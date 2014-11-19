@@ -32,12 +32,12 @@ Mx.init()
 Mx.setInput(xstar_fixed, "x")
 Mx.evaluate()
 
-Y_N = Mx.getOutput("f") + np.random.normal(0, sigma, 4)
+Y_N = Mx.getOutput("f") + np.random.normal(0, sigma, N)
 # Y_N = Mx.getOutput("f")
 
 # Set up cost function f
 
-A = ca.mul(np.linalg.inv(np.sqrt(Sigma)), M) - Y_N
+A = ca.mul(np.linalg.solve(np.sqrt(Sigma), np.eye(N)), M) - Y_N
 # A = M - Y_N
 f = ca.mul(A.T, A)
 
@@ -50,8 +50,8 @@ solver = ca.NlpSolver("ipopt", fx)
 solver.setOption("tol", 1e-10)
 solver.init()
 
-solver.setInput(np.zeros(G.size1()), "lbg")
-solver.setInput(np.zeros(G.size1()), "ubg")
+solver.setInput(np.zeros(m), "lbg")
+solver.setInput(np.zeros(m), "ubg")
 
 solver.evaluate()
 
@@ -68,7 +68,7 @@ beta = fxstar/(N + m -d)
 
 print beta
 
-J1 = ca.mul(np.linalg.inv(np.sqrt(Sigma)), Mx.jac("x", "f"))
+J1 = ca.mul(np.linalg.solve(np.sqrt(Sigma), np.eye(N)), Mx.jac("x", "f"))
 
 Gx = ca.MXFunction(ca.nlpIn(x=x), ca.nlpOut(f=G))
 Gx.init()
@@ -79,22 +79,23 @@ Jplus = ca.mul([ \
 
     ca.horzcat((np.ones((d,d)),np.zeros((d, m)))), \
 
-    ca.inv(ca.vertcat(( \
+    ca.solve(ca.vertcat(( \
     
         ca.horzcat((ca.mul(J1.T, J1), J2.T)), \
-        ca.horzcat((J2, np.zeros((m, m))))) \
+        ca.horzcat((J2, np.zeros((m, m)))) \
     
-    )), \
+    )), np.eye(d+m)), \
 
     ca.vertcat((J1.T, np.zeros((m, N)))) \
 
     ])
 
-Cov = ca.mul([Jplus, beta, np.ones((N, N)), Jplus.T])
+Cov = ca.mul([Jplus, beta, np.eye(N), Jplus.T])
 
 Covx = ca.MXFunction(ca.nlpIn(x=x), ca.nlpOut(f=Cov))
 Covx.init()
 
 Covx.setInput(xstar, "x")
-print Covx
 Covx.evaluate()
+
+print Covx.getOutput("f")
