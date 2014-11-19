@@ -22,7 +22,7 @@ G = 2 - ca.mul(x.trans(),x)
 
 # Generate Sigma
 
-Sigma = np.diag(sigma)
+Sigma = np.diag(sigma)**2
 
 # Generate pseudo-measurement data
 
@@ -33,12 +33,10 @@ Mx.setInput(xstar_fixed, "x")
 Mx.evaluate()
 
 Y_N = Mx.getOutput("f") + np.random.normal(0, sigma, N)
-# Y_N = Mx.getOutput("f")
 
 # Set up cost function f
 
 A = ca.mul(np.linalg.solve(np.sqrt(Sigma), np.eye(N)), M) - Y_N
-# A = M - Y_N
 f = ca.mul(A.T, A)
 
 # Solve minimization problem for f
@@ -60,11 +58,7 @@ fxstar = solver.getOutput("f")
 
 print xstar
 
-# Mx.setInput(xstar, "x")
-# Mx.evaluate()
-# print Mx.getOutput("f")
-
-beta = fxstar/(N + m -d)
+beta = fxstar / (N + m -d)
 
 print beta
 
@@ -90,7 +84,7 @@ Jplus = ca.mul([ \
 
     ])
 
-Cov = ca.mul([Jplus, beta, np.eye(N), Jplus.T])
+Cov = beta * ca.mul([Jplus, Jplus.T])
 
 Covx = ca.MXFunction(ca.nlpIn(x=x), ca.nlpOut(f=Cov))
 Covx.init()
