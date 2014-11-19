@@ -56,11 +56,7 @@ solver.evaluate()
 xstar = solver.getOutput("x")
 fxstar = solver.getOutput("f")
 
-print xstar
-
 beta = fxstar / (N + m -d)
-
-print beta
 
 J1 = ca.mul(np.linalg.solve(np.sqrt(Sigma), np.eye(N)), Mx.jac("x", "f"))
 
@@ -92,4 +88,17 @@ Covx.init()
 Covx.setInput(xstar, "x")
 Covx.evaluate()
 
-print Covx.getOutput("f")
+Covxstar = Covx.getOutput("f")
+
+# Print the Output
+
+print("\nResults:\n")
+
+print("beta = {0}\n".format(beta))
+
+for i, xi in enumerate(xstar):
+
+    print("x{0:<3} = {1:10} +/- {2:10}".format(\
+        i, xi, np.sqrt(Covxstar[i, i])))
+
+print("\nCovariance matrix Cov(x):\n{0}".format(Covxstar))
