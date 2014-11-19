@@ -11,14 +11,13 @@ N = 4
 d = 2
 m = 1
 
-sigma = np.zeros(N)
-sigma.fill(0.5)
+sigma = 0.5 * np.ones(N)
 x = ca.MX.sym("x", d)
 
 xstar_fixed = [1, 1]
 
-M = ca.mul(np.transpose(np.matrix([np.ones(4), range(1,5)])),x)
-G = 2 - ca.mul(x.trans(),x)
+M = ca.mul(np.matrix([np.ones(4), range(1,5)]).T,x)
+G = 2 - ca.mul(x.T,x)
 
 # Generate Sigma
 
@@ -33,10 +32,11 @@ Mx.setInput(xstar_fixed, "x")
 Mx.evaluate()
 
 Y_N = Mx.getOutput("f") + np.random.normal(0, sigma, N)
+# Y_N = Mx.getOutput("f") + np.random.normal(0, 1, N)
 
 # Set up cost function f
 
-A = ca.mul(np.linalg.solve(np.sqrt(Sigma), np.eye(N)), M) - Y_N
+A = ca.mul(np.linalg.solve(np.sqrt(Sigma), np.eye(N)), (M - Y_N))
 f = ca.mul(A.T, A)
 
 # Solve minimization problem for f
@@ -71,7 +71,7 @@ J2 = Gx.jac("x", "f")
 
 Jplus = ca.mul([ \
 
-    ca.horzcat((np.ones((d,d)),np.zeros((d, m)))), \
+    ca.horzcat((np.eye(d),np.zeros((d, m)))), \
 
     ca.solve(ca.vertcat(( \
     
