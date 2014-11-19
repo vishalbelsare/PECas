@@ -16,7 +16,9 @@ x = ca.MX.sym("x", d)
 
 xstar_fixed = [1, 1]
 
-M = ca.mul(np.matrix([np.ones(4), range(1,5)]).T,x)
+M = ca.mul(np.matrix([np.ones(4), range(1,5)]).T, \
+    ca.vertcat((x[0], x[1]**2)))
+# M = ca.mul(np.matrix([np.ones(4), range(1,5)]).T, x)
 G = 2 - ca.mul(x.T,x)
 
 # Generate Sigma
@@ -50,6 +52,7 @@ solver.init()
 
 solver.setInput(np.zeros(m), "lbg")
 solver.setInput(np.zeros(m), "ubg")
+solver.setInput([1, 1], "x0")
 
 solver.evaluate()
 
