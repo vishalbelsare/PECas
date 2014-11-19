@@ -4,7 +4,6 @@
 
 import casadi as ca
 import numpy as np
-import scipy as sp
 
 # Problem setup
 
@@ -12,15 +11,14 @@ N = 4
 d = 2
 m = 1
 
-sigma = [0.5, 0.5, 0.5, 0.5]
+sigma = np.zeros(N)
+sigma.fill(0.5)
 x = ca.MX.sym("x", d)
 
 xstar_fixed = [1, 1]
 
 M = ca.mul(np.transpose(np.matrix([np.ones(4), range(1,5)])),x)
 G = 2 - ca.mul(x.trans(),x)
-
-print M
 
 # Generate Sigma
 
@@ -33,14 +31,13 @@ Mx.init()
 
 Mx.setInput(xstar_fixed, "x")
 Mx.evaluate()
-Y = Mx.getOutput("f")
 
-Y_N = Y + np.random.normal(0, sigma, 4)
-# Y_N = Y
+Y_N = Mx.getOutput("f") + np.random.normal(0, sigma, 4)
+# Y_N = Mx.getOutput("f")
 
 # Set up cost function f
 
-A = ca.mul(sp.linalg.inv(np.sqrt(Sigma)), M) - Y_N
+A = ca.mul(np.linalg.inv(np.sqrt(Sigma)), M) - Y_N
 # A = M - Y_N
 f = ca.mul(A.T, A)
 
@@ -67,18 +64,37 @@ print xstar
 # Mx.evaluate()
 # print Mx.getOutput("f")
 
-beta = fxstar/(N-d)
+beta = fxstar/(N + m -d)
 
 print beta
 
-J1 = ca.mul(sp.linalg.inv(np.sqrt(Sigma)), Mx.jac("x", "f"))
+J1 = ca.mul(np.linalg.inv(np.sqrt(Sigma)), Mx.jac("x", "f"))
 
 Gx = ca.MXFunction(ca.nlpIn(x=x), ca.nlpOut(f=G))
 Gx.init()
 
 J2 = Gx.jac("x", "f")
 
-# Jplus1 = ca.vertcat((ca.mul(J1.T, J1), J2.T))
-# Jplus2 = ca.vertcat((J2, np.zeros((J2.size1(), J2.size1()))))
-# Jplus = ca.inv(ca.horzcat((Jplus1.T, Jplus2.T)).T)
+Jplus = ca.mul([ \
 
+    ca.horzcat((np.ones((d,d)),np.zeros((d, m)))), \
+
+    ca.inv(ca.vertcat(( \
+    
+        ca.horzcat((ca.mul(J1.T, J1), J2.T)), \
+        ca.horzcat((J2, np.zeros((m, m))))) \
+    
+    )), \
+
+    ca.vertcat((J1.T, np.zeros((m, N)))) \
+
+    ])
+
+Cov = ca.mul([Jplus, beta, np.ones((N, N)), Jplus.T])
+
+Covx = ca.MXFunction(ca.nlpIn(x=x), ca.nlpOut(f=Cov))
+Covx.init()
+
+Covx.setInput(xstar, "x")
+print Covx
+Covx.evaluate()
