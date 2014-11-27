@@ -57,9 +57,14 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
     def set_x(self, x):
 
         '''
-        Set the column vector for the parameters (type casadi.casadi_core.MX).
-        This function is automatically called at the initialization of the
-        object and only needed to change parameters after the initialization.
+        :param x: Column vector :math:`x \in \mathbb{R}^{d}` for the
+                  parameters.
+        :type x: casadi.casadi_core.MX.
+
+        *This function is called automatically at the initialization of the
+        object.*
+
+        Set the column vector :math:`x` for the parameters.
         '''
 
         self.__check_variable_validity(x, "x", ca.casadi_core.MX, 1)
@@ -69,7 +74,10 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
     def get_x(self):
 
         '''
-        Get the column vector for the parameters (type casadi.casadi_core.MX).
+        :returns: casadi.casadi_core.MX - the column vector
+                  :math:`x  \in \mathbb{R}^{d}` for the parameters.
+
+        Get the column vector :math:`x` for the parameters.
         '''
 
         return self.__x
@@ -80,19 +88,44 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
     def set_M(self, M):
 
         '''
-        Set the column vector for the model (type casadi.casadi_core.MX).
-        This function is automatically called at the initialization of the
-        object and only needed to change parameters after the initialization.
+        :param M: Column vector :math:`M \in \mathbb{R}^{N}` for the
+                  model.
+        :type M: casadi.casadi_core.MX.
+        :raises: AttributeError
+        :catches: AttributeError
+
+        *This function is called automatically at the initialization of the
+        object.*
+
+        Set the column vector :math:`M` for the model. If the
+        dimensions of :math:`\sigma` and :math:`M` are not consistent,
+        an exception will be raised.
         '''
 
         self.__check_variable_validity(M, "M", ca.casadi_core.MX, 1)
+
+        try:
+
+            self.__check_variable_consistency("M", self.__M.shape[0], \
+            "sigma", self.__sigma.shape[0])
+
+        # If a variable in comparison has not been set up so far, an
+        # AttributeError exception will be thrown
+
+        except AttributeError:
+
+            pass
+
         self.__M = M
 
 
     def get_M(self):
 
         '''
-        Get the column vector for the model (type casadi.casadi_core.MX).
+        :returns: casadi.casadi_core.MX - the column vector
+                  :math:`M  \in \mathbb{R}^{N}` for the model.
+
+        Get the column vector :math:`M` for the model.
         '''
 
         return self.__M
@@ -103,19 +136,47 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
     def set_sigma(self, sigma):
 
         '''
-        Set the column vector for the standard deviation (type numpy.ndarray).
-        This function is automatically called at the initialization of the
-        object and only needed to change parameters after the initialization.
+        :param sigma: Column vector :math:`\sigma \in \mathbb{R}^{N}` for the
+                  standard deviations.
+        :type sigma: numpy.ndarray.
+        :raises: AttributeError, ValueError
+        :catches: AttributeError
+
+        *This function is called automatically at the initialization of the
+        object.*
+
+        Set the column vector :math:`\sigma` for the standard deviation. If the
+        dimensions of :math:`\sigma` and :math:`M` or :math:`\sigma` and 
+        :math:`Y` are not consistent, an exception will be raised.
         '''
 
         self.__check_variable_validity(sigma, "sigma", np.ndarray, 1)
+
+        try:
+
+            self.__check_variable_consistency("M", self.__M.shape[0], \
+            "sigma", self.__sigma.shape[0])
+
+            self.__check_variable_consistency("Y", self.__Y.shape[0], \
+                "sigma", self.__sigma.shape[0])
+
+        # If a variable in comparison has not been set up so far, an
+        # AttributeError exception will be thrown
+
+        except AttributeError:
+
+            pass
+
         self.__sigma = sigma
 
 
     def get_sigma(self):
 
         '''
-        Get the column vector for the standard deviation (type numpy.ndarray).
+        :returns: numpy.ndarray - the column vector
+                  :math:`\sigma  \in \mathbb{R}^{N}` for the model.
+
+        Get the column vector :math:`\sigma` for the standard deviations.
         '''
 
         return self.__sigma
@@ -123,6 +184,60 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
     # -----------------------------------------------------------------------#
 
 
+    def set_Y(self, Y):
+
+        '''
+        :param Y: Column vector :math:`Y \in \mathbb{R}^{N}` for the
+                  measurements.
+        :type Y: numpy.ndarray.
+        :raises: AttributeError, ValueError
+        :catches: AttributeError
+
+        Set the column vector :math:`Y` for the measurements. If the
+        dimensions of :math:`\sigma` and :math:`Y` are not consistent,
+        an exception will be raised.
+
+        For generation of "random" pseudo measurement data, see
+        :func:`generate_pseudo_measurement_data`.
+        '''
+
+        self.__check_variable_validity(Y, "Y", np.ndarray, 1)
+
+        try:
+
+            self.__check_variable_consistency("Y", self.__Y.shape[0], \
+                "sigma", self.__sigma.shape[0])
+
+        # If a variable in comparison has not been set up so far, an
+        # AttributeError exception will be thrown
+
+        except AttributeError:
+
+            pass
+
+        self.__Y = Y
+
+
+    def get_Y(self):
+
+        '''
+        :returns: numpy.ndarray - the column vector
+                  :math:`Y  \in \mathbb{R}^{N}` for the measurements.
+        :raises: AttributeError
+        :catches: AttributeError
+
+        Get the column vector :math:`Y` for the measurements. If no data
+        has been provided so far either by manual input or via
+        :func:`generate_pseudo_measurement_data`, the function will raise and
+        catch an exception and display possible solutions to the user.
+        '''
+        try:
+            return self.__Y
+        except AttributeError:
+            print('''
+No data for Y has been provided so far. Try set_Y() for manual setting, or
+generate_pseudo_measurement_data() for "random" pseudo measurement data.
+''')
 
 
     ##########################################################################
@@ -133,37 +248,48 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         self, x, M, sigma, Y=None, xtrue=None, G=None, H=None, x0=None):
 
         '''
-        The inputs for the constructor are as follows:
 
-        Necessary information:
+        **Mandatory information for constructing the class**
 
-        x:          Column vector for the parameters
-                    (type casadi.casadi_core.MX)
-        M:          Column vector for the model
-                    (type casadi.casadi_core.MX)
-        sigma:      Column vector for the standard deviations
-                    (type numpy.ndarray)
+        :param x: Column vector :math:`x \in \mathbb{R}^{d}` for the
+                  parameters.
+        :type x: casadi.casadi_core.MX.
 
-        Mutually substitutable information:
+        :param M: Column vector :math:`M \in \mathbb{R}^{N}` for the model.
+        :type M: casadi.casadi_core.MX.
 
-        (exactly one of the two variables Y and xtrue has to be set)
+        :param sigma: Column vector :math:`\sigma \in \mathbb{R}^{N}` for
+                      the standard deviations.
+        :type sigma: numpy.ndarray.
 
-        Y:          Column vector for the Measurements
-                    (type numpy.ndarray)
-        xtrue:      Column vector containing the true value of x to generate
-                    pseudo measurement data using M and sigma
-                    (type numpy.ndarray)
 
-        Optional information:
+        **Mutually substitutable information for constructing the class**
 
-        G:          Column vector for the equality constraints
-                    (type casadi.casadi_core.MX)
+        *Exactly one of the two variables Y and xtrue has to be set!*
 
-        H:          Column vector for the inequality constraints
-                    (type casadi.casadi_core.MX)
+        :param Y: Column vector :math:`Y \in \mathbb{R}^{N}` for the
+                  measurements.
+        :type Y: numpy.ndarray.
 
-        x0:         Column vector for the initial guess x0
-                    (type numpy.ndarray)
+        :param xtrue: Column vector :math:`x_{true} \in \mathbb{R}^{d}` 
+                      containing the true value of x to
+                      generate pseudo measurement data using
+                      the vectors :math:`M` and :math:`\sigma`.
+        :type xtrue: numpy.ndarray.
+
+
+        **Optional information for constructing the class**
+
+        :param G: Column vector for the equality constraints.
+        :type G: casadi.casadi_core.MX.
+
+        :param H: Column vector for the inequality constraints.
+        :type H: casadi.casadi_core.MX.
+
+        :param x0: Column vector for the initial guess of the parameter values.
+        :type x0: numpy.ndarray.
+
+        |
 
         '''
 
@@ -195,8 +321,9 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         # Measurements
 
         if Y is not None:
-            self.__check_variable_validity(Y, "Y", np.ndarray, 1)
-            self.__Y = Y
+            # self.__check_variable_validity(Y, "Y", np.ndarray, 1)
+            # self.__Y = Y
+            self.set_Y(Y)
 
         # True value of x
 
