@@ -12,7 +12,19 @@ class NLPETool:
     def __check_variable_validity(self, var, varname, dtype, ddim):
 
         '''
-        Check the validity of an input variables.
+        :param var: Variable that's validity shall be checked.
+        :type var: dtype
+        :param varname: Name of the variable that shall be checked.
+        :type varname: str
+        :param dtype: Description of the type that var has to be.
+        :type dtype: ca.casadi_core.MX, numpy.ndarray
+        :param ddim: Description of the second dimension var has to have.
+        :param ddim: int
+        :raises: IndexError, ValueError
+        :catches: IndexError
+
+        Check the validity of an input variable by checking the type of the
+        varriable and it's shape properties.
         '''
 
         # Check variable type
@@ -514,22 +526,6 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         if xinit is not None:
             self.__xinit = xinit
-
-
-        ## Check variable consistency ##
-
-        # Check whether M and sigma, and Y if already given, have the same
-        # number of entries
-
-        self.__check_variable_consistency("M", self.__M.shape[0], \
-            "sigma", self.__sigma.shape[0])
-
-        if Y is not None:
-            self.__check_variable_consistency("Y", self.__Y.shape[0], \
-                "sigma", self.__sigma.shape[0])
-
-
-        ## Get problem dimension ##
 
         # Get the number of measurements N from M
 
