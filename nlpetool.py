@@ -63,7 +63,7 @@ class NLPETool:
         :type ddim2: int
 
         Check the consistency for two input variables by comparing the
-        dimensions provided with the function call.
+        relevant dimensions of the variables provided with the function call.
         '''
 
         if ddim1 != ddim2:
@@ -450,14 +450,14 @@ No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
 
         :param x: Column vector :math:`x \in \mathbb{R}^{d}` for the
                   parameters.
-        :type x: casadi.casadi_core.MX.
+        :type x: casadi.casadi_core.MX
 
         :param M: Column vector :math:`M \in \mathbb{R}^{N}` for the model.
-        :type M: casadi.casadi_core.MX.
+        :type M: casadi.casadi_core.MX
 
         :param sigma: Column vector :math:`\sigma \in \mathbb{R}^{N}` for
                       the standard deviations.
-        :type sigma: numpy.ndarray.
+        :type sigma: numpy.ndarray
 
 
         **Mutually substitutable information for constructing the class**
@@ -466,26 +466,26 @@ No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
 
         :param Y: Column vector :math:`Y \in \mathbb{R}^{N}` for the
                   measurements.
-        :type Y: numpy.ndarray.
+        :type Y: numpy.ndarray
 
         :param xtrue: Column vector :math:`x_{true} \in \mathbb{R}^{d}` 
                       containing the true value of :math:`x` to
                       generate pseudo measurement data using
                       the vectors :math:`M` and :math:`\sigma`.
-        :type xtrue: numpy.ndarray.
+        :type xtrue: numpy.ndarray
 
 
         **Optional information for constructing the class**
 
         :param G: Column vector :math:`G \in \mathbb{R}^{m}` for the
                   equality constraints.
-        :type G: casadi.casadi_core.MX.
+        :type G: casadi.casadi_core.MX
 
         :param H: Column vector :math:`H` for the inequality constraints.
-        :type H: casadi.casadi_core.MX.
+        :type H: casadi.casadi_core.MX
 
         :param xinit: Column vector :math:`x_{init} \in \mathbb{R}^{d}` for the initial guess of the parameter values.
-        :type xinit: numpy.ndarray.
+        :type xinit: numpy.ndarray
 
         |
 
@@ -556,8 +556,24 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
     def generate_pseudo_measurement_data(self):
 
         '''
-        This functions generates pseudo measurement data for the parameter
-        estimation from M and sigma.
+
+        This functions generates "random" pseudo measurement data in
+        :math:`Y` for a parameter estimation from :math:`M`,
+        :math:`\sigma` and :math:`x_{true}`.
+
+        For obtaining :math:`Y`, at first the Matrix-valued expression
+
+        .. math::
+            \hat{Y} = M * x_{true}
+
+        is evaluated, and afterwards normally distributed measurement noise
+        :math:`\epsilon_{M} \in \mathbb{R}^{N}` with zeros mean
+        and standard deviation :math:`\sigma` is added to the computed values
+        of :math:`\hat{Y}`, so that
+
+        .. math::
+            Y = \hat{Y} + \epsilon_{M},~ \epsilon_{M} \sim
+                \mathcal{N}(0, \sigma^{2})
 
         '''
 
@@ -577,25 +593,17 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
         '''
         This functions will run the parameter estimation for the given model.
         If measurement data is not yet existing, it will be generate using
-        the class function generate_pseudo_measurement_data().
+        the :func:`generate_pseudo_measurement_data()`.
 
         '''
 
-        ## Check variable consistency again ##
+        # First, check if measurement data exists; if not, generate it
 
-        # Check whether M, sigma and Y have the same number of entries
-
-        # self.__check_variable_consistency("M", self.__M.shape[0], \
-        #     "sigma", self.__sigma.shape[0])
-
-        # # With this, also check if measurements data exists; if not,
-        # # generate it
-
-        # try:
-        #     self.__check_variable_consistency("Y", self.__Y.shape[0], \
-        #         "sigma", self.__sigma.shape[0])
-        # except NameError:
-        #     self.generate_pseudo_measurement_data()            
+        try:
+            self.__check_variable_consistency("Y", self.__Y.shape[0], \
+                "sigma", self.__sigma.shape[0])
+        except NameError:
+            self.generate_pseudo_measurement_data()            
 
         # Set up cost function f
 
