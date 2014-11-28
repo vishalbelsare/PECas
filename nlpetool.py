@@ -49,17 +49,28 @@ class NLPETool:
     # -----------------------------------------------------------------------#
 
 
-    def __check_variable_consistency(self, var1, ddim1, var2, ddim2):
+    def __check_variable_consistency(self, varname1, ddim1, varname2, ddim2):
 
         '''
-        Check the consistency for two input variables.
+        :param varname1: The name of the first variable that shall be compared.
+        :type varname1: str
+        :param ddim1: The dimension for the first variable to be compared.
+        :type ddim1: int
+        :param varname2: The name of the second variable that shall be
+                         compared.
+        :type varname2: str
+        :param ddim2: The dimension for the second variable to be compared.
+        :type ddim2: int
+
+        Check the consistency for two input variables by comparing the
+        dimensions provided with the function call.
         '''
 
         if ddim1 != ddim2:
             raise ValueError('''
 The dimensions of the variables "{0}" and "{2}" do not match, since
 "{0}" has {1} entries, while "{2}"" has {4} entries.'''.format(\
-                var1, ddim1, var2, ddim2))
+                varname1, ddim1, varname2, ddim2))
 
 
     ##########################################################################
