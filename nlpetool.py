@@ -561,19 +561,19 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
         :math:`Y` for a parameter estimation from :math:`M`,
         :math:`\sigma` and :math:`x_{true}`.
 
-        For obtaining :math:`Y`, at first the Matrix-valued expression
+        For obtaining :math:`Y`, at first the expression
 
         .. math::
-            \hat{Y} = M * x_{true}
+            Y_{true} = M(x_{true})
 
-        is evaluated, and afterwards normally distributed measurement noise
+        is evaluated, and afterwards, normally distributed measurement noise
         :math:`\epsilon_{M} \in \mathbb{R}^{N}` with zeros mean
         and standard deviation :math:`\sigma` is added to the computed values
         of :math:`\hat{Y}`, so that
 
         .. math::
-            Y = \hat{Y} + \epsilon_{M},~ \epsilon_{M} \sim
-                \mathcal{N}(0, \sigma^{2})
+            Y = Y_{true} + \epsilon_{M},~ \epsilon_{M} \sim
+                \mathcal{N}(0, \sigma^{2}).
 
         '''
 
@@ -591,28 +591,40 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
     def run_parameter_estimation(self):
 
         '''
-        This functions will run the parameter estimation for the given model.
+        This functions will run the parameter estimation for the given problem.
+        
         If measurement data is not yet existing, it will be generate using
         the :func:`generate_pseudo_measurement_data()`.
 
+        Then, the parameter estimation problem
+
+        .. math::
+
+            \hat{x} &= arg\,\underset{x}{min}\|M(x)-Y\|_{2}^{2}\\
+            s.\,t.&~\\
+            G &= 0\\
+            H &\leq 0\\
+            x_{0} &= x_{init}
+
+        will be set up, and solved using IPOPT. Afterwards, the
+        value of :math:`\hat{x}` is stored insdie the variable xhat, which can
+        be returned using the function :func:`get_xhat()`.
         '''
 
         # First, check if measurement data exists; if not, generate it
 
-        try:
-            self.__check_variable_consistency("Y", self.__Y.shape[0], \
-                "sigma", self.__sigma.shape[0])
-        except NameError:
+        if not hasattr(self, '__Y'):
+
             self.generate_pseudo_measurement_data()            
 
-        # Set up cost function f
+        # Set up  the cost function f
 
         pass
 
         # A = ca.mul(np.linalg.solve(np.sqrt(Sigma), np.eye(N)), (M - Y_N))
         # f = ca.mul(A.T, A)
 
-        # Solve minimization problem for f
+        # # Solve minimization problem for f
 
         # fx = ca.MXFunction(ca.nlpIn(x=x), ca.nlpOut(f=f, g=G))
         # fx.init()
