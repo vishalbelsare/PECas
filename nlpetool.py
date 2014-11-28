@@ -59,7 +59,8 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         '''
         :param x: Column vector :math:`x \in \mathbb{R}^{d}` for the
                   parameters.
-        :type x: casadi.casadi_core.MX.
+        :type x: casadi.casadi_core.MX
+        :raises: ValueError
 
         *This function is called automatically at the initialization of the
         object.*
@@ -75,7 +76,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
 
         '''
         :returns: casadi.casadi_core.MX - the column vector
-                  :math:`x  \in \mathbb{R}^{d}` for the parameters.
+                  :math:`x \in \mathbb{R}^{d}` for the parameters.
 
         Get the column vector :math:`x` for the parameters.
         '''
@@ -90,8 +91,8 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         '''
         :param M: Column vector :math:`M \in \mathbb{R}^{N}` for the
                   model.
-        :type M: casadi.casadi_core.MX.
-        :raises: AttributeError
+        :type M: casadi.casadi_core.MX
+        :raises: AttributeError, ValueError
         :catches: AttributeError
 
         *This function is called automatically at the initialization of the
@@ -138,7 +139,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         '''
         :param sigma: Column vector :math:`\sigma \in \mathbb{R}^{N}` for the
                   standard deviations.
-        :type sigma: numpy.ndarray.
+        :type sigma: numpy.ndarray
         :raises: AttributeError, ValueError
         :catches: AttributeError
 
@@ -189,9 +190,12 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         '''
         :param Y: Column vector :math:`Y \in \mathbb{R}^{N}` for the
                   measurements.
-        :type Y: numpy.ndarray.
+        :type Y: numpy.ndarray
         :raises: AttributeError, ValueError
         :catches: AttributeError
+
+        *If data is provided, this function is called automatically at the
+        initialization of the object.*
 
         Set the column vector :math:`Y` for the measurements. If the
         dimensions of :math:`\sigma` and :math:`Y` are not consistent,
@@ -247,10 +251,11 @@ generate_pseudo_measurement_data() for "random" pseudo measurement data.
         '''
         :param xtrue: Column vector :math:`x_{true} \in \mathbb{R}^{d}` 
                       containing the true value of :math:`x`.
-        :type xtrue: numpy.ndarray.
-        :type xtrue: numpy.ndarray.
-        :raises: AttributeError, ValueError
-        :catches: AttributeError
+        :type xtrue: numpy.ndarray
+        :raises: ValueError
+
+        *If data is provided, this function is called automatically at the
+        initialization of the object.*
 
         Set the column vector :math:`x_{true}` that can be used for generating
         "random" pseudo measurement data, see
@@ -282,6 +287,90 @@ generate_pseudo_measurement_data() for "random" pseudo measurement data.
 No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
 ''')
 
+    # -----------------------------------------------------------------------#
+
+
+    def set_G(self, G):
+
+        '''
+        :param G: Column vector :math:`G \in \mathbb{R}^{m}` for the
+                  equality constraints.
+        :type G: casadi.casadi_core.MX
+        :raises: ValueError
+
+        *If data is provided, this function is called automatically at the
+        initialization of the object.*
+
+        Set the column vector :math:`G` for the equality constraints.
+        '''
+
+        self.__check_variable_validity(G, "G", ca.casadi_core.MX, 1)
+
+        self.__G = G
+
+
+    def get_G(self):
+
+        '''
+        :returns: casadi.casadi_core.MX - the column vector
+                  :math:`G \in \mathbb{R}^{m}` for the equality constraints.
+        :raises: AttributeError
+        :catches: AttributeError
+
+        Get the column vector :math:`G` for the equality constraints.
+        If no data has been provided, the function will raise and
+        catch an exception and display possible solutions to the user.
+        '''
+
+        try:
+            return self.__G
+        except AttributeError:
+            print('''
+No data for G has been provided so far. Try set_G() for manual setting.
+''')
+
+    # -----------------------------------------------------------------------#
+
+
+    def set_H(self, H):
+
+        '''
+        :param H: Column vector :math:`H` for the
+                  inequality constraints.
+        :type H: casadi.casadi_core.MX
+        :raises: ValueError
+
+        *If data is provided, this function is called automatically at the
+        initialization of the object.*
+
+        Set the column vector :math:`H` for the inequality constraints.
+        '''
+
+        self.__check_variable_validity(H, "H", ca.casadi_core.MX, 1)
+
+        self.__H = H
+
+
+    def get_H(self):
+
+        '''
+        :returns: casadi.casadi_core.MX - the column vector
+                  :math:`H` for the inequality constraints.
+        :raises: AttributeError
+        :catches: AttributeError
+
+        Get the column vector :math:`H` for the inequality constraints.
+        If no data has been provided, the function will raise and
+        catch an exception and display possible solutions to the user.
+        '''
+
+        try:
+            return self.__H
+        except AttributeError:
+            print('''
+No data for G has been provided so far. Try set_H() for manual setting.
+''')
+
     ##########################################################################
     ################### Constructor for the class NLPETool ###################
     ##########################################################################
@@ -307,7 +396,7 @@ No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
 
         **Mutually substitutable information for constructing the class**
 
-        *Exactly one of the two variables Y and xtrue has to be set!*
+        *One of the two variables Y and xtrue has to be set!*
 
         :param Y: Column vector :math:`Y \in \mathbb{R}^{N}` for the
                   measurements.
@@ -322,13 +411,14 @@ No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
 
         **Optional information for constructing the class**
 
-        :param G: Column vector for the equality constraints.
+        :param G: Column vector :math:`G \in \mathbb{R}^{m}` for the
+                  equality constraints.
         :type G: casadi.casadi_core.MX.
 
-        :param H: Column vector for the inequality constraints.
+        :param H: Column vector :math:`H` for the inequality constraints.
         :type H: casadi.casadi_core.MX.
 
-        :param x0: Column vector for the initial guess of the parameter values.
+        :param x0: Column vector :math:`x_{0} \in \mathbb{R}^{d}` for the initial guess of the parameter values.
         :type x0: numpy.ndarray.
 
         |
@@ -361,13 +451,8 @@ No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
 
         if (Y is None) and (xtrue is None):
             raise ValueError('''
-If no measurement data "Y" is provided, the true value of x must be provided
-in "xtrue" so pseudo measurement data can be created for parameter estimation.
-''')
-        elif (Y is not None) and (xtrue is not None):
-            raise ValueError('''
-You can only either directly provide measurement data in "Y", or or the true
-value of x in "xtrue" to generate pseudo measurement data, not both.
+If no measurement data Y is provided, the true value of x must be provided
+in xtrue so pseudo measurement data can be created for parameter estimation.
 ''')
 
         # Optional information
@@ -375,14 +460,12 @@ value of x in "xtrue" to generate pseudo measurement data, not both.
         # Equality constrains
 
         if G is not None:
-            self.__check_variable_validity(G, "G", ca.casadi_core.MX, 1)
-            self.__G = G
+            self.set_G()
 
         # Inequality constrains
 
         if H is not None:
-            self.__check_variable_validity(H, "H", ca.casadi_core.MX, 1)
-            self.__H = H
+            self.set_H()
 
         # Initial guess
 
