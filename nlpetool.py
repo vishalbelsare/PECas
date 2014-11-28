@@ -257,8 +257,8 @@ generate_pseudo_measurement_data() for "random" pseudo measurement data.
         *If data is provided, this function is called automatically at the
         initialization of the object.*
 
-        Set the column vector :math:`x_{true}` that can be used for generating
-        "random" pseudo measurement data, see
+        Set the column vector :math:`x_{true}` for the true values of :math:`x`
+        that can be used for generating "random" pseudo measurement data, see
         :func:`generate_pseudo_measurement_data`.
         '''
 
@@ -371,12 +371,55 @@ No data for G has been provided so far. Try set_G() for manual setting.
 No data for G has been provided so far. Try set_H() for manual setting.
 ''')
 
+    # -----------------------------------------------------------------------#
+
+
+    def set_xinit(self, xtrue):
+
+        '''
+        :param xinit: Column vector :math:`x_{init} \in \mathbb{R}^{d}` 
+                      containing the initial guess for :math:`x`.
+        :type xtrue: numpy.ndarray
+        :raises: ValueError
+
+        *If data is provided, this function is called automatically at the
+        initialization of the object.*
+
+        Set the column vector :math:`x_{init}` for the initial guess
+        of :math:`x`.
+        '''
+
+        self.self.__check_variable_validity(xinit, "xinit", np.ndarray, 1)
+
+        self.__xinit = xinit
+
+
+    def get_xtrue(self):
+
+        '''
+        :returns: numpy.ndarray - the column vector
+                  :math:`x_{true} \in \mathbb{R}^{d}` for the true values
+                  of :math:`x`.
+        :raises: AttributeError
+        :catches: AttributeError
+
+        Get the column vector :math:`x_{true}` for the true values of
+        :math:`x`. If no data has been provided, the function will raise and
+        catch an exception and display possible solutions to the user.
+        '''
+        try:
+            return self.__xtrue
+        except AttributeError:
+            print('''
+No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
+''')
+
     ##########################################################################
     ################### Constructor for the class NLPETool ###################
     ##########################################################################
 
     def __init__(\
-        self, x, M, sigma, Y=None, xtrue=None, G=None, H=None, x0=None):
+        self, x, M, sigma, Y=None, xtrue=None, G=None, H=None, xinit=None):
 
         '''
 
@@ -418,8 +461,8 @@ No data for G has been provided so far. Try set_H() for manual setting.
         :param H: Column vector :math:`H` for the inequality constraints.
         :type H: casadi.casadi_core.MX.
 
-        :param x0: Column vector :math:`x_{0} \in \mathbb{R}^{d}` for the initial guess of the parameter values.
-        :type x0: numpy.ndarray.
+        :param xinit: Column vector :math:`x_{init} \in \mathbb{R}^{d}` for the initial guess of the parameter values.
+        :type xinit: numpy.ndarray.
 
         |
 
@@ -469,9 +512,8 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         # Initial guess
 
-        if x0 is not None:
-            self.__check_variable_validity(x0, "x0", np.ndarray, 1)
-            self.__x0 = x0
+        if xinit is not None:
+            self.__xinit = xinit
 
 
         ## Check variable consistency ##
@@ -566,6 +608,6 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         # solver.setInput(np.zeros(m), "lbg")
         # solver.setInput(np.zeros(m), "ubg")
-        # solver.setInput([1, 1], "x0")
+        # solver.setInput([1, 1], "xinit")
 
         # solver.evaluate()
