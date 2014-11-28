@@ -239,6 +239,48 @@ No data for Y has been provided so far. Try set_Y() for manual setting, or
 generate_pseudo_measurement_data() for "random" pseudo measurement data.
 ''')
 
+    # -----------------------------------------------------------------------#
+
+
+    def set_xtrue(self, xtrue):
+
+        '''
+        :param xtrue: Column vector :math:`x_{true} \in \mathbb{R}^{d}` 
+                      containing the true value of :math:`x`.
+        :type xtrue: numpy.ndarray.
+        :type xtrue: numpy.ndarray.
+        :raises: AttributeError, ValueError
+        :catches: AttributeError
+
+        Set the column vector :math:`x_{true}` that can be used for generating
+        "random" pseudo measurement data, see
+        :func:`generate_pseudo_measurement_data`.
+        '''
+
+        self.self.__check_variable_validity(xtrue, "xtrue", np.ndarray, 1)
+
+        self.__xtrue = xtrue
+
+
+    def get_xtrue(self):
+
+        '''
+        :returns: numpy.ndarray - the column vector
+                  :math:`x_{true} \in \mathbb{R}^{d}` for the true values
+                  of :math:`x`.
+        :raises: AttributeError
+        :catches: AttributeError
+
+        Get the column vector :math:`x_{true}` for the true values of
+        :math:`x`. If no data has been provided, the function will raise and
+        catch an exception and display possible solutions to the user.
+        '''
+        try:
+            return self.__xtrue
+        except AttributeError:
+            print('''
+No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
+''')
 
     ##########################################################################
     ################### Constructor for the class NLPETool ###################
@@ -272,7 +314,7 @@ generate_pseudo_measurement_data() for "random" pseudo measurement data.
         :type Y: numpy.ndarray.
 
         :param xtrue: Column vector :math:`x_{true} \in \mathbb{R}^{d}` 
-                      containing the true value of x to
+                      containing the true value of :math:`x` to
                       generate pseudo measurement data using
                       the vectors :math:`M` and :math:`\sigma`.
         :type xtrue: numpy.ndarray.
@@ -293,43 +335,27 @@ generate_pseudo_measurement_data() for "random" pseudo measurement data.
 
         '''
 
-        ## Check variable validity ##
-
-        # Necessary information
-
         # Parameters
 
-        # self.__check_variable_validity(x, "x", ca.casadi_core.MX, 1)
-        # self.__x = x
         self.set_x(x)
 
         # Model
 
-        # self.__check_variable_validity(M, "M", ca.casadi_core.MX, 1)
-        # self.__M = M
         self.set_M(M)
 
         # Standard deviations
 
-        # self.__check_variable_validity(sigma, "sigma", np.ndarray, 1)
-        # self.__sigma = sigma
-
         self.set_sigma(sigma)
-
-        # Mutually substitutable information
 
         # Measurements
 
         if Y is not None:
-            # self.__check_variable_validity(Y, "Y", np.ndarray, 1)
-            # self.__Y = Y
             self.set_Y(Y)
 
         # True value of x
 
         if xtrue is not None:
-            self.__check_variable_validity(xtrue, "xtrue", np.ndarray, 1)
-            self.__xtrue = xtrue
+            self.set_xtrue(xtrue)
 
         # Assure that only one of the variables Y and xtrue is provided
 
