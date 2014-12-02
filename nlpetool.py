@@ -219,7 +219,8 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
 
         '''
         :returns: numpy.ndarray - the covariance matrix
-                  of the error :math:`\Sigma_{\epsilon} \in \mathbb{N}^{N}`.
+                  of the error
+                  :math:`\Sigma_{\epsilon} \in \mathbb{R}^{N\,x\,N}`.
 
         Get the covariance matrix of the error :math:`\Sigma_{\epsilon}.`
         '''
@@ -458,6 +459,99 @@ No data for G has been provided so far. Try set_H() for manual setting.
 No data for xinit has been provided so far. Try set_xinit() for manual setting.
 ''')
 
+    # -----------------------------------------------------------------------#
+
+
+    def get_xhat(self):
+
+        '''
+        :returns: numpy.ndarray - the column vector
+                  :math:`\hat{x} \in \mathbb{R}^{d}` 
+                  containing the estimated value for :math:`x`.
+        :raises: AttributeError
+        :catches: AttributeError
+
+        Get the column vector :math:`\hat{x}` for the estimated value
+        of :math:`x`.
+        '''
+
+        try:
+            return self.__xhat
+        except AttributeError:
+            print('''
+No data for xhat has been provided so far. You have to call
+run_parameter_estimation() first.
+''')    
+
+
+    def get_Rhat(self):
+
+        '''
+        :returns: float - the scalar value
+                  :math:`\hat{R} \in \mathbb{R}` 
+                  containing the residual for the estimated value
+                  :math:`\hat{x}`.
+        :raises: AttributeError
+        :catches: AttributeError
+
+        Get the scalar value :math:`\hat{R}` containing the residual
+        for the estimated value :math:`\hat{x}`.
+        '''
+
+        try:
+            return self.__Rhat
+        except AttributeError:
+            print('''
+No data for Rhat has been provided so far. You have to call
+run_parameter_estimation() first.
+''')
+
+    # -----------------------------------------------------------------------#
+
+
+    def get_beta(self):
+
+        '''
+        :returns: float - the scalar value for :math:`\beta`.
+        :raises: AttributeError
+        :catches: AttributeError
+
+        Get the scalar value for :math:`\beta`. For information about
+        computation of :math:`\beta`, see :func:`compute_covariance_matrix()`.
+        '''
+
+        try:
+            return self.__beta
+        except AttributeError:
+            print('''
+No data for beta has been provided so far. You have to call
+compute_covariance_matrix() first.
+''')
+
+
+    def get_Covx(self):
+
+        '''
+        :returns: numpy.ndarray - the covariance matrix
+        :math:`\Sigma_{\hat{x}} \in \mathbb{R}^{d\,x\,d}` for the
+        estimated parameters :math:`\hat{x}`.
+        :raises: AttributeError
+        :catches: AttributeError
+
+        Get the covariance matrix
+        :math:`\Sigma_{\hat{x}}}` for the
+        estimated parameters :math:`\hat{x}`. For information about
+        computation of :math:`\beta`, see :func:`compute_covariance_matrix()`.
+        '''
+
+        try:
+            return self.__Covx
+        except AttributeError:
+            print('''
+No data for beta has been provided so far. You have to call
+compute_covariance_matrix() first.
+''')
+
 
     ##########################################################################
     ################## 3. Constructor for the class NLPETool #################
@@ -581,7 +675,7 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
     def generate_pseudo_measurement_data(self):
 
-        '''
+        r'''
 
         This functions generates "random" pseudo measurement data in
         :math:`Y` for a parameter estimation from :math:`M`,
@@ -593,14 +687,13 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
             Y_{true} = M(x_{true})
 
         is evaluated, and afterwards, normally distributed measurement noise
-        :math:`\epsilon_{M} \in \mathbb{R}^{N}` with zeros mean
+        :math:`\epsilon \in \mathbb{R}^{N}` with zeros mean
         and standard deviation :math:`\sigma` is added to the computed values
         of :math:`\hat{Y}`, so that
 
         .. math::
-            Y = Y_{true} + \epsilon_{M},~ \epsilon_{M} \sim
+            Y = Y_{true} + \epsilon,~ \epsilon \sim
                 \mathcal{N}(0, \sigma^{2}).
-
         '''
 
         self.__Mx = ca.MXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
@@ -616,11 +709,11 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
     def run_parameter_estimation(self):
 
-        '''
+        r'''
         This functions will run the parameter estimation for the given problem.
         
-        If measurement data is not yet existing, it will be generate using
-        the :func:`generate_pseudo_measurement_data()`.
+        If measurement data is not yet existing, it will be generated using
+        the function :func:`generate_pseudo_measurement_data()`.
 
         Then, the parameter estimation problem
 
@@ -632,9 +725,15 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
             H &\leq 0\\
             x_{0} &= x_{init}
 
-        will be set up, and solved using IPOPT. Afterwards, the
-        value of :math:`\hat{x}` is stored insdie the variable xhat, which can
-        be returned using the function :func:`get_xhat()`.
+
+        will be set up, and solved using IPOPT. Afterwards,
+
+        - the value of :math:`\hat{x}` is stored inside the variable xhat,
+          which can be returned using the function :func:`get_xhat()`,
+
+        - the value of the residual :math:`\hat{R}` will be stored inside
+          the variable Rhat,
+          which can be returned using the function :func:`get_Rhat()`.
         '''
 
         # First, check if measurement data exists; if not, generate it
@@ -671,3 +770,121 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
             solver.setInput(self.__xinit, "xinit")
 
         solver.evaluate()
+
+        # Store the results of the computation
+
+        self.__xhat = solver.getOutput("x")
+        self.__Rhat = solver.getOutput("f")
+
+
+    ##########################################################################
+    ########## 5. Functions for parameter estimation interpretation ##########
+    ##########################################################################
+
+    def compute_covariance_matrix(self):
+        
+        r'''
+        This function will compute the covariance matrix
+        :math:`\Sigma_{\hat{x}} \in \mathbb{R}^{d\,x\,d}` for the
+        estimated parameters :math:`\hat{x}`. It is computed from
+
+        .. math::
+
+            \Sigma_{\hat{x}} = \beta * J^{+, T} * J
+
+        with
+
+        .. math::
+
+            \beta = \frac{\hat{R}}{N + m - d}
+
+        and
+
+        .. math::
+
+            J^{+} = ...
+
+        while
+
+        .. math::
+
+            J_{1} = \Sigma_{\epsilon}^{-1} * \frac{\partial M}{\partial x}
+
+        and
+
+        .. math::
+
+            J_{2} = \frac{\partial G}{\partial x} .
+
+        If the number of equality constraints is 0, copmutation of
+        :math:`J_{plus}` simplifies to
+
+        .. math::
+
+            J_{plus} = J_{1}
+
+        Afterwards,
+
+          - the value of :math:`\beta` will be stored inside the variable beta,
+            which can be returned using the function :func:`get_beta()`, and
+          - the value of :math:`\Sigma_{\hat{x}}` will be stored inside the
+            variable Covx which can be returned using the function
+            :func:`get_Covx()`.
+        '''
+
+        # Compute beta
+
+        if hasattr(self, '__m'):
+            self.__beta = self.Rhat / (self.__N + self.__m - self.__d)
+        else:
+            self.__beta = self.Rhat / (self.__N - self.__d)
+
+        # Compute J1, J2
+
+        Mx = ca.MXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
+        Mx.init()
+
+        self.__J1 = ca.mul(np.linalg.solve(np.sqrt(self.__Sigma), \
+            np.eye(self.__N)), Mx.jac("x", "f"))
+
+        Gx = ca.MXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__G))
+        Gx.init()
+
+        self.__J2 = Gx.jac("x", "f")
+
+        # Compute Jplus; this simplifies to Jplus = J1 when m = 0
+
+        if hasattr(self, '__m'):
+
+            self.__Jplus = ca.mul([ \
+
+                ca.horzcat((np.eye(self.__d),np.zeros((self.__d, self.__m)))),\
+
+                ca.solve(ca.vertcat(( \
+                
+                    ca.horzcat((ca.mul(self.__J1.T, self.__J1), self.__J2.T)),\
+                    ca.horzcat((self.__J2, np.zeros((self.__m, self.__m)))) \
+                
+                )), np.eye(self.__d + self.__m)), \
+
+                ca.vertcat((self.__J1.T, np.zeros((self.__m, self.__N)))) \
+
+                ])
+
+        else:
+
+            self.__Jplus = self.__J1
+
+        # Compute the covariance matrix, and evaluate for xhat
+
+        self.__fCov = beta * ca.mul([self.__Jplus, self.__Jplus.T])
+
+        self.__fCovx = ca.MXFunction(ca.nlpIn(x=x), ca.nlpOut(f=Cov))
+        self.__fCovx.init()
+
+        self.__fCovx.setInput(xhat, "x")
+        self.__fCovx.evaluate()
+
+        # Store the covariance matrix in Covx
+
+        self.__Covx = self.__fCovx.getOutput("f")
