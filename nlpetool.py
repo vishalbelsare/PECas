@@ -172,6 +172,10 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         Set the column vector :math:`\sigma` for the standard deviation. If the
         dimensions of :math:`\sigma` and :math:`M` or :math:`\sigma` and 
         :math:`Y` are not consistent, an exception will be raised.
+
+        Also set up the covariance matrix :math:`\Sigma_{\epsilon}` of the
+        error using :math:`\sigma` as its diagonal entries, i. e.
+        :math:`\sigma = diag(\Sigma_{\epsilon})`.
         '''
 
         self.__check_variable_validity(sigma, "sigma", np.ndarray, 1)
@@ -193,17 +197,34 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
 
         self.__sigma = sigma
 
+        # Set up the covariance matrix of the error
+
+        self.__Sigma = np.diag(sigma)
+
 
     def get_sigma(self):
 
         '''
         :returns: numpy.ndarray - the column vector
-                  :math:`\sigma  \in \mathbb{R}^{N}` for the model.
+                  :math:`\sigma  \in \mathbb{R}^{N}` for the
+                  standard deviations.
 
         Get the column vector :math:`\sigma` for the standard deviations.
         '''
 
         return self.__sigma
+
+
+    def get_Sigma(self):
+
+        '''
+        :returns: numpy.ndarray - the covariance matrix
+                  of the error :math:`\Sigma_{\epsilon} \in \mathbb{N}^{N}`.
+
+        Get the covariance matrix of the error :math:`\Sigma_{\epsilon}.`
+        '''
+
+        return self.__Sigma
 
     # -----------------------------------------------------------------------#
 
@@ -417,28 +438,29 @@ No data for G has been provided so far. Try set_H() for manual setting.
         self.__xinit = xinit
 
 
-    def get_xtrue(self):
+    def get_xinit(self):
 
         '''
         :returns: numpy.ndarray - the column vector
-                  :math:`x_{true} \in \mathbb{R}^{d}` for the true values
-                  of :math:`x`.
+                  :math:`x_{init} \in \mathbb{R}^{d}` 
+                  containing the initial guess for :math:`x`.
         :raises: AttributeError
         :catches: AttributeError
 
-        Get the column vector :math:`x_{true}` for the true values of
-        :math:`x`. If no data has been provided, the function will raise and
-        catch an exception and display possible solutions to the user.
+        Get the column vector :math:`x_{init}` for the initial guess
+        of :math:`x`.
         '''
+
         try:
-            return self.__xtrue
+            return self.__xinit
         except AttributeError:
             print('''
-No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
+No data for xinit has been provided so far. Try set_xinit() for manual setting.
 ''')
 
+
     ##########################################################################
-    ################### Constructor for the class NLPETool ###################
+    ################## 3. Constructor for the class NLPETool #################
     ##########################################################################
 
     def __init__(\
@@ -553,6 +575,10 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
             self.__m = 0
 
 
+    ##########################################################################
+    ############# 4. Functions for running parameter estimation ##############
+    ##########################################################################
+
     def generate_pseudo_measurement_data(self):
 
         '''
@@ -617,24 +643,31 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
             self.generate_pseudo_measurement_data()            
 
-        # Set up  the cost function f
+        # Set up the cost function f
 
-        pass
+        A = ca.mul(np.linalg.solve(np.sqrt(self.__Sigma), np.eye(self.__N)), \
+            (self.__M - self.__Y))
+        self.__f = ca.mul(A.T, A)
 
-        # A = ca.mul(np.linalg.solve(np.sqrt(Sigma), np.eye(N)), (M - Y_N))
-        # f = ca.mul(A.T, A)
+        # Solve the minimization problem for f
 
-        # # Solve minimization problem for f
+        self.__fx = ca.MXFunction(ca.nlpIn(x=self.__x), \
+            ca.nlpOut(f=self.__f, g=self.__G))
+        self.__fx.init()
 
-        # fx = ca.MXFunction(ca.nlpIn(x=x), ca.nlpOut(f=f, g=G))
-        # fx.init()
+        solver = ca.NlpSolver("ipopt", self.__fx)
+        solver.setOption("tol", 1e-10)
+        solver.init()
 
-        # solver = ca.NlpSolver("ipopt", fx)
-        # solver.setOption("tol", 1e-10)
-        # solver.init()
+        # If equality constraints exist, set the bounds for the solver
 
-        # solver.setInput(np.zeros(m), "lbg")
-        # solver.setInput(np.zeros(m), "ubg")
-        # solver.setInput([1, 1], "xinit")
+        if hasattr(self, '__m'):
+            solver.setInput(np.zeros(self.__m), "lbg")
+            solver.setInput(np.zeros(self.__m), "ubg")
 
-        # solver.evaluate()
+        # If an initial guess was given, set the initial guess for the solver
+        
+        if hasattr(self, '__xinit'):
+            solver.setInput(self.__xinit, "xinit")
+
+        solver.evaluate()
