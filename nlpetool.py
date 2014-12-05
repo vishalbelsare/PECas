@@ -307,7 +307,7 @@ generate_pseudo_measurement_data() for "random" pseudo measurement data.
         :func:`generate_pseudo_measurement_data`.
         '''
 
-        self.self.__check_variable_validity(xtrue, "xtrue", np.ndarray, 1)
+        self.__check_variable_validity(xtrue, "xtrue", np.ndarray, 1)
 
         self.__xtrue = xtrue
 
@@ -531,7 +531,7 @@ compute_covariance_matrix() first.
 
     def get_Covx(self):
 
-        '''
+        r'''
         :returns: numpy.ndarray - the covariance matrix
         :math:`\Sigma_{\hat{x}} \in \mathbb{R}^{d\,x\,d}` for the
         estimated parameters :math:`\hat{x}`.
@@ -877,12 +877,13 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         # Compute the covariance matrix, and evaluate for xhat
 
-        self.__fCov = beta * ca.mul([self.__Jplus, self.__Jplus.T])
+        self.__fCov = self.__beta * ca.mul([self.__Jplus, self.__Jplus.T])
 
-        self.__fCovx = ca.MXFunction(ca.nlpIn(x=x), ca.nlpOut(f=Cov))
+        self.__fCovx = ca.MXFunction(ca.nlpIn(x=self.__x), \
+            ca.nlpOut(f=self.__fCov))
         self.__fCovx.init()
 
-        self.__fCovx.setInput(xhat, "x")
+        self.__fCovx.setInput(self.__xhat, "x")
         self.__fCovx.evaluate()
 
         # Store the covariance matrix in Covx
