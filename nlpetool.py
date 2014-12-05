@@ -434,7 +434,7 @@ No data for G has been provided so far. Try set_H() for manual setting.
         of :math:`x`.
         '''
 
-        self.self.__check_variable_validity(xinit, "xinit", np.ndarray, 1)
+        self.__check_variable_validity(xinit, "xinit", np.ndarray, 1)
 
         self.__xinit = xinit
 
@@ -458,6 +458,48 @@ No data for G has been provided so far. Try set_H() for manual setting.
             print('''
 No data for xinit has been provided so far. Try set_xinit() for manual setting.
 ''')
+
+    # -----------------------------------------------------------------------#
+
+
+    def get_N(self):
+
+        '''
+        :returns: int - the scalar value
+                  :math:`N \in \mathbb{N}^{+}` 
+                  containing the number of measurements.
+
+        Get the scalar value :math:`N` containing the number of measurements.
+        '''
+
+        return self.__N
+
+
+    def get_d(self):
+
+        '''
+        :returns: int - the scalar value
+                  :math:`d \in \mathbb{N}^{+}` 
+                  containing the number of parameters.
+
+        Get the scalar value :math:`d` containing the number of parameters.
+        '''
+
+        return self.__d
+
+
+    def get_m(self):
+
+        '''
+        :returns: int - the scalar value
+                  :math:`m \in \mathbb{N}^{0}` 
+                  containing the number of equality constraints.
+
+        Get the scalar value :math:`m` containing the number of equality
+        constraints.
+        '''
+
+        return self.__m
 
     # -----------------------------------------------------------------------#
 
@@ -642,12 +684,12 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
         # Equality constrains
 
         if G is not None:
-            self.set_G()
+            self.set_G(G)
 
         # Inequality constrains
 
         if H is not None:
-            self.set_H()
+            self.set_H(H)
 
         # Initial guess
 
@@ -738,7 +780,7 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         # First, check if measurement data exists; if not, generate it
 
-        if not hasattr(self, '__Y'):
+        if self.get_Y() is None:
 
             self.generate_pseudo_measurement_data()            
 
@@ -750,8 +792,16 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         # Solve the minimization problem for f
 
-        self.__fx = ca.MXFunction(ca.nlpIn(x=self.__x), \
-            ca.nlpOut(f=self.__f, g=self.__G))
+        if self.get_G() is None:
+
+            self.__fx = ca.MXFunction(ca.nlpIn(x=self.__x), \
+                ca.nlpOut(f=self.__f, g=self.__G))
+
+        else:
+
+            self.__fx = ca.MXFunction(ca.nlpIn(x=self.__x), \
+                ca.nlpOut(f=self.__f))
+
         self.__fx.init()
 
         solver = ca.NlpSolver("ipopt", self.__fx)
@@ -760,14 +810,16 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         # If equality constraints exist, set the bounds for the solver
 
-        if hasattr(self, '__m'):
+        if self.get_m() is not 0:
+
             solver.setInput(np.zeros(self.__m), "lbg")
             solver.setInput(np.zeros(self.__m), "ubg")
 
         # If an initial guess was given, set the initial guess for the solver
         
-        if hasattr(self, '__xinit'):
-            solver.setInput(self.__xinit, "xinit")
+        if self.get_xinit() is not None:
+
+            solver.setInput(self.__xinit, "x0")
 
         solver.evaluate()
 
@@ -834,10 +886,13 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         # Compute beta
 
-        if hasattr(self, '__m'):
-            self.__beta = self.Rhat / (self.__N + self.__m - self.__d)
+        if self.get_m() is not None:
+
+            self.__beta = self.__Rhat / (self.__N + self.__m - self.__d)
+
         else:
-            self.__beta = self.Rhat / (self.__N - self.__d)
+
+            self.__beta = self.__Rhat / (self.__N - self.__d)
 
         # Compute J1, J2
 
@@ -847,14 +902,14 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
         self.__J1 = ca.mul(np.linalg.solve(np.sqrt(self.__Sigma), \
             np.eye(self.__N)), Mx.jac("x", "f"))
 
-        Gx = ca.MXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__G))
-        Gx.init()
-
-        self.__J2 = Gx.jac("x", "f")
-
         # Compute Jplus; this simplifies to Jplus = J1 when m = 0
 
-        if hasattr(self, '__m'):
+        if self.get_G() is not None:
+
+            Gx = ca.MXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__G))
+            Gx.init()
+
+            self.__J2 = Gx.jac("x", "f")
 
             self.__Jplus = ca.mul([ \
 
