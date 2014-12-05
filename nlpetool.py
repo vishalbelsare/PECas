@@ -1,5 +1,6 @@
 import casadi as ca
 import numpy as np
+import sys
 
 class NLPETool:
 
@@ -413,7 +414,7 @@ No data for G has been provided so far. Try set_G() for manual setting.
             return self.__H
         except AttributeError:
             print('''
-No data for G has been provided so far. Try set_H() for manual setting.
+No data for H has been provided so far. Try set_H() for manual setting.
 ''')
 
     # -----------------------------------------------------------------------#
@@ -884,6 +885,12 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
             :func:`get_Covx()`.
         '''
 
+        if self.get_xhat() is None:
+
+            raise AttributeError('''
+Execute run_parameter_estimation() before computing the covariance matrix.
+''')
+
         # Compute beta
 
         if self.get_m() is not None:
@@ -944,3 +951,29 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
         # Store the covariance matrix in Covx
 
         self.__Covx = self.__fCovx.getOutput("f")
+
+
+    def print_results(self):
+
+        r'''
+        Here to be the docstring!
+        '''
+
+        if (self.get_xhat() is None) or (self.get_Covx() is None):
+
+            raise AttributeError('''
+You must execute both run_parameter_estimation() and
+compute_covariance_matrix() before all results can be displayed.
+''')
+
+
+        print('\n## Parameter estimation results: ## \n')
+
+        print("   beta = {0}\n".format(self.get_beta()))
+
+        for i, xi in enumerate(self.get_xhat()):
+
+            print("   x{0:<3} = {1:10} +/- {2:10}".format(\
+                i, xi, np.sqrt(self.get_Covx()[i, i])))
+
+        print("\n   Covariance matrix Cov(x):\n   {0}".format(self.get_Covx())) 
