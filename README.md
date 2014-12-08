@@ -1,5 +1,8 @@
-PECas - Parameter estimation using CasADi
-=========================================
+PECas
+=====
+
+Parameter estimation using CasADi
+---------------------------------
 
 PECas holds a user-friendly environment for solving parameter estimation
 problems and for interpretation of the results recieved. It does so by
