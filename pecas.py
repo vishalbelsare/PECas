@@ -2,7 +2,7 @@ import casadi as ca
 import numpy as np
 import sys
 
-class NLPETool:
+class PECasProb:
 
     '''Here to be the docstring for the class.'''
 
