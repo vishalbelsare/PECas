@@ -1,5 +1,5 @@
-NLPE-Tool documentation
-=======================
+PECas class and function documentation
+======================================
 
-.. automodule:: nlpetool
+.. automodule:: pecas
     :members:
