@@ -89,11 +89,13 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         *This function is called automatically at the initialization of the
         object.*
 
-        Set the column vector :math:`x` for the parameters.
+        Set the column vector :math:`x` for the parameters, and with this,
+        the scalar value :math:`d` containing the number of parameters.
         '''
 
         self.__check_variable_validity(x, "x", ca.casadi_core.MX, 1)
         self.__x = x
+        self.__d = self.__x.shape[0]
 
 
     def get_x(self):
@@ -122,7 +124,8 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         *This function is called automatically at the initialization of the
         object.*
 
-        Set the column vector :math:`M` for the model. If the
+        Set the column vector :math:`M` for the model, and with this, the
+        scalar value :math:`N` containing the number of measurements. If the
         dimensions of :math:`\sigma` and :math:`M` are not consistent,
         an exception will be raised.
         '''
@@ -142,6 +145,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
             pass
 
         self.__M = M
+        self.__N = self.__M.shape[0]
 
 
     def get_M(self):
@@ -348,13 +352,15 @@ No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
         *If data is provided, this function is called automatically at the
         initialization of the object.*
 
-        Set the column vector :math:`G` for the equality constraints.
+        Set the column vector :math:`G` for the equality constraints, and with
+        this, the scalar value :math:`m` containing the number of equality
+        constraints.
         '''
 
         self.__check_variable_validity(G, "G", ca.casadi_core.MX, 1)
 
         self.__G = G
-
+        self.__m = self.__G.shape[0]
 
     def get_G(self):
 
@@ -696,6 +702,8 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         if G is not None:
             self.set_G(G)
+        else:
+            self.__m = 0
 
         # Inequality constrains
 
@@ -706,20 +714,6 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         if xinit is not None:
             self.__xinit = xinit
-
-        # Get the number of measurements N from M
-
-        self.__N = self.__M.shape[0]
-
-        # Get the number of parameters d from x
-
-        self.__d = self.__x.shape[0]
-
-        # If they exist, get the number of equality constraints from G
-        if G is not None:
-            self.__m = self.__G.shape[0]
-        else:
-            self.__m = 0
 
 
     ##########################################################################
