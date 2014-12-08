@@ -160,7 +160,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
 
     def set_sigma(self, sigma):
 
-        '''
+        r'''
         :param sigma: Column vector :math:`\sigma \in \mathbb{R}^{N}` for the
                   standard deviations.
         :type sigma: numpy.ndarray
@@ -174,9 +174,10 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         dimensions of :math:`\sigma` and :math:`M` or :math:`\sigma` and 
         :math:`Y` are not consistent, an exception will be raised.
 
-        Also set up the covariance matrix :math:`\Sigma_{\epsilon}` of the
-        error using :math:`\sigma` as its diagonal entries, i. e.
-        :math:`\sigma = diag(\Sigma_{\epsilon})`.
+        The function will also set up the covariance matrix
+        :math:`\Sigma_{\epsilon}` of the
+        error using :math:`\sigma^{2}` as its diagonal entries, i. e.
+        :math:`\sigma^{2} = \text{diag}(\Sigma_{\epsilon})`.
         '''
 
         self.__check_variable_validity(sigma, "sigma", np.ndarray, 1)
@@ -450,7 +451,8 @@ No data for H has been provided so far. Try set_H() for manual setting.
         :catches: AttributeError
 
         Get the column vector :math:`x_{init}` for the initial guess
-        of :math:`x`.
+        of :math:`x`. If no data has been provided, the function will raise
+        and catch an exception and display possible solutions to the user.
         '''
 
         try:
@@ -515,7 +517,8 @@ No data for xinit has been provided so far. Try set_xinit() for manual setting.
         :catches: AttributeError
 
         Get the column vector :math:`\hat{x}` for the estimated value
-        of :math:`x`.
+        of :math:`x`. If no data has been provided, the function will raise
+        and catch an exception and display possible solutions to the user.
         '''
 
         try:
@@ -538,7 +541,9 @@ run_parameter_estimation() first.
         :catches: AttributeError
 
         Get the scalar value :math:`\hat{R}` containing the residual
-        for the estimated value :math:`\hat{x}`.
+        for the estimated value :math:`\hat{x}`. If no data has been provided,
+        the function will raise and
+        catch an exception and display possible solutions to the user.
         '''
 
         try:
@@ -554,13 +559,15 @@ run_parameter_estimation() first.
 
     def get_beta(self):
 
-        '''
+        r'''
         :returns: float - the scalar value for :math:`\beta`.
         :raises: AttributeError
         :catches: AttributeError
 
         Get the scalar value for :math:`\beta`. For information about
         computation of :math:`\beta`, see :func:`compute_covariance_matrix()`.
+        If no data has been provided, the function will raise and
+        catch an exception and display possible solutions to the user.
         '''
 
         try:
@@ -576,15 +583,18 @@ compute_covariance_matrix() first.
 
         r'''
         :returns: numpy.ndarray - the covariance matrix
-        :math:`\Sigma_{\hat{x}} \in \mathbb{R}^{d\,x\,d}` for the
-        estimated parameters :math:`\hat{x}`.
+            :math:`\Sigma_{\hat{x}} \in \mathbb{R}^{d\,x\,d}` for the
+            estimated parameters :math:`\hat{x}`.
         :raises: AttributeError
         :catches: AttributeError
 
         Get the covariance matrix
-        :math:`\Sigma_{\hat{x}}}` for the
+        :math:`\Sigma_{\hat{x}}` for the
         estimated parameters :math:`\hat{x}`. For information about
-        computation of :math:`\beta`, see :func:`compute_covariance_matrix()`.
+        computation of :math:`\Sigma_{\hat{x}}`, see
+        :func:`compute_covariance_matrix()`. If no data has been provided,
+        the function will raise and
+        catch an exception and display possible solutions to the user.
         '''
 
         try:
@@ -722,7 +732,8 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         This functions generates "random" pseudo measurement data in
         :math:`Y` for a parameter estimation from :math:`M`,
-        :math:`\sigma` and :math:`x_{true}`.
+        :math:`\sigma` and :math:`x_{true}`. If measurement data had been
+        stored already, it will be overwritten.
 
         For obtaining :math:`Y`, at first the expression
 
@@ -737,6 +748,12 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
         .. math::
             Y = Y_{true} + \epsilon,~ \epsilon \sim
                 \mathcal{N}(0, \sigma^{2}).
+
+
+        Afterwards,
+
+          - the vector :math:`Y` will be stored inside the variable Y,
+            which can be returned using the function :func:`get_Y()`.
         '''
 
         self.__Mx = ca.MXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
@@ -753,8 +770,7 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
     def run_parameter_estimation(self):
 
         r'''
-        This functions will run the parameter estimation for the given problem.
-        
+        This functions will run the parameter estimation for the given problem.        
         If measurement data is not yet existing, it will be generated using
         the function :func:`generate_pseudo_measurement_data()`.
 
@@ -762,11 +778,11 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         .. math::
 
-            \hat{x} &= arg\,\underset{x}{min}\|M(x)-Y\|_{2}^{2}\\
-            s.\,t.&~\\
-            G &= 0\\
-            H &\leq 0\\
-            x_{0} &= x_{init}
+            ~ & \hat{x} = \text{arg}\, & \underset{x}{\text{min}}\|M(x)-Y\|_{2}^{2}\\
+            \text{s. t.}&~&~\\
+            ~ & ~ & G = 0\\
+            ~ & ~ & H \leq 0\\
+            ~ & ~ & x_{0} = x_{init}
 
 
         will be set up, and solved using IPOPT. Afterwards,
@@ -837,13 +853,20 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
     def compute_covariance_matrix(self):
         
         r'''
+        :raises: AttributeError
+
         This function will compute the covariance matrix
         :math:`\Sigma_{\hat{x}} \in \mathbb{R}^{d\,x\,d}` for the
-        estimated parameters :math:`\hat{x}`. It is computed from
+        estimated parameters :math:`\hat{x}` and the residual
+        :math:`\hat{R}`. It can not be used before function
+        :func:`run_parameter_estimation()` has been used.
+
+
+        :math:`\Sigma_{\hat{x}}` is then computed as
 
         .. math::
 
-            \Sigma_{\hat{x}} = \beta * J^{+, T} * J
+            \Sigma_{\hat{x}} = \beta * (J^{+})^{T} * J^{+}
 
         with
 
@@ -855,7 +878,10 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         .. math::
 
-            J^{+} = ...
+            J^{+} = \begin{pmatrix} {I} & {0} \end{pmatrix}
+                \begin{pmatrix} {J_{1}^{T} J_{1}} & {J_{2}^{T}} \\
+                {J_{2}} & {0} \end{pmatrix}^{-1}
+                \begin{pmatrix} {J_{1}^{T}} \\ {0} \end{pmatrix}
 
         while
 
@@ -869,18 +895,18 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
             J_{2} = \frac{\partial G}{\partial x} .
 
-        If the number of equality constraints is 0, copmutation of
-        :math:`J_{plus}` simplifies to
+        If the number of equality constraints is 0, computation of
+        :math:`J^{+}` simplifies to
 
         .. math::
 
-            J_{plus} = J_{1}
+            J^{+} = J_{1}
 
         Afterwards,
 
           - the value of :math:`\beta` will be stored inside the variable beta,
             which can be returned using the function :func:`get_beta()`, and
-          - the value of :math:`\Sigma_{\hat{x}}` will be stored inside the
+          - the matrix :math:`\Sigma_{\hat{x}}` will be stored inside the
             variable Covx which can be returned using the function
             :func:`get_Covx()`.
         '''
@@ -956,7 +982,19 @@ Execute run_parameter_estimation() before computing the covariance matrix.
     def print_results(self):
 
         r'''
-        Here to be the docstring!
+        :raises: AttributeError
+
+        This function displays the results of the parameter estimation
+        computations. It can not be used before function
+        :func:`compute_covariance_matrix()` has been used. The results
+        displayed by the function contain
+
+          - the value of :math:`\beta`,
+          - the values of the estimated parameters :math:`\hat{x}`
+            and their corresponding standard deviations, and
+          - the values of the covariance matrix
+            :math:`\Sigma_{\hat{x}}` fot the
+            estimated parameters.
         '''
 
         if (self.get_xhat() is None) or (self.get_Covx() is None):
