@@ -432,7 +432,7 @@ No data for H has been provided so far. Try set_H() for manual setting.
         '''
         :param xinit: Column vector :math:`x_{init} \in \mathbb{R}^{d}` 
                       containing the initial guess for :math:`x`.
-        :type xtrue: numpy.ndarray
+        :type xinit: numpy.ndarray
         :raises: ValueError
 
         *If data is provided, this function is called automatically at the
