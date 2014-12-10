@@ -806,12 +806,12 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
         if self.get_G() is None:
 
             self.__fx = ca.MXFunction(ca.nlpIn(x=self.__x), \
-                ca.nlpOut(f=self.__f, g=self.__G))
+                ca.nlpOut(f=self.__f))
 
         else:
 
             self.__fx = ca.MXFunction(ca.nlpIn(x=self.__x), \
-                ca.nlpOut(f=self.__f))
+                ca.nlpOut(f=self.__f, g=self.__G))
 
         self.__fx.init()
 
@@ -955,7 +955,7 @@ Execute run_parameter_estimation() before computing the covariance matrix.
 
         else:
 
-            self.__Jplus = self.__J1
+            self.__Jplus = self.__J1.T
 
         # Compute the covariance matrix, and evaluate for xhat
 
