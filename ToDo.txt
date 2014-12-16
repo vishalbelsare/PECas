@@ -11,6 +11,4 @@ ToDo:
 Auftretende Fehler:
 
 - Aufruf von generate_pseudo_measurement_data() ohne vorhandenes xtrue wird nicht abgefangen
-- "try-set-values"-messages apper also if the get-fcuntiosn are only used for checking
-- vereinfachte Berechnung der Kovarianzmatrix fehlerhaft
 - Skalierung mit sigma der Messwerte und Modellfunktion fehlt noch komplett

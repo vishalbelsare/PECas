@@ -273,9 +273,11 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         self.__Y = Y
 
 
-    def get_Y(self):
+    def get_Y(self, msg = True):
 
         '''
+        :param msg: Flag to switch on/off display of error message.
+        :type msg: bool
         :returns: numpy.ndarray - the column vector
                   :math:`Y  \in \mathbb{R}^{N}` for the measurements.
         :raises: AttributeError
@@ -284,12 +286,14 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         Get the column vector :math:`Y` for the measurements. If no data
         has been provided so far either by manual input or via
         :func:`generate_pseudo_measurement_data`, the function will raise and
-        catch an exception and display possible solutions to the user.
+        catch an exception and, if msg ist set to True,
+        display possible solutions to the user.
         '''
         try:
             return self.__Y
         except AttributeError:
-            print('''
+            if msg:
+                print('''
 No data for Y has been provided so far. Try set_Y() for manual setting, or
 generate_pseudo_measurement_data() for "random" pseudo measurement data.
 ''')
@@ -362,9 +366,11 @@ No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
         self.__G = G
         self.__m = self.__G.shape[0]
 
-    def get_G(self):
+    def get_G(self, msg = True):
 
         '''
+        :param msg: Flag to switch on/off display of error message.
+        :type msg: bool
         :returns: casadi.casadi_core.MX - the column vector
                   :math:`G \in \mathbb{R}^{m}` for the equality constraints.
         :raises: AttributeError
@@ -372,13 +378,15 @@ No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
 
         Get the column vector :math:`G` for the equality constraints.
         If no data has been provided, the function will raise and
-        catch an exception and display possible solutions to the user.
+        catch an exception and, if msg is set to True,
+        display possible solutions to the user.
         '''
 
         try:
             return self.__G
         except AttributeError:
-            print('''
+            if msg:
+                print('''
 No data for G has been provided so far. Try set_G() for manual setting.
 ''')
 
@@ -447,9 +455,11 @@ No data for H has been provided so far. Try set_H() for manual setting.
         self.__xinit = xinit
 
 
-    def get_xinit(self):
+    def get_xinit(self, msg = True):
 
         '''
+        :param msg: Flag to switch on/off display of error message.
+        :type msg: bool
         :returns: numpy.ndarray - the column vector
                   :math:`x_{init} \in \mathbb{R}^{d}` 
                   containing the initial guess for :math:`x`.
@@ -458,13 +468,15 @@ No data for H has been provided so far. Try set_H() for manual setting.
 
         Get the column vector :math:`x_{init}` for the initial guess
         of :math:`x`. If no data has been provided, the function will raise
-        and catch an exception and display possible solutions to the user.
+        and catch an exception and, is msg is set to True,
+        display possible solutions to the user.
         '''
 
         try:
             return self.__xinit
         except AttributeError:
-            print('''
+            if msg:
+                print('''
 No data for xinit has been provided so far. Try set_xinit() for manual setting.
 ''')
 
@@ -513,9 +525,11 @@ No data for xinit has been provided so far. Try set_xinit() for manual setting.
     # -----------------------------------------------------------------------#
 
 
-    def get_xhat(self):
+    def get_xhat(self, msg = True):
 
         '''
+        :param msg: Flag to switch on/off display of error message.
+        :type msg: bool
         :returns: numpy.ndarray - the column vector
                   :math:`\hat{x} \in \mathbb{R}^{d}` 
                   containing the estimated value for :math:`x`.
@@ -524,13 +538,15 @@ No data for xinit has been provided so far. Try set_xinit() for manual setting.
 
         Get the column vector :math:`\hat{x}` for the estimated value
         of :math:`x`. If no data has been provided, the function will raise
-        and catch an exception and display possible solutions to the user.
+        and catch an exception and, if msg is set to True,
+        display possible solutions to the user.
         '''
 
         try:
             return self.__xhat
         except AttributeError:
-            print('''
+            if msg:
+                print('''
 No data for xhat has been provided so far. You have to call
 run_parameter_estimation() first.
 ''')    
@@ -585,9 +601,11 @@ compute_covariance_matrix() first.
 ''')
 
 
-    def get_Covx(self):
+    def get_Covx(self, msg = True):
 
         r'''
+        :param msg: Flag to switch on/off display of error message.
+        :type msg: bool
         :returns: numpy.ndarray - the covariance matrix
             :math:`\Sigma_{\hat{x}} \in \mathbb{R}^{d\,x\,d}` for the
             estimated parameters :math:`\hat{x}`.
@@ -600,13 +618,15 @@ compute_covariance_matrix() first.
         computation of :math:`\Sigma_{\hat{x}}`, see
         :func:`compute_covariance_matrix()`. If no data has been provided,
         the function will raise and
-        catch an exception and display possible solutions to the user.
+        catch an exception and, if msg is set to True,
+        display possible solutions to the user.
         '''
 
         try:
             return self.__Covx
         except AttributeError:
-            print('''
+            if msg:
+                print('''
 No data for beta has been provided so far. You have to call
 compute_covariance_matrix() first.
 ''')
@@ -791,7 +811,7 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         # First, check if measurement data exists; if not, generate it
 
-        if self.get_Y() is None:
+        if self.get_Y(msg = False) is None:
 
             self.generate_pseudo_measurement_data()            
 
@@ -803,7 +823,7 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         # Solve the minimization problem for f
 
-        if self.get_G() is None:
+        if self.get_G(msg = False) is None:
 
             self.__fx = ca.MXFunction(ca.nlpIn(x=self.__x), \
                 ca.nlpOut(f=self.__f))
@@ -828,7 +848,7 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         # If an initial guess was given, set the initial guess for the solver
         
-        if self.get_xinit() is not None:
+        if self.get_xinit(msg = True) is not None:
 
             solver.setInput(self.__xinit, "x0")
 
@@ -931,7 +951,7 @@ Execute run_parameter_estimation() before computing the covariance matrix.
 
         # Compute Jplus and covariance matrix
 
-        if self.get_G() is not None:
+        if self.get_G(msg = False) is not None:
 
             Gx = ca.MXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__G))
             Gx.init()
@@ -988,11 +1008,12 @@ Execute run_parameter_estimation() before computing the covariance matrix.
           - the values of the estimated parameters :math:`\hat{x}`
             and their corresponding standard deviations, and
           - the values of the covariance matrix
-            :math:`\Sigma_{\hat{x}}` fot the
+            :math:`\Sigma_{\hat{x}}` for the
             estimated parameters.
         '''
 
-        if (self.get_xhat() is None) or (self.get_Covx() is None):
+        if (self.get_xhat(msg = False) is None) or \
+            (self.get_Covx(msg = False) is None):
 
             raise AttributeError('''
 You must execute both run_parameter_estimation() and
