@@ -286,7 +286,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         Get the column vector :math:`Y` for the measurements. If no data
         has been provided so far either by manual input or via
         :func:`generate_pseudo_measurement_data`, the function will raise and
-        catch an exception and, if msg ist set to True,
+        catch an exception and, if ``msg`` ist set to ``True``,
         display possible solutions to the user.
         '''
         try:
@@ -378,7 +378,7 @@ No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
 
         Get the column vector :math:`G` for the equality constraints.
         If no data has been provided, the function will raise and
-        catch an exception and, if msg is set to True,
+        catch an exception and, if ``msg`` is set to ``True``,
         display possible solutions to the user.
         '''
 
@@ -468,7 +468,7 @@ No data for H has been provided so far. Try set_H() for manual setting.
 
         Get the column vector :math:`x_{init}` for the initial guess
         of :math:`x`. If no data has been provided, the function will raise
-        and catch an exception and, is msg is set to True,
+        and catch an exception and, is ``msg`` is set to ``True``,
         display possible solutions to the user.
         '''
 
@@ -538,7 +538,7 @@ No data for xinit has been provided so far. Try set_xinit() for manual setting.
 
         Get the column vector :math:`\hat{x}` for the estimated value
         of :math:`x`. If no data has been provided, the function will raise
-        and catch an exception and, if msg is set to True,
+        and catch an exception and, if ``msg`` is set to ``True``,
         display possible solutions to the user.
         '''
 
@@ -618,7 +618,7 @@ compute_covariance_matrix() first.
         computation of :math:`\Sigma_{\hat{x}}`, see
         :func:`compute_covariance_matrix()`. If no data has been provided,
         the function will raise and
-        catch an exception and, if msg is set to True,
+        catch an exception and, if ``msg`` is set to ``True``,
         display possible solutions to the user.
         '''
 
@@ -909,7 +909,7 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
             J_{2} = \frac{\partial G}{\partial x} .
 
-        If the number of equality constraints is 0, computation of
+        If the number of equality constraints :math:`m = 0`, computation of
         :math:`J^{+}` simplifies to
 
         .. math::
