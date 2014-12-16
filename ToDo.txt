@@ -1,8 +1,6 @@
 ToDo:
 
-- Berechnung Kovarianzmatrix überprüfen
-- Ergebnis muss das gleiche sein für Berechnungsweise Seite 24 Skript SI und die J_plus-Formel
-- Testen ob Berechnung mit und ohne Gleichungsnebenbedingungen funktioniert, indem weitere Variable x in Schätzfunktion, und dafür Gleichungsbedingung z. B. x = 3 eingeführt wird
+- Berechnung Kovarianzmatrix überprüfen --> überarbeitet, jetzt testen!
 
 - Anbindung Rawesome
 - Plot der Konfidenzellipsoide
@@ -10,5 +8,4 @@ ToDo:
 
 Auftretende Fehler:
 
-- Aufruf von generate_pseudo_measurement_data() ohne vorhandenes xtrue wird nicht abgefangen
 - Skalierung mit sigma der Messwerte und Modellfunktion fehlt noch komplett

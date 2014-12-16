@@ -323,9 +323,11 @@ generate_pseudo_measurement_data() for "random" pseudo measurement data.
         self.__xtrue = xtrue
 
 
-    def get_xtrue(self):
+    def get_xtrue(self, msg = True):
 
         '''
+        :param msg: Flag to switch on/off display of error message.
+        :type msg: bool
         :returns: numpy.ndarray - the column vector
                   :math:`x_{true} \in \mathbb{R}^{d}` for the true values
                   of :math:`x`.
@@ -334,12 +336,14 @@ generate_pseudo_measurement_data() for "random" pseudo measurement data.
 
         Get the column vector :math:`x_{true}` for the true values of
         :math:`x`. If no data has been provided, the function will raise and
-        catch an exception and display possible solutions to the user.
+        catch an exception and, if ``msg`` is set to ``True``,
+        display possible solutions to the user.
         '''
         try:
             return self.__xtrue
         except AttributeError:
-            print('''
+            if msg:
+                print('''
 No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
 ''')
 
@@ -771,6 +775,13 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
             can be returned using the function :func:`get_Y()`.
         '''
 
+        if self.get_xtrue(msg = False) is None:
+
+            raise AttributeError('''
+Pseudo measurement data can only be generated if the true value of x, xtrue,
+is known. You can set xtrue manually using the function set_xtrue().
+''')
+
         self.__Mx = ca.MXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
         self.__Mx.setOption("name", "Model function Mx")
         self.__Mx.init()
@@ -926,7 +937,7 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
             can be returned using the function :func:`get_Covx()`.
         '''
 
-        if self.get_xhat() is None:
+        if self.get_xhat(msg = False) is None:
 
             raise AttributeError('''
 Execute run_parameter_estimation() before computing the covariance matrix.
