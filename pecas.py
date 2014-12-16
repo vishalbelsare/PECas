@@ -1,5 +1,6 @@
 import casadi as ca
 import numpy as np
+import textwrap as tw
 import sys
 
 class PECasProb:
@@ -1021,13 +1022,20 @@ compute_covariance_matrix() before all results can be displayed.
 ''')
 
 
-        print('\n## Parameter estimation results: ## \n')
+        print('\n\n## Begin of parameter estimation results ## \n')
 
-        print("   beta = {0}\n".format(self.get_beta()))
+        print("Factor beta and residual Rhat:\n")
+        print("beta = {0}".format(self.get_beta()))
+        print("Rhat = {0}\n".format(self.get_Rhat()))
 
+        print("\nEstimated parameters xi:\n")
         for i, xi in enumerate(self.get_xhat()):
 
-            print("   x{0:<3} = {1:10} +/- {2:10}".format(\
+            print("x{0:<3} = {1:10} +/- {2:10}".format(\
                 i, xi, np.sqrt(self.get_Covx()[i, i])))
 
-        print("\n   Covariance matrix Cov(x):\n   {0}".format(self.get_Covx())) 
+        print("\n\nCovariance matrix Cov(x):\n")
+
+        print(np.vectorize("%03.05e".__mod__)(self.get_Covx()))
+
+        print('\n\n##  End of parameter estimation results  ## \n')
