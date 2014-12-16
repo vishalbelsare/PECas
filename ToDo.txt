@@ -4,6 +4,12 @@ ToDo:
 
 - Anbindung Rawesome
 - Plot der Konfidenzellipsoide
+- andere CasADi-Variablen berücksichtigen
+
+- viele Messungen --> beta sollte iwann 1 werden
+- power indizes
+- plots
+- plots inkl. min-max-belegung 
 
 
 Auftretende Fehler:
