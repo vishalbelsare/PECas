@@ -879,7 +879,8 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         .. math::
 
-            \Sigma_{\hat{x}} = \beta * (J^{+})^{T} * J^{+}
+            \Sigma_{\hat{x}} = \beta \cdot J^{+}
+                \begin{pmatrix} J^{+} \end{pmatrix}^{T}
 
         with
 
@@ -900,7 +901,7 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         .. math::
 
-            J_{1} = \Sigma_{\epsilon}^{-1} * \frac{\partial M}{\partial x}
+            J_{1} = \Sigma_{\epsilon}^{-1} \frac{\partial M}{\partial x}
 
         and
 
@@ -913,7 +914,8 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         .. math::
 
-            J^{+} = J_{1}
+            J^{+} = \begin{pmatrix} {J_{1}^{T} J_{1}}\end{pmatrix}^{-1}
+                {J_{1}^{T}}
 
         Afterwards,
 
