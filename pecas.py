@@ -748,7 +748,8 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
     def generate_pseudo_measurement_data(self):
 
         r'''
-
+        :raises: AttributeError
+        
         This functions generates "random" pseudo measurement data in
         :math:`Y` for a parameter estimation from :math:`M`,
         :math:`\sigma` and :math:`x_{true}`. If measurement data had been
