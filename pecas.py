@@ -766,8 +766,8 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         Afterwards,
 
-          - the vector :math:`Y` will be stored inside the variable Y,
-            which can be returned using the function :func:`get_Y()`.
+          - the vector :math:`Y`
+            can be returned using the function :func:`get_Y()`.
         '''
 
         self.__Mx = ca.MXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
@@ -801,12 +801,11 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         will be set up, and solved using IPOPT. Afterwards,
 
-        - the value of :math:`\hat{x}` is stored inside the variable xhat,
-          which can be returned using the function :func:`get_xhat()`,
+        - the value of :math:`\hat{x}`
+          can be returned using the function :func:`get_xhat()`, and
 
-        - the value of the residual :math:`\hat{R}` will be stored inside
-          the variable Rhat,
-          which can be returned using the function :func:`get_Rhat()`.
+        - the value of the residual :math:`\hat{R}`
+          can be returned using the function :func:`get_Rhat()`.
         '''
 
         # First, check if measurement data exists; if not, generate it
@@ -918,11 +917,10 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
 
         Afterwards,
 
-          - the value of :math:`\beta` will be stored inside the variable beta,
-            which can be returned using the function :func:`get_beta()`, and
-          - the matrix :math:`\Sigma_{\hat{x}}` will be stored inside the
-            variable Covx which can be returned using the function
-            :func:`get_Covx()`.
+          - the value of :math:`\beta` 
+            can be returned using the function :func:`get_beta()`, and
+          - the matrix :math:`\Sigma_{\hat{x}}`
+            can be returned using the function :func:`get_Covx()`.
         '''
 
         if self.get_xhat() is None:
