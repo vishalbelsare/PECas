@@ -929,7 +929,7 @@ Execute run_parameter_estimation() before computing the covariance matrix.
         self.__J1 = ca.mul(np.linalg.solve(np.sqrt(self.__Sigma), \
             np.eye(self.__N)), Mx.jac("x", "f"))
 
-        # Compute Jplus; this simplifies to Jplus = J1 when m = 0
+        # Compute Jplus and covariance matrix
 
         if self.get_G() is not None:
 
@@ -955,11 +955,12 @@ Execute run_parameter_estimation() before computing the covariance matrix.
 
         else:
 
-            self.__Jplus = self.__J1.T
-
-        # Compute the covariance matrix, and evaluate for xhat
+            self.__Jplus = ca.mul(ca.solve(ca.mul(self.__J1.T, self.__J1), \
+                np.eye(self.__d)), self.__J1.T)
 
         self.__fCov = self.__beta * ca.mul([self.__Jplus, self.__Jplus.T])
+
+        # Evaluate covariance matrix for xhat
 
         self.__fCovx = ca.MXFunction(ca.nlpIn(x=self.__x), \
             ca.nlpOut(f=self.__fCov))
