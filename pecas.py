@@ -860,7 +860,7 @@ is known. You can set xtrue manually using the function set_xtrue().
 
         # If an initial guess was given, set the initial guess for the solver
         
-        if self.get_xinit(msg = True) is not None:
+        if self.get_xinit(msg = False) is not None:
 
             solver.setInput(self.__xinit, "x0")
 
