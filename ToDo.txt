@@ -12,6 +12,5 @@ ToDo:
 - plots inkl. min-max-belegung 
 
 
-Auftretende Fehler:
+Bekannte Fehler:
 
-- Skalierung mit sigma der Messwerte und Modellfunktion fehlt noch komplett
