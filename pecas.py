@@ -677,11 +677,11 @@ compute_covariance_matrix() first.
 
         **Optional information for constructing the class**
 
-        :param G: Column vector :math:`G \in \mathbb{R}^{m}` for the
+        :param G: Column vector :math:`G \in (0)^{m}` for the
                   equality constraints.
         :type G: casadi.casadi_core.MX
 
-        :param H: Column vector :math:`H` for the inequality constraints.
+        :param H: Column vector :math:`H \in (\mathbb{R}^{-}_{0})^{m}` for the inequality constraints.
         :type H: casadi.casadi_core.MX
 
         :param xinit: Column vector :math:`x_{init} \in \mathbb{R}^{d}` for the initial guess of the parameter values.
