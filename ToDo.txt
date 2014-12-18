@@ -14,3 +14,5 @@ ToDo:
 
 Bekannte Fehler:
 
+- Doku fehlt bei Covx die Wurzel bei J1
+- solver ist noch linalg.solve

@@ -914,7 +914,7 @@ is known. You can set xtrue manually using the function set_xtrue().
 
         .. math::
 
-            J_{1} = \Sigma_{\epsilon}^{-1} \frac{\partial M}{\partial x}
+            J_{1} = \Sigma_{\epsilon}^{\mathbf{^{-1}/_{2}}} \frac{\partial M}{\partial x}
 
         and
 

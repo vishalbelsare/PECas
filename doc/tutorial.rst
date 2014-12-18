@@ -14,10 +14,10 @@ The task for this example is to estimate a single parameter :math:`x \in \mathbb
 .. math::
 
     M = \begin{pmatrix}
-            {\frac{1}{3} x} \\
-            {\frac{2}{3} x} \\
-            {\frac{3}{3} x} \\
-            {\frac{4}{3} x}
+            {\frac{x}{3}} \\
+            {\frac{2x}{3}} \\
+            {x} \\
+            {\frac{4x}{3}}
         \end{pmatrix},~
     Y = \begin{pmatrix}
             {2,5} \\
@@ -193,7 +193,6 @@ Again, import the necessary modules, and define the optimization variables ``x``
     >>> import pecas
     >>> import numpy as np
     >>> import casadi as ca 
-
     >>> d = 2
     >>> x = ca.MX.sym("x", d)
 
@@ -313,3 +312,54 @@ After the solver converged, the covariance matrix can be computed, and the resul
 
 
     ##  End of parameter estimation results  ## 
+
+
+Generating pseudo measurement data and using ``get``-methods (``examples/ex3.py``)
+----------------------------------------------------------------------------------
+
+In this example, the generation of pseudo measurement data in PECas and usage of the ``get``-methods is shown. This example can be found in ``ex3.py`` in the ``examples`` directory of the `PECas repository <https://github.com/adbuerger/PECas>`_.
+
+The task for this example is to generate pseudo measurement data for the model from `the previous example <file:///mnt/data/Dokumente/imtek/highwind/PECas-doc/html/tutorial.html#using-equality-constraints-and-initial-guesses-examples-ex2-py>`_ and return the data for further usage. The data is created from the given model :math:`M`, the standard deviations :math:`\sigma_{i},\,i = 1, \dotsc, N` and some true values for the parameters :math:`x_{true}` that are assumed to be known, which in this case will be defined as
+
+.. math::
+
+    x_{true} = \begin{pmatrix} {1} \\ {1} \end{pmatrix}.
+
+For a more detailed description of the performed computations, see :doc:`tool`.
+
+The intention why one might want to do this is to generate pseudo measurement data that can either be used for testing the parameter estimation properties of the given setup (provided that the true parameter values :math:`x_{true}` can be supported), testing of the software itself, or to generate data for a given model that can later be used e. g. within exercises and lessons on parameter estimation.
+
+First, define the several components of the parameter estimation problem just as before, but without specifying the measurement values.
+
+.. code:: python
+
+    >>> import pecas
+    >>> import numpy as np
+    >>> import casadi as ca 
+    >>> d = 2
+    >>> x = ca.MX.sym("x", d)   
+    >>> M = ca.mul(np.matrix([np.ones(4), range(1,5)]).T, ca.vertcat((x[0], x[1]**2)))
+    >>> G = 2 - ca.mul(x.T,x)
+    >>> sigma = 0.5 * np.ones(M.shape[0])
+    >>> xinit = np.array([1, 1])
+
+Then, define a column vector ``xtrue`` of type ``numpy.ndarray`` for the true values of the parameters, and create an instance ``pep`` of the class PECas providing all information.
+
+.. code:: python
+
+    >>> xtrue = np.array([1, 1])
+    >>> pep = pecas.PECasProb(x, M, sigma, xtrue = xtrue, G = G, xinit = xinit)
+
+Afterwards, the class instance ``pep`` can be used to generate pseudo measurement data that will be stored as measurement data inside the object.
+
+.. code::
+
+    >>> pep.generate_pseudo_measurement_data()
+
+The generated data can be returned using the ``get``-method for the measurement data, and then e. g. be stored in another variable ``meas_data`` for further usage.
+
+.. code::
+
+    >>> meas_data = pep.get_Y()
+
+For an overview of the other available ``get``-methods, see again :doc:`tool`.
