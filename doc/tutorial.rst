@@ -343,7 +343,7 @@ First, define the several components of the parameter estimation problem just as
     >>> sigma = 0.5 * np.ones(M.shape[0])
     >>> xinit = np.array([1, 1])
 
-Then, define a column vector ``xtrue`` of type ``numpy.ndarray`` for the true values of the parameters, and create an instance ``pep`` of the class PECas providing all information.
+Then, define a column vector ``xtrue`` of type ``numpy.ndarray`` for the true values of the parameters, and create an instance ``pep`` of the class PECasProb providing all information.
 
 .. code:: python
 
