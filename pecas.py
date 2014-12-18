@@ -959,7 +959,7 @@ Execute run_parameter_estimation() before computing the covariance matrix.
         Mx = ca.MXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
         Mx.init()
 
-        self.__J1 = ca.mul(np.linalg.solve(np.sqrt(self.__Sigma), \
+        self.__J1 = ca.mul(ca.solve(np.sqrt(self.__Sigma), \
             np.eye(self.__N)), Mx.jac("x", "f"))
 
         # Compute Jplus and covariance matrix
