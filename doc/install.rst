@@ -2,9 +2,9 @@ Get and install PECas
 =====================
 
 Within the next sections, you will get to know how to obtain and install PECas,
-and what prerequesites have to be met in order to get PECas to work correctly.
+and what prerequisites have to be met in order to get PECas to work correctly.
 
-Prerequesites
+Prerequisites
 -------------
 
 In order to use PECas, please make sure that
@@ -13,7 +13,7 @@ In order to use PECas, please make sure that
 and a recent version of `CasADi <https://github.com/casadi/casadi/wiki>`_ are
 installed on your system.
 
-PECas has only been run on Ubuntu Linux systems so far, and has not been tested for Windows. However, if the prerequesites are met, usage on Windows should also be possible.
+PECas has only been run on Ubuntu Linux systems so far, and has not been tested for Windows. However, if the prerequisites are met, usage on Windows should also be possible.
 
 Get PECas
 ---------
@@ -21,7 +21,7 @@ Get PECas
 The preferred way to obtain PECas is `directly from its
 git repository <https://github.com/adbuerger/PECas>`_. You can then either clone the repository, or download the current files within a zip-archive.
 
-To obtain the zip-file you do not need to have `git <http://git-scm.com/>`_ installed, but cloning the repository provides an easy way to recieve updates on PECas by pulling from the repository in regular intervals.
+To obtain the zip-file you do not need to have `git <http://git-scm.com/>`_ installed, but cloning the repository provides an easy way to receive updates on PECas by pulling from the repository in regular intervals.
 
 Install PECas
 -------------

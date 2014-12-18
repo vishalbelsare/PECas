@@ -26,7 +26,7 @@ class PECasProb:
         :catches: IndexError
 
         Check the validity of an input variable by checking the type of the
-        varriable and it's shape properties.
+        variable and it's shape properties.
         '''
 
         # Check variable type

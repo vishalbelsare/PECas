@@ -2,7 +2,7 @@ Tutorial on using PECas
 =======================
 
 Within the next sections, you will get to know how to initialize a parameter
-estimation problem with PECas, and how to perfom the provided operations. For a detailed description of the used functions and commands (and many more), see :doc:`tool`.
+estimation problem with PECas, and how to perform the provided operations. For a detailed description of the used functions and commands (and many more), see :doc:`tool`.
 
 General usage of PECas (``examples/ex1.py``)
 --------------------------------------------
@@ -59,7 +59,7 @@ Store the measurement data in a variable ``Y`` of type ``numpy.ndarray`` that al
 
     >>> Y = np.array([2.5, 4.1, 6.3, 8.2])
 
-Now, create an instance ``pep`` of the class PECasProb to define the parameter estimation problem within PECas. While ``x``, ``M`` and ``sigma``, which are the first three arguments, are mandatory, the other variables are either optional or mutually substitutable, and therefor need to be adressed.
+Now, create an instance ``pep`` of the class PECasProb to define the parameter estimation problem within PECas. While ``x``, ``M`` and ``sigma``, which are the first three arguments, are mandatory, the other variables are either optional or mutually substitutable, and therefore need to be addressed.
 
 .. code:: python
 
@@ -221,7 +221,7 @@ Finally, again create the vectors for the measurements ``Y`` and the standard de
     >>> Y = np.array([2.23947, 2.84568, 4.55041, 5.08583])
     >>> sigma = 0.5 * np.ones(M.shape[0])
 
-Now, an instance ``pep`` of the class PECasProb can be created by also adressing the equality constraints and the inital guess, and perform the least squares estimation.
+Now, an instance ``pep`` of the class PECasProb can be created by also addressing the equality constraints and the initial guess, and perform the least squares estimation.
 
 
 .. code:: python
