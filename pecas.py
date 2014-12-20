@@ -5,7 +5,10 @@ import sys
 
 class PECasProb:
 
-    '''Here to be the docstring for the class.'''
+    '''The class :class:`PECasProb` is the central (and only) class of
+    PECas and used to define and solve parameter estimation
+    problems with PECas. All functionalities of PECas are realized as class
+    functions of this class.'''
 
     ##########################################################################
     #### 1. Functions for checking validity and consistency of the inputs ####
