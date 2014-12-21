@@ -10,7 +10,7 @@ import numpy as np
 import casadi as ca 
 
 d = 2
-x = ca.MX.sym("x", d)   
+x = ca.SX.sym("x", d)   
 
 M = ca.mul(np.matrix([np.ones(4), range(1,5)]).T, \
     ca.vertcat((x[0], x[1]**2)))
