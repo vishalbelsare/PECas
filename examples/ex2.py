@@ -9,7 +9,7 @@ import numpy as np
 import casadi as ca
 
 d = 2
-x = ca.MX.sym("x", d)
+x = ca.SX.sym("x", d)
 
 # Then, define the model M from the descriptions above, e. g. by using the
 # CasADi commands for matrix multiplication casadi.mul() and vertical
@@ -18,7 +18,7 @@ x = ca.MX.sym("x", d)
 M = ca.mul(np.matrix([np.ones(4), range(1,5)]).T, \
         ca.vertcat((x[0], x[1]**2)))
 
-# Define the column vector G of type casadi.casadi_core.MX for the
+# Define the column vector G of type casadi.casadi_core.SX for the
 # equality constraints using the optimization variables x.
 
 G = 2 - ca.mul(x.T,x)

@@ -34,14 +34,14 @@ First, open a Python console (e. g. `iPython <http://ipython.org/>`_) or develop
     >>> import numpy as np
     >>> import casadi as ca   
 
-Then, define the ``d`` optimization variables, i. e. the parameters that will be estimated. Here, there will be only one parameter. The variable ``x`` has to be a column vector of type ``casadi.casadi_core.MX``.
+Then, define the ``d`` optimization variables, i. e. the parameters that will be estimated. Here, there will be only one parameter. The variable ``x`` has to be a column vector of type ``casadi.casadi_core.SX``.
 
 .. code:: python
 
     >>> d = 1
-    >>> x = ca.MX.sym("x", d)
+    >>> x = ca.SX.sym("x", d)
 
-Afterwards, create the model using the optimization variables in ``x``. By doing this, the model ``M`` automatically becomes of the necessary type ``casadi.casadi_core.MX``. The variable ``M`` has also to be a column vector and of size ``N``.
+Afterwards, create the model using the optimization variables in ``x``. By doing this, the model ``M`` automatically becomes of the necessary type ``casadi.casadi_core.SX``. The variable ``M`` has also to be a column vector and of size ``N``.
 
 .. code:: python
 
@@ -194,7 +194,7 @@ Again, import the necessary modules, and define the optimization variables ``x``
     >>> import numpy as np
     >>> import casadi as ca 
     >>> d = 2
-    >>> x = ca.MX.sym("x", d)
+    >>> x = ca.SX.sym("x", d)
 
 Then, define the model ``M`` from the descriptions above, e. g. by using the CasADi commands for matrix multiplication ``casadi.mul()`` and vertical concatenation ``casadi.vertcat()``.
 
@@ -202,7 +202,7 @@ Then, define the model ``M`` from the descriptions above, e. g. by using the Cas
 
     >>> M = ca.mul(np.matrix([np.ones(4), range(1,5)]).T, ca.vertcat((x[0], x[1]**2)))
 
-Define the column vector ``G`` of type ``casadi.casadi_core.MX`` for the equality constraints using the optimization variables ``x``.
+Define the column vector ``G`` of type ``casadi.casadi_core.SX`` for the equality constraints using the optimization variables ``x``.
 
 .. code:: python
 
@@ -337,7 +337,7 @@ First, define the several components of the parameter estimation problem just as
     >>> import numpy as np
     >>> import casadi as ca 
     >>> d = 2
-    >>> x = ca.MX.sym("x", d)   
+    >>> x = ca.SX.sym("x", d)   
     >>> M = ca.mul(np.matrix([np.ones(4), range(1,5)]).T, ca.vertcat((x[0], x[1]**2)))
     >>> G = 2 - ca.mul(x.T,x)
     >>> sigma = 0.5 * np.ones(M.shape[0])

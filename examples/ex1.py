@@ -10,14 +10,14 @@ import casadi as ca
 
 # Then, define the d optimization variables, i. e. the parameters that
 # will be estimated. Here, there will be only one parameter.
-# The variable x has to be a column vector of type casadi.casadi_core.MX.
+# The variable x has to be a column vector of type casadi.casadi_core.SX.
 
 d = 1
-x = ca.MX.sym("x", d)
+x = ca.SX.sym("x", d)
 
 # Afterwards, create the model using the optimization variables. By doing
 # this, the model automatically becomes of the necessary type
-# casadi.casadi_core.MX. The variable M has also to be a column vector
+# casadi.casadi_core.SX. The variable M has also to be a column vector
 # and of size N.
 
 M = np.array([1., 2., 3., 4.]) / 3. * x[0]

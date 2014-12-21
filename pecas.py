@@ -22,7 +22,7 @@ class PECasProb:
         :param varname: Name of the variable that shall be checked.
         :type varname: str
         :param dtype: Description of the type that var has to be.
-        :type dtype: ca.casadi_core.MX, numpy.ndarray
+        :type dtype: ca.casadi_core.SX, numpy.ndarray
         :param ddim: Description of the second dimension var has to have.
         :param ddim: int
         :raises: IndexError, ValueError
@@ -87,7 +87,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         '''
         :param x: Column vector :math:`x \in \mathbb{R}^{d}` for the
                   parameters.
-        :type x: casadi.casadi_core.MX
+        :type x: casadi.casadi_core.SX
         :raises: ValueError
 
         *This function is called automatically at the initialization of the
@@ -97,7 +97,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         the scalar value :math:`d` containing the number of parameters.
         '''
 
-        self.__check_variable_validity(x, "x", ca.casadi_core.MX, 1)
+        self.__check_variable_validity(x, "x", ca.casadi_core.SX, 1)
         self.__x = x
         self.__d = self.__x.shape[0]
 
@@ -105,7 +105,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
     def get_x(self):
 
         '''
-        :returns: casadi.casadi_core.MX - the column vector
+        :returns: casadi.casadi_core.SX - the column vector
                   :math:`x \in \mathbb{R}^{d}` for the parameters.
 
         Get the column vector :math:`x` for the parameters.
@@ -121,7 +121,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         '''
         :param M: Column vector :math:`M \in \mathbb{R}^{N}` for the
                   model.
-        :type M: casadi.casadi_core.MX
+        :type M: casadi.casadi_core.SX
         :raises: AttributeError, ValueError
         :catches: AttributeError
 
@@ -134,7 +134,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         an exception will be raised.
         '''
 
-        self.__check_variable_validity(M, "M", ca.casadi_core.MX, 1)
+        self.__check_variable_validity(M, "M", ca.casadi_core.SX, 1)
 
         try:
 
@@ -155,7 +155,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
     def get_M(self):
 
         '''
-        :returns: casadi.casadi_core.MX - the column vector
+        :returns: casadi.casadi_core.SX - the column vector
                   :math:`M  \in \mathbb{R}^{N}` for the model.
 
         Get the column vector :math:`M` for the model.
@@ -358,7 +358,7 @@ No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
         '''
         :param G: Column vector :math:`G \in \mathbb{R}^{m}` for the
                   equality constraints.
-        :type G: casadi.casadi_core.MX
+        :type G: casadi.casadi_core.SX
         :raises: ValueError
 
         *If data is provided, this function is called automatically at the
@@ -369,7 +369,7 @@ No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
         constraints.
         '''
 
-        self.__check_variable_validity(G, "G", ca.casadi_core.MX, 1)
+        self.__check_variable_validity(G, "G", ca.casadi_core.SX, 1)
 
         self.__G = G
         self.__m = self.__G.shape[0]
@@ -379,7 +379,7 @@ No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
         '''
         :param msg: Flag to switch on/off display of error message.
         :type msg: bool
-        :returns: casadi.casadi_core.MX - the column vector
+        :returns: casadi.casadi_core.SX - the column vector
                   :math:`G \in \mathbb{R}^{m}` for the equality constraints.
         :raises: AttributeError
         :catches: AttributeError
@@ -406,7 +406,7 @@ No data for G has been provided so far. Try set_G() for manual setting.
         '''
         :param H: Column vector :math:`H` for the
                   inequality constraints.
-        :type H: casadi.casadi_core.MX
+        :type H: casadi.casadi_core.SX
         :raises: ValueError
 
         *If data is provided, this function is called automatically at the
@@ -415,7 +415,7 @@ No data for G has been provided so far. Try set_G() for manual setting.
         Set the column vector :math:`H` for the inequality constraints.
         '''
 
-        self.__check_variable_validity(H, "H", ca.casadi_core.MX, 1)
+        self.__check_variable_validity(H, "H", ca.casadi_core.SX, 1)
 
         self.__H = H
 
@@ -423,7 +423,7 @@ No data for G has been provided so far. Try set_G() for manual setting.
     def get_H(self):
 
         '''
-        :returns: casadi.casadi_core.MX - the column vector
+        :returns: casadi.casadi_core.SX - the column vector
                   :math:`H` for the inequality constraints.
         :raises: AttributeError
         :catches: AttributeError
@@ -653,10 +653,10 @@ compute_covariance_matrix() first.
 
         :param x: Column vector :math:`x \in \mathbb{R}^{d}` for the
                   parameters.
-        :type x: casadi.casadi_core.MX
+        :type x: casadi.casadi_core.SX
 
         :param M: Column vector :math:`M \in \mathbb{R}^{N}` for the model.
-        :type M: casadi.casadi_core.MX
+        :type M: casadi.casadi_core.SX
 
         :param sigma: Column vector :math:`\sigma \in \mathbb{R}^{N}` for
                       the standard deviations.
@@ -682,10 +682,10 @@ compute_covariance_matrix() first.
 
         :param G: Column vector :math:`G \in (0)^{m}` for the
                   equality constraints.
-        :type G: casadi.casadi_core.MX
+        :type G: casadi.casadi_core.SX
 
         :param H: Column vector :math:`H \in (\mathbb{R}^{-}_{0})^{n}` for the inequality constraints.
-        :type H: casadi.casadi_core.MX
+        :type H: casadi.casadi_core.SX
 
         :param xinit: Column vector :math:`x_{init} \in \mathbb{R}^{d}` for the initial guess of the parameter values.
         :type xinit: numpy.ndarray
@@ -786,7 +786,7 @@ Pseudo measurement data can only be generated if the true value of x, xtrue,
 is known. You can set xtrue manually using the function set_xtrue().
 ''')
 
-        self.__Mx = ca.MXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
+        self.__Mx = ca.SXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
         self.__Mx.setOption("name", "Model function Mx")
         self.__Mx.init()
 
@@ -840,12 +840,12 @@ is known. You can set xtrue manually using the function set_xtrue().
 
         if self.get_G(msg = False) is None:
 
-            self.__fx = ca.MXFunction(ca.nlpIn(x=self.__x), \
+            self.__fx = ca.SXFunction(ca.nlpIn(x=self.__x), \
                 ca.nlpOut(f=self.__f))
 
         else:
 
-            self.__fx = ca.MXFunction(ca.nlpIn(x=self.__x), \
+            self.__fx = ca.SXFunction(ca.nlpIn(x=self.__x), \
                 ca.nlpOut(f=self.__f, g=self.__G))
 
         self.__fx.init()
@@ -959,7 +959,7 @@ Execute run_parameter_estimation() before computing the covariance matrix.
 
         # Compute J1, J2
 
-        Mx = ca.MXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
+        Mx = ca.SXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
         Mx.init()
 
         self.__J1 = ca.mul(ca.solve(np.sqrt(self.__Sigma), \
@@ -969,7 +969,7 @@ Execute run_parameter_estimation() before computing the covariance matrix.
 
         if self.get_G(msg = False) is not None:
 
-            Gx = ca.MXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__G))
+            Gx = ca.SXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__G))
             Gx.init()
 
             self.__J2 = Gx.jac("x", "f")
@@ -998,7 +998,7 @@ Execute run_parameter_estimation() before computing the covariance matrix.
 
         # Evaluate covariance matrix for xhat
 
-        self.__fCovx = ca.MXFunction(ca.nlpIn(x=self.__x), \
+        self.__fCovx = ca.SXFunction(ca.nlpIn(x=self.__x), \
             ca.nlpOut(f=self.__fCov))
         self.__fCovx.init()
 
