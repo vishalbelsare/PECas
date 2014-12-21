@@ -521,7 +521,7 @@ No data for xinit has been provided so far. Try set_xinit() for manual setting.
 
         '''
         :returns: int - the scalar value
-                  :math:`m \in \mathbb{N}^{0}` 
+                  :math:`m \in \mathbb{N}^{+}_{0}` 
                   containing the number of equality constraints.
 
         Get the scalar value :math:`m` containing the number of equality
