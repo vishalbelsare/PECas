@@ -684,7 +684,7 @@ compute_covariance_matrix() first.
                   equality constraints.
         :type G: casadi.casadi_core.MX
 
-        :param H: Column vector :math:`H \in (\mathbb{R}^{-}_{0})^{m}` for the inequality constraints.
+        :param H: Column vector :math:`H \in (\mathbb{R}^{-}_{0})^{n}` for the inequality constraints.
         :type H: casadi.casadi_core.MX
 
         :param xinit: Column vector :math:`x_{init} \in \mathbb{R}^{d}` for the initial guess of the parameter values.
