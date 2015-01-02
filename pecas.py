@@ -1,6 +1,6 @@
 import casadi as ca
 import numpy as np
-import textwrap as tw
+import pylab as pl
 import sys
 
 class PECasProb:
@@ -1054,3 +1054,37 @@ compute_covariance_matrix() before all results can be displayed.
         print(np.vectorize("%03.05e".__mod__)(self.get_Covx()))
 
         print('\n\n##  End of parameter estimation results  ## \n')
+
+
+    def plot_confidence_ellipsoids(self, indices, colors = None, \
+        labels = None, loc = 'upper left'):
+
+        Covx = self.get_Covx()
+        xhat = self.get_xhat()
+        plotfig = pl.figure()
+
+        xy = pl.array([pl.cos(pl.linspace(0,2*pl.pi,100)), \
+                    pl.sin(pl.linspace(0,2*pl.pi,100))])
+
+        for j, ind1 in enumerate(indices):
+
+            for k, ind2 in enumerate(indices[j+1:]):
+
+                covs = np.array( \
+                        [ \
+                            [Covx[ind1, ind1], Covx[ind1, ind2]], \
+                            [Covx[ind2, ind1], Covx[ind2, ind2]] \
+                        ] \
+                    )
+
+                w, v = pl.linalg.eig(covs)
+
+                ellipse = ca.mul(np.array([xhat[ind1], xhat[ind2]]), pl.ones([1,100])) + \
+                    ca.mul([v, pl.diag(w), xy])
+
+                pl.figure()
+                pl.plot(pl.array(ellipse[0,:]).T, pl.array(ellipse[1,:]).T)
+                pl.scatter(xhat[ind1], xhat[ind2])
+                # pl.legend(loc="upper left")
+
+        pl.show()
