@@ -1,6 +1,7 @@
 import casadi as ca
 import numpy as np
 import pylab as pl
+from scipy.misc import comb
 import sys
 
 class PECasProb:
@@ -1061,7 +1062,10 @@ compute_covariance_matrix() before all results can be displayed.
 
         Covx = self.get_Covx()
         xhat = self.get_xhat()
+
+        nplots = int(round(comb(len(indices), 2)))
         plotfig = pl.figure()
+        plcount = 1
 
         xy = pl.array([pl.cos(pl.linspace(0,2*pl.pi,100)), \
                     pl.sin(pl.linspace(0,2*pl.pi,100))])
@@ -1079,12 +1083,15 @@ compute_covariance_matrix() before all results can be displayed.
 
                 w, v = pl.linalg.eig(covs)
 
-                ellipse = ca.mul(np.array([xhat[ind1], xhat[ind2]]), pl.ones([1,100])) + \
-                    ca.mul([v, pl.diag(w), xy])
+                ellipse = ca.mul(np.array([xhat[ind1], xhat[ind2]]), \
+                    pl.ones([1,100])) + ca.mul([v, pl.diag(w), xy])
 
-                pl.figure()
-                pl.plot(pl.array(ellipse[0,:]).T, pl.array(ellipse[1,:]).T)
-                pl.scatter(xhat[ind1], xhat[ind2])
+                ax = plotfig.add_subplot(nplots, 1, plcount)
+                ax.plot(pl.array(ellipse[0,:]).T, pl.array(ellipse[1,:]).T)
+                ax.scatter(xhat[ind1], xhat[ind2])
+                ax.legend(loc="upper left")
+                
+                plcount += 1
                 # pl.legend(loc="upper left")
 
         pl.show()
