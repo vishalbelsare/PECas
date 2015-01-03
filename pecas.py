@@ -1057,11 +1057,49 @@ compute_covariance_matrix() before all results can be displayed.
         print('\n\n##  End of parameter estimation results  ## \n')
 
 
-    def plot_confidence_ellipsoids(self, indices, colors = None, \
-        labels = None, loc = 'upper left'):
+    def plot_confidence_ellipsoids(self, indices = []):
 
-        Covx = self.get_Covx()
-        xhat = self.get_xhat()
+        '''
+        :param indices: List of the indices of the parameters in :math:`x` for
+                        which the confidence ellipsoids shall be plotted.
+                        The indices must be defined by list entries of type
+                        int. If an empty list is supported (which is default),
+                        the ellipsoids for all parameters will be plotted.
+        :type indices: list
+        :raises: AttributeError, ValueError, TypeError
+
+        '''
+
+        if (self.get_xhat(msg = False) is None) or \
+            (self.get_Covx(msg = False) is None):
+
+            raise AttributeError('''
+You must execute both run_parameter_estimation() and
+compute_covariance_matrix() before the confidece ellipsoids can be plotted.
+''')
+
+        if type(indices) is not list:
+            raise TypeError('''
+The variable containing the indices of the parameters has to be of type list.
+''')
+
+        # If the list of indices is empty, create a list that contains
+        # all indices
+
+        if len(indices) == 0:
+            indices = range(0, self.__d)
+
+        if len(indices) == 1:
+            raise ValueError('''
+A confidence ellipsoid can not be plotted for only one single parameter. The
+list of indices must therefor contain more than only one entry.
+''')            
+
+        for ind in indices:
+            if type(ind) is not int:
+                raise TypeError('''
+All list entries for the indices have to be of type int.
+''')
 
         nplots = int(round(comb(len(indices), 2)))
         plotfig = pl.figure()
@@ -1074,24 +1112,26 @@ compute_covariance_matrix() before all results can be displayed.
 
             for k, ind2 in enumerate(indices[j+1:]):
 
-                covs = np.array( \
-                        [ \
-                            [Covx[ind1, ind1], Covx[ind1, ind2]], \
-                            [Covx[ind2, ind1], Covx[ind2, ind2]] \
-                        ] \
-                    )
+                covs = np.array([ \
+
+                        [self.__Covx[ind1, ind1], self.__Covx[ind1, ind2]], \
+                        [self.__Covx[ind2, ind1], self.__Covx[ind2, ind2]] \
+
+                    ])
 
                 w, v = pl.linalg.eig(covs)
 
-                ellipse = ca.mul(np.array([xhat[ind1], xhat[ind2]]), \
+                ellipse = ca.mul(np.array([self.__xhat[ind1], \
+                    self.__xhat[ind2]]), \
                     pl.ones([1,100])) + ca.mul([v, pl.diag(w), xy])
 
                 ax = plotfig.add_subplot(nplots, 1, plcount)
-                ax.plot(pl.array(ellipse[0,:]).T, pl.array(ellipse[1,:]).T)
-                ax.scatter(xhat[ind1], xhat[ind2])
+                ax.plot(pl.array(ellipse[0,:]).T, pl.array(ellipse[1,:]).T, \
+                    label = str(self.__x[ind1].getName()) + ' - ' + \
+                    str(self.__x[ind2].getName()))
+                ax.scatter(self.__xhat[ind1], self.__xhat[ind2])
                 ax.legend(loc="upper left")
-                
+
                 plcount += 1
-                # pl.legend(loc="upper left")
 
         pl.show()
