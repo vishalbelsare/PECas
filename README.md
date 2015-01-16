@@ -18,4 +18,4 @@ problems.
 
 For an installation guide, a tutorial on how to use PECas and
 a detailed documentation, please
-visit [the manual pages](http://adbuerger.github.io/) .
+visit [the manual pages](http://adbuerger.github.io/PECas) .
