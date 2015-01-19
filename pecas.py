@@ -98,7 +98,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         the scalar value :math:`d` containing the number of parameters.
         '''
 
-        self.__check_variable_validity(x, "x", ca.casadi_core.SX, 1)
+        # self.__check_variable_validity(x, "x", ca.casadi_core.SX, 1)
         self.__x = x
         self.__d = self.__x.shape[0]
 
@@ -206,11 +206,11 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
 
             pass
 
-        self.__sigma = sigma
+        self.__sigma = pl.squeeze(sigma)
 
         # Set up the covariance matrix of the error
 
-        self.__Sigma = np.diag(sigma)
+        self.__Sigma = np.diag(pl.squeeze(sigma))
 
 
     def get_sigma(self):
