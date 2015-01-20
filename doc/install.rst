@@ -10,7 +10,7 @@ Prerequisites
 In order to use PECas, please make sure that
 `Python <https://www.python.org/>`_ as well as
 `Python Numpy <http://www.numpy.org/>`_
-and a recent version of `CasADi <https://github.com/casadi/casadi/wiki>`_ are
+and a recent version of `CasADi <http://casadi.org>`_ are
 installed on your system.
 
 PECas has only been run on Ubuntu Linux systems so far, and has not been tested for Windows. However, if the prerequisites are met, usage on Windows should also be possible.
