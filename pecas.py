@@ -444,7 +444,7 @@ No data for H has been provided so far. Try set_H() for manual setting.
     # -----------------------------------------------------------------------#
 
 
-    def set_xinit(self, xtrue):
+    def set_xinit(self, xinit):
 
         '''
         :param xinit: Column vector :math:`x_{init} \in \mathbb{R}^{d}` 
@@ -459,7 +459,7 @@ No data for H has been provided so far. Try set_H() for manual setting.
         of :math:`x`.
         '''
 
-        self.__check_variable_validity(xinit, "xinit", np.ndarray, 1)
+        # self.__check_variable_validity(xinit, "xinit", np.ndarray, 1)
 
         self.__xinit = xinit
 
@@ -490,95 +490,95 @@ No data for xinit has been provided so far. Try set_xinit() for manual setting.
 ''')
 
 
-    def set_lbx(self, lbx):
+    def set_xmin(self, xmin):
 
         '''
-        :param lbx: Column vector :math:`lb_{x} \in \mathbb{R}^{d}` 
+        :param xmin: Column vector :math:`x_min \in \mathbb{R}^{d}` 
                       containing lower bounds for :math:`x`.
-        :type lbx: numpy.ndarray
+        :type xmin: numpy.ndarray
         :raises: ValueError
 
         *If data is provided, this function is called automatically at the
         initialization of the object.*
 
-        Set the column vector :math:`lb_{x}` for the lower bounds
+        Set the column vector :math:`x_{min}` for the lower bounds
         of :math:`x`.
         '''
 
-        self.__check_variable_validity(lbx, "lbx", np.ndarray, 1)
+        # self.__check_variable_validity(xmin, "xmin", np.ndarray, 1)
 
-        self.__lbx = lbx
+        self.__xmin = xmin
 
 
-    def get_lbx(self, msg = True):
+    def get_xmin(self, msg = True):
 
         '''
         :param msg: Flag to switch on/off display of error message.
         :type msg: bool
         :returns: numpy.ndarray - the column vector
-                  :math:`lb_{x} \in \mathbb{R}^{d}` 
+                  :math:`x_{min} \in \mathbb{R}^{d}` 
                   containing the lower bounds for :math:`x`.
         :raises: AttributeError
         :catches: AttributeError
 
-        Get the column vector :math:`lb_{x}` for the lower bounds
+        Get the column vector :math:`x_{min}` for the lower bounds
         of :math:`x`. If no data has been provided, the function will raise
         and catch an exception and, if ``msg`` is set to ``True``,
         display possible solutions to the user.
         '''
 
         try:
-            return self.__lbx
+            return self.__xmin
         except AttributeError:
             if msg:
                 print('''
-No data for lbx has been provided so far. Try set_lbx() for manual setting.
+No data for xmin has been provided so far. Try set_xmin() for manual setting.
 ''')
 
 
-    def set_ubx(self, lbx):
+    def set_xmax(self, xmax):
 
         '''
-        :param ubx: Column vector :math:`ub_{x} \in \mathbb{R}^{d}` 
+        :param xmax: Column vector :math:`x_{max} \in \mathbb{R}^{d}` 
                       containing upper bounds for :math:`x`.
-        :type ubx: numpy.ndarray
+        :type xmax: numpy.ndarray
         :raises: ValueError
 
         *If data is provided, this function is called automatically at the
         initialization of the object.*
 
-        Set the column vector :math:`ub_{x}` for the upper bounds
+        Set the column vector :math:`x_{max}` for the upper bounds
         of :math:`x`.
         '''
 
-        self.__check_variable_validity(ubx, "ubx", np.ndarray, 1)
+        # self.__check_variable_validity(xmax, "xmax", np.ndarray, 1)
 
-        self.__ubx = ubx
+        self.__xmax = xmax
 
 
-    def get_ubx(self, msg = True):
+    def get_xmax(self, msg = True):
 
         '''
         :param msg: Flag to switch on/off display of error message.
         :type msg: bool
         :returns: numpy.ndarray - the column vector
-                  :math:`ub_{x} \in \mathbb{R}^{d}` 
+                  :math:`x_{max} \in \mathbb{R}^{d}` 
                   containing the upper bounds for :math:`x`.
         :raises: AttributeError
         :catches: AttributeError
 
-        Get the column vector :math:`ub_{x}` for the upper bounds
+        Get the column vector :math:`x_{max}` for the upper bounds
         of :math:`x`. If no data has been provided, the function will raise
         and catch an exception and, if ``msg`` is set to ``True``,
         display possible solutions to the user.
         '''
 
         try:
-            return self.__ubx
+            return self.__xmax
         except AttributeError:
             if msg:
                 print('''
-No data for ubx has been provided so far. Try set_ubx() for manual setting.
+No data for xmax has been provided so far. Try set_xmax() for manual setting.
 ''')
 
     # -----------------------------------------------------------------------#
@@ -739,7 +739,7 @@ compute_covariance_matrix() first.
 
     def __init__(\
         self, x, M, sigma, Y=None, xtrue=None, G=None, H=None, xinit=None, \
-        lbx = None, ubx = None):
+        xmin = None, xmax = None):
 
         '''
 
@@ -784,13 +784,13 @@ compute_covariance_matrix() first.
         :param xinit: Column vector :math:`x_{init} \in \mathbb{R}^{d}` for the initial guess of the parameter values.
         :type xinit: numpy.ndarray
 
-        :param lbx: Column vector :math:`lb_{x} \in \mathbb{R}^{d}` 
+        :param xmin: Column vector :math:`x_{min} \in \mathbb{R}^{d}` 
                     for the lower bounds of :math:`x`.
-        :type lbx: numpy.ndarray
+        :type xmin: numpy.ndarray
 
-        :param ubx: Column vector :math:`ub_{x} \in \mathbb{R}^{d}` 
+        :param xmax: Column vector :math:`x_{max} \in \mathbb{R}^{d}` 
                     for the upper bounds of :math:`x`.
-        :type ubx: numpy.ndarray
+        :type xmax: numpy.ndarray
 
         |
 
@@ -843,15 +843,15 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
         # Initial guess
 
         if xinit is not None:
-            self.__xinit = xinit
+            self.set_xinit(xinit)
 
         # Bounds
 
-        if lbx is not None:
-            self.__lbx = lbx
+        if xmin is not None:
+            self.set_xmin(xmin)
 
-        if ubx is not None:
-            self.__ubx = ubx
+        if xmax is not None:
+            self.set_xmax(xmax)
 
 
     ##########################################################################
@@ -979,13 +979,13 @@ is known. You can set xtrue manually using the function set_xtrue().
 
         # If given, set the bounds for the parameter values
 
-        if self.get_lbx(msg = None) is not None:
+        if self.get_xmin(msg = None) is not None:
 
-            solver.setInput(self.__lbx, "lbx")
+            solver.setInput(self.__xmin, "lbx")
 
-        if self.get_ubx(msg = None) is not None:
+        if self.get_xmax(msg = None) is not None:
 
-            solver.setInput(self.__ubx, "ubx")
+            solver.setInput(self.__xmax, "ubx")
 
         # Run the optimization problem
 
