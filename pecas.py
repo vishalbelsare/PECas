@@ -90,7 +90,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         '''
         :param x: Column vector :math:`x \in \mathbb{R}^{d}` for the
                   parameters.
-        :type x: casadi.casadi_core.SX
+        :type x: casadi.casadi_core.SX, casadi.tools.structure.ssymStruct
         :raises: ValueError
 
         *This function is called automatically at the initialization of the
@@ -109,7 +109,8 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
     def get_x(self):
 
         '''
-        :returns: casadi.casadi_core.SX - the column vector
+        :returns: casadi.casadi_core.SX, casadi.tools.structure.ssymStruct
+                  - the column vector
                   :math:`x \in \mathbb{R}^{d}` for the parameters.
 
         Get the column vector :math:`x` for the parameters.
@@ -452,7 +453,7 @@ No data for H has been provided so far. Try set_H() for manual setting.
         '''
         :param xinit: Column vector :math:`x_{init} \in \mathbb{R}^{d}` 
                       containing the initial guess for :math:`x`.
-        :type xinit: numpy.ndarray
+        :type xinit: numpy.ndarray, casadi.tools.structure.DMatrixStruct
         :raises: ValueError
 
         *If data is provided, this function is called automatically at the
@@ -473,7 +474,8 @@ No data for H has been provided so far. Try set_H() for manual setting.
         '''
         :param msg: Flag to switch on/off display of error message.
         :type msg: bool
-        :returns: numpy.ndarray - the column vector
+        :returns: numpy.ndarray, casadi.tools.structure.DMatrixStruct
+                  - the column vector
                   :math:`x_{init} \in \mathbb{R}^{d}` 
                   containing the initial guess for :math:`x`.
         :raises: AttributeError
@@ -499,7 +501,7 @@ No data for xinit has been provided so far. Try set_xinit() for manual setting.
         '''
         :param xmin: Column vector :math:`x_min \in \mathbb{R}^{d}` 
                       containing lower bounds for :math:`x`.
-        :type xmin: numpy.ndarray
+        :type xmin: numpy.ndarray, casadi.tools.structure.DMatrixStruct
         :raises: ValueError
 
         *If data is provided, this function is called automatically at the
@@ -520,7 +522,8 @@ No data for xinit has been provided so far. Try set_xinit() for manual setting.
         '''
         :param msg: Flag to switch on/off display of error message.
         :type msg: bool
-        :returns: numpy.ndarray - the column vector
+        :returns: numpy.ndarray, casadi.tools.structure.DMatrixStruct
+                  - the column vector
                   :math:`x_{min} \in \mathbb{R}^{d}` 
                   containing the lower bounds for :math:`x`.
         :raises: AttributeError
@@ -546,7 +549,7 @@ No data for xmin has been provided so far. Try set_xmin() for manual setting.
         '''
         :param xmax: Column vector :math:`x_{max} \in \mathbb{R}^{d}` 
                       containing upper bounds for :math:`x`.
-        :type xmax: numpy.ndarray
+        :type xmax: numpy.ndarray, casadi.tools.structure.DMatrixStruct
         :raises: ValueError
 
         *If data is provided, this function is called automatically at the
@@ -567,7 +570,8 @@ No data for xmin has been provided so far. Try set_xmin() for manual setting.
         '''
         :param msg: Flag to switch on/off display of error message.
         :type msg: bool
-        :returns: numpy.ndarray - the column vector
+        :returns: numpy.ndarray, casadi.tools.structure.DMatrixStruct
+                  - the column vector
                   :math:`x_{max} \in \mathbb{R}^{d}` 
                   containing the upper bounds for :math:`x`.
         :raises: AttributeError
@@ -753,7 +757,7 @@ compute_covariance_matrix() first.
 
         :param x: Column vector :math:`x \in \mathbb{R}^{d}` for the
                   parameters.
-        :type x: casadi.casadi_core.SX, casadi.tools.structure.DMatrixStruct
+        :type x: casadi.casadi_core.SX, casadi.tools.structure.ssymStruct
 
         :param M: Column vector :math:`M \in \mathbb{R}^{N}` for the model.
         :type M: casadi.casadi_core.SX
