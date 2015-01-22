@@ -9,7 +9,8 @@ Prerequisites
 
 In order to use PECas, please make sure that
 `Python <https://www.python.org/>`_ as well as
-`Python Numpy <http://www.numpy.org/>`_
+`Python Numpy <http://www.numpy.org/>`_,
+`PyLab <http://wiki.scipy.org/PyLab>`_
 and a recent version of `CasADi <http://casadi.org>`_ are
 installed on your system.
 
