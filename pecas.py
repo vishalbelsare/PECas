@@ -641,7 +641,8 @@ No data for xmax has been provided so far. Try set_xmax() for manual setting.
         '''
         :param msg: Flag to switch on/off display of error message.
         :type msg: bool
-        :returns: numpy.ndarray - the column vector
+        :returns: numpy.ndarray, casadi.tools.structure.DMatrixStruct
+                  - the column vector
                   :math:`\hat{x} \in \mathbb{R}^{d}` 
                   containing the estimated value for :math:`x`.
         :raises: AttributeError
@@ -666,7 +667,8 @@ run_parameter_estimation() first.
     def get_Rhat(self):
 
         '''
-        :returns: float - the scalar value
+        :returns: float, casadi.tools.structure.DMatrixStruct
+                  - the scalar value
                   :math:`\hat{R} \in \mathbb{R}` 
                   containing the residual for the estimated value
                   :math:`\hat{x}`.
