@@ -1,4 +1,5 @@
 import casadi as ca
+import casadi.tools as cat
 import numpy as np
 import pylab as pl
 from scipy.misc import comb
@@ -15,15 +16,15 @@ class PECasProb:
     #### 1. Functions for checking validity and consistency of the inputs ####
     ##########################################################################
 
-    def __check_variable_validity(self, var, varname, dtype, ddim):
+    def __check_variable_validity(self, var, varname, dtypes, ddim):
 
         '''
         :param var: Variable that's validity shall be checked.
-        :type var: dtype
+        :type var: dtypes
         :param varname: Name of the variable that shall be checked.
         :type varname: str
-        :param dtype: Description of the type that var has to be.
-        :type dtype: ca.casadi_core.SX, numpy.ndarray
+        :param dtypes: List of the types that var might be.
+        :type dtypes: list
         :param ddim: Description of the second dimension var has to have.
         :param ddim: int
         :raises: IndexError, ValueError
@@ -35,9 +36,10 @@ class PECasProb:
 
         # Check variable type
 
-        if type(var) is not dtype:
+        if type(var) not in dtypes:
             raise ValueError(\
-                '"{0}" needs to be of type "{1}".'.format(varname, dtype))
+                '"{0}" needs to be of one of the following types: "{1}".'.format( \
+                    varname, dtypes))
 
         # Check if the variable contains a (column) vector
 
@@ -98,7 +100,8 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         the scalar value :math:`d` containing the number of parameters.
         '''
 
-        # self.__check_variable_validity(x, "x", ca.casadi_core.SX, 1)
+        self.__check_variable_validity(x, "x", [ca.casadi_core.SX, \
+            cat.structure.ssymStruct], 1)
         self.__x = x
         self.__d = self.__x.shape[0]
 
@@ -135,7 +138,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         an exception will be raised.
         '''
 
-        self.__check_variable_validity(M, "M", ca.casadi_core.SX, 1)
+        self.__check_variable_validity(M, "M", [ca.casadi_core.SX], 1)
 
         try:
 
@@ -189,7 +192,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         :math:`\sigma^{2} = \text{diag}(\Sigma_{\epsilon})`.
         '''
 
-        self.__check_variable_validity(sigma, "sigma", np.ndarray, 1)
+        self.__check_variable_validity(sigma, "sigma", [np.ndarray], 1)
 
         try:
 
@@ -261,7 +264,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         :func:`generate_pseudo_measurement_data`.
         '''
 
-        self.__check_variable_validity(Y, "Y", np.ndarray, 1)
+        self.__check_variable_validity(Y, "Y", [np.ndarray], 1)
 
         try:
 
@@ -322,7 +325,7 @@ generate_pseudo_measurement_data() for "random" pseudo measurement data.
         :func:`generate_pseudo_measurement_data`.
         '''
 
-        self.__check_variable_validity(xtrue, "xtrue", np.ndarray, 1)
+        self.__check_variable_validity(xtrue, "xtrue", [np.ndarray], 1)
 
         self.__xtrue = xtrue
 
@@ -370,7 +373,7 @@ No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
         constraints.
         '''
 
-        self.__check_variable_validity(G, "G", ca.casadi_core.SX, 1)
+        self.__check_variable_validity(G, "G", [ca.casadi_core.SX], 1)
 
         self.__G = G
         self.__m = self.__G.shape[0]
@@ -416,7 +419,7 @@ No data for G has been provided so far. Try set_G() for manual setting.
         Set the column vector :math:`H` for the inequality constraints.
         '''
 
-        self.__check_variable_validity(H, "H", ca.casadi_core.SX, 1)
+        self.__check_variable_validity(H, "H", [ca.casadi_core.SX], 1)
 
         self.__H = H
 
@@ -459,7 +462,8 @@ No data for H has been provided so far. Try set_H() for manual setting.
         of :math:`x`.
         '''
 
-        # self.__check_variable_validity(xinit, "xinit", np.ndarray, 1)
+        self.__check_variable_validity(xinit, "xinit", [np.ndarray, \
+            cat.structure.DMatrixStruct], 1)
 
         self.__xinit = xinit
 
@@ -505,7 +509,8 @@ No data for xinit has been provided so far. Try set_xinit() for manual setting.
         of :math:`x`.
         '''
 
-        # self.__check_variable_validity(xmin, "xmin", np.ndarray, 1)
+        self.__check_variable_validity(xmin, "xmin", [np.ndarray, \
+            cat.structure.DMatrixStruct], 1)
 
         self.__xmin = xmin
 
@@ -551,7 +556,8 @@ No data for xmin has been provided so far. Try set_xmin() for manual setting.
         of :math:`x`.
         '''
 
-        # self.__check_variable_validity(xmax, "xmax", np.ndarray, 1)
+        self.__check_variable_validity(xmax, "xmax", [np.ndarray, \
+            cat.structure.DMatrixStruct], 1)
 
         self.__xmax = xmax
 
@@ -747,7 +753,7 @@ compute_covariance_matrix() first.
 
         :param x: Column vector :math:`x \in \mathbb{R}^{d}` for the
                   parameters.
-        :type x: casadi.casadi_core.SX
+        :type x: casadi.casadi_core.SX, casadi.tools.structure.DMatrixStruct
 
         :param M: Column vector :math:`M \in \mathbb{R}^{N}` for the model.
         :type M: casadi.casadi_core.SX
@@ -782,15 +788,15 @@ compute_covariance_matrix() first.
         :type H: casadi.casadi_core.SX
 
         :param xinit: Column vector :math:`x_{init} \in \mathbb{R}^{d}` for the initial guess of the parameter values.
-        :type xinit: numpy.ndarray
+        :type xinit: numpy.ndarray, casadi.tools.structure.DMatrixStruct
 
         :param xmin: Column vector :math:`x_{min} \in \mathbb{R}^{d}` 
                     for the lower bounds of :math:`x`.
-        :type xmin: numpy.ndarray
+        :type xmin: numpy.ndarray, casadi.tools.structure.DMatrixStruct
 
         :param xmax: Column vector :math:`x_{max} \in \mathbb{R}^{d}` 
                     for the upper bounds of :math:`x`.
-        :type xmax: numpy.ndarray
+        :type xmax: numpy.ndarray, casadi.tools.structure.DMatrixStruct
 
         |
 
