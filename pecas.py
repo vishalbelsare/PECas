@@ -143,7 +143,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
 
         try:
 
-            self.__check_variable_consistency("M", self.__M.shape[0], \
+            self.__check_variable_consistency("M", M.shape[0], \
             "sigma", self.__sigma.shape[0])
 
         # If a variable in comparison has not been set up so far, an
@@ -198,10 +198,10 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         try:
 
             self.__check_variable_consistency("M", self.__M.shape[0], \
-            "sigma", self.__sigma.shape[0])
+            "sigma", sigma.shape[0])
 
             self.__check_variable_consistency("Y", self.__Y.shape[0], \
-                "sigma", self.__sigma.shape[0])
+                "sigma", sigma.shape[0])
 
         # If a variable in comparison has not been set up so far, an
         # AttributeError exception will be thrown
@@ -269,7 +269,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
 
         try:
 
-            self.__check_variable_consistency("Y", self.__Y.shape[0], \
+            self.__check_variable_consistency("Y", Y.shape[0], \
                 "sigma", self.__sigma.shape[0])
 
         # If a variable in comparison has not been set up so far, an
@@ -514,6 +514,9 @@ No data for xinit has been provided so far. Try set_xinit() for manual setting.
         self.__check_variable_validity(xmin, "xmin", [np.ndarray, \
             cat.structure.DMatrixStruct], 1)
 
+        self.__check_variable_consistency("x", self.__x.shape[0], \
+            "xmin", xmin.shape[0])
+
         self.__xmin = xmin
 
 
@@ -561,6 +564,9 @@ No data for xmin has been provided so far. Try set_xmin() for manual setting.
 
         self.__check_variable_validity(xmax, "xmax", [np.ndarray, \
             cat.structure.DMatrixStruct], 1)
+
+        self.__check_variable_consistency("x", self.__x.shape[0], \
+            "xmax", xmax.shape[0])
 
         self.__xmax = xmax
 

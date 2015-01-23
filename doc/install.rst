@@ -27,7 +27,7 @@ To obtain the zip-file you do not need to have `git <http://git-scm.com/>`_ inst
 Install PECas
 -------------
 
-If you meet the requirements in from the above sections, you can run PECas directly from within the 
+If you meet the requirements from the above sections, you can run PECas directly from within the 
 directory in which you obtained or unpacked it,
 or copy ``pecas.py`` to another destination.
 If you
