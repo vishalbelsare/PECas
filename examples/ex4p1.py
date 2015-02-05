@@ -35,7 +35,8 @@ fvx.init()
 Theta = ca.SX.sym("Theta", 3)
 
 simvx = ca.SX.sym("simvx",t.size)
-simvx[0] = fvx([Theta[0], Theta[1], Theta[2], 0, Dk[0]])[0]
+
+simvx[0] = Theta[2]
 
 for k in xrange(1, t.size):
 

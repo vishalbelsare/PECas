@@ -54,7 +54,7 @@ fT2.init()
 # Load measurements data when available, and
 # replace values of t by real measurement time when available
 
-data = pl.loadtxt("meas_waterpot.txt")
+data = pl.loadtxt("meas_stirred_dunked.txt")
 t = data[:,0]
 t_end = t[-1:]
 N = len(t)
@@ -106,7 +106,10 @@ fT_sim.evaluate()
 
 f_sim = fT_sim.getOutput("f")
 
-pl.plot(t, f_sim, color = "g")
-pl.scatter(t, pep.get_Y(), s = 2)
+pl.plot(t, f_sim, color = "b", label = "fitted forward simulation")
+pl.scatter(t, pep.get_Y(), color = 'k', s = 2, label = "measurements")
 pl.xlim((t[0], t[-1:]))
+pl.xlabel("time [s]")
+pl.ylabel("temperature [K]")
+pl.legend()
 pl.show()
