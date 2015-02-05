@@ -23,7 +23,7 @@ vx0 = ca.SX.sym("vx0", 1)
 # simstep
 
 vx = (C1 * D - C2) * (1 / C3) * (1 - pl.exp(-C3 * dT)) + \
-      vxp * pl.exp(-C3 * dT)
+    vxp * pl.exp(-C3 * dT)
 
 fvx = ca.SXFunction([C1, C2, C3, vxp, dT, D], [vx])
 fvx.setOption("name", "fvx")
@@ -33,19 +33,19 @@ fvx.init()
 
 Theta = ca.SX.sym("Theta", 4)
 
-simvx = ca.SX.sym("simvx",t.size)
+simvx = ca.SX.sym("simvx", t.size)
 simvx[0] = fvx([Theta[0], Theta[1], Theta[2], Theta[3], 0, Dk[0]])[0]
 
 for k in xrange(1, t.size):
 
-    simvx[k] = fvx([Theta[0], Theta[1], Theta[2], simvx[k-1], \
-               t[k] - t[k-1], Dk[k-1]])[0]
+    simvx[k] = fvx([Theta[0], Theta[1], Theta[2], simvx[k-1],
+                   t[k] - t[k-1], Dk[k]])[0]
 
 
 sigma = pl.ones(t.size)
 xinit = pl.ones(4)
 
-pep = pc.PECasProb(Theta, simvx, sigma, Y = vxm, xinit = xinit)
+pep = pc.PECasProb(Theta, simvx, sigma, Y=vxm, xinit=xinit)
 pep.run_parameter_estimation()
 
 print pep.get_xhat()
