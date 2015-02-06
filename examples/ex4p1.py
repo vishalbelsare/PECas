@@ -122,7 +122,7 @@ Theta = ca.SX.sym("Theta", 3)
 # symbolic expression is just the first of them.
 #==============================================================================
 simvx = ca.SX.sym("simvx",N)
-simvx[0] = fvx([Theta[0], Theta[1], Theta[2], 0, Dk[0]])[0]
+simvx[0] = Theta[2]
 
 for k in xrange(1, N):
 
