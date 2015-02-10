@@ -57,7 +57,7 @@ class PECasProb:
     # -----------------------------------------------------------------------#
 
 
-    def __check_variable_consistency(self, varname1, ddim1, varname2, ddim2):
+    def __check_dimensional_consistency(self, varname1, ddim1, varname2, ddim2):
 
         '''
         :param varname1: The name of the first variable that shall be compared.
@@ -70,8 +70,9 @@ class PECasProb:
         :param ddim2: The dimension for the second variable to be compared.
         :type ddim2: int
 
-        Check the consistency for two input variables by comparing the
-        relevant dimensions of the variables provided with the function call.
+        Check the dimensional consistency for two input variables by
+        comparing the relevant dimensions of the variables provided with
+        the function call.
         '''
 
         if ddim1 != ddim2:
@@ -143,7 +144,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
 
         try:
 
-            self.__check_variable_consistency("M", M.shape[0], \
+            self.__check_dimensional_consistency("M", M.shape[0], \
             "sigma", self.__sigma.shape[0])
 
         # If a variable in comparison has not been set up so far, an
@@ -197,10 +198,10 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
 
         try:
 
-            self.__check_variable_consistency("M", self.__M.shape[0], \
+            self.__check_dimensional_consistency("M", self.__M.shape[0], \
             "sigma", sigma.shape[0])
 
-            self.__check_variable_consistency("Y", self.__Y.shape[0], \
+            self.__check_dimensional_consistency("Y", self.__Y.shape[0], \
                 "sigma", sigma.shape[0])
 
         # If a variable in comparison has not been set up so far, an
@@ -269,7 +270,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
 
         try:
 
-            self.__check_variable_consistency("Y", Y.shape[0], \
+            self.__check_dimensional_consistency("Y", Y.shape[0], \
                 "sigma", self.__sigma.shape[0])
 
         # If a variable in comparison has not been set up so far, an
@@ -514,7 +515,7 @@ No data for xinit has been provided so far. Try set_xinit() for manual setting.
         self.__check_variable_validity(xmin, "xmin", [np.ndarray, \
             cat.structure.DMatrixStruct], 1)
 
-        self.__check_variable_consistency("x", self.__x.shape[0], \
+        self.__check_dimensional_consistency("x", self.__x.shape[0], \
             "xmin", xmin.shape[0])
 
         self.__xmin = xmin
@@ -565,7 +566,7 @@ No data for xmin has been provided so far. Try set_xmin() for manual setting.
         self.__check_variable_validity(xmax, "xmax", [np.ndarray, \
             cat.structure.DMatrixStruct], 1)
 
-        self.__check_variable_consistency("x", self.__x.shape[0], \
+        self.__check_dimensional_consistency("x", self.__x.shape[0], \
             "xmax", xmax.shape[0])
 
         self.__xmax = xmax
