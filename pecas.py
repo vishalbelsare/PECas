@@ -16,10 +16,10 @@ class PECasProb:
     #### 1. Functions for checking validity and consistency of the inputs ####
     ##########################################################################
 
-    def __check_variable_validity(self, var, varname, dtypes, ddim):
+    def __check_type_and_shape_validity(self, var, varname, dtypes, ddim):
 
         '''
-        :param var: Variable that's validity shall be checked.
+        :param var: Variable whos type and shape validity shall be checked.
         :type var: dtypes
         :param varname: Name of the variable that shall be checked.
         :type varname: str
@@ -60,17 +60,19 @@ class PECasProb:
     def __check_dimensional_consistency(self, varname1, ddim1, varname2, ddim2):
 
         '''
-        :param varname1: The name of the first variable that shall be compared.
+        :param varname1: The name of the first variable whos dimension
+                         shall be compared.
         :type varname1: str
-        :param ddim1: The dimension for the first variable to be compared.
+        :param ddim1: The dimension of the first variable to be compared.
         :type ddim1: int
-        :param varname2: The name of the second variable that shall be
-                         compared.
+        :param varname2: The name of the second variable whose dimension
+                         shall be compared.
         :type varname2: str
-        :param ddim2: The dimension for the second variable to be compared.
+        :param ddim2: The dimension of the second variable to be compared.
         :type ddim2: int
+        :raises: ValueError
 
-        Check the dimensional consistency for two input variables by
+        Check the dimensional consistency of two input variables by
         comparing the relevant dimensions of the variables provided with
         the function call.
         '''
@@ -78,8 +80,34 @@ class PECasProb:
         if ddim1 != ddim2:
             raise ValueError('''
 The dimensions of the variables "{0}" and "{2}" do not match, since
-"{0}" has {1} entries, while "{2}"" has {4} entries.'''.format(\
+"{0}" has {1} entries, while "{2}"" has {3} entries.'''.format(\
                 varname1, ddim1, varname2, ddim2))
+
+    # -----------------------------------------------------------------------#
+
+
+    def __check_type_consistency(self, var1, var2):
+
+        '''
+        :param var1: The first variable whos type shall be compared.
+        :type var1: casadi.casadi_core.SX/.MX,
+                    casadi.tools.structure.ssymStruct/.msymStruct
+        :param var2: The name of the second variable that shall be
+                         compared.
+        :type var2: casadi.casadi_core.SX/.MX,
+                    casadi.tools.structure.ssymStruct/.msymStruct
+        :raises: TypeError
+
+        Check the dimensional consistency for two input variables by
+        comparing the relevant dimensions of the variables provided with
+        the function call.
+        '''
+
+        if type(var1) != type(var2):
+            raise TypeError('''
+The dimensions of the variables "{0}" ({1})
+and "{2}" ({3}) do not match.'''.format(\
+                var1, type(var1), var2, type(var2)))
 
 
     ##########################################################################
@@ -101,7 +129,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         the scalar value :math:`d` containing the number of parameters.
         '''
 
-        self.__check_variable_validity(x, "x", [ca.casadi_core.SX, \
+        self.__check_type_and_shape_validity(x, "x", [ca.casadi_core.SX, \
             cat.structure.ssymStruct], 1)
         self.__x = x
         self.__d = self.__x.shape[0]
@@ -140,7 +168,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         an exception will be raised.
         '''
 
-        self.__check_variable_validity(M, "M", [ca.casadi_core.SX], 1)
+        self.__check_type_and_shape_validity(M, "M", [ca.casadi_core.SX], 1)
 
         try:
 
@@ -194,7 +222,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         :math:`\sigma^{2} = \text{diag}(\Sigma_{\epsilon})`.
         '''
 
-        self.__check_variable_validity(sigma, "sigma", [np.ndarray], 1)
+        self.__check_type_and_shape_validity(sigma, "sigma", [np.ndarray], 1)
 
         try:
 
@@ -266,7 +294,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         :func:`generate_pseudo_measurement_data`.
         '''
 
-        self.__check_variable_validity(Y, "Y", [np.ndarray], 1)
+        self.__check_type_and_shape_validity(Y, "Y", [np.ndarray], 1)
 
         try:
 
@@ -327,7 +355,7 @@ generate_pseudo_measurement_data() for "random" pseudo measurement data.
         :func:`generate_pseudo_measurement_data`.
         '''
 
-        self.__check_variable_validity(xtrue, "xtrue", [np.ndarray], 1)
+        self.__check_type_and_shape_validity(xtrue, "xtrue", [np.ndarray], 1)
 
         self.__xtrue = xtrue
 
@@ -375,7 +403,7 @@ No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
         constraints.
         '''
 
-        self.__check_variable_validity(G, "G", [ca.casadi_core.SX], 1)
+        self.__check_type_and_shape_validity(G, "G", [ca.casadi_core.SX], 1)
 
         self.__G = G
         self.__m = self.__G.shape[0]
@@ -421,7 +449,7 @@ No data for G has been provided so far. Try set_G() for manual setting.
         Set the column vector :math:`H` for the inequality constraints.
         '''
 
-        self.__check_variable_validity(H, "H", [ca.casadi_core.SX], 1)
+        self.__check_type_and_shape_validity(H, "H", [ca.casadi_core.SX], 1)
 
         self.__H = H
 
@@ -464,7 +492,7 @@ No data for H has been provided so far. Try set_H() for manual setting.
         of :math:`x`.
         '''
 
-        self.__check_variable_validity(xinit, "xinit", [np.ndarray, \
+        self.__check_type_and_shape_validity(xinit, "xinit", [np.ndarray, \
             cat.structure.DMatrixStruct], 1)
 
         self.__xinit = xinit
@@ -512,7 +540,7 @@ No data for xinit has been provided so far. Try set_xinit() for manual setting.
         of :math:`x`.
         '''
 
-        self.__check_variable_validity(xmin, "xmin", [np.ndarray, \
+        self.__check_type_and_shape_validity(xmin, "xmin", [np.ndarray, \
             cat.structure.DMatrixStruct], 1)
 
         self.__check_dimensional_consistency("x", self.__x.shape[0], \
@@ -563,7 +591,7 @@ No data for xmin has been provided so far. Try set_xmin() for manual setting.
         of :math:`x`.
         '''
 
-        self.__check_variable_validity(xmax, "xmax", [np.ndarray, \
+        self.__check_type_and_shape_validity(xmax, "xmax", [np.ndarray, \
             cat.structure.DMatrixStruct], 1)
 
         self.__check_dimensional_consistency("x", self.__x.shape[0], \
