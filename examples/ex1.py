@@ -35,12 +35,12 @@ sigma = 0.1 * np.ones(M.shape[0])
 
 Y = np.array([2.5, 4.1, 6.3, 8.2])
 
-# Now, create an instance pep of the class PECasProb to define the parameter
+# Now, create an instance pep of the class PECasLSq to define the parameter
 # estimation problem within PECas. While x, M and sigma, which are the
 # first three arguments, are mandatory, the other variables are either
 # optional or mutually substitutable, and therefor need to be adressed.
 
-pep = pecas.PECasProb(x, M, sigma, Y = Y)
+pep = pecas.PECasLSq(x, M, sigma, Y = Y)
 
 # With the problem set up, you can now perform a least squares
 # parameter estimation for the problem. You should then see the outputs

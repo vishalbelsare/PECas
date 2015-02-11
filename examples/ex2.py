@@ -35,11 +35,11 @@ Y = np.array([2.23947, 2.84568, 4.55041, 5.08583])
 sigma = 0.5 * np.ones(M.shape[0])
 
 
-# Now, an instance pep of the class PECasProb can be created by also
+# Now, an instance pep of the class PECasLSq can be created by also
 # adressing the equality constraints and the inital guess, and perform
 # the least squares estimation.
 
-pep = pecas.PECasProb(x, M, sigma, Y = Y, G = G, xinit = xinit)
+pep = pecas.PECasLSq(x, M, sigma, Y = Y, G = G, xinit = xinit)
 pep.run_parameter_estimation()
 
 # After the solver converged, the covariance matrix can be computed,

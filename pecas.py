@@ -5,12 +5,12 @@ import pylab as pl
 from scipy.misc import comb
 import sys
 
-class PECasProb:
+class PECasLSq:
 
-    '''The class :class:`PECasProb` is the central (and only) class of
-    PECas and used to define and solve parameter estimation
-    problems with PECas. All functionalities of PECas are realized as class
-    functions of this class.'''
+    '''The class :class:`PECasLSq` is the central (and yet only) class of
+    PECas and used to define and solve least squares parameter estimation
+    problems with PECas. Yet all functionalities of PECas are realized as
+    class functions of this class.'''
 
     ##########################################################################
     #### 1. Functions for checking validity and consistency of the inputs ####

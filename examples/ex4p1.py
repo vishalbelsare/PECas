@@ -46,7 +46,7 @@ for k in xrange(1, t.size):
 sigma = pl.ones(t.size)
 xinit = pl.ones(3)
 
-pep = pc.PECasProb(Theta, simvx, sigma, Y = vxm, xinit = xinit)
+pep = pc.PECasLSq(Theta, simvx, sigma, Y = vxm, xinit = xinit)
 pep.run_parameter_estimation()
 
 fsimvx = ca.SXFunction(ca.nlpIn(x = Theta), ca.nlpOut(f =simvx))

@@ -83,10 +83,10 @@ for k in range(N-1):
 # Setup PECas and generate pseudo measurement data;
 # insert data here when measurements are available
 #
-pep = pe.PECasProb(lambda_g, T_sim, sigma, Y = Y)
+pep = pe.PECasLSq(lambda_g, T_sim, sigma, Y = Y)
 #
 
-# pep = pe.PECasProb(lambda_g, T_sim, sigma, xtrue = pl.array(lambda_g_lit))
+# pep = pe.PECasLSq(lambda_g, T_sim, sigma, xtrue = pl.array(lambda_g_lit))
 # pep.generate_pseudo_measurement_data()
 
 pep.run_parameter_estimation()
