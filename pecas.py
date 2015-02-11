@@ -23,7 +23,7 @@ class PECasProb:
         :type var: dtypes
         :param varname: Name of the variable that shall be checked.
         :type varname: str
-        :param dtypes: List of the types that var might be.
+        :param dtypes: List of the types that var might take.
         :type dtypes: list
         :param ddim: Description of the second dimension var has to have.
         :param ddim: int
@@ -34,7 +34,7 @@ class PECasProb:
         variable and it's shape properties.
         '''
 
-        # Check variable type
+        # Check the variable's type
 
         if type(var) not in dtypes:
             raise ValueError(\
@@ -92,20 +92,19 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         :param var1: The first variable whos type shall be compared.
         :type var1: casadi.casadi_core.SX/.MX,
                     casadi.tools.structure.ssymStruct/.msymStruct
-        :param var2: The name of the second variable that shall be
-                         compared.
+        :param var2: The second variable whos type shall be compared.
         :type var2: casadi.casadi_core.SX/.MX,
                     casadi.tools.structure.ssymStruct/.msymStruct
         :raises: TypeError
 
         Check the dimensional consistency for two input variables by
-        comparing the relevant dimensions of the variables provided with
+        comparing the types of the variables provided with
         the function call.
         '''
 
         if type(var1) != type(var2):
             raise TypeError('''
-The dimensions of the variables "{0}" ({1})
+The types of the variables "{0}" ({1})
 and "{2}" ({3}) do not match.'''.format(\
                 var1, type(var1), var2, type(var2)))
 
