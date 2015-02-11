@@ -102,7 +102,23 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         the function call.
         '''
 
-        if type(var1) != type(var2):
+        types = []
+
+        for k, var in enumerate([var1, var2]):
+
+            if type(var) == cat.structure.ssymStruct:
+
+                types[k] = ca.casadi_core.SX
+
+            elif type(var) == cat.structure.msymStruct:
+
+                types[k] = ca.casadi_core.MX
+
+            else:
+
+                types[k] = type(var)
+
+        if not all(elem == types[0] for elem in types):
             raise TypeError('''
 The types of the variables "{0}" ({1})
 and "{2}" ({3}) do not match.'''.format(\
@@ -867,10 +883,11 @@ compute_covariance_matrix() first.
 
         :param x: Column vector :math:`x \in \mathbb{R}^{d}` for the
                   parameters.
-        :type x: casadi.casadi_core.SX, casadi.tools.structure.ssymStruct
+        :type x: casadi.casadi_core.SX/.MX,
+                 casadi.tools.structure.ssymStruct/.msymStruct
 
         :param M: Column vector :math:`M \in \mathbb{R}^{N}` for the model.
-        :type M: casadi.casadi_core.SX
+        :type M: casadi.casadi_core.SX/.MX
 
         :param sigma: Column vector :math:`\sigma \in \mathbb{R}^{N}` for
                       the standard deviations.
@@ -896,10 +913,10 @@ compute_covariance_matrix() first.
 
         :param G: Column vector :math:`G \in (0)^{m}` for the
                   equality constraints.
-        :type G: casadi.casadi_core.SX
+        :type G: casadi.casadi_core.SX/.MX
 
         :param H: Column vector :math:`H \in (\mathbb{R}^{-}_{0})^{n}` for the inequality constraints.
-        :type H: casadi.casadi_core.SX
+        :type H: casadi.casadi_core.SX/.MX
 
         :param xinit: Column vector :math:`x_{init} \in \mathbb{R}^{d}` for the initial guess of the parameter values.
         :type xinit: numpy.ndarray, casadi.tools.structure.DMatrixStruct
@@ -919,6 +936,19 @@ compute_covariance_matrix() first.
         # Parameters
 
         self.set_x(x)
+
+        # Depending on the type of the parameter variable, determine whether
+        # the SX or the MX class is used, and with this, whether SXFunction or
+        # MXFunction is used to set up the CasADi functions within the class
+
+        if type(self.__x) is ca.casadi_core.SX or \
+            type(self.__x) is cat.structure.ssymStruct:
+
+            self.__CasADiFunction = ca.SXFunction
+
+        else:
+
+            self.__CasADiFunction = ca.MXFunction
 
         # Model
 
@@ -1016,7 +1046,8 @@ Pseudo measurement data can only be generated if the true value of x, xtrue,
 is known. You can set xtrue manually using the function set_xtrue().
 ''')
 
-        self.__Mx = ca.SXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
+        self.__Mx = self.__CasADiFunction(ca.nlpIn(x=self.__x), \
+            ca.nlpOut(f=self.__M))
         self.__Mx.setOption("name", "Model function Mx")
         self.__Mx.init()
 
@@ -1070,12 +1101,12 @@ is known. You can set xtrue manually using the function set_xtrue().
 
         if self.get_G(msg = False) is None:
 
-            self.__fx = ca.SXFunction(ca.nlpIn(x=self.__x), \
+            self.__fx = self.__CasADiFunction(ca.nlpIn(x=self.__x), \
                 ca.nlpOut(f=self.__f))
 
         else:
 
-            self.__fx = ca.SXFunction(ca.nlpIn(x=self.__x), \
+            self.__fx = self.__CasADiFunction(ca.nlpIn(x=self.__x), \
                 ca.nlpOut(f=self.__f, g=self.__G))
 
         self.__fx.init()
@@ -1201,7 +1232,7 @@ Execute run_parameter_estimation() before computing the covariance matrix.
 
         # Compute J1, J2
 
-        Mx = ca.SXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
+        Mx = self.__CasADiFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
         Mx.init()
 
         self.__J1 = ca.mul(ca.solve(np.sqrt(self.__Sigma), \
@@ -1211,7 +1242,7 @@ Execute run_parameter_estimation() before computing the covariance matrix.
 
         if self.get_G(msg = False) is not None:
 
-            Gx = ca.SXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__G))
+            Gx = self.__CasADiFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__G))
             Gx.init()
 
             self.__J2 = Gx.jac("x", "f")
@@ -1240,7 +1271,7 @@ Execute run_parameter_estimation() before computing the covariance matrix.
 
         # Evaluate covariance matrix for xhat
 
-        self.__fCovx = ca.SXFunction(ca.nlpIn(x=self.__x), \
+        self.__fCovx = self.__CasADiFunction(ca.nlpIn(x=self.__x), \
             ca.nlpOut(f=self.__fCov))
         self.__fCovx.init()
 
