@@ -133,11 +133,11 @@ and "{2}" ({3}) do not match.'''.format(\
             ca.casadi_core.MX, cat.structure.ssymStruct, \
             cat.structure.msymStruct], 1)
 
-        for var in [self.__M, self.__G, self.__H]:
+        for attr in ['__M', '__G', '__H']:
 
             try:
 
-                self.__check_type_consistency(x, var)
+                self.__check_type_consistency(x, getattr(self, attr))
 
             # If a variable in comparison has not been set up so far, an
             # AttributeError exception will be thrown
@@ -199,11 +199,11 @@ and "{2}" ({3}) do not match.'''.format(\
 
             pass
 
-        for var in [self.__x, self.__G, self.__H]:
+        for attr in ['__x', '__G', '__H']:
 
             try:
 
-                self.__check_type_consistency(x, var)
+                self.__check_type_consistency(M, getattr(self, attr))
 
             # If a variable in comparison has not been set up so far, an
             # AttributeError exception will be thrown
@@ -436,11 +436,11 @@ No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
         self.__check_type_and_shape_validity(G, "G", [ca.casadi_core.SX, \
             ca.casadi_core.MX], 1)
 
-        for var in [self.__x, self.__M, self.__H]:
+        for attr in ['__x', '__M', '__H']:
 
             try:
 
-                self.__check_type_consistency(x, var)
+                self.__check_type_consistency(G, getattr(self, attr))
 
             # If a variable in comparison has not been set up so far, an
             # AttributeError exception will be thrown
@@ -496,11 +496,11 @@ No data for G has been provided so far. Try set_G() for manual setting.
         self.__check_type_and_shape_validity(H, "H", [ca.casadi_core.SX, \
             ca.casadi_core.MX], 1)
 
-        for var in [self.__x, self.__M, self.__H]:
+        for attr in ['__x', '__M', '__H']:
 
             try:
 
-                self.__check_type_consistency(x, var)
+                self.__check_type_consistency(H, getattr(self, attr))
 
             # If a variable in comparison has not been set up so far, an
             # AttributeError exception will be thrown
