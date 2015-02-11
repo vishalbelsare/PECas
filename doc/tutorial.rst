@@ -59,11 +59,11 @@ Store the measurement data in a variable ``Y`` of type ``numpy.ndarray`` that al
 
     >>> Y = np.array([2.5, 4.1, 6.3, 8.2])
 
-Now, create an instance ``pep`` of the class PECasProb to define the parameter estimation problem within PECas. While ``x``, ``M`` and ``sigma``, which are the first three arguments, are mandatory, the other variables are either optional or mutually substitutable, and therefore need to be addressed.
+Now, create an instance ``pep`` of the class PECasLSq to define the parameter estimation problem within PECas. While ``x``, ``M`` and ``sigma``, which are the first three arguments, are mandatory, the other variables are either optional or mutually substitutable, and therefore need to be addressed.
 
 .. code:: python
 
-    >>> pep = pecas.PECasProb(x, M, sigma, Y = Y)
+    >>> pep = pecas.PECasLSq(x, M, sigma, Y = Y)
 
 
 With the problem set up, you can now perform a least squares parameter estimation for the problem. You should then see the outputs of IPOPT, the solver that is used for solving the optimization problems.
@@ -221,12 +221,12 @@ Finally, again create the vectors for the measurements ``Y`` and the standard de
     >>> Y = np.array([2.23947, 2.84568, 4.55041, 5.08583])
     >>> sigma = 0.5 * np.ones(M.shape[0])
 
-Now, an instance ``pep`` of the class PECasProb can be created by also addressing the equality constraints and the initial guess, and perform the least squares estimation.
+Now, an instance ``pep`` of the class PECasLSq can be created by also addressing the equality constraints and the initial guess, and perform the least squares estimation.
 
 
 .. code:: python
 
-    >>> pep = pecas.PECasProb(x, M, sigma, Y = Y, G = G, xinit = xinit)
+    >>> pep = pecas.PECasLSq(x, M, sigma, Y = Y, G = G, xinit = xinit)
     >>> pep.run_parameter_estimation()
 
     This is Ipopt version 3.11.8, running with linear solver mumps.
@@ -343,12 +343,12 @@ First, define the several components of the parameter estimation problem just as
     >>> sigma = 0.5 * np.ones(M.shape[0])
     >>> xinit = np.array([1, 1])
 
-Then, define a column vector ``xtrue`` of type ``numpy.ndarray`` for the true values of the parameters, and create an instance ``pep`` of the class PECasProb providing all information.
+Then, define a column vector ``xtrue`` of type ``numpy.ndarray`` for the true values of the parameters, and create an instance ``pep`` of the class PECasLSq providing all information.
 
 .. code:: python
 
     >>> xtrue = np.array([1, 1])
-    >>> pep = pecas.PECasProb(x, M, sigma, xtrue = xtrue, G = G, xinit = xinit)
+    >>> pep = pecas.PECasLSq(x, M, sigma, xtrue = xtrue, G = G, xinit = xinit)
 
 Afterwards, the class instance ``pep`` can be used to generate pseudo measurement data that will be stored as measurement data inside the object.
 

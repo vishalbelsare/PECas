@@ -5,25 +5,25 @@ import pylab as pl
 from scipy.misc import comb
 import sys
 
-class PECasProb:
+class PECasLSq:
 
-    '''The class :class:`PECasProb` is the central (and only) class of
-    PECas and used to define and solve parameter estimation
-    problems with PECas. All functionalities of PECas are realized as class
-    functions of this class.'''
+    '''The class :class:`PECasLSq` is the central (and yet only) class of
+    PECas and used to define and solve least squares parameter estimation
+    problems with PECas. Yet all functionalities of PECas are realized as
+    class functions of this class.'''
 
     ##########################################################################
     #### 1. Functions for checking validity and consistency of the inputs ####
     ##########################################################################
 
-    def __check_variable_validity(self, var, varname, dtypes, ddim):
+    def __check_type_and_shape_validity(self, var, varname, dtypes, ddim):
 
         '''
-        :param var: Variable that's validity shall be checked.
+        :param var: Variable whos type and shape validity shall be checked.
         :type var: dtypes
         :param varname: Name of the variable that shall be checked.
         :type varname: str
-        :param dtypes: List of the types that var might be.
+        :param dtypes: List of the types that var might take.
         :type dtypes: list
         :param ddim: Description of the second dimension var has to have.
         :param ddim: int
@@ -34,7 +34,7 @@ class PECasProb:
         variable and it's shape properties.
         '''
 
-        # Check variable type
+        # Check the variable's type
 
         if type(var) not in dtypes:
             raise ValueError(\
@@ -57,28 +57,72 @@ class PECasProb:
     # -----------------------------------------------------------------------#
 
 
-    def __check_variable_consistency(self, varname1, ddim1, varname2, ddim2):
+    def __check_dimensional_consistency(self, varname1, ddim1, varname2, ddim2):
 
         '''
-        :param varname1: The name of the first variable that shall be compared.
+        :param varname1: The name of the first variable whos dimension
+                         shall be compared.
         :type varname1: str
-        :param ddim1: The dimension for the first variable to be compared.
+        :param ddim1: The dimension of the first variable to be compared.
         :type ddim1: int
-        :param varname2: The name of the second variable that shall be
-                         compared.
+        :param varname2: The name of the second variable whose dimension
+                         shall be compared.
         :type varname2: str
-        :param ddim2: The dimension for the second variable to be compared.
+        :param ddim2: The dimension of the second variable to be compared.
         :type ddim2: int
+        :raises: ValueError
 
-        Check the consistency for two input variables by comparing the
-        relevant dimensions of the variables provided with the function call.
+        Check the dimensional consistency of two input variables by
+        comparing the relevant dimensions of the variables provided with
+        the function call.
         '''
 
         if ddim1 != ddim2:
             raise ValueError('''
 The dimensions of the variables "{0}" and "{2}" do not match, since
-"{0}" has {1} entries, while "{2}"" has {4} entries.'''.format(\
+"{0}" has {1} entries, while "{2}"" has {3} entries.'''.format(\
                 varname1, ddim1, varname2, ddim2))
+
+    # -----------------------------------------------------------------------#
+
+
+    def __check_type_consistency(self, var1, var2):
+
+        '''
+        :param var1: The first variable whos type shall be compared.
+        :type var1: casadi.casadi_core.SX/.MX,
+                    casadi.tools.structure.ssymStruct/.msymStruct
+        :param var2: The second variable whos type shall be compared.
+        :type var2: casadi.casadi_core.SX/.MX,
+                    casadi.tools.structure.ssymStruct/.msymStruct
+        :raises: TypeError
+
+        Check the dimensional consistency for two input variables by
+        comparing the types of the variables provided with
+        the function call.
+        '''
+
+        types = []
+
+        for k, var in enumerate([var1, var2]):
+
+            if type(var) == cat.structure.ssymStruct:
+
+                types[k] = ca.casadi_core.SX
+
+            elif type(var) == cat.structure.msymStruct:
+
+                types[k] = ca.casadi_core.MX
+
+            else:
+
+                types[k] = type(var)
+
+        if not all(elem == types[0] for elem in types):
+            raise TypeError('''
+The types of the variables "{0}" ({1})
+and "{2}" ({3}) do not match.'''.format(\
+                var1, type(var1), var2, type(var2)))
 
 
     ##########################################################################
@@ -90,7 +134,8 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         '''
         :param x: Column vector :math:`x \in \mathbb{R}^{d}` for the
                   parameters.
-        :type x: casadi.casadi_core.SX, casadi.tools.structure.ssymStruct
+        :type x: casadi.casadi_core.SX/.MX,
+                 casadi.tools.structure.ssymStruct/.msymStruct
         :raises: ValueError
 
         *This function is called automatically at the initialization of the
@@ -100,8 +145,23 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         the scalar value :math:`d` containing the number of parameters.
         '''
 
-        self.__check_variable_validity(x, "x", [ca.casadi_core.SX, \
-            cat.structure.ssymStruct], 1)
+        self.__check_type_and_shape_validity(x, "x", [ca.casadi_core.SX, \
+            ca.casadi_core.MX, cat.structure.ssymStruct, \
+            cat.structure.msymStruct], 1)
+
+        for attr in ['__M', '__G', '__H']:
+
+            try:
+
+                self.__check_type_consistency(x, getattr(self, attr))
+
+            # If a variable in comparison has not been set up so far, an
+            # AttributeError exception will be thrown
+
+            except AttributeError:
+
+                continue
+
         self.__x = x
         self.__d = self.__x.shape[0]
 
@@ -109,7 +169,8 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
     def get_x(self):
 
         '''
-        :returns: casadi.casadi_core.SX, casadi.tools.structure.ssymStruct
+        :returns: casadi.casadi_core.SX/.MX,
+                  casadi.tools.structure.ssymStruct/.msymStruct
                   - the column vector
                   :math:`x \in \mathbb{R}^{d}` for the parameters.
 
@@ -126,7 +187,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         '''
         :param M: Column vector :math:`M \in \mathbb{R}^{N}` for the
                   model.
-        :type M: casadi.casadi_core.SX
+        :type M: casadi.casadi_core.SX/.MX
         :raises: AttributeError, ValueError
         :catches: AttributeError
 
@@ -139,11 +200,12 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         an exception will be raised.
         '''
 
-        self.__check_variable_validity(M, "M", [ca.casadi_core.SX], 1)
+        self.__check_type_and_shape_validity(M, "M", [ca.casadi_core.SX, \
+            ca.casadi_core.MX], 1)
 
         try:
 
-            self.__check_variable_consistency("M", M.shape[0], \
+            self.__check_dimensional_consistency("M", M.shape[0], \
             "sigma", self.__sigma.shape[0])
 
         # If a variable in comparison has not been set up so far, an
@@ -153,6 +215,19 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
 
             pass
 
+        for attr in ['__x', '__G', '__H']:
+
+            try:
+
+                self.__check_type_consistency(M, getattr(self, attr))
+
+            # If a variable in comparison has not been set up so far, an
+            # AttributeError exception will be thrown
+
+            except AttributeError:
+
+                continue
+
         self.__M = M
         self.__N = self.__M.shape[0]
 
@@ -160,7 +235,7 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
     def get_M(self):
 
         '''
-        :returns: casadi.casadi_core.SX - the column vector
+        :returns: casadi.casadi_core.SX/.MX - the column vector
                   :math:`M  \in \mathbb{R}^{N}` for the model.
 
         Get the column vector :math:`M` for the model.
@@ -193,14 +268,14 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         :math:`\sigma^{2} = \text{diag}(\Sigma_{\epsilon})`.
         '''
 
-        self.__check_variable_validity(sigma, "sigma", [np.ndarray], 1)
+        self.__check_type_and_shape_validity(sigma, "sigma", [np.ndarray], 1)
 
         try:
 
-            self.__check_variable_consistency("M", self.__M.shape[0], \
+            self.__check_dimensional_consistency("M", self.__M.shape[0], \
             "sigma", sigma.shape[0])
 
-            self.__check_variable_consistency("Y", self.__Y.shape[0], \
+            self.__check_dimensional_consistency("Y", self.__Y.shape[0], \
                 "sigma", sigma.shape[0])
 
         # If a variable in comparison has not been set up so far, an
@@ -265,11 +340,11 @@ The dimensions of the variables "{0}" and "{2}" do not match, since
         :func:`generate_pseudo_measurement_data`.
         '''
 
-        self.__check_variable_validity(Y, "Y", [np.ndarray], 1)
+        self.__check_type_and_shape_validity(Y, "Y", [np.ndarray], 1)
 
         try:
 
-            self.__check_variable_consistency("Y", Y.shape[0], \
+            self.__check_dimensional_consistency("Y", Y.shape[0], \
                 "sigma", self.__sigma.shape[0])
 
         # If a variable in comparison has not been set up so far, an
@@ -326,7 +401,7 @@ generate_pseudo_measurement_data() for "random" pseudo measurement data.
         :func:`generate_pseudo_measurement_data`.
         '''
 
-        self.__check_variable_validity(xtrue, "xtrue", [np.ndarray], 1)
+        self.__check_type_and_shape_validity(xtrue, "xtrue", [np.ndarray], 1)
 
         self.__xtrue = xtrue
 
@@ -363,7 +438,7 @@ No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
         '''
         :param G: Column vector :math:`G \in \mathbb{R}^{m}` for the
                   equality constraints.
-        :type G: casadi.casadi_core.SX
+        :type G: casadi.casadi_core.SX/.MX
         :raises: ValueError
 
         *If data is provided, this function is called automatically at the
@@ -374,7 +449,21 @@ No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
         constraints.
         '''
 
-        self.__check_variable_validity(G, "G", [ca.casadi_core.SX], 1)
+        self.__check_type_and_shape_validity(G, "G", [ca.casadi_core.SX, \
+            ca.casadi_core.MX], 1)
+
+        for attr in ['__x', '__M', '__H']:
+
+            try:
+
+                self.__check_type_consistency(G, getattr(self, attr))
+
+            # If a variable in comparison has not been set up so far, an
+            # AttributeError exception will be thrown
+
+            except AttributeError:
+
+                continue
 
         self.__G = G
         self.__m = self.__G.shape[0]
@@ -384,7 +473,7 @@ No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
         '''
         :param msg: Flag to switch on/off display of error message.
         :type msg: bool
-        :returns: casadi.casadi_core.SX - the column vector
+        :returns: casadi.casadi_core.SX/.MX - the column vector
                   :math:`G \in \mathbb{R}^{m}` for the equality constraints.
         :raises: AttributeError
         :catches: AttributeError
@@ -411,7 +500,7 @@ No data for G has been provided so far. Try set_G() for manual setting.
         '''
         :param H: Column vector :math:`H` for the
                   inequality constraints.
-        :type H: casadi.casadi_core.SX
+        :type H: casadi.casadi_core.SX/.MX
         :raises: ValueError
 
         *If data is provided, this function is called automatically at the
@@ -420,15 +509,30 @@ No data for G has been provided so far. Try set_G() for manual setting.
         Set the column vector :math:`H` for the inequality constraints.
         '''
 
-        self.__check_variable_validity(H, "H", [ca.casadi_core.SX], 1)
+        self.__check_type_and_shape_validity(H, "H", [ca.casadi_core.SX, \
+            ca.casadi_core.MX], 1)
+
+        for attr in ['__x', '__M', '__H']:
+
+            try:
+
+                self.__check_type_consistency(H, getattr(self, attr))
+
+            # If a variable in comparison has not been set up so far, an
+            # AttributeError exception will be thrown
+
+            except AttributeError:
+
+                continue
 
         self.__H = H
+        self.__n = self.__H.shape[0]
 
 
     def get_H(self):
 
         '''
-        :returns: casadi.casadi_core.SX - the column vector
+        :returns: casadi.casadi_core.SX/.MX - the column vector
                   :math:`H` for the inequality constraints.
         :raises: AttributeError
         :catches: AttributeError
@@ -463,7 +567,7 @@ No data for H has been provided so far. Try set_H() for manual setting.
         of :math:`x`.
         '''
 
-        self.__check_variable_validity(xinit, "xinit", [np.ndarray, \
+        self.__check_type_and_shape_validity(xinit, "xinit", [np.ndarray, \
             cat.structure.DMatrixStruct], 1)
 
         self.__xinit = xinit
@@ -511,10 +615,10 @@ No data for xinit has been provided so far. Try set_xinit() for manual setting.
         of :math:`x`.
         '''
 
-        self.__check_variable_validity(xmin, "xmin", [np.ndarray, \
+        self.__check_type_and_shape_validity(xmin, "xmin", [np.ndarray, \
             cat.structure.DMatrixStruct], 1)
 
-        self.__check_variable_consistency("x", self.__x.shape[0], \
+        self.__check_dimensional_consistency("x", self.__x.shape[0], \
             "xmin", xmin.shape[0])
 
         self.__xmin = xmin
@@ -562,10 +666,10 @@ No data for xmin has been provided so far. Try set_xmin() for manual setting.
         of :math:`x`.
         '''
 
-        self.__check_variable_validity(xmax, "xmax", [np.ndarray, \
+        self.__check_type_and_shape_validity(xmax, "xmax", [np.ndarray, \
             cat.structure.DMatrixStruct], 1)
 
-        self.__check_variable_consistency("x", self.__x.shape[0], \
+        self.__check_dimensional_consistency("x", self.__x.shape[0], \
             "xmax", xmax.shape[0])
 
         self.__xmax = xmax
@@ -638,6 +742,20 @@ No data for xmax has been provided so far. Try set_xmax() for manual setting.
         '''
 
         return self.__m
+
+
+    def get_n(self):
+
+        '''
+        :returns: int - the scalar value
+                  :math:`n \in \mathbb{N}^{+}_{0}` 
+                  containing the number of inequality constraints.
+
+        Get the scalar value :math:`n` containing the number of inequality
+        constraints.
+        '''
+
+        return self.__n
 
     # -----------------------------------------------------------------------#
 
@@ -765,10 +883,11 @@ compute_covariance_matrix() first.
 
         :param x: Column vector :math:`x \in \mathbb{R}^{d}` for the
                   parameters.
-        :type x: casadi.casadi_core.SX, casadi.tools.structure.ssymStruct
+        :type x: casadi.casadi_core.SX/.MX,
+                 casadi.tools.structure.ssymStruct/.msymStruct
 
         :param M: Column vector :math:`M \in \mathbb{R}^{N}` for the model.
-        :type M: casadi.casadi_core.SX
+        :type M: casadi.casadi_core.SX/.MX
 
         :param sigma: Column vector :math:`\sigma \in \mathbb{R}^{N}` for
                       the standard deviations.
@@ -794,10 +913,10 @@ compute_covariance_matrix() first.
 
         :param G: Column vector :math:`G \in (0)^{m}` for the
                   equality constraints.
-        :type G: casadi.casadi_core.SX
+        :type G: casadi.casadi_core.SX/.MX
 
         :param H: Column vector :math:`H \in (\mathbb{R}^{-}_{0})^{n}` for the inequality constraints.
-        :type H: casadi.casadi_core.SX
+        :type H: casadi.casadi_core.SX/.MX
 
         :param xinit: Column vector :math:`x_{init} \in \mathbb{R}^{d}` for the initial guess of the parameter values.
         :type xinit: numpy.ndarray, casadi.tools.structure.DMatrixStruct
@@ -817,6 +936,19 @@ compute_covariance_matrix() first.
         # Parameters
 
         self.set_x(x)
+
+        # Depending on the type of the parameter variable, determine whether
+        # the SX or the MX class is used, and with this, whether SXFunction or
+        # MXFunction is used to set up the CasADi functions within the class
+
+        if type(self.__x) is ca.casadi_core.SX or \
+            type(self.__x) is cat.structure.ssymStruct:
+
+            self.__CasADiFunction = ca.SXFunction
+
+        else:
+
+            self.__CasADiFunction = ca.MXFunction
 
         # Model
 
@@ -914,7 +1046,8 @@ Pseudo measurement data can only be generated if the true value of x, xtrue,
 is known. You can set xtrue manually using the function set_xtrue().
 ''')
 
-        self.__Mx = ca.SXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
+        self.__Mx = self.__CasADiFunction(ca.nlpIn(x=self.__x), \
+            ca.nlpOut(f=self.__M))
         self.__Mx.setOption("name", "Model function Mx")
         self.__Mx.init()
 
@@ -968,12 +1101,12 @@ is known. You can set xtrue manually using the function set_xtrue().
 
         if self.get_G(msg = False) is None:
 
-            self.__fx = ca.SXFunction(ca.nlpIn(x=self.__x), \
+            self.__fx = self.__CasADiFunction(ca.nlpIn(x=self.__x), \
                 ca.nlpOut(f=self.__f))
 
         else:
 
-            self.__fx = ca.SXFunction(ca.nlpIn(x=self.__x), \
+            self.__fx = self.__CasADiFunction(ca.nlpIn(x=self.__x), \
                 ca.nlpOut(f=self.__f, g=self.__G))
 
         self.__fx.init()
@@ -1099,7 +1232,7 @@ Execute run_parameter_estimation() before computing the covariance matrix.
 
         # Compute J1, J2
 
-        Mx = ca.SXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
+        Mx = self.__CasADiFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
         Mx.init()
 
         self.__J1 = ca.mul(ca.solve(np.sqrt(self.__Sigma), \
@@ -1109,7 +1242,7 @@ Execute run_parameter_estimation() before computing the covariance matrix.
 
         if self.get_G(msg = False) is not None:
 
-            Gx = ca.SXFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__G))
+            Gx = self.__CasADiFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__G))
             Gx.init()
 
             self.__J2 = Gx.jac("x", "f")
@@ -1138,7 +1271,7 @@ Execute run_parameter_estimation() before computing the covariance matrix.
 
         # Evaluate covariance matrix for xhat
 
-        self.__fCovx = ca.SXFunction(ca.nlpIn(x=self.__x), \
+        self.__fCovx = self.__CasADiFunction(ca.nlpIn(x=self.__x), \
             ca.nlpOut(f=self.__fCov))
         self.__fCovx.init()
 

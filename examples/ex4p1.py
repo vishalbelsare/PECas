@@ -143,7 +143,7 @@ xinit = pl.ones(3)
 # need to be adressed. Then the least squares parameter estimation for the
 # problem can be obtained.
 #==============================================================================
-pep = pc.PECasProb(Theta, simvx, sigma, Y = vxm, xinit = xinit)
+pep = pc.PECasLsq(Theta, simvx, sigma, Y = vxm, xinit = xinit)
 pep.run_parameter_estimation()
 
 #==============================================================================

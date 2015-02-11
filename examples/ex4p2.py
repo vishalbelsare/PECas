@@ -38,14 +38,14 @@ simvx[0] = Theta[3]
 
 for k in xrange(1, t.size):
 
-    simvx[k] = fvx([Theta[0], Theta[1], Theta[2], simvx[k-1],
-                   t[k] - t[k-1], Dk[k]])[0]
+    simvx[k] = fvx([Theta[0], Theta[1], Theta[2], simvx[k-1], \
+               t[k] - t[k-1], Dk[k-1]])[0]
 
 
 sigma = pl.ones(t.size)
 xinit = pl.ones(4)
 
-pep = pc.PECasProb(Theta, simvx, sigma, Y=vxm, xinit=xinit)
+pep = pc.PECasLSq(Theta, simvx, sigma, Y = vxm, xinit = xinit)
 pep.run_parameter_estimation()
 
 print pep.get_xhat()

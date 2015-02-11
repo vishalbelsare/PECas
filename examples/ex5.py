@@ -27,7 +27,7 @@ A_m = (A_a - A_i) / pl.log(A_a / A_i)
 V = pl.pi * r_i**2 * h
 m = rho * V
 
-T_out = C2K(18)
+T_amb = C2K(22)
 
 T2 = ca.SX.sym("T2", 1)
 T1 = ca.SX.sym("T1", 1)
@@ -37,10 +37,10 @@ t1 = ca.SX.sym("t1", 1)
 
 lambda_g = ca.SX.sym("lambda_g", 1)
 
-# T2 = (((lambda_g * A_m * (t2 - t1)) / delta) * T_out + m * c * T1) / \
+# T2 = (((lambda_g * A_m * (t2 - t1)) / delta) * T_amb + m * c * T1) / \
 #     (m * c + ((lambda_g * A_m * (t2 - t1)) / delta))
 
-T2 = (((lambda_g * A_m * (t2 - t1)) / delta) * T_out + \
+T2 = (((lambda_g * A_m * (t2 - t1)) / delta) * T_amb + \
     (m * c - ((lambda_g * A_m * (t2 - t1)) / (2 * delta))) * T1) / \
     (m * c + ((lambda_g * A_m * (t2 - t1)) / (2 * delta)))
 
@@ -54,22 +54,21 @@ fT2.init()
 # Load measurements data when available, and
 # replace values of t by real measurement time when available
 
-# data = pl.loadtxt("meas.txt")
-# t = data[:,0]
-# t_end = t[-1:]
-# N = len(t)
-#
-# Y = data[:,1]
-# T_start = Y[0]
-#
+data = pl.loadtxt("meas_stirred_dunked.txt")
+t = data[:,0]
+t_end = t[-1:]
+N = len(t)
 
-t_end = 600
-N = 1000
-t = pl.linspace(0,t_end,N)
+Y = C2K(data[:,1])
+T_start = Y[0]
 
-T_start = C2K(70)
+
+# t_end = 600
+# N = 1000
+# t = pl.linspace(0,t_end,N)
+
 lambda_g_lit = 0.76
-sigma = 0.5 * pl.ones(N)
+sigma = 1 * pl.ones(N)
 
 # Simulation
 
@@ -84,11 +83,11 @@ for k in range(N-1):
 # Setup PECas and generate pseudo measurement data;
 # insert data here when measurements are available
 #
-# pep = pe.PECasProb(lambda_g, T_sim, sigma, Y = Y)
+pep = pe.PECasLSq(lambda_g, T_sim, sigma, Y = Y)
 #
 
-pep = pe.PECasProb(lambda_g, T_sim, sigma, xtrue = pl.array(lambda_g_lit))
-pep.generate_pseudo_measurement_data()
+# pep = pe.PECasLSq(lambda_g, T_sim, sigma, xtrue = pl.array(lambda_g_lit))
+# pep.generate_pseudo_measurement_data()
 
 pep.run_parameter_estimation()
 pep.compute_covariance_matrix()
@@ -107,7 +106,10 @@ fT_sim.evaluate()
 
 f_sim = fT_sim.getOutput("f")
 
-pl.plot(t, f_sim, color = "g")
-pl.scatter(t, pep.get_Y(), s = 2)
+pl.plot(t, f_sim, color = "b", label = "fitted forward simulation")
+pl.scatter(t, pep.get_Y(), color = 'k', s = 2, label = "measurements")
 pl.xlim((t[0], t[-1:]))
+pl.xlabel("time [s]")
+pl.ylabel("temperature [K]")
+pl.legend()
 pl.show()

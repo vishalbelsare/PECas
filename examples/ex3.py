@@ -23,11 +23,11 @@ xinit = np.array([1, 1])
 
 # Then, define a column vector xtrue of type numpy.ndarray for the true
 # values of the parameters, and create an instance pep of the class
-# PECasProb providing all information.
+# PECasLSq providing all information.
 
 xtrue = np.array([1, 1])
 
-pep = pecas.PECasProb(x, M, sigma, xtrue = xtrue, G = G, xinit = xinit)
+pep = pecas.PECasLSq(x, M, sigma, xtrue = xtrue, G = G, xinit = xinit)
 
 # Afterwards, the class instance pep can be used to generate pseudo
 # measurement data that will be stored as measurement data inside the object.
