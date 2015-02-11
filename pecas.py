@@ -118,7 +118,8 @@ and "{2}" ({3}) do not match.'''.format(\
         '''
         :param x: Column vector :math:`x \in \mathbb{R}^{d}` for the
                   parameters.
-        :type x: casadi.casadi_core.SX, casadi.tools.structure.ssymStruct
+        :type x: casadi.casadi_core.SX/.MX,
+                 casadi.tools.structure.ssymStruct/.msymStruct
         :raises: ValueError
 
         *This function is called automatically at the initialization of the
@@ -129,7 +130,22 @@ and "{2}" ({3}) do not match.'''.format(\
         '''
 
         self.__check_type_and_shape_validity(x, "x", [ca.casadi_core.SX, \
-            cat.structure.ssymStruct], 1)
+            ca.casadi_core.MX, cat.structure.ssymStruct, \
+            cat.structure.msymStruct], 1)
+
+        for var in [self.__M, self.__G, self.__H]:
+
+            try:
+
+                self.__check_type_consistency(x, var)
+
+            # If a variable in comparison has not been set up so far, an
+            # AttributeError exception will be thrown
+
+            except AttributeError:
+
+                continue
+
         self.__x = x
         self.__d = self.__x.shape[0]
 
@@ -137,7 +153,8 @@ and "{2}" ({3}) do not match.'''.format(\
     def get_x(self):
 
         '''
-        :returns: casadi.casadi_core.SX, casadi.tools.structure.ssymStruct
+        :returns: casadi.casadi_core.SX/.MX,
+                  casadi.tools.structure.ssymStruct/.msymStruct
                   - the column vector
                   :math:`x \in \mathbb{R}^{d}` for the parameters.
 
@@ -154,7 +171,7 @@ and "{2}" ({3}) do not match.'''.format(\
         '''
         :param M: Column vector :math:`M \in \mathbb{R}^{N}` for the
                   model.
-        :type M: casadi.casadi_core.SX
+        :type M: casadi.casadi_core.SX/.MX
         :raises: AttributeError, ValueError
         :catches: AttributeError
 
@@ -167,7 +184,8 @@ and "{2}" ({3}) do not match.'''.format(\
         an exception will be raised.
         '''
 
-        self.__check_type_and_shape_validity(M, "M", [ca.casadi_core.SX], 1)
+        self.__check_type_and_shape_validity(M, "M", [ca.casadi_core.SX, \
+            ca.casadi_core.MX], 1)
 
         try:
 
@@ -181,6 +199,19 @@ and "{2}" ({3}) do not match.'''.format(\
 
             pass
 
+        for var in [self.__x, self.__G, self.__H]:
+
+            try:
+
+                self.__check_type_consistency(x, var)
+
+            # If a variable in comparison has not been set up so far, an
+            # AttributeError exception will be thrown
+
+            except AttributeError:
+
+                continue
+
         self.__M = M
         self.__N = self.__M.shape[0]
 
@@ -188,7 +219,7 @@ and "{2}" ({3}) do not match.'''.format(\
     def get_M(self):
 
         '''
-        :returns: casadi.casadi_core.SX - the column vector
+        :returns: casadi.casadi_core.SX/.MX - the column vector
                   :math:`M  \in \mathbb{R}^{N}` for the model.
 
         Get the column vector :math:`M` for the model.
@@ -391,7 +422,7 @@ No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
         '''
         :param G: Column vector :math:`G \in \mathbb{R}^{m}` for the
                   equality constraints.
-        :type G: casadi.casadi_core.SX
+        :type G: casadi.casadi_core.SX/.MX
         :raises: ValueError
 
         *If data is provided, this function is called automatically at the
@@ -402,7 +433,21 @@ No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
         constraints.
         '''
 
-        self.__check_type_and_shape_validity(G, "G", [ca.casadi_core.SX], 1)
+        self.__check_type_and_shape_validity(G, "G", [ca.casadi_core.SX, \
+            ca.casadi_core.MX], 1)
+
+        for var in [self.__x, self.__M, self.__H]:
+
+            try:
+
+                self.__check_type_consistency(x, var)
+
+            # If a variable in comparison has not been set up so far, an
+            # AttributeError exception will be thrown
+
+            except AttributeError:
+
+                continue
 
         self.__G = G
         self.__m = self.__G.shape[0]
@@ -412,7 +457,7 @@ No data for xtrue has been provided so far. Try set_xtrue() for manual setting.
         '''
         :param msg: Flag to switch on/off display of error message.
         :type msg: bool
-        :returns: casadi.casadi_core.SX - the column vector
+        :returns: casadi.casadi_core.SX/.MX - the column vector
                   :math:`G \in \mathbb{R}^{m}` for the equality constraints.
         :raises: AttributeError
         :catches: AttributeError
@@ -439,7 +484,7 @@ No data for G has been provided so far. Try set_G() for manual setting.
         '''
         :param H: Column vector :math:`H` for the
                   inequality constraints.
-        :type H: casadi.casadi_core.SX
+        :type H: casadi.casadi_core.SX/.MX
         :raises: ValueError
 
         *If data is provided, this function is called automatically at the
@@ -448,15 +493,30 @@ No data for G has been provided so far. Try set_G() for manual setting.
         Set the column vector :math:`H` for the inequality constraints.
         '''
 
-        self.__check_type_and_shape_validity(H, "H", [ca.casadi_core.SX], 1)
+        self.__check_type_and_shape_validity(H, "H", [ca.casadi_core.SX, \
+            ca.casadi_core.MX], 1)
+
+        for var in [self.__x, self.__M, self.__H]:
+
+            try:
+
+                self.__check_type_consistency(x, var)
+
+            # If a variable in comparison has not been set up so far, an
+            # AttributeError exception will be thrown
+
+            except AttributeError:
+
+                continue
 
         self.__H = H
+        self.__n = self.__H.shape[0]
 
 
     def get_H(self):
 
         '''
-        :returns: casadi.casadi_core.SX - the column vector
+        :returns: casadi.casadi_core.SX/.MX - the column vector
                   :math:`H` for the inequality constraints.
         :raises: AttributeError
         :catches: AttributeError
@@ -666,6 +726,20 @@ No data for xmax has been provided so far. Try set_xmax() for manual setting.
         '''
 
         return self.__m
+
+
+    def get_n(self):
+
+        '''
+        :returns: int - the scalar value
+                  :math:`n \in \mathbb{N}^{+}_{0}` 
+                  containing the number of inequality constraints.
+
+        Get the scalar value :math:`n` containing the number of inequality
+        constraints.
+        '''
+
+        return self.__n
 
     # -----------------------------------------------------------------------#
 
