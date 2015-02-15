@@ -1093,7 +1093,7 @@ is known. You can set xtrue manually using the function set_xtrue().
 
         # Set up the cost function f
 
-        A = ca.mul(np.linalg.solve(np.sqrt(self.__Sigma), np.eye(self.__N)), \
+        A = ca.mul(np.linalg.solve(self.__Sigma, np.eye(self.__N)), \
             (self.__M - self.__Y))
         self.__f = ca.mul(A.T, A)
 
@@ -1235,7 +1235,7 @@ Execute run_parameter_estimation() before computing the covariance matrix.
         Mx = self.__CasADiFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
         Mx.init()
 
-        self.__J1 = ca.mul(ca.solve(np.sqrt(self.__Sigma), \
+        self.__J1 = ca.mul(ca.solve(self.__Sigma, \
             np.eye(self.__N)), Mx.jac("x", "f"))
 
         # Compute Jplus and covariance matrix
