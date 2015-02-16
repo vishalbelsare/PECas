@@ -1069,7 +1069,7 @@ is known. You can set xtrue manually using the function set_xtrue().
 
         .. math::
 
-            ~ & \hat{x} = \text{arg}\, & \underset{x}{\text{min}}\|M(x)-Y\|_{2}^{2}\\
+            ~ & \hat{x} = \text{arg}\, & \underset{x}{\text{min}}\|M(x)-Y\|_{\Sigma_{\epsilon}^{-1}}^{2}\\
             \text{s. t.}&~&~\\
             ~ & ~ & G = 0\\
             ~ & ~ & H \leq 0\\
