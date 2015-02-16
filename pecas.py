@@ -1335,7 +1335,7 @@ compute_covariance_matrix() before all results can be displayed.
         This function plots the confidence ellipsoids pairwise for all
         parameters defined in ``indices``. The plots are displayed in subplots
         inside of one plot window. For naming the plots, the variable names
-        defined within the SX-variables that contain the parameters are used.
+        defined within the SX/MX-variables that contain the parameters are used.
 
         :param indices: List of the indices of the parameters in :math:`x` for
                         which the confidence ellipsoids shall be plotted.
