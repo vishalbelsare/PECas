@@ -289,7 +289,7 @@ and "{2}" ({3}) do not match.'''.format(\
 
         # Set up the covariance matrix of the error
 
-        self.__Sigma = np.diag(pl.squeeze(sigma))
+        self.__Sigma_eps = pl.diag(pl.squeeze(pl.square(sigma)))
 
 
     def get_sigma(self):
@@ -305,7 +305,7 @@ and "{2}" ({3}) do not match.'''.format(\
         return self.__sigma
 
 
-    def get_Sigma(self):
+    def get_Sigma_eps(self):
 
         '''
         :returns: numpy.ndarray - the covariance matrix
@@ -315,7 +315,7 @@ and "{2}" ({3}) do not match.'''.format(\
         Get the covariance matrix of the error :math:`\Sigma_{\epsilon}.`
         '''
 
-        return self.__Sigma
+        return self.__Sigma_eps
 
     # -----------------------------------------------------------------------#
 
@@ -1093,7 +1093,7 @@ is known. You can set xtrue manually using the function set_xtrue().
 
         # Set up the cost function f
 
-        A = ca.mul(np.linalg.solve(np.sqrt(self.__Sigma), np.eye(self.__N)), \
+        A = ca.mul(np.linalg.solve(np.sqrt(self.__Sigma_eps), np.eye(self.__N)), \
             (self.__M - self.__Y))
         self.__f = ca.mul(A.T, A)
 
@@ -1235,7 +1235,7 @@ Execute run_parameter_estimation() before computing the covariance matrix.
         Mx = self.__CasADiFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
         Mx.init()
 
-        self.__J1 = ca.mul(ca.solve(np.sqrt(self.__Sigma), \
+        self.__J1 = ca.mul(ca.solve(np.sqrt(self.__Sigma_eps), \
             np.eye(self.__N)), Mx.jac("x", "f"))
 
         # Compute Jplus and covariance matrix
