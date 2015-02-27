@@ -50,18 +50,20 @@ def mainEx6EIMX():
     fphiw.init()
     
     
-    # simsloop
+    # simsloop    
+    Model_phi = []
+    Model_w = []
+    Model_phi.append(Theta[0])    
+    Model_w.append(Theta[1])    
+
+    for k in xrange(1, t.size):
+        Model_fun = fphiw([Theta, Model_phi[k-1], Model_w[k-1],
+                        t[k] - t[k-1]])
+        Model_phi.append(Model_fun[0])
+        Model_w.append(Model_fun[1])
     
-    Model = ca.MX.zeros(2*N, 1)    
-    Model[0] = Theta[0]
-    Model[t.size] = Theta[1]
-    
-    for k_phi in xrange(1, N):
-        k_w = t.size+k_phi
-        simfun = fphiw([Theta, Model[k_phi-1], Model[k_w-1],
-                        t[k_phi] - t[k_phi-1]])
-        Model[k_phi] = simfun[0]
-        Model[k_w] = simfun[1]
+    Model_phi.extend(Model_w)
+    Model = ca.vertcat(Model_phi)  
     
     sigmaphi = pl.ones(t.size)*pl.std(phim, ddof=1)
     sigmaw = pl.ones(t.size)*pl.std(wm, ddof=1)

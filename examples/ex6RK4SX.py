@@ -48,17 +48,19 @@ def mainEx6EISX():
     # simsloop
     Theta = ca.SX.sym("Theta", 3)
     
-    simphiw = ca.SX.sym("simphiw", t.size*2)
-    simphiw[0] = Theta[0]
-    simphiw[t.size] = Theta[1]
+    simphi = []
+    simw = []
+    simphi.append(Theta[0])    
+    simw.append(Theta[1])    
+
+    for k in xrange(1, t.size):
+        simfun = fphiw.call([Theta[2], simphi[k-1], simw[k-1],
+                        t[k] - t[k-1]])
+        simphi.append(simfun[0])
+        simw.append(simfun[1])
     
-    for k_phi in xrange(1, t.size):
-        k_w = t.size+k_phi
-        simfun = fphiw([Theta[2], simphiw[k_phi-1], simphiw[k_w-1],
-                        t[k_phi] - t[k_phi-1]])
-        simphiw[k_phi] = simfun[0]
-        simphiw[k_w] = simfun[1]
-    
+    simphi.extend(simw)
+    simphiw = ca.vertcat(simphi)  
     sigmaphi = pl.ones(t.size)*pl.std(phim, ddof=1)
     sigmaw = pl.ones(t.size)*pl.std(wm, ddof=1)
     sigma = pl.concatenate([sigmaphi, sigmaw])
