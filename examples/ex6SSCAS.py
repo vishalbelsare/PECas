@@ -134,7 +134,8 @@ def mainEx6SS():
 #        [phi0,phi1.....,phiN,w0,w1,.......,wN].T
 #==============================================================================
     Theta = ca.MX.sym("Theta", 3)
-    Model = ca.MX.zeros(2*N, 1)
+    Model_phi = []
+    Model_w = []
 
 #==============================================================================
 # Define the variable representing the current state X at any time k, and asigns
@@ -142,13 +143,13 @@ def mainEx6SS():
 # first value of the Model are also assigned.
 #==============================================================================
     X = ca.vertcat([Theta[0], Theta[1]])
-    Model[0] = X[0]
-    Model[t.size] = X[1]
+    Model_phi.append(X[0])
+    Model_w.append(X[1])
     
 #==============================================================================
 # In a iterative fashion, the different discrete states X(k) = [phi(k), w(k)] 
 # are obtained. For that, we use the Casadi integrator function, which 
-# integrates the ODE of the system on a small time step ΔT, taking as initial
+# integrates the ODE of the system on a small time step dT, taking as initial
 # state X(k-1) and ending at X(k). IThe first state has to be the unknown
 # the X(t=0) = [phi0,w0] = [Theta[0], Theta[1]] that will be estimated.
 # Using the Casadi integrator input scheme, the 2 required inputs are defined:
@@ -172,8 +173,11 @@ def mainEx6SS():
         integrator.setOption("tf", t[k]-t[k-1])
         X = ca.integratorOut(integrator(ca.integratorIn(x0=X,
                               p=Theta)), "xf")[0]
-        Model[k] = X[0]
-        Model[k+t.size] = X[1]
+        Model_phi.append(X[0])
+        Model_w.append(X[1])
+        
+    Model_phi.extend(Model_w)
+    Model = ca.vertcat(Model_phi)
     
 #==============================================================================
 # Definition of the standar deviations each of the measurements. Since no data
