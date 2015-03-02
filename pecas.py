@@ -495,63 +495,6 @@ No data for G has been provided so far. Try set_G() for manual setting.
     # -----------------------------------------------------------------------#
 
 
-    def set_H(self, H):
-
-        '''
-        :param H: Column vector :math:`H` for the
-                  inequality constraints.
-        :type H: casadi.casadi_core.SX/.MX
-        :raises: ValueError
-
-        *If data is provided, this function is called automatically at the
-        initialization of the object.*
-
-        Set the column vector :math:`H` for the inequality constraints.
-        '''
-
-        self.__check_type_and_shape_validity(H, "H", [ca.casadi_core.SX, \
-            ca.casadi_core.MX], 1)
-
-        for attr in ['__x', '__M', '__H']:
-
-            try:
-
-                self.__check_type_consistency(H, getattr(self, attr))
-
-            # If a variable in comparison has not been set up so far, an
-            # AttributeError exception will be thrown
-
-            except AttributeError:
-
-                continue
-
-        self.__H = H
-        self.__n = self.__H.shape[0]
-
-
-    def get_H(self):
-
-        '''
-        :returns: casadi.casadi_core.SX/.MX - the column vector
-                  :math:`H` for the inequality constraints.
-        :raises: AttributeError
-        :catches: AttributeError
-
-        Get the column vector :math:`H` for the inequality constraints.
-        If no data has been provided, the function will raise and
-        catch an exception and display possible solutions to the user.
-        '''
-
-        try:
-            return self.__H
-        except AttributeError:
-            print('''
-No data for H has been provided so far. Try set_H() for manual setting.
-''')
-
-    # -----------------------------------------------------------------------#
-
-
     def set_xinit(self, xinit):
 
         '''
@@ -915,9 +858,6 @@ compute_covariance_matrix() first.
                   equality constraints.
         :type G: casadi.casadi_core.SX/.MX
 
-        :param H: Column vector :math:`H \in (\mathbb{R}^{-}_{0})^{n}` for the inequality constraints.
-        :type H: casadi.casadi_core.SX/.MX
-
         :param xinit: Column vector :math:`x_{init} \in \mathbb{R}^{d}` for the initial guess of the parameter values.
         :type xinit: numpy.ndarray, casadi.tools.structure.DMatrixStruct
 
@@ -984,11 +924,6 @@ in xtrue so pseudo measurement data can be created for parameter estimation.
             self.set_G(G)
         else:
             self.__m = 0
-
-        # Inequality constrains
-
-        if H is not None:
-            self.set_H(H)
 
         # Initial guess
 
