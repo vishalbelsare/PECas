@@ -1,5 +1,7 @@
 import casadi as ca
 import casadi.tools as cat
+import pylab as pl
+from abc import ABCMeta, abstractmethod
 
 class BPEval:
 
@@ -7,13 +9,14 @@ class BPEval:
 
         self.Y = []
         self.G = []
+        self.N = N
 
         self.V = cat.struct_symMX([
                 (
-                    cat.entry("T", repeat = [N], shape = bp.v["t"].shape),
-                    cat.entry("U", repeat = [N], shape = bp.v["u"].shape),
+                    cat.entry("T", repeat = [self.N], shape = bp.v["t"].shape),
+                    cat.entry("U", repeat = [self.N], shape = bp.v["u"].shape),
                     cat.entry("P", shape = bp.v["p"].shape),
-                    cat.entry("W", repeat = [N], shape = bp.fcn["g"].shape)
+                    cat.entry("W", repeat = [self.N], shape = bp.fcn["g"].shape)
                 )
             ])
 
@@ -23,7 +26,7 @@ class BPEval:
         gfcn = ca.SXFunction([bp.v["t"], bp.v["u"], bp.v["p"]], [bp.fcn["g"]])
         gfcn.init()
 
-        for k in range(N):
+        for k in range(self.N):
 
             self.Y.append(yfcn.call([self.V["T"][k], self.V["U"][k], \
                 self.V["P"]])[0])
@@ -34,36 +37,100 @@ class BPEval:
         self.G = ca.vertcat(self.G)
 
 
-class ODESolSingleShooting:
+class CollocationBase(object):
 
-    def __init__(self, op, N, x0):
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def __init__(self, op, N):
 
         self.Y = []
         self.G = []
+        self.N = N
 
-        self.V = cat.struct_MX([
+        self.tau_root = ca.collocationPoints(3, "radau")
+
+        # Degree of interpolating polynomial
+
+        self.d = len(self.tau_root) - 1
+
+        self.V = cat.struct_symMX([
                 (
-                    cat.entry("T", repeat = [N], shape = op.v["t"].shape),
-                    cat.entry("U", repeat = [N], shape = op.v["u"].shape),
-                    cat.entry("X", repeat = [N], shape = op.v["x"].shape),
+                    cat.entry("T", repeat = [self.N], shape = op.v["t"].shape),
+                    cat.entry("U", repeat = [self.N, self.d], shape = op.v["u"].shape),
+                    cat.entry("X", repeat = [self.N+1, self.d+1], shape = op.v["x"].shape),
                     cat.entry("P", shape = op.v["p"].shape),
-                    cat.entry("W", repeat = [N], shape = op.fcn["g"].shape)
+                    cat.entry("W", repeat = [self.N], shape = op.v["x"].shape)
                 )
             ])
 
-        ffcn = ca.SXFunction([op.v["t"], op.v["u"], op.v["x"], op.v["p"]],
-            [op.fcn["f"]])
-        ffcn.init()
 
-        # self.V["X", 0, :] = x0
+        # Coefficients of the collocation equation
 
-        for k in range(N-1):
+        self.C = pl.zeros((self.d + 1, self.d + 1))
 
-            [K1] = ffcn.call([self.V["T", k], self.V["U", k, :], self.V["X", k, :], self.V["P", :]])
-            [K2] = ffcn.call([self.V["T", k], self.V["U", k, :], self.V["X", k, :] + 0.5 * K1 * (self.V["T", k+1] - self.V["T", k]), self.V["P", :]])
-            [K3] = ffcn.call([self.V["T", k], self.V["U", k, :], self.V["X", k, :] + 0.5 * K2 * (self.V["T", k+1] - self.V["T", k]), self.V["P", :]])
-            [K4] = ffcn.call([self.V["T", k], self.V["U", k, :], self.V["X", k, :] + K3 * (self.V["T", k+1] - self.V["T", k]), self.V["P", :]])
+        # Coefficients of the continuity equation
 
-            self.V["X", k+1, :] = (1.0 / 6.0) * (K1 + 2 * K2 + 2 * K3 + K4) * (self.V["T", k+1] - self.V["T", k])
+        self.D = pl.zeros(self.d + 1)
 
-            # self.V["X", k + 1, :] = ca.integratorOut(integrator(ca.integratorIn([self.V["T", k], self.V["U", k, :], self.V["X", k, :], self.V["P", :]])))
+        # Dimensionless time inside one control interval
+
+        self.tau = ca.SX.sym("tau")
+
+        # Construct the matrix T that contains all collocation time points
+
+        self.T = pl.zeros((self.N, self.d + 1))
+
+        for k in range(self.N):
+
+            for j in range(self.d + 1):
+
+                self.T[k,j] = self.V["T", k] + \
+                    (self.V["T", k+1] - self.V["T", k]) * self.tau_root[j]
+
+        # For all collocation points
+
+        for j in range(self.d + 1):
+
+            # Construct Lagrange polynomials to get the polynomial basis
+            # at the collocation point
+            
+            L = 1
+            
+            for r in range(self.d + 1):
+            
+                if r != j:
+            
+                    L *= (self.tau - self.tau_root[r]) / \
+                        (self.tau_root[j] - self.tau_root[r])
+            
+            lfcn = ca.SXFunction([self.tau],[L])
+            lfcn.init()
+          
+            # Evaluate the polynomial at the final time to get the
+            # coefficients of the continuity equation
+            
+            lfcn.setInput(1.0)
+            lfcn.evaluate()
+            self.D[j] = lfcn.getOutput()
+
+            # Evaluate the time derivative of the polynomial at all 
+            # collocation points to get the coefficients of the
+            # continuity equation
+            
+            tfcn = lfcn.tangent()
+            tfcn.init()
+
+            for r in range(self.d + 1):
+
+                tfcn.setInput(self.tau_root[r])
+                tfcn.evaluate()
+                self.C[j,r] = tfcn.getOutput()
+
+
+class ODECollocation(CollocationBase):
+
+    def __init__(self, op, N):
+
+        super(ODECollocation, self).__init__(op, N)
+

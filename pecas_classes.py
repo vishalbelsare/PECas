@@ -38,4 +38,4 @@ class ODEProblem(BasicProblem):
                  y = None, \
                  f = None, g = ca.SX.sym("g", 0)):
 
-        super(ODEProblem, self).__init__(t = t, u = u, x = x, z = z, p = p, y = y, f = f, g = g)
+        super(ODEProblem, self).__init__(t = t, u = u, x = x, p = p, y = y, f = f)
