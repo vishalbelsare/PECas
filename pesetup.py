@@ -182,6 +182,7 @@ class CollocationBaseClass(PESetupBaseClass):
             x0min = x0min, x0max = x0max, \
             xNmin = xNmin, xNmax = xNmax)
 
+
     @abstractmethod
     def __init__(self, system = None, timegrid = None, \
         umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
