@@ -5,12 +5,15 @@ from abc import ABCMeta, abstractmethod
 
 class BSEvaluation:
 
-    def __init__(self, bp = None, timegrid = None):
+    def __init__(self, bp = None, timegrid = None, \
+        umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
+        uinit = pl.zeros(1), \
+        pmin = -pl.inf, pmax = pl.inf, pinit = 0.0):
 
-        self.Y = []
-        self.G = []
         self.timegrid = timegrid
         self.N = timegrid.shape[0]
+
+        # Define the struct holding the variables
 
         self.V = cat.struct_symMX([
                 (
@@ -21,6 +24,39 @@ class BSEvaluation:
 
         yfcn = ca.SXFunction([bp.v["t"], bp.v["u"], bp.v["p"]], [bp.fcn["y"]])
         yfcn.init()
+
+        # Define bounds and initial values
+
+        self.Vmin = self.V()
+        self.Vmax = self.V()
+        self.Vinit = self.V()
+
+        # Set controls and its bounds
+
+        if not self.nu == 0:
+
+            if self.nu == 1:
+
+                uinit = uinit[pl.newaxis,:]
+                umin = umin[pl.newaxis,:]
+                umax= umax[pl.newaxis,:]
+
+            for k in range(self.N):
+
+                self.Vinit["U", k, :] = ca.tools.repeated(uinit[:,k])
+                self.Vmin["U", k, :] = ca.tools.repeated(umin[:,k])
+                self.Vmax["U", k, :] = ca.tools.repeated(umax[:,k])
+
+        # Parameters
+
+        self.Vinit["P",:] = self.repeat_input(pinit, self.np)
+        self.Vmin["P",:] = self.repeat_input(pmin, self.np)
+        self.Vmax["P",:] = self.repeat_input(pmax, self.np)
+
+        # Set up Y and G
+
+        self.Y = []
+        self.G = []
 
         for k in range(self.N):
 
@@ -49,12 +85,12 @@ class CollocationBaseClass(object):
 
     @abstractmethod
     def __init__(self, op = None, timegrid = None, \
-        xmin = -pl.inf, xmax = pl.inf, \
-        x0min = -pl.inf, x0max = pl.inf, \
-        xNmin = -pl.inf, xNmax = pl.inf, xinit = 0.0, \
         umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
         uinit = pl.zeros(1), \
-        pmin = -pl.inf, pmax = pl.inf, pinit = 0.0):
+        pmin = -pl.inf, pmax = pl.inf, pinit = 0.0, \
+        xmin = -pl.inf, xmax = pl.inf, \
+        x0min = -pl.inf, x0max = pl.inf, \
+        xNmin = -pl.inf, xNmax = pl.inf, xinit = 0.0):
 
         self.Y = []
         self.G = []
@@ -71,6 +107,8 @@ class CollocationBaseClass(object):
 
         self.d = len(self.tau_root) - 1
 
+        # Define the struct holding the variables
+
         self.V = cat.struct_symMX([
                 (
                     cat.entry("U", repeat = [self.N, self.d], shape = self.nu),
@@ -79,6 +117,61 @@ class CollocationBaseClass(object):
                     cat.entry("W", repeat = [self.N], shape = self.nx)
                 )
             ])
+
+        # Define bounds and initial values
+
+        self.Vmin = self.V()
+        self.Vmax = self.V()
+        self.Vinit = self.V()
+
+        # Set states and its bounds
+
+        self.Vinit["X",:,:] = ca.tools.repeated( \
+            ca.tools.repeated(self.repeat_input(xinit, self.nx)))
+
+        self.Vmin["X",:,:] = ca.tools.repeated( \
+            ca.tools.repeated(self.repeat_input(xmin, self.nx)))
+
+        self.Vmax["X",:,:] = ca.tools.repeated( \
+            ca.tools.repeated(self.repeat_input(xmax, self.nx)))
+
+        # Set controls and its bounds
+
+        if not self.nu == 0:
+
+            if self.nu == 1:
+
+                uinit = uinit[pl.newaxis,:]
+                umin = umin[pl.newaxis,:]
+                umax= umax[pl.newaxis,:]
+
+            for k in range(self.N):
+
+                self.Vinit["U", k, :] = ca.tools.repeated(uinit[:,k])
+                self.Vmin["U", k, :] = ca.tools.repeated(umin[:,k])
+                self.Vmax["U", k, :] = ca.tools.repeated(umax[:,k])
+
+        # State at initial time
+
+        self.Vmin["X",0,0] = self.repeat_input(x0min, self.nx)
+        self.Vmax["X",0,0] = self.repeat_input(x0max, self.nx)
+
+        # State at end time
+
+        self.Vmin["X",-1,0] = self.repeat_input(xNmin, self.nx)
+        self.Vmax["X",-1,0] = self.repeat_input(xNmax, self.nx)
+
+        # Disturbances
+
+        self.Vinit["W",:] = ca.tools.repeated(0.0)
+        self.Vmin["W",:] = ca.tools.repeated(-pl.inf)
+        self.Vmax["W",:] = ca.tools.repeated(pl.inf)
+
+        # Parameters
+
+        self.Vinit["P",:] = self.repeat_input(pinit, self.np)
+        self.Vmin["P",:] = self.repeat_input(pmin, self.np)
+        self.Vmax["P",:] = self.repeat_input(pmax, self.np)
 
 
         # Coefficients of the collocation equation
@@ -144,71 +237,15 @@ class CollocationBaseClass(object):
                 self.C[j,r] = tfcn.getOutput()
 
 
-        # Define bounds and initial values
-
-        self.Vmin = self.V()
-        self.Vmax = self.V()
-        self.Vinit = self.V()
-
-        # Set states and its bounds
-
-        self.Vinit["X",:,:] = ca.tools.repeated( \
-            ca.tools.repeated(self.repeat_input(xinit, self.nx)))
-
-        self.Vmin["X",:,:] = ca.tools.repeated( \
-            ca.tools.repeated(self.repeat_input(xmin, self.nx)))
-
-        self.Vmax["X",:,:] = ca.tools.repeated( \
-            ca.tools.repeated(self.repeat_input(xmax, self.nx)))
-
-        # Set controls and its bounds
-
-        if not self.nu == 0:
-
-            if self.nu == 1:
-
-                uinit = uinit[pl.newaxis,:]
-                umin = umin[pl.newaxis,:]
-                umax= umax[pl.newaxis,:]
-
-            for k in range(self.N):
-
-                self.Vinit["U", k, :] = ca.tools.repeated(uinit[:,k])
-                self.Vmin["U", k, :] = ca.tools.repeated(umin[:,k])
-                self.Vmax["U", k, :] = ca.tools.repeated(umax[:,k])
-
-        # State at initial time
-
-        self.Vmin["X",0,0] = self.repeat_input(x0min, self.nx)
-        self.Vmax["X",0,0] = self.repeat_input(x0max, self.nx)
-
-        # State at end time
-
-        self.Vmin["X",-1,0] = self.repeat_input(xNmin, self.nx)
-        self.Vmax["X",-1,0] = self.repeat_input(xNmax, self.nx)
-
-        # Disturbances
-
-        self.Vinit["W",:] = ca.tools.repeated(0.0)
-        self.Vmin["W",:] = ca.tools.repeated(-pl.inf)
-        self.Vmax["W",:] = ca.tools.repeated(pl.inf)
-
-        # Parameters
-
-        self.Vinit["P",:] = self.repeat_input(pinit, self.np)
-        self.Vmin["P",:] = self.repeat_input(pmin, self.np)
-        self.Vmax["P",:] = self.repeat_input(pmax, self.np)
-
-
 class ODECollocation(CollocationBaseClass):
 
     def __init__(self, op = None, timegrid = None, \
-        xmin = -pl.inf, xmax = pl.inf, \
-        x0min = -pl.inf, x0max = pl.inf, \
-        xNmin = -pl.inf, xNmax = pl.inf, xinit = 0.0, \
         umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
         uinit = pl.zeros(1), \
-        pmin = -pl.inf, pmax = pl.inf, pinit = 0.0):
+        pmin = -pl.inf, pmax = pl.inf, pinit = 0.0, \
+        xmin = -pl.inf, xmax = pl.inf, \
+        x0min = -pl.inf, x0max = pl.inf, \
+        xNmin = -pl.inf, xNmax = pl.inf, xinit = 0.0):
 
         super(ODECollocation, self).__init__(op, timegrid, \
             xmin, xmax, x0min, x0max, xNmin, xNmax, xinit, \
