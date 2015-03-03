@@ -3,73 +3,15 @@ import casadi.tools as cat
 import pylab as pl
 from abc import ABCMeta, abstractmethod
 
-class BSEvaluation:
-
-    def __init__(self, bp = None, timegrid = None, \
-        umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
-        uinit = pl.zeros(1), \
-        pmin = -pl.inf, pmax = pl.inf, pinit = 0.0):
-
-        self.timegrid = timegrid
-        self.N = timegrid.shape[0]
-
-        # Define the struct holding the variables
-
-        self.V = cat.struct_symMX([
-                (
-                    cat.entry("U", repeat = [self.N], shape = bp.v["u"].shape),
-                    cat.entry("P", shape = bp.v["p"].shape),
-                )
-            ])
-
-        yfcn = ca.SXFunction([bp.v["t"], bp.v["u"], bp.v["p"]], [bp.fcn["y"]])
-        yfcn.init()
-
-        # Define bounds and initial values
-
-        self.Vmin = self.V()
-        self.Vmax = self.V()
-        self.Vinit = self.V()
-
-        # Set controls and its bounds
-
-        if not self.nu == 0:
-
-            if self.nu == 1:
-
-                uinit = uinit[pl.newaxis,:]
-                umin = umin[pl.newaxis,:]
-                umax= umax[pl.newaxis,:]
-
-            for k in range(self.N):
-
-                self.Vinit["U", k, :] = ca.tools.repeated(uinit[:,k])
-                self.Vmin["U", k, :] = ca.tools.repeated(umin[:,k])
-                self.Vmax["U", k, :] = ca.tools.repeated(umax[:,k])
-
-        # Parameters
-
-        self.Vinit["P",:] = self.repeat_input(pinit, self.np)
-        self.Vmin["P",:] = self.repeat_input(pmin, self.np)
-        self.Vmax["P",:] = self.repeat_input(pmax, self.np)
-
-        # Set up Y and G
-
-        self.Y = []
-        self.G = []
-
-        for k in range(self.N):
-
-            self.Y.append(yfcn.call([self.timegrid[k], self.V["U"][k], \
-                self.V["P"]])[0])
-
-        self.Y = ca.vertcat(self.Y)
-        self.G = bp.fcn["g"]
-
-
-class CollocationBaseClass(object):
+class MethodBaseClass(object):
 
     __metaclass__ = ABCMeta
+
+
+    @abstractmethod
+    def __init__(self):
+
+        pass
 
 
     def repeat_input(self, val, dim):
@@ -83,59 +25,21 @@ class CollocationBaseClass(object):
             return val
 
 
-    @abstractmethod
-    def __init__(self, op = None, timegrid = None, \
+    def set_bounds_and_initials(self, \
         umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
         uinit = pl.zeros(1), \
         pmin = -pl.inf, pmax = pl.inf, pinit = 0.0, \
-        xmin = -pl.inf, xmax = pl.inf, \
+        xmin = -pl.inf, xmax = pl.inf, xinit = 0.0, \
         x0min = -pl.inf, x0max = pl.inf, \
-        xNmin = -pl.inf, xNmax = pl.inf, xinit = 0.0):
+        xNmin = -pl.inf, xNmax = pl.inf):
 
-        self.Y = []
-        self.G = []
-
-        self.nx = op.v["x"].shape[0]
-        self.nu = op.v["u"].shape[0]
-        self.np = op.v["p"].shape[0]
-
-        self.timegrid = timegrid
-        self.N = timegrid.shape[0] - 1
-        self.tau_root = ca.collocationPoints(3, "radau")
-
-        # Degree of interpolating polynomial
-
-        self.d = len(self.tau_root) - 1
-
-        # Define the struct holding the variables
-
-        self.V = cat.struct_symMX([
-                (
-                    cat.entry("U", repeat = [self.N, self.d], shape = self.nu),
-                    cat.entry("X", repeat = [self.N+1, self.d+1], shape = self.nx),
-                    cat.entry("P", shape = self.np),
-                    cat.entry("W", repeat = [self.N], shape = self.nx)
-                )
-            ])
-
-        # Define bounds and initial values
+         # Define bounds and initial values
 
         self.Vmin = self.V()
         self.Vmax = self.V()
         self.Vinit = self.V()
 
-        # Set states and its bounds
-
-        self.Vinit["X",:,:] = ca.tools.repeated( \
-            ca.tools.repeated(self.repeat_input(xinit, self.nx)))
-
-        self.Vmin["X",:,:] = ca.tools.repeated( \
-            ca.tools.repeated(self.repeat_input(xmin, self.nx)))
-
-        self.Vmax["X",:,:] = ca.tools.repeated( \
-            ca.tools.repeated(self.repeat_input(xmax, self.nx)))
-
-        # Set controls and its bounds
+        # Set control initials and bounds
 
         if not self.nu == 0:
 
@@ -151,28 +55,175 @@ class CollocationBaseClass(object):
                 self.Vmin["U", k, :] = ca.tools.repeated(umin[:,k])
                 self.Vmax["U", k, :] = ca.tools.repeated(umax[:,k])
 
-        # State at initial time
-
-        self.Vmin["X",0,0] = self.repeat_input(x0min, self.nx)
-        self.Vmax["X",0,0] = self.repeat_input(x0max, self.nx)
-
-        # State at end time
-
-        self.Vmin["X",-1,0] = self.repeat_input(xNmin, self.nx)
-        self.Vmax["X",-1,0] = self.repeat_input(xNmax, self.nx)
-
-        # Disturbances
-
-        self.Vinit["W",:] = ca.tools.repeated(0.0)
-        self.Vmin["W",:] = ca.tools.repeated(-pl.inf)
-        self.Vmax["W",:] = ca.tools.repeated(pl.inf)
-
-        # Parameters
+        # Set parameter initials and bounds
 
         self.Vinit["P",:] = self.repeat_input(pinit, self.np)
         self.Vmin["P",:] = self.repeat_input(pmin, self.np)
         self.Vmax["P",:] = self.repeat_input(pmax, self.np)
 
+        # Set states initials and bounds, if contained
+
+        if "X" in self.V.keys():
+
+            self.Vinit["X",:,:] = ca.tools.repeated( \
+                ca.tools.repeated(self.repeat_input(xinit, self.nx)))
+
+            self.Vmin["X",:,:] = ca.tools.repeated( \
+                ca.tools.repeated(self.repeat_input(xmin, self.nx)))
+
+            self.Vmax["X",:,:] = ca.tools.repeated( \
+                ca.tools.repeated(self.repeat_input(xmax, self.nx)))
+
+            # State at initial time
+
+            self.Vmin["X",0,0] = self.repeat_input(x0min, self.nx)
+            self.Vmax["X",0,0] = self.repeat_input(x0max, self.nx)
+
+            # State at end time
+
+            self.Vmin["X",-1,0] = self.repeat_input(xNmin, self.nx)
+            self.Vmax["X",-1,0] = self.repeat_input(xNmax, self.nx)
+
+            # Disturbances
+
+            self.Vinit["W",:] = ca.tools.repeated(0.0)
+            self.Vmin["W",:] = ca.tools.repeated(-pl.inf)
+            self.Vmax["W",:] = ca.tools.repeated(pl.inf)
+
+
+class BSEvaluation(MethodBaseClass):
+
+    def set_bounds_and_initials(self, \
+        umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
+        uinit = pl.zeros(1), \
+        pmin = -pl.inf, pmax = pl.inf, pinit = 0.0, \
+        xmin = -pl.inf, xmax = pl.inf, xinit = 0.0, \
+        x0min = -pl.inf, x0max = pl.inf, \
+        xNmin = -pl.inf, xNmax = pl.inf):
+
+        super(BSEvaluation, self).set_bounds_and_initials( \
+            umin = umin, umax = umax, uinit = uinit, \
+            pmin = pmin, pmax = pmax, pinit = pinit, \
+            xmin = xmin, xmax = xmax, xinit = xinit, \
+            x0min = x0min, x0max = x0max, \
+            xNmin = xNmin, xNmax = xNmax)
+
+
+    def __init__(self, system = None, timegrid = None, \
+        umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
+        uinit = pl.zeros(1), \
+        pmin = -pl.inf, pmax = pl.inf, pinit = 0.0):
+
+        # Set up Y and G
+
+        self.Y = []
+        self.G = []
+
+        # Dmensions
+
+        self.nu = system.v["u"].shape[0]
+        self.np = system.v["p"].shape[0]
+
+        self.timegrid = timegrid
+        self.N = timegrid.shape[0]
+
+        # Define the struct holding the variables
+
+        self.V = cat.struct_symMX([
+                (
+                    cat.entry("U", repeat = [self.N, 1], \
+                        shape = system.v["u"].shape),
+                    cat.entry("P", shape = system.v["p"].shape),
+                )
+            ])
+
+        yfcn = ca.SXFunction([system.v["t"], system.v["u"], system.v["p"]], \
+            [system.fcn["y"]])
+        yfcn.init()
+
+        # Set bounds and initial values
+
+        self.set_bounds_and_initials( \
+            umin = umin, umax = umax, uinit = uinit, \
+            pmin = pmin, pmax = pmax, pinit = pinit)
+
+        for k in range(self.N):
+
+            self.Y.append(yfcn.call([self.timegrid[k], self.V["U", k, :][0], \
+                self.V["P"]])[0])
+
+        self.Y = ca.vertcat(self.Y)
+        self.G = system.fcn["g"]
+
+
+class CollocationBaseClass(MethodBaseClass):
+
+    __metaclass__ = ABCMeta
+
+    def set_bounds_and_initials(self, \
+        umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
+        uinit = pl.zeros(1), \
+        pmin = -pl.inf, pmax = pl.inf, pinit = 0.0, \
+        xmin = -pl.inf, xmax = pl.inf, xinit = 0.0, \
+        x0min = -pl.inf, x0max = pl.inf, \
+        xNmin = -pl.inf, xNmax = pl.inf):
+
+        super(CollocationBaseClass, self).set_bounds_and_initials( \
+            umin = umin, umax = umax, uinit = uinit, \
+            pmin = pmin, pmax = pmax, pinit = pinit, \
+            xmin = xmin, xmax = xmax, xinit = xinit, \
+            x0min = x0min, x0max = x0max, \
+            xNmin = xNmin, xNmax = xNmax)
+
+    @abstractmethod
+    def __init__(self, system = None, timegrid = None, \
+        umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
+        uinit = pl.zeros(1), \
+        pmin = -pl.inf, pmax = pl.inf, pinit = 0.0, \
+        xmin = -pl.inf, xmax = pl.inf, \
+        x0min = -pl.inf, x0max = pl.inf, \
+        xNmin = -pl.inf, xNmax = pl.inf, xinit = 0.0):
+
+        # Set up Y and G
+
+        self.Y = []
+        self.G = []
+
+        # Dimensions
+
+        self.nx = system.v["x"].shape[0]
+        self.nu = system.v["u"].shape[0]
+        self.np = system.v["p"].shape[0]
+
+        self.timegrid = timegrid
+        self.N = timegrid.shape[0] - 1
+
+        self.tau_root = ca.collocationPoints(3, "radau")
+
+        # Degree of interpolating polynomial
+
+        self.d = len(self.tau_root) - 1
+
+        # Define the struct holding the variables
+
+        self.V = cat.struct_symMX([
+                (
+                    cat.entry("U", repeat = [self.N, self.d], shape = self.nu),
+                    cat.entry("X", repeat = [self.N+1, self.d+1], \
+                        shape = self.nx),
+                    cat.entry("P", shape = self.np),
+                    cat.entry("W", repeat = [self.N], shape = self.nx)
+                )
+            ])
+
+        # Define bounds and initial values
+
+        self.set_bounds_and_initials( \
+            umin = umin, umax = umax, uinit = uinit, \
+            pmin = pmin, pmax = pmax, pinit = pinit, \
+            xmin = xmin, xmax = xmax, xinit = xinit, \
+            x0min = x0min, x0max = x0max, \
+            xNmin = xNmin, xNmax = xNmax)
 
         # Coefficients of the collocation equation
 
@@ -239,7 +290,7 @@ class CollocationBaseClass(object):
 
 class ODECollocation(CollocationBaseClass):
 
-    def __init__(self, op = None, timegrid = None, \
+    def __init__(self, system = None, timegrid = None, \
         umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
         uinit = pl.zeros(1), \
         pmin = -pl.inf, pmax = pl.inf, pinit = 0.0, \
@@ -247,12 +298,16 @@ class ODECollocation(CollocationBaseClass):
         x0min = -pl.inf, x0max = pl.inf, \
         xNmin = -pl.inf, xNmax = pl.inf, xinit = 0.0):
 
-        super(ODECollocation, self).__init__(op, timegrid, \
-            xmin, xmax, x0min, x0max, xNmin, xNmax, xinit, \
-            umin, umax, uinit, pmin, pmax, pinit)
+        super(ODECollocation, self).__init__(system = system, \
+            timegrid = timegrid, \
+            umin = umin, umax = umax, uinit = uinit, \
+            pmin = pmin, pmax = pmax, pinit = pinit, \
+            xmin = xmin, xmax = xmax, xinit = xinit, \
+            x0min = x0min, x0max = x0max, \
+            xNmin = xNmin, xNmax = xNmax)
 
-        self.f = ca.SXFunction([op.v["t"], op.v["x"], op.v["u"], op.v["p"]], \
-            [op.v["f"]])
+        self.f = ca.SXFunction([system.v["t"], system.v["x"], system.v["u"], \
+            system.v["p"]], [system.fcn["f"]])
         self.f.init()
 
         # For all finite elements
@@ -275,8 +330,9 @@ class ODECollocation(CollocationBaseClass):
                 # Add collocation equations to the NLP
 
                 [fk] = self.f.call([self.T[k][j], self.V["X",k,j], \
-                    self.V["U",k,j-1], self.__V["P"]])
-                self.G.append((tgrid[k+1] - tgrid[k]) * fk - xp_jk)
+                    self.V["U",k,j-1], self.V["P"]])
+                self.G.append((self.timegrid[k+1] - \
+                    self.timegrid[k]) * fk - xp_jk)
 
             # Get an expression for the state at the end of
             # the finite element
@@ -291,12 +347,7 @@ class ODECollocation(CollocationBaseClass):
             
             self.G.append(self.V["X",k+1,0] - xf_k + self.V["W", k])
 
-        # Equality constraints (lbg = ubg)
-
-        # self.__gmin = list(pl.zeros(self.__N * self.__d + self.__N))
-        # self.__gmax = list(pl.zeros(self.__N * self.__d + self.__N))
-
         # Concatenate constraints
 
         # self.Y = something ...
-        self.G = ca.vertcat(G)
+        self.G = ca.vertcat(self.G)
