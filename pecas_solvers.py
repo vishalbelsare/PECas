@@ -5,15 +5,15 @@ from abc import ABCMeta, abstractmethod
 
 class BPEval:
 
-    def __init__(self, bp, N):
+    def __init__(self, bp, timegrid):
 
         self.Y = []
         self.G = []
-        self.N = N
+        self.timegrid = timegrid
+        self.N = len(timegrid)
 
         self.V = cat.struct_symMX([
                 (
-                    cat.entry("T", repeat = [self.N], shape = bp.v["t"].shape),
                     cat.entry("U", repeat = [self.N], shape = bp.v["u"].shape),
                     cat.entry("P", shape = bp.v["p"].shape),
                     cat.entry("W", repeat = [self.N], shape = bp.fcn["g"].shape)
@@ -28,9 +28,9 @@ class BPEval:
 
         for k in range(self.N):
 
-            self.Y.append(yfcn.call([self.V["T"][k], self.V["U"][k], \
+            self.Y.append(yfcn.call([self.timegrid[k], self.V["U"][k], \
                 self.V["P"]])[0])
-            self.G.append(gfcn.call([self.V["T"][k], self.V["U"][k], \
+            self.G.append(gfcn.call([self.timegrid[k], self.V["U"][k], \
                 self.V["P"]])[0])
 
         self.Y = ca.vertcat(self.Y)
@@ -42,12 +42,12 @@ class CollocationBase(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def __init__(self, op, N):
+    def __init__(self, op, timegrid):
 
         self.Y = []
         self.G = []
-        self.N = N
-
+        self.timegrid = timegrid
+        self.N = len(timegrid) - 1
         self.tau_root = ca.collocationPoints(3, "radau")
 
         # Degree of interpolating polynomial
@@ -56,7 +56,6 @@ class CollocationBase(object):
 
         self.V = cat.struct_symMX([
                 (
-                    cat.entry("T", repeat = [self.N], shape = op.v["t"].shape),
                     cat.entry("U", repeat = [self.N, self.d], shape = op.v["u"].shape),
                     cat.entry("X", repeat = [self.N+1, self.d+1], shape = op.v["x"].shape),
                     cat.entry("P", shape = op.v["p"].shape),
@@ -85,8 +84,8 @@ class CollocationBase(object):
 
             for j in range(self.d + 1):
 
-                self.T[k,j] = self.V["T", k] + \
-                    (self.V["T", k+1] - self.V["T", k]) * self.tau_root[j]
+                self.T[k,j] = self.timegrid[k] + \
+                    (self.timegrid[k+1] - self.timegrid[k]) * self.tau_root[j]
 
         # For all collocation points
 
@@ -130,7 +129,7 @@ class CollocationBase(object):
 
 class ODECollocation(CollocationBase):
 
-    def __init__(self, op, N):
+    def __init__(self, op, timegrid):
 
-        super(ODECollocation, self).__init__(op, N)
+        super(ODECollocation, self).__init__(op, timegrid)
 
