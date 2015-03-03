@@ -16,25 +16,19 @@ class BPEval:
                 (
                     cat.entry("U", repeat = [self.N], shape = bp.v["u"].shape),
                     cat.entry("P", shape = bp.v["p"].shape),
-                    cat.entry("W", repeat = [self.N], shape = bp.fcn["g"].shape)
                 )
             ])
 
         yfcn = ca.SXFunction([bp.v["t"], bp.v["u"], bp.v["p"]], [bp.fcn["y"]])
         yfcn.init()
 
-        gfcn = ca.SXFunction([bp.v["t"], bp.v["u"], bp.v["p"]], [bp.fcn["g"]])
-        gfcn.init()
-
         for k in range(self.N):
 
             self.Y.append(yfcn.call([self.timegrid[k], self.V["U"][k], \
                 self.V["P"]])[0])
-            self.G.append(gfcn.call([self.timegrid[k], self.V["U"][k], \
-                self.V["P"]])[0])
 
         self.Y = ca.vertcat(self.Y)
-        self.G = ca.vertcat(self.G)
+        self.G = bp.fcn["g"]
 
 
 class CollocationBase(object):
