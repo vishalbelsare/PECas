@@ -14,7 +14,7 @@ class MethodBaseClass(object):
         pass
 
 
-    def repeat_input(self, val, dim):
+    def __repeat_input(self, val, dim):
 
         if not isinstance(val, list):
 
@@ -57,32 +57,32 @@ class MethodBaseClass(object):
 
         # Set parameter initials and bounds
 
-        self.Vinit["P",:] = self.repeat_input(pinit, self.np)
-        self.Vmin["P",:] = self.repeat_input(pmin, self.np)
-        self.Vmax["P",:] = self.repeat_input(pmax, self.np)
+        self.Vinit["P",:] = self.__repeat_input(pinit, self.np)
+        self.Vmin["P",:] = self.__repeat_input(pmin, self.np)
+        self.Vmax["P",:] = self.__repeat_input(pmax, self.np)
 
         # Set states initials and bounds, if contained
 
         if "X" in self.V.keys():
 
             self.Vinit["X",:,:] = ca.tools.repeated( \
-                ca.tools.repeated(self.repeat_input(xinit, self.nx)))
+                ca.tools.repeated(self.__repeat_input(xinit, self.nx)))
 
             self.Vmin["X",:,:] = ca.tools.repeated( \
-                ca.tools.repeated(self.repeat_input(xmin, self.nx)))
+                ca.tools.repeated(self.__repeat_input(xmin, self.nx)))
 
             self.Vmax["X",:,:] = ca.tools.repeated( \
-                ca.tools.repeated(self.repeat_input(xmax, self.nx)))
+                ca.tools.repeated(self.__repeat_input(xmax, self.nx)))
 
             # State at initial time
 
-            self.Vmin["X",0,0] = self.repeat_input(x0min, self.nx)
-            self.Vmax["X",0,0] = self.repeat_input(x0max, self.nx)
+            self.Vmin["X",0,0] = self.__repeat_input(x0min, self.nx)
+            self.Vmax["X",0,0] = self.__repeat_input(x0max, self.nx)
 
             # State at end time
 
-            self.Vmin["X",-1,0] = self.repeat_input(xNmin, self.nx)
-            self.Vmax["X",-1,0] = self.repeat_input(xNmax, self.nx)
+            self.Vmin["X",-1,0] = self.__repeat_input(xNmin, self.nx)
+            self.Vmax["X",-1,0] = self.__repeat_input(xNmax, self.nx)
 
             # Disturbances
 
@@ -153,6 +153,10 @@ class BSEvaluation(MethodBaseClass):
                 self.V["P"]])[0])
 
         self.Y = ca.vertcat(self.Y)
+
+        # Set up S
+
+        self.S = []
 
         # Set up G
 
@@ -305,6 +309,10 @@ class CollocationBaseClass(MethodBaseClass):
                 tfcn.evaluate()
                 self.C[j,r] = tfcn.getOutput()
 
+        # Set up S
+
+        self.S = ca.vertcat(self.V["W", :])
+
         # Set up G
 
         self.G = []
@@ -328,10 +336,10 @@ class ODECollocation(CollocationBaseClass):
             x0min = x0min, x0max = x0max, \
             xNmin = xNmin, xNmax = xNmax)
 
-        self.f = ca.SXFunction([system.v["t"], system.v["x"], system.v["u"], \
+        f = ca.SXFunction([system.v["t"], system.v["x"], system.v["u"], \
             system.v["p"]], [system.fcn["f"]])
-        self.f.setOption("name", "ffcn")
-        self.f.init()
+        f.setOption("name", "ffcn")
+        f.init()
 
         # For all finite elements
 
@@ -352,7 +360,7 @@ class ODECollocation(CollocationBaseClass):
           
                 # Add collocation equations to the NLP
 
-                [fk] = self.f.call([self.T[k][j], self.V["X",k,j], \
+                [fk] = f.call([self.T[k][j], self.V["X",k,j], \
                     self.V["U",k,j-1], self.V["P"]])
                 self.G.append((self.timegrid[k+1] - \
                     self.timegrid[k]) * fk - xp_jk)
