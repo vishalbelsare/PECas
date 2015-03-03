@@ -3,7 +3,7 @@ import casadi.tools as cat
 import pylab as pl
 from abc import ABCMeta, abstractmethod
 
-class MethodBaseClass(object):
+class PESetupBaseClass(object):
 
     __metaclass__ = ABCMeta
 
@@ -91,7 +91,7 @@ class MethodBaseClass(object):
             self.Vmax["W",:] = ca.tools.repeated(pl.inf)
 
 
-class BSEvaluation(MethodBaseClass):
+class BSEvaluation(PESetupBaseClass):
 
     def set_bounds_and_initials(self, \
         umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
@@ -163,7 +163,7 @@ class BSEvaluation(MethodBaseClass):
         self.G = system.fcn["g"]
 
 
-class CollocationBaseClass(MethodBaseClass):
+class CollocationBaseClass(PESetupBaseClass):
 
     __metaclass__ = ABCMeta
 
