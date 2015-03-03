@@ -114,12 +114,7 @@ class BSEvaluation(MethodBaseClass):
         uinit = pl.zeros(1), \
         pmin = -pl.inf, pmax = pl.inf, pinit = 0.0):
 
-        # Set up Y and G
-
-        self.Y = []
-        self.G = []
-
-        # Dmensions
+        # Dimensions
 
         self.nu = system.v["u"].shape[0]
         self.np = system.v["p"].shape[0]
@@ -137,22 +132,30 @@ class BSEvaluation(MethodBaseClass):
                 )
             ])
 
-        yfcn = ca.SXFunction([system.v["t"], system.v["u"], system.v["p"]], \
-            [system.fcn["y"]])
-        yfcn.init()
-
         # Set bounds and initial values
 
         self.set_bounds_and_initials( \
             umin = umin, umax = umax, uinit = uinit, \
             pmin = pmin, pmax = pmax, pinit = pinit)
 
+        # Set up Y
+
+        Y = []
+
+        yfcn = ca.SXFunction([system.v["t"], system.v["u"], system.v["p"]], \
+            [system.fcn["y"]])
+        yfcn.setOption("name", "yfcn")
+        yfcn.init()
+
         for k in range(self.N):
 
-            self.Y.append(yfcn.call([self.timegrid[k], self.V["U", k, :][0], \
+            self.Y.append(yfcn.call([self.timegrid[k], self.V["U", k, 0], \
                 self.V["P"]])[0])
 
         self.Y = ca.vertcat(self.Y)
+
+        # Set up G
+
         self.G = system.fcn["g"]
 
 
@@ -183,11 +186,6 @@ class CollocationBaseClass(MethodBaseClass):
         xmin = -pl.inf, xmax = pl.inf, \
         x0min = -pl.inf, x0max = pl.inf, \
         xNmin = -pl.inf, xNmax = pl.inf, xinit = 0.0):
-
-        # Set up Y and G
-
-        self.Y = []
-        self.G = []
 
         # Dimensions
 
@@ -224,6 +222,26 @@ class CollocationBaseClass(MethodBaseClass):
             xmin = xmin, xmax = xmax, xinit = xinit, \
             x0min = x0min, x0max = x0max, \
             xNmin = xNmin, xNmax = xNmax)
+
+        # Set up Y
+
+        self.Y = []
+
+        yfcn = ca.SXFunction([system.v["t"], system.v["x"], \
+            system.v["p"]], [system.fcn["y"]])
+        yfcn.setOption("name", "yfcn")
+        yfcn.init()
+
+        for k in range(self.N + 1):
+
+            # DEPENDECY ON U NOT POSSIBLE AT THIS POINT! len(U) = N, not N + 1!
+            # self.Y.append(yfcn.call([self.timegrid[k], self.V["U", k, 0], \
+            self.Y.append(yfcn.call([self.timegrid[k], self.V["X", k, 0], \
+                self.V["P"]])[0])
+
+        self.Y = ca.vertcat(self.Y)
+
+        # Set tp the collocation coefficients
 
         # Coefficients of the collocation equation
 
@@ -287,6 +305,10 @@ class CollocationBaseClass(MethodBaseClass):
                 tfcn.evaluate()
                 self.C[j,r] = tfcn.getOutput()
 
+        # Set up G
+
+        self.G = []
+
 
 class ODECollocation(CollocationBaseClass):
 
@@ -308,6 +330,7 @@ class ODECollocation(CollocationBaseClass):
 
         self.f = ca.SXFunction([system.v["t"], system.v["x"], system.v["u"], \
             system.v["p"]], [system.fcn["f"]])
+        self.f.setOption("name", "ffcn")
         self.f.init()
 
         # For all finite elements
@@ -349,5 +372,4 @@ class ODECollocation(CollocationBaseClass):
 
         # Concatenate constraints
 
-        # self.Y = something ...
         self.G = ca.vertcat(self.G)
