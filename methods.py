@@ -3,7 +3,7 @@ import casadi.tools as cat
 import pylab as pl
 from abc import ABCMeta, abstractmethod
 
-class BPEval:
+class BSEvaluation:
 
     def __init__(self, bp = None, timegrid = None):
 
@@ -31,7 +31,7 @@ class BPEval:
         self.G = bp.fcn["g"]
 
 
-class CollocationBase(object):
+class CollocationBaseClass(object):
 
     __metaclass__ = ABCMeta
 
@@ -200,7 +200,7 @@ class CollocationBase(object):
         self.Vmax["P",:] = self.repeat_input(pmax, self.np)
 
 
-class ODECollocation(CollocationBase):
+class ODECollocation(CollocationBaseClass):
 
     def __init__(self, op = None, timegrid = None, \
         xmin = -pl.inf, xmax = pl.inf, \
