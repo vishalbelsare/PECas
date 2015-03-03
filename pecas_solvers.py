@@ -5,12 +5,12 @@ from abc import ABCMeta, abstractmethod
 
 class BPEval:
 
-    def __init__(self, bp, timegrid):
+    def __init__(self, bp = None, timegrid = None):
 
         self.Y = []
         self.G = []
         self.timegrid = timegrid
-        self.N = len(timegrid)
+        self.N = timegrid.shape[0]
 
         self.V = cat.struct_symMX([
                 (
@@ -48,17 +48,23 @@ class CollocationBase(object):
 
 
     @abstractmethod
-    def __init__(self, op, timegrid):
+    def __init__(self, op = None, timegrid = None, \
+        xmin = -pl.inf, xmax = pl.inf, \
+        x0min = -pl.inf, x0max = pl.inf, \
+        xNmin = -pl.inf, xNmax = pl.inf, xinit = 0.0, \
+        umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
+        uinit = pl.zeros(1), \
+        pmin = -pl.inf, pmax = pl.inf, pinit = 0.0):
 
         self.Y = []
         self.G = []
 
-        self.nx = op.v["x"].shape
-        self.nu = op.v["u"].shape
-        self.np = op.v["p"].shape
+        self.nx = op.v["x"].shape[0]
+        self.nu = op.v["u"].shape[0]
+        self.np = op.v["p"].shape[0]
 
         self.timegrid = timegrid
-        self.N = len(timegrid) - 1
+        self.N = timegrid.shape[0] - 1
         self.tau_root = ca.collocationPoints(3, "radau")
 
         # Degree of interpolating polynomial
@@ -140,8 +146,8 @@ class CollocationBase(object):
 
         # Define bounds and initial values
 
-        self.Vmin   = self.V()
-        self.Vmax   = self.V()
+        self.Vmin = self.V()
+        self.Vmax = self.V()
         self.Vinit = self.V()
 
         # Set states and its bounds
@@ -149,10 +155,10 @@ class CollocationBase(object):
         self.Vinit["X",:,:] = ca.tools.repeated( \
             ca.tools.repeated(self.repeat_input(xinit, self.nx)))
 
-        self.__Vmin["X",:,:] = ca.tools.repeated( \
+        self.Vmin["X",:,:] = ca.tools.repeated( \
             ca.tools.repeated(self.repeat_input(xmin, self.nx)))
 
-        self.__Vmax["X",:,:] = ca.tools.repeated( \
+        self.Vmax["X",:,:] = ca.tools.repeated( \
             ca.tools.repeated(self.repeat_input(xmax, self.nx)))
 
         # Set controls and its bounds
@@ -165,7 +171,7 @@ class CollocationBase(object):
                 umin = umin[pl.newaxis,:]
                 umax= umax[pl.newaxis,:]
 
-            for k in range(self.__N):
+            for k in range(self.N):
 
                 self.Vinit["U", k, :] = ca.tools.repeated(uinit[:,k])
                 self.Vmin["U", k, :] = ca.tools.repeated(umin[:,k])
@@ -196,7 +202,15 @@ class CollocationBase(object):
 
 class ODECollocation(CollocationBase):
 
-    def __init__(self, op, timegrid):
+    def __init__(self, op = None, timegrid = None, \
+        xmin = -pl.inf, xmax = pl.inf, \
+        x0min = -pl.inf, x0max = pl.inf, \
+        xNmin = -pl.inf, xNmax = pl.inf, xinit = 0.0, \
+        umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
+        uinit = pl.zeros(1), \
+        pmin = -pl.inf, pmax = pl.inf, pinit = 0.0):
 
-        super(ODECollocation, self).__init__(op, timegrid)
+        super(ODECollocation, self).__init__(op, timegrid, \
+            xmin, xmax, x0min, x0max, xNmin, xNmax, xinit, \
+            umin, umax, uinit, pmin, pmax, pinit)
 
