@@ -214,3 +214,52 @@ class ODECollocation(CollocationBaseClass):
             xmin, xmax, x0min, x0max, xNmin, xNmax, xinit, \
             umin, umax, uinit, pmin, pmax, pinit)
 
+        self.f = ca.SXFunction([op.v["t"], op.v["x"], op.v["u"], op.v["p"]], \
+            [op.v["f"]])
+        self.f.init()
+
+        # For all finite elements
+
+        for k in range(self.N):
+          
+            # For all collocation points
+
+            for j in range(1, self.d + 1):
+                
+                # Get an expression for the state derivative at
+                # the collocation point
+
+                xp_jk = 0
+                
+                for r in range(self.d + 1):
+                    
+                    xp_jk += self.C[r,j] * self.V["X",k,r]
+          
+                # Add collocation equations to the NLP
+
+                [fk] = self.f.call([self.T[k][j], self.V["X",k,j], \
+                    self.V["U",k,j-1], self.__V["P"]])
+                self.G.append((tgrid[k+1] - tgrid[k]) * fk - xp_jk)
+
+            # Get an expression for the state at the end of
+            # the finite element
+            
+            xf_k = 0
+
+            for r in range(self.d + 1):
+
+                xf_k += self.D[r] * self.V["X",k,r]
+            
+            # Add the continuity equation to NLP
+            
+            self.G.append(self.V["X",k+1,0] - xf_k + self.V["W", k])
+
+        # Equality constraints (lbg = ubg)
+
+        # self.__gmin = list(pl.zeros(self.__N * self.__d + self.__N))
+        # self.__gmax = list(pl.zeros(self.__N * self.__d + self.__N))
+
+        # Concatenate constraints
+
+        # self.Y = something ...
+        self.G = ca.vertcat(G)
