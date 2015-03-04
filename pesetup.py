@@ -49,7 +49,7 @@ class PESetupBaseClass(object):
                 umin = umin[pl.newaxis,:]
                 umax= umax[pl.newaxis,:]
 
-            for k in range(self.N):
+            for k in range(self.nsteps):
 
                 self.Vinit["U", k, :] = ca.tools.repeated(uinit[:,k])
                 self.Vmin["U", k, :] = ca.tools.repeated(umin[:,k])
@@ -120,13 +120,13 @@ class BSEvaluation(PESetupBaseClass):
         self.np = system.v["p"].shape[0]
 
         self.timegrid = timegrid
-        self.N = timegrid.shape[0]
+        self.nsteps = timegrid.shape[0]
 
         # Define the struct holding the variables
 
         self.V = cat.struct_symMX([
                 (
-                    cat.entry("U", repeat = [self.N, 1], \
+                    cat.entry("U", repeat = [self.nsteps, 1], \
                         shape = system.v["u"].shape),
                     cat.entry("P", shape = system.v["p"].shape),
                 )
@@ -138,29 +138,29 @@ class BSEvaluation(PESetupBaseClass):
             umin = umin, umax = umax, uinit = uinit, \
             pmin = pmin, pmax = pmax, pinit = pinit)
 
-        # Set up Y
+        # Set up phiN
 
-        Y = []
+        phiN = []
 
         yfcn = ca.SXFunction([system.v["t"], system.v["u"], system.v["p"]], \
             [system.fcn["y"]])
         yfcn.setOption("name", "yfcn")
         yfcn.init()
 
-        for k in range(self.N):
+        for k in range(self.nsteps):
 
-            self.Y.append(yfcn.call([self.timegrid[k], self.V["U", k, 0], \
+            self.phiN.append(yfcn.call([self.timegrid[k], self.V["U", k, 0], \
                 self.V["P"]])[0])
 
-        self.Y = ca.vertcat(self.Y)
+        self.phiN = ca.vertcat(self.phiN)
 
-        # Set up S
+        # Set up s
 
-        self.S = []
+        self.s = []
 
-        # Set up G
+        # Set up g
 
-        self.G = system.fcn["g"]
+        self.g = system.fcn["g"]
 
 
 class CollocationBaseClass(PESetupBaseClass):
@@ -199,23 +199,23 @@ class CollocationBaseClass(PESetupBaseClass):
         self.np = system.v["p"].shape[0]
 
         self.timegrid = timegrid
-        self.N = timegrid.shape[0] - 1
+        self.nsteps = timegrid.shape[0] - 1
 
-        self.tau_root = ca.collocationPoints(3, "radau")
+        self.tauroot = ca.collocationPoints(3, "radau")
 
         # Degree of interpolating polynomial
 
-        self.d = len(self.tau_root) - 1
+        self.ntauroot = len(self.tauroot) - 1
 
         # Define the struct holding the variables
 
         self.V = cat.struct_symMX([
                 (
-                    cat.entry("U", repeat = [self.N, self.d], shape = self.nu),
-                    cat.entry("X", repeat = [self.N+1, self.d+1], \
+                    cat.entry("U", repeat = [self.nsteps, self.ntauroot], shape = self.nu),
+                    cat.entry("X", repeat = [self.nsteps+1, self.ntauroot+1], \
                         shape = self.nx),
                     cat.entry("P", shape = self.np),
-                    cat.entry("W", repeat = [self.N], shape = self.nx)
+                    cat.entry("W", repeat = [self.nsteps], shape = self.nx)
                 )
             ])
 
@@ -228,66 +228,66 @@ class CollocationBaseClass(PESetupBaseClass):
             x0min = x0min, x0max = x0max, \
             xNmin = xNmin, xNmax = xNmax)
 
-        # Set up Y
+        # Set up phiN
 
-        self.Y = []
+        self.phiN = []
 
         yfcn = ca.SXFunction([system.v["t"], system.v["x"], \
             system.v["p"]], [system.fcn["y"]])
         yfcn.setOption("name", "yfcn")
         yfcn.init()
 
-        for k in range(self.N + 1):
+        for k in range(self.nsteps + 1):
 
             # DEPENDECY ON U NOT POSSIBLE AT THIS POINT! len(U) = N, not N + 1!
-            # self.Y.append(yfcn.call([self.timegrid[k], self.V["U", k, 0], \
-            self.Y.append(yfcn.call([self.timegrid[k], self.V["X", k, 0], \
+            # self.phiN.append(yfcn.call([self.timegrid[k], self.V["U", k, 0], \
+            self.phiN.append(yfcn.call([self.timegrid[k], self.V["X", k, 0], \
                 self.V["P"]])[0])
 
-        self.Y = ca.vertcat(self.Y)
+        self.phiN = ca.vertcat(self.phiN)
 
         # Set tp the collocation coefficients
 
         # Coefficients of the collocation equation
 
-        self.C = pl.zeros((self.d + 1, self.d + 1))
+        self.C = pl.zeros((self.ntauroot + 1, self.ntauroot + 1))
 
         # Coefficients of the continuity equation
 
-        self.D = pl.zeros(self.d + 1)
+        self.D = pl.zeros(self.ntauroot + 1)
 
         # Dimensionless time inside one control interval
 
-        self.tau = ca.SX.sym("tau")
+        tau = ca.SX.sym("tau")
 
         # Construct the matrix T that contains all collocation time points
 
-        self.T = pl.zeros((self.N, self.d + 1))
+        self.T = pl.zeros((self.nsteps, self.ntauroot + 1))
 
-        for k in range(self.N):
+        for k in range(self.nsteps):
 
-            for j in range(self.d + 1):
+            for j in range(self.ntauroot + 1):
 
                 self.T[k,j] = self.timegrid[k] + \
-                    (self.timegrid[k+1] - self.timegrid[k]) * self.tau_root[j]
+                    (self.timegrid[k+1] - self.timegrid[k]) * self.tauroot[j]
 
         # For all collocation points
 
-        for j in range(self.d + 1):
+        for j in range(self.ntauroot + 1):
 
             # Construct Lagrange polynomials to get the polynomial basis
             # at the collocation point
             
             L = 1
             
-            for r in range(self.d + 1):
+            for r in range(self.ntauroot + 1):
             
                 if r != j:
             
-                    L *= (self.tau - self.tau_root[r]) / \
-                        (self.tau_root[j] - self.tau_root[r])
+                    L *= (tau - self.tauroot[r]) / \
+                        (self.tauroot[j] - self.tauroot[r])
             
-            lfcn = ca.SXFunction([self.tau],[L])
+            lfcn = ca.SXFunction([tau],[L])
             lfcn.init()
           
             # Evaluate the polynomial at the final time to get the
@@ -304,19 +304,19 @@ class CollocationBaseClass(PESetupBaseClass):
             tfcn = lfcn.tangent()
             tfcn.init()
 
-            for r in range(self.d + 1):
+            for r in range(self.ntauroot + 1):
 
-                tfcn.setInput(self.tau_root[r])
+                tfcn.setInput(self.tauroot[r])
                 tfcn.evaluate()
                 self.C[j,r] = tfcn.getOutput()
 
-        # Set up S
+        # Set up s
 
-        self.S = ca.vertcat(self.V["W", :])
+        self.s = ca.vertcat(self.V["W", :])
 
-        # Set up G
+        # Set up g
 
-        self.G = []
+        self.g = []
 
 
 class ODECollocation(CollocationBaseClass):
@@ -344,18 +344,18 @@ class ODECollocation(CollocationBaseClass):
 
         # For all finite elements
 
-        for k in range(self.N):
+        for k in range(self.nsteps):
           
             # For all collocation points
 
-            for j in range(1, self.d + 1):
+            for j in range(1, self.ntauroot + 1):
                 
                 # Get an expression for the state derivative at
                 # the collocation point
 
                 xp_jk = 0
                 
-                for r in range(self.d + 1):
+                for r in range(self.ntauroot + 1):
                     
                     xp_jk += self.C[r,j] * self.V["X",k,r]
           
@@ -363,7 +363,7 @@ class ODECollocation(CollocationBaseClass):
 
                 [fk] = f.call([self.T[k][j], self.V["X",k,j], \
                     self.V["U",k,j-1], self.V["P"]])
-                self.G.append((self.timegrid[k+1] - \
+                self.g.append((self.timegrid[k+1] - \
                     self.timegrid[k]) * fk - xp_jk)
 
             # Get an expression for the state at the end of
@@ -371,14 +371,14 @@ class ODECollocation(CollocationBaseClass):
             
             xf_k = 0
 
-            for r in range(self.d + 1):
+            for r in range(self.ntauroot + 1):
 
                 xf_k += self.D[r] * self.V["X",k,r]
             
             # Add the continuity equation to NLP
             
-            self.G.append(self.V["X",k+1,0] - xf_k + self.V["W", k])
+            self.g.append(self.V["X",k+1,0] - xf_k + self.V["W", k])
 
         # Concatenate constraints
 
-        self.G = ca.vertcat(self.G)
+        self.g = ca.vertcat(self.g)

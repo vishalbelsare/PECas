@@ -10,23 +10,23 @@ class PECasBaseClass:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def __init__(self, pep = None, Ymeas = None, sigmaY = 1, sigmaS = 10e-4):
+    def __init__(self, pep = None, yN = None, stdy = 1, ws = 10e-4):
 
         self.pep = pep
 
-        self.Ymeas = pl.zeros(pl.size(Ymeas))
-        self.sigmaY = pl.zeros(pl.size(Ymeas))
+        self.yN = pl.zeros(pl.size(yN))
+        self.stdy = pl.zeros(pl.size(yN))
 
-        for k in Ymeas.shape[1]:
+        for k in yN.shape[1]:
 
-            self.Ymeas[k:Ymeas.shape[1]*Ymeas.shape[0]+1:Ymeas.shape[1]] = \
-                Ymeas[k, :]
-            self.Ymeas[k:Ymeas.shape[1]*Ymeas.shape[0]+1:Ymeas.shape[1]] = \
-                sigmaY[k, :]
+            self.yN[k:yN.shape[1]*yN.shape[0]+1:yN.shape[1]] = \
+                yN[k, :]
+            self.yN[k:yN.shape[1]*yN.shape[0]+1:yN.shape[1]] = \
+                stdy[k, :]
 
-        self.sigmaS = [sigmaS] * pep.S.shape[0]
+        self.ws = [ws] * pep.S.shape[0]
 
-        selfSigma = pl.square(pl.diag(pl.concatenate((sigmaY, sigmaS))))
+        self.Covys = pl.square(pl.diag(pl.concatenate((stdy, ws))))
 
 
 
@@ -35,181 +35,185 @@ class LSq(PECasBaseClass):
     '''The class :class:`LSq` is used to define and solve least
     squares parameter estimation problems with PECas.'''
 
-    def __init__(\
-        self, x, M, sigma, Y=None, xtrue=None, G=None, H=None, xinit=None, \
-        xmin = None, xmax = None):
+    def __init__(self, pep = None, yN = None, stdy = 1, ws = 10e-4):
 
-        '''
+        super(LSq, self).__init__(pep = None, yN = None, stdy = 1, ws = 10e-4)
 
-        **Mandatory information for constructing the class**
+#     def __init__(\
+#         self, x, M, sigma, Y=None, xtrue=None, G=None, H=None, xinit=None, \
+#         xmin = None, xmax = None):
 
-        :param x: Column vector :math:`x \in \mathbb{R}^{d}` for the
-                  parameters.
-        :type x: casadi.casadi_core.SX/.MX,
-                 casadi.tools.structure.ssymStruct/.msymStruct
+#         '''
 
-        :param M: Column vector :math:`M \in \mathbb{R}^{N}` for the model.
-        :type M: casadi.casadi_core.SX/.MX
+#         **Mandatory information for constructing the class**
 
-        :param sigma: Column vector :math:`\sigma \in \mathbb{R}^{N}` for
-                      the standard deviations.
-        :type sigma: numpy.ndarray
+#         :param x: Column vector :math:`x \in \mathbb{R}^{d}` for the
+#                   parameters.
+#         :type x: casadi.casadi_core.SX/.MX,
+#                  casadi.tools.structure.ssymStruct/.msymStruct
 
+#         :param M: Column vector :math:`M \in \mathbb{R}^{N}` for the model.
+#         :type M: casadi.casadi_core.SX/.MX
 
-        **Mutually substitutable information for constructing the class**
-
-        *One of the two variables Y and xtrue has to be set!*
-
-        :param Y: Column vector :math:`Y \in \mathbb{R}^{N}` for the
-                  measurements.
-        :type Y: numpy.ndarray
-
-        :param xtrue: Column vector :math:`x_{true} \in \mathbb{R}^{d}` 
-                      containing the true value of :math:`x` to
-                      generate pseudo measurement data using
-                      the vectors :math:`M` and :math:`\sigma`.
-        :type xtrue: numpy.ndarray
+#         :param sigma: Column vector :math:`\sigma \in \mathbb{R}^{N}` for
+#                       the standard deviations.
+#         :type sigma: numpy.ndarray
 
 
-        **Optional information for constructing the class**
+#         **Mutually substitutable information for constructing the class**
 
-        :param G: Column vector :math:`G \in (0)^{m}` for the
-                  equality constraints.
-        :type G: casadi.casadi_core.SX/.MX
+#         *One of the two variables Y and xtrue has to be set!*
 
-        :param xinit: Column vector :math:`x_{init} \in \mathbb{R}^{d}` for the initial guess of the parameter values.
-        :type xinit: numpy.ndarray, casadi.tools.structure.DMatrixStruct
+#         :param Y: Column vector :math:`Y \in \mathbb{R}^{N}` for the
+#                   measurements.
+#         :type Y: numpy.ndarray
 
-        :param xmin: Column vector :math:`x_{min} \in \mathbb{R}^{d}` 
-                    for the lower bounds of :math:`x`.
-        :type xmin: numpy.ndarray, casadi.tools.structure.DMatrixStruct
-
-        :param xmax: Column vector :math:`x_{max} \in \mathbb{R}^{d}` 
-                    for the upper bounds of :math:`x`.
-        :type xmax: numpy.ndarray, casadi.tools.structure.DMatrixStruct
-
-        |
-
-        '''
-
-        # Parameters
-
-        self.set_x(x)
-
-        # Depending on the type of the parameter variable, determine whether
-        # the SX or the MX class is used, and with this, whether SXFunction or
-        # MXFunction is used to set up the CasADi functions within the class
-
-        if type(self.__x) is ca.casadi_core.SX or \
-            type(self.__x) is cat.structure.ssymStruct:
-
-            self.__CasADiFunction = ca.SXFunction
-
-        else:
-
-            self.__CasADiFunction = ca.MXFunction
-
-        # Model
-
-        self.set_M(M)
-
-        # Standard deviations
-
-        self.set_sigma(sigma)
-
-        # Measurements
-
-        if Y is not None:
-            self.set_Y(Y)
-
-        # True value of x
-
-        if xtrue is not None:
-            self.set_xtrue(xtrue)
-
-        # Assure that only one of the variables Y and xtrue is provided
-
-        if (Y is None) and (xtrue is None):
-            raise ValueError('''
-If no measurement data Y is provided, the true value of x must be provided
-in xtrue so pseudo measurement data can be created for parameter estimation.
-''')
-
-        # Optional information
-
-        # Equality constrains
-
-        if G is not None:
-            self.set_G(G)
-        else:
-            self.__m = 0
-
-        # Initial guess
-
-        if xinit is not None:
-            self.set_xinit(xinit)
-
-        # Bounds
-
-        if xmin is not None:
-            self.set_xmin(xmin)
-
-        if xmax is not None:
-            self.set_xmax(xmax)
+#         :param xtrue: Column vector :math:`x_{true} \in \mathbb{R}^{d}` 
+#                       containing the true value of :math:`x` to
+#                       generate pseudo measurement data using
+#                       the vectors :math:`M` and :math:`\sigma`.
+#         :type xtrue: numpy.ndarray
 
 
-    ##########################################################################
-    ############# 4. Functions for running parameter estimation ##############
-    ##########################################################################
+#         **Optional information for constructing the class**
 
-    def generate_pseudo_measurement_data(self):
+#         :param G: Column vector :math:`G \in (0)^{m}` for the
+#                   equality constraints.
+#         :type G: casadi.casadi_core.SX/.MX
 
-        r'''
-        :raises: AttributeError
+#         :param xinit: Column vector :math:`x_{init} \in \mathbb{R}^{d}` for the initial guess of the parameter values.
+#         :type xinit: numpy.ndarray, casadi.tools.structure.DMatrixStruct
+
+#         :param xmin: Column vector :math:`x_{min} \in \mathbb{R}^{d}` 
+#                     for the lower bounds of :math:`x`.
+#         :type xmin: numpy.ndarray, casadi.tools.structure.DMatrixStruct
+
+#         :param xmax: Column vector :math:`x_{max} \in \mathbb{R}^{d}` 
+#                     for the upper bounds of :math:`x`.
+#         :type xmax: numpy.ndarray, casadi.tools.structure.DMatrixStruct
+
+#         |
+
+#         '''
+
+#         # Parameters
+
+#         self.set_x(x)
+
+#         # Depending on the type of the parameter variable, determine whether
+#         # the SX or the MX class is used, and with this, whether SXFunction or
+#         # MXFunction is used to set up the CasADi functions within the class
+
+#         if type(self.__x) is ca.casadi_core.SX or \
+#             type(self.__x) is cat.structure.ssymStruct:
+
+#             self.__CasADiFunction = ca.SXFunction
+
+#         else:
+
+#             self.__CasADiFunction = ca.MXFunction
+
+#         # Model
+
+#         self.set_M(M)
+
+#         # Standard deviations
+
+#         self.set_sigma(sigma)
+
+#         # Measurements
+
+#         if Y is not None:
+#             self.set_Y(Y)
+
+#         # True value of x
+
+#         if xtrue is not None:
+#             self.set_xtrue(xtrue)
+
+#         # Assure that only one of the variables Y and xtrue is provided
+
+#         if (Y is None) and (xtrue is None):
+#             raise ValueError('''
+# If no measurement data Y is provided, the true value of x must be provided
+# in xtrue so pseudo measurement data can be created for parameter estimation.
+# ''')
+
+#         # Optional information
+
+#         # Equality constrains
+
+#         if G is not None:
+#             self.set_G(G)
+#         else:
+#             self.__m = 0
+
+#         # Initial guess
+
+#         if xinit is not None:
+#             self.set_xinit(xinit)
+
+#         # Bounds
+
+#         if xmin is not None:
+#             self.set_xmin(xmin)
+
+#         if xmax is not None:
+#             self.set_xmax(xmax)
+
+
+#     ##########################################################################
+#     ############# 4. Functions for running parameter estimation ##############
+#     ##########################################################################
+
+#     def generate_pseudo_measurement_data(self):
+
+#         r'''
+#         :raises: AttributeError
         
-        This functions generates "random" pseudo measurement data in
-        :math:`Y` for a parameter estimation from :math:`M`,
-        :math:`\sigma` and :math:`x_{true}`. If measurement data had been
-        stored already, it will be overwritten.
+#         This functions generates "random" pseudo measurement data in
+#         :math:`Y` for a parameter estimation from :math:`M`,
+#         :math:`\sigma` and :math:`x_{true}`. If measurement data had been
+#         stored already, it will be overwritten.
 
-        For obtaining :math:`Y`, at first the expression
+#         For obtaining :math:`Y`, at first the expression
 
-        .. math::
-            Y_{true} = M(x_{true})
+#         .. math::
+#             Y_{true} = M(x_{true})
 
-        is evaluated, and afterwards, normally distributed measurement noise
-        :math:`\epsilon \in \mathbb{R}^{N}` with zeros mean
-        and standard deviation :math:`\sigma` is added to the computed values
-        of :math:`\hat{Y}`, so that
+#         is evaluated, and afterwards, normally distributed measurement noise
+#         :math:`\epsilon \in \mathbb{R}^{N}` with zeros mean
+#         and standard deviation :math:`\sigma` is added to the computed values
+#         of :math:`\hat{Y}`, so that
 
-        .. math::
-            Y = Y_{true} + \epsilon,~ \epsilon \sim
-                \mathcal{N}(0, \sigma^{2}).
+#         .. math::
+#             Y = Y_{true} + \epsilon,~ \epsilon \sim
+#                 \mathcal{N}(0, \sigma^{2}).
 
 
-        Afterwards,
+#         Afterwards,
 
-          - the vector :math:`Y`
-            can be returned using the function :func:`get_Y()`.
-        '''
+#           - the vector :math:`Y`
+#             can be returned using the function :func:`get_Y()`.
+#         '''
 
-        if self.get_xtrue(msg = False) is None:
+#         if self.get_xtrue(msg = False) is None:
 
-            raise AttributeError('''
-Pseudo measurement data can only be generated if the true value of x, xtrue,
-is known. You can set xtrue manually using the function set_xtrue().
-''')
+#             raise AttributeError('''
+# Pseudo measurement data can only be generated if the true value of x, xtrue,
+# is known. You can set xtrue manually using the function set_xtrue().
+# ''')
 
-        self.__Mx = self.__CasADiFunction(ca.nlpIn(x=self.__x), \
-            ca.nlpOut(f=self.__M))
-        self.__Mx.setOption("name", "Model function Mx")
-        self.__Mx.init()
+#         self.__Mx = self.__CasADiFunction(ca.nlpIn(x=self.__x), \
+#             ca.nlpOut(f=self.__M))
+#         self.__Mx.setOption("name", "Model function Mx")
+#         self.__Mx.init()
 
-        self.__Mx.setInput(self.__xtrue, "x")
-        self.__Mx.evaluate()
+#         self.__Mx.setInput(self.__xtrue, "x")
+#         self.__Mx.evaluate()
 
-        self.__Y = self.__Mx.getOutput("f") + \
-            np.random.normal(0, self.__sigma, self.__N)
+#         self.__Y = self.__Mx.getOutput("f") + \
+#             np.random.normal(0, self.__sigma, self.__N)
 
 
     def run_parameter_estimation(self):
