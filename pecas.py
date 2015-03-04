@@ -4,29 +4,30 @@ import numpy as np
 import pylab as pl
 from scipy.misc import comb
 import sys
+from abc import ABCMeta, abstractmethod
 
 class PECasBaseClass:
 
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def __init__(self, pep = None, yN = None, stdy = 1, ws = 10e-4):
+    def __init__(self, pep = None, yN = None, stdyN = 1, stds = 10e-4):
 
         self.pep = pep
 
         self.yN = pl.zeros(pl.size(yN))
-        self.stdy = pl.zeros(pl.size(yN))
+        self.stdyN = pl.zeros(pl.size(yN))
 
-        for k in yN.shape[1]:
+        for k in range(yN.shape[1]):
 
             self.yN[k:yN.shape[1]*yN.shape[0]+1:yN.shape[1]] = \
-                yN[k, :]
-            self.yN[k:yN.shape[1]*yN.shape[0]+1:yN.shape[1]] = \
-                stdy[k, :]
+                yN[:, k]
+            self.stdyN[k:yN.shape[1]*yN.shape[0]+1:yN.shape[1]] = \
+                stdyN[:, k]
 
-        self.ws = [ws] * pep.S.shape[0]
+        self.stds = stds * pl.ones(pep.s.shape[0])
 
-        self.Covys = pl.square(pl.diag(pl.concatenate((stdy, ws))))
+        self.CovyNs = pl.square(pl.diag(pl.concatenate((self.stdyN, self.stds))))
 
 
 
@@ -35,9 +36,9 @@ class LSq(PECasBaseClass):
     '''The class :class:`LSq` is used to define and solve least
     squares parameter estimation problems with PECas.'''
 
-    def __init__(self, pep = None, yN = None, stdy = 1, ws = 10e-4):
+    def __init__(self, pep = None, yN = None, stdyN = 1, stds = 10e-4):
 
-        super(LSq, self).__init__(pep = None, yN = None, stdy = 1, ws = 10e-4)
+        super(LSq, self).__init__(pep = pep, yN = yN, stdyN = stdyN, stds = stds)
 
 #     def __init__(\
 #         self, x, M, sigma, Y=None, xtrue=None, G=None, H=None, xinit=None, \
@@ -245,56 +246,50 @@ class LSq(PECasBaseClass):
 
         # First, check if measurement data exists; if not, generate it
 
-        if self.get_Y(msg = False) is None:
+        # if self.get_Y(msg = False) is None:
 
-            self.generate_pseudo_measurement_data()            
+        #     self.generate_pseudo_measurement_data()            
 
         # Set up the cost function f
 
-        A = ca.mul(np.linalg.solve(np.sqrt(self.__Sigma_eps), np.eye(self.__N)), \
-            (self.__M - self.__Y))
-        self.__f = ca.mul(A.T, A)
+        A = ca.mul(pl.linalg.solve(pl.sqrt(self.CovyNs), \
+            np.eye(pl.size(self.yN))), (self.pep.phiN - self.yN))
+        lsqest = ca.mul(A.T, A)
 
         # Solve the minimization problem for f
 
-        if self.get_G(msg = False) is None:
+        if not self.pep.g:
 
-            self.__fx = self.__CasADiFunction(ca.nlpIn(x=self.__x), \
-                ca.nlpOut(f=self.__f))
+            lsqestfcn = self.__CasADiFunction(ca.nlpIn(x=self.pep.V), \
+                ca.nlpOut(f=lsqest))
 
         else:
 
-            self.__fx = self.__CasADiFunction(ca.nlpIn(x=self.__x), \
-                ca.nlpOut(f=self.__f, g=self.__G))
+            lsqestfcn = self.__CasADiFunction(ca.nlpIn(x=self.pep.V), \
+                ca.nlpOut(f=lsqest, g=self.pep.g))
 
-        self.__fx.init()
+        lsqestfcn.init()
 
-        solver = ca.NlpSolver("ipopt", self.__fx)
+        solver = ca.NlpSolver("ipopt", lsqestfcn)
         solver.setOption("tol", 1e-10)
         solver.init()
 
         # If equality constraints exist, set the bounds for the solver
 
-        if self.get_m() is not 0:
+        if self.pep.g:
 
-            solver.setInput(np.zeros(self.__m), "lbg")
-            solver.setInput(np.zeros(self.__m), "ubg")
+            solver.setInput(pl.zeros(self.pep.g.size()), "lbg")
+            solver.setInput(pl.zeros(self.pep.g.size()), "ubg")
 
         # If an initial guess was given, set the initial guess for the solver
-        
-        if self.get_xinit(msg = False) is not None:
 
-            solver.setInput(self.__xinit, "x0")
+        solver.setInput(self.pep.Vinit, "x0")
 
         # If given, set the bounds for the parameter values
 
-        if self.get_xmin(msg = None) is not None:
+        solver.setInput(self.pep.Vmin, "lbx")
 
-            solver.setInput(self.__xmin, "lbx")
-
-        if self.get_xmax(msg = None) is not None:
-
-            solver.setInput(self.__xmax, "ubx")
+        solver.setInput(self.pep.Vmax, "ubx")
 
         # Run the optimization problem
 
@@ -302,8 +297,8 @@ class LSq(PECasBaseClass):
 
         # Store the results of the computation
 
-        self.__xhat = solver.getOutput("x")
-        self.__Rhat = solver.getOutput("f")
+        self.Vhat = solver.getOutput("x")
+        self.Rhat = solver.getOutput("f")
 
 
     ##########################################################################

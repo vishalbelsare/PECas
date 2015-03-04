@@ -337,10 +337,10 @@ class ODECollocation(CollocationBaseClass):
             x0min = x0min, x0max = x0max, \
             xNmin = xNmin, xNmax = xNmax)
 
-        f = ca.SXFunction([system.v["t"], system.v["x"], system.v["u"], \
+        ffcn = ca.SXFunction([system.v["t"], system.v["x"], system.v["u"], \
             system.v["p"]], [system.fcn["f"]])
-        f.setOption("name", "ffcn")
-        f.init()
+        ffcn.setOption("name", "ffcn")
+        ffcn.init()
 
         # For all finite elements
 
@@ -361,7 +361,7 @@ class ODECollocation(CollocationBaseClass):
           
                 # Add collocation equations to the NLP
 
-                [fk] = f.call([self.T[k][j], self.V["X",k,j], \
+                [fk] = ffcn.call([self.T[k][j], self.V["X",k,j], \
                     self.V["U",k,j-1], self.V["P"]])
                 self.g.append((self.timegrid[k+1] - \
                     self.timegrid[k]) * fk - xp_jk)
