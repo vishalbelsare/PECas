@@ -1,9 +1,12 @@
 import casadi as ca
 import casadi.tools as cat
-import numpy as np
+
 import pylab as pl
 from scipy.misc import comb
-import sys
+
+import systems
+import setupmethods
+
 from abc import ABCMeta, abstractmethod
 
 class PECasBaseClass:
@@ -11,9 +14,14 @@ class PECasBaseClass:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def __init__(self, pep = None, yN = None, stdyN = 1, stds = 1e-2):
+    def __init__(self, pesetup = None, yN = None, stdyN = 1, stds = 1e-2):
 
-        self.pep = pep
+        # Store the parameter estimation problem setup
+
+        self.pesetup = pesetup
+
+        # Get the measurement values and standard deviations into the
+        # necessary order of apperance and dimensions
 
         self.yN = pl.zeros(pl.size(yN))
         self.stdyN = pl.zeros(pl.size(yN))
@@ -25,7 +33,9 @@ class PECasBaseClass:
             self.stdyN[k:yN.shape[1]*yN.shape[0]+1:yN.shape[1]] = \
                 stdyN[:, k]
 
-        self.stds = stds * pl.ones(pep.s.shape[0])
+        self.stds = stds * pl.ones(pesetup.s.shape[0])
+
+        # Set up the covariance matrix for the measurements
 
         self.CovyNs = pl.square(pl.diag(pl.concatenate((self.stdyN, self.stds))))
 
@@ -36,19 +46,18 @@ class LSq(PECasBaseClass):
     '''The class :class:`LSq` is used to define and solve least
     squares parameter estimation problems with PECas.'''
 
-    def __init__(self, pep = None, yN = None, stdyN = 1, stds = 10e-2):
+    def __init__(self, pesetup = None, yN = None, stdyN = 1, stds = 10e-2):
 
-        super(LSq, self).__init__(pep = pep, yN = yN, stdyN = stdyN, stds = stds)
+        super(LSq, self).__init__(pesetup = pesetup, yN = yN, stdyN = stdyN, stds = stds)
 
 
     def run_parameter_estimation(self):
 
         r'''
-        This functions will run the parameter estimation for the given problem.        
-        If measurement data is not yet existing, it will be generated using
-        the function :func:`generate_pseudo_measurement_data()`.
+        This functions will run a least sqaures parameter estimation for the
+        given problem.
 
-        Then, the parameter estimation problem
+        For this, the least squares parameter estimation problem
 
         .. math::
 
@@ -66,57 +75,47 @@ class LSq(PECasBaseClass):
 
         - the value of the residual :math:`\hat{R}`
           can be returned using the function :func:`get_Rhat()`.
-        '''
+        '''          
 
-        # First, check if measurement data exists; if not, generate it
-
-        # if self.get_Y(msg = False) is None:
-
-        #     self.generate_pseudo_measurement_data()            
-
-        # Set up the cost function f
+        # Set up the residual function reslsq
 
         A = ca.mul(pl.linalg.solve(pl.sqrt(self.CovyNs), \
-            np.eye(pl.size(self.yN) + pl.size(self.stds))), \
-            ca.vertcat([self.pep.phiN - self.yN, self.pep.s]))
-        # A = ca.mul(pl.linalg.solve(pl.sqrt(self.CovyNs), \
-        #     np.eye(pl.size(self.yN))), (self.pep.phiN - self.yN))
-        lsqest = ca.mul(A.T, A)
+            pl.eye(pl.size(self.yN) + pl.size(self.stds))), \
+            ca.vertcat([self.pesetup.phiN - self.yN, self.pesetup.s]))
 
-        # Solve the minimization problem for f
+        reslsq = ca.mul(A.T, A)
 
-        if not self.pep.g.size():
+        # If equality constraints exists, set then for the solver as well
+        # as the cost function
 
-            lsqestfcn = ca.MXFunction(ca.nlpIn(x=self.pep.V), \
-                ca.nlpOut(f=lsqest))
+        if not self.pesetup.g.size():
+
+            reslsqfcn = ca.MXFunction(ca.nlpIn(x=self.pesetup.V), \
+                ca.nlpOut(f=reslsq))
 
         else:
 
-            lsqestfcn = ca.MXFunction(ca.nlpIn(x=self.pep.V), \
-                ca.nlpOut(f=lsqest, g=self.pep.g))
+            reslsqfcn = ca.MXFunction(ca.nlpIn(x=self.pesetup.V), \
+                ca.nlpOut(f=reslsq, g=self.pesetup.g))
 
-        lsqestfcn.init()
+        reslsqfcn.init()
 
-        solver = ca.NlpSolver("ipopt", lsqestfcn)
+        solver = ca.NlpSolver("ipopt", reslsqfcn)
         solver.setOption("tol", 1e-10)
         solver.init()
 
         # If equality constraints exist, set the bounds for the solver
 
-        if self.pep.g.size():
+        if self.pesetup.g.size():
 
-            solver.setInput(pl.zeros(self.pep.g.size()), "lbg")
-            solver.setInput(pl.zeros(self.pep.g.size()), "ubg")
+            solver.setInput(pl.zeros(self.pesetup.g.size()), "lbg")
+            solver.setInput(pl.zeros(self.pesetup.g.size()), "ubg")
 
-        # If an initial guess was given, set the initial guess for the solver
+        # Set the initial guess and bounds for the solver
 
-        solver.setInput(self.pep.Vinit, "x0")
-
-        # If given, set the bounds for the parameter values
-
-        solver.setInput(self.pep.Vmin, "lbx")
-
-        solver.setInput(self.pep.Vmax, "ubx")
+        solver.setInput(self.pesetup.Vinit, "x0")
+        solver.setInput(self.pesetup.Vmin, "lbx")
+        solver.setInput(self.pesetup.Vmax, "ubx")
 
         # Run the optimization problem
 
@@ -215,8 +214,8 @@ Execute run_parameter_estimation() before computing the covariance matrix.
         Mx = self.__CasADiFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
         Mx.init()
 
-        self.__J1 = ca.mul(ca.solve(np.sqrt(self.__Sigma_eps), \
-            np.eye(self.__N)), Mx.jac("x", "f"))
+        self.__J1 = ca.mul(ca.solve(pl.sqrt(self.__Sigma_eps), \
+            pl.eye(self.__N)), Mx.jac("x", "f"))
 
         # Compute Jplus and covariance matrix
 
@@ -229,23 +228,23 @@ Execute run_parameter_estimation() before computing the covariance matrix.
 
             self.__Jplus = ca.mul([ \
 
-                ca.horzcat((np.eye(self.__d),np.zeros((self.__d, self.__m)))),\
+                ca.horzcat((pl.eye(self.__d),pl.zeros((self.__d, self.__m)))),\
 
                 ca.solve(ca.vertcat(( \
                 
                     ca.horzcat((ca.mul(self.__J1.T, self.__J1), self.__J2.T)),\
-                    ca.horzcat((self.__J2, np.zeros((self.__m, self.__m)))) \
+                    ca.horzcat((self.__J2, pl.zeros((self.__m, self.__m)))) \
                 
-                )), np.eye(self.__d + self.__m)), \
+                )), pl.eye(self.__d + self.__m)), \
 
-                ca.vertcat((self.__J1.T, np.zeros((self.__m, self.__N)))) \
+                ca.vertcat((self.__J1.T, pl.zeros((self.__m, self.__N)))) \
 
                 ])
 
         else:
 
             self.__Jplus = ca.mul(ca.solve(ca.mul(self.__J1.T, self.__J1), \
-                np.eye(self.__d)), self.__J1.T)
+                pl.eye(self.__d)), self.__J1.T)
 
         self.__fCov = self.__beta * ca.mul([self.__Jplus, self.__Jplus.T])
 
@@ -300,11 +299,11 @@ compute_covariance_matrix() before all results can be displayed.
         for i, xi in enumerate(self.get_xhat()):
 
             print("x{0:<3} = {1:10} +/- {2:10}".format(\
-                i, xi, np.sqrt(self.get_Covx()[i, i])))
+                i, xi, pl.sqrt(self.get_Covx()[i, i])))
 
         print("\n\nCovariance matrix Cov(x):\n")
 
-        print(np.vectorize("%03.05e".__mod__)(self.get_Covx()))
+        print(pl.vectorize("%03.05e".__mod__)(self.get_Covx()))
 
         print('\n\n##  End of parameter estimation results  ## \n')
 
@@ -370,7 +369,7 @@ All list entries for the indices have to be of type int.
 
             for k, ind2 in enumerate(indices[j+1:]):
 
-                covs = np.array([ \
+                covs = pl.array([ \
 
                         [self.__Covx[ind1, ind1], self.__Covx[ind1, ind2]], \
                         [self.__Covx[ind2, ind1], self.__Covx[ind2, ind2]] \
@@ -379,7 +378,7 @@ All list entries for the indices have to be of type int.
 
                 w, v = pl.linalg.eig(covs)
 
-                ellipse = ca.mul(np.array([self.__xhat[ind1], \
+                ellipse = ca.mul(pl.array([self.__xhat[ind1], \
                     self.__xhat[ind2]]), \
                     pl.ones([1,100])) + ca.mul([v, pl.diag(w), xy])
 
