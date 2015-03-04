@@ -11,7 +11,7 @@ class PECasBaseClass:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def __init__(self, pep = None, yN = None, stdyN = 1, stds = 10e-4):
+    def __init__(self, pep = None, yN = None, stdyN = 1, stds = 1e-2):
 
         self.pep = pep
 
@@ -36,185 +36,9 @@ class LSq(PECasBaseClass):
     '''The class :class:`LSq` is used to define and solve least
     squares parameter estimation problems with PECas.'''
 
-    def __init__(self, pep = None, yN = None, stdyN = 1, stds = 10e-4):
+    def __init__(self, pep = None, yN = None, stdyN = 1, stds = 10e-2):
 
         super(LSq, self).__init__(pep = pep, yN = yN, stdyN = stdyN, stds = stds)
-
-#     def __init__(\
-#         self, x, M, sigma, Y=None, xtrue=None, G=None, H=None, xinit=None, \
-#         xmin = None, xmax = None):
-
-#         '''
-
-#         **Mandatory information for constructing the class**
-
-#         :param x: Column vector :math:`x \in \mathbb{R}^{d}` for the
-#                   parameters.
-#         :type x: casadi.casadi_core.SX/.MX,
-#                  casadi.tools.structure.ssymStruct/.msymStruct
-
-#         :param M: Column vector :math:`M \in \mathbb{R}^{N}` for the model.
-#         :type M: casadi.casadi_core.SX/.MX
-
-#         :param sigma: Column vector :math:`\sigma \in \mathbb{R}^{N}` for
-#                       the standard deviations.
-#         :type sigma: numpy.ndarray
-
-
-#         **Mutually substitutable information for constructing the class**
-
-#         *One of the two variables Y and xtrue has to be set!*
-
-#         :param Y: Column vector :math:`Y \in \mathbb{R}^{N}` for the
-#                   measurements.
-#         :type Y: numpy.ndarray
-
-#         :param xtrue: Column vector :math:`x_{true} \in \mathbb{R}^{d}` 
-#                       containing the true value of :math:`x` to
-#                       generate pseudo measurement data using
-#                       the vectors :math:`M` and :math:`\sigma`.
-#         :type xtrue: numpy.ndarray
-
-
-#         **Optional information for constructing the class**
-
-#         :param G: Column vector :math:`G \in (0)^{m}` for the
-#                   equality constraints.
-#         :type G: casadi.casadi_core.SX/.MX
-
-#         :param xinit: Column vector :math:`x_{init} \in \mathbb{R}^{d}` for the initial guess of the parameter values.
-#         :type xinit: numpy.ndarray, casadi.tools.structure.DMatrixStruct
-
-#         :param xmin: Column vector :math:`x_{min} \in \mathbb{R}^{d}` 
-#                     for the lower bounds of :math:`x`.
-#         :type xmin: numpy.ndarray, casadi.tools.structure.DMatrixStruct
-
-#         :param xmax: Column vector :math:`x_{max} \in \mathbb{R}^{d}` 
-#                     for the upper bounds of :math:`x`.
-#         :type xmax: numpy.ndarray, casadi.tools.structure.DMatrixStruct
-
-#         |
-
-#         '''
-
-#         # Parameters
-
-#         self.set_x(x)
-
-#         # Depending on the type of the parameter variable, determine whether
-#         # the SX or the MX class is used, and with this, whether SXFunction or
-#         # MXFunction is used to set up the CasADi functions within the class
-
-#         if type(self.__x) is ca.casadi_core.SX or \
-#             type(self.__x) is cat.structure.ssymStruct:
-
-#             self.__CasADiFunction = ca.SXFunction
-
-#         else:
-
-#             self.__CasADiFunction = ca.MXFunction
-
-#         # Model
-
-#         self.set_M(M)
-
-#         # Standard deviations
-
-#         self.set_sigma(sigma)
-
-#         # Measurements
-
-#         if Y is not None:
-#             self.set_Y(Y)
-
-#         # True value of x
-
-#         if xtrue is not None:
-#             self.set_xtrue(xtrue)
-
-#         # Assure that only one of the variables Y and xtrue is provided
-
-#         if (Y is None) and (xtrue is None):
-#             raise ValueError('''
-# If no measurement data Y is provided, the true value of x must be provided
-# in xtrue so pseudo measurement data can be created for parameter estimation.
-# ''')
-
-#         # Optional information
-
-#         # Equality constrains
-
-#         if G is not None:
-#             self.set_G(G)
-#         else:
-#             self.__m = 0
-
-#         # Initial guess
-
-#         if xinit is not None:
-#             self.set_xinit(xinit)
-
-#         # Bounds
-
-#         if xmin is not None:
-#             self.set_xmin(xmin)
-
-#         if xmax is not None:
-#             self.set_xmax(xmax)
-
-
-#     ##########################################################################
-#     ############# 4. Functions for running parameter estimation ##############
-#     ##########################################################################
-
-#     def generate_pseudo_measurement_data(self):
-
-#         r'''
-#         :raises: AttributeError
-        
-#         This functions generates "random" pseudo measurement data in
-#         :math:`Y` for a parameter estimation from :math:`M`,
-#         :math:`\sigma` and :math:`x_{true}`. If measurement data had been
-#         stored already, it will be overwritten.
-
-#         For obtaining :math:`Y`, at first the expression
-
-#         .. math::
-#             Y_{true} = M(x_{true})
-
-#         is evaluated, and afterwards, normally distributed measurement noise
-#         :math:`\epsilon \in \mathbb{R}^{N}` with zeros mean
-#         and standard deviation :math:`\sigma` is added to the computed values
-#         of :math:`\hat{Y}`, so that
-
-#         .. math::
-#             Y = Y_{true} + \epsilon,~ \epsilon \sim
-#                 \mathcal{N}(0, \sigma^{2}).
-
-
-#         Afterwards,
-
-#           - the vector :math:`Y`
-#             can be returned using the function :func:`get_Y()`.
-#         '''
-
-#         if self.get_xtrue(msg = False) is None:
-
-#             raise AttributeError('''
-# Pseudo measurement data can only be generated if the true value of x, xtrue,
-# is known. You can set xtrue manually using the function set_xtrue().
-# ''')
-
-#         self.__Mx = self.__CasADiFunction(ca.nlpIn(x=self.__x), \
-#             ca.nlpOut(f=self.__M))
-#         self.__Mx.setOption("name", "Model function Mx")
-#         self.__Mx.init()
-
-#         self.__Mx.setInput(self.__xtrue, "x")
-#         self.__Mx.evaluate()
-
-#         self.__Y = self.__Mx.getOutput("f") + \
-#             np.random.normal(0, self.__sigma, self.__N)
 
 
     def run_parameter_estimation(self):
@@ -253,19 +77,22 @@ class LSq(PECasBaseClass):
         # Set up the cost function f
 
         A = ca.mul(pl.linalg.solve(pl.sqrt(self.CovyNs), \
-            np.eye(pl.size(self.yN))), (self.pep.phiN - self.yN))
+            np.eye(pl.size(self.yN) + pl.size(self.stds))), \
+            ca.vertcat([self.pep.phiN - self.yN, self.pep.s]))
+        # A = ca.mul(pl.linalg.solve(pl.sqrt(self.CovyNs), \
+        #     np.eye(pl.size(self.yN))), (self.pep.phiN - self.yN))
         lsqest = ca.mul(A.T, A)
 
         # Solve the minimization problem for f
 
-        if not self.pep.g:
+        if not self.pep.g.size():
 
-            lsqestfcn = self.__CasADiFunction(ca.nlpIn(x=self.pep.V), \
+            lsqestfcn = ca.MXFunction(ca.nlpIn(x=self.pep.V), \
                 ca.nlpOut(f=lsqest))
 
         else:
 
-            lsqestfcn = self.__CasADiFunction(ca.nlpIn(x=self.pep.V), \
+            lsqestfcn = ca.MXFunction(ca.nlpIn(x=self.pep.V), \
                 ca.nlpOut(f=lsqest, g=self.pep.g))
 
         lsqestfcn.init()
@@ -276,7 +103,7 @@ class LSq(PECasBaseClass):
 
         # If equality constraints exist, set the bounds for the solver
 
-        if self.pep.g:
+        if self.pep.g.size():
 
             solver.setInput(pl.zeros(self.pep.g.size()), "lbg")
             solver.setInput(pl.zeros(self.pep.g.size()), "ubg")
