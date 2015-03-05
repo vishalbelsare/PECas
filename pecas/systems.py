@@ -13,6 +13,11 @@ class BasicSystem(object):
                  y = None, \
                  g = ca.SX.sym("g", 0)):
 
+        if not all(isinstance(arg, (ca.casadi.SX, ca.casadi.MX)) for \
+            arg in [t, u, p, y, g]):
+
+            raise TypeError("Input arguments must be CasADi symbolic types.")
+
         self.v = cat.struct_MX([
                 (
                     cat.entry("t", expr = t),
@@ -39,6 +44,11 @@ class ExplODE(BasicSystem):
                  y = None, \
                  f = None, \
                  g = ca.SX.sym("g", 0)):
+
+        if not all(isinstance(arg, (ca.casadi.SX, ca.casadi.MX)) for \
+            arg in [t, u, x, p, y, f, g]):
+
+            raise TypeError("Input arguments must be CasADi symbolic types.")
 
         self.v = cat.struct_MX([
                 (
