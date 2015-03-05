@@ -3,7 +3,12 @@ import casadi.tools as cat
 import pylab as pl
 from abc import ABCMeta, abstractmethod
 
+import systems
+
 class SetupMethodsBaseClass(object):
+
+    '''The abstract class :class:`SetupMethodsBaseClass` contains the basic
+    functionalities of all other classes.'''
 
     __metaclass__ = ABCMeta
 
@@ -11,10 +16,24 @@ class SetupMethodsBaseClass(object):
     @abstractmethod
     def __init__(self):
 
+        '''Placeholder-function for the according __init__-methods of the
+        classes that inherit from :class:`SetupMethodsBaseClass`.'''
+
         pass
 
 
     def __repeat_input(self, val, dim):
+
+        '''
+        :param val: Value that will possibly be repeated.
+        :type val: float, list
+        :param dim: The value for how often ``val`` will possibly be repeated.
+        :type dim: int
+
+        If the input value ``val`` is not of type list, return a list with
+        ``dim`` repetitions of ``val``. Else, return ``val`` without
+        modifications.
+        '''
 
         if not isinstance(val, list):
 
@@ -32,6 +51,16 @@ class SetupMethodsBaseClass(object):
         xmin = -pl.inf, xmax = pl.inf, xinit = 0.0, \
         x0min = -pl.inf, x0max = pl.inf, \
         xNmin = -pl.inf, xNmax = pl.inf):
+
+        '''
+        :param tbd: tbd
+        :type tbd: tbd
+
+        Define structures for minimum, maximum and initial values for the
+        several variables contained constructing the optimization problem.
+        Afterwards, the values are stored inside the class variables ``Vmin``,
+        ``Vmax`` and ``Vinit``, respectively.
+        '''
 
          # Define bounds and initial values
 
@@ -114,6 +143,11 @@ class BSsetup(SetupMethodsBaseClass):
         uinit = pl.zeros(1), \
         pmin = -pl.inf, pmax = pl.inf, pinit = 0.0):
 
+        if not type(system) is systems.BasicSystem:
+
+            raise TypeError("Setup-method " + self.__class__.__name__ + \
+                " not allowed for system of type " + str(type(system)) + ".")
+
         # Dimensions
 
         self.nu = system.v["u"].shape[0]
@@ -190,7 +224,13 @@ class CollocationBaseClass(SetupMethodsBaseClass):
         pmin = -pl.inf, pmax = pl.inf, pinit = 0.0, \
         xmin = -pl.inf, xmax = pl.inf, \
         x0min = -pl.inf, x0max = pl.inf, \
-        xNmin = -pl.inf, xNmax = pl.inf, xinit = 0.0):
+        xNmin = -pl.inf, xNmax = pl.inf, xinit = 0.0, \
+        systemclass = None):
+
+        if not type(system) is systemclass:
+
+            raise TypeError("Setup-method " + self.__class__.__name__ + \
+                " not allowed for system of type " + str(type(system)) + ".")
 
         # Dimensions
 
@@ -335,7 +375,8 @@ class ODEsetup(CollocationBaseClass):
             pmin = pmin, pmax = pmax, pinit = pinit, \
             xmin = xmin, xmax = xmax, xinit = xinit, \
             x0min = x0min, x0max = x0max, \
-            xNmin = xNmin, xNmax = xNmax)
+            xNmin = xNmin, xNmax = xNmax, \
+            systemclass = systems.ExplODE)
 
         ffcn = ca.SXFunction([system.v["t"], system.v["x"], system.v["u"], \
             system.v["p"]], [system.fcn["f"]])
