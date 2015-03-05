@@ -1,3 +1,5 @@
+# todo: license & copywrite
+
 import casadi as ca
 import casadi.tools as cat
 import numpy as np
