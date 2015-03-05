@@ -26,6 +26,10 @@ import casadi.tools as cat
 class BasicSystem(object):
 
     '''
+    :param t: CasADi symbolic variable for the time :math:``t``.
+    :type t: 
+
+
     The class :class:``BasicSystem`` is used to define non-dynamic systems for
     parameter estimation of the following structure:
 
