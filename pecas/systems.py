@@ -27,8 +27,14 @@ class BasicSystem(object):
 
     '''
     :param t: CasADi symbolic variable for the time :math:``t``.
-    :type t: 
-
+    :type t: casadi.casadi.SX, casadi.casadi.MX
+    :param u: CasADi symbolic variable for the controls :math:``u``.
+    :type u: casadi.casadi.SX, casadi.casadi.MX
+    :param p: CasADi symbolic variable for the unknow parameters :math:``p``.
+    :type p: casadi.casadi.SX, casadi.casadi.MX
+    :param y: CasADi symbolic variable describing the output function
+              :math:``y``, i. e. which is the output of the system
+              :math:``\phi = y(\dot)`` can be measured.
 
     The class :class:``BasicSystem`` is used to define non-dynamic systems for
     parameter estimation of the following structure:

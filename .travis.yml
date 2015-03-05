@@ -11,7 +11,7 @@ before_install:
  - sudo dpkg -i python-casadi_2.2.0-2_amd64.deb
  - sudo apt-get install -y -f
  - rm python-casadi_2.2.0-2_amd64.deb
- - sudo updatedb
+ # - sudo updatedb
  - sudo locate casadi
 install:
  - python setup.py install
