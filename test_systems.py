@@ -48,3 +48,4 @@ def test_define_explode_systems():
 def test_define_implade_systems():
 
     assert_raises(NotImplementedError, pecas.systems.ImplDAE)
+    
