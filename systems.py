@@ -1,7 +1,7 @@
 import casadi as ca
 import casadi.tools as cat
 
-class Basic(object):
+class BasicSystem(object):
 
     def __init__(self, \
                  t = ca.SX.sym("t", 1), u = ca.SX.sym("u", 0), \
@@ -29,7 +29,7 @@ class Basic(object):
             ])
 
 
-class ODE(Basic):
+class ExplODE(BasicSystem):
 
     def __init__(self, \
                  t = ca.SX.sym("t", 1), u = ca.SX.sym("u", 0), \
@@ -38,4 +38,4 @@ class ODE(Basic):
                  y = None, \
                  f = None, g = ca.SX.sym("g", 0)):
 
-        super(ODE, self).__init__(t = t, u = u, x = x, p = p, y = y, f = f)
+        super(ExplODE, self).__init__(t = t, u = u, x = x, p = p, y = y, f = f)

@@ -124,7 +124,7 @@ class LSq(PECasBaseClass):
         # Store the results of the computation
 
         self.Vhat = solver.getOutput("x")
-        self.Rhat = solver.getOutput("f")
+        self.rhat = solver.getOutput("f")
 
 
     ##########################################################################
@@ -192,12 +192,6 @@ class LSq(PECasBaseClass):
           - the matrix :math:`\Sigma_{\hat{x}}`
             can be returned using the function :func:`get_Covx()`.
         '''
-
-        if self.get_xhat(msg = False) is None:
-
-            raise AttributeError('''
-Execute run_parameter_estimation() before computing the covariance matrix.
-''')
 
         # Compute beta
 

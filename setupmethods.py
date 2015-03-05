@@ -91,7 +91,7 @@ class SetupMethodsBaseClass(object):
             self.Vmax["W",:] = ca.tools.repeated(pl.inf)
 
 
-class BSEvaluation(SetupMethodsBaseClass):
+class BSsetup(SetupMethodsBaseClass):
 
     def set_bounds_and_initials(self, \
         umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
@@ -101,7 +101,7 @@ class BSEvaluation(SetupMethodsBaseClass):
         x0min = -pl.inf, x0max = pl.inf, \
         xNmin = -pl.inf, xNmax = pl.inf):
 
-        super(BSEvaluation, self).set_bounds_and_initials( \
+        super(BSsetup, self).set_bounds_and_initials( \
             umin = umin, umax = umax, uinit = uinit, \
             pmin = pmin, pmax = pmax, pinit = pinit, \
             xmin = xmin, xmax = xmax, xinit = xinit, \
@@ -319,7 +319,7 @@ class CollocationBaseClass(SetupMethodsBaseClass):
         self.g = []
 
 
-class ODECollocation(CollocationBaseClass):
+class ODEsetup(CollocationBaseClass):
 
     def __init__(self, system = None, timegrid = None, \
         umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
@@ -329,7 +329,7 @@ class ODECollocation(CollocationBaseClass):
         x0min = -pl.inf, x0max = pl.inf, \
         xNmin = -pl.inf, xNmax = pl.inf, xinit = 0.0):
 
-        super(ODECollocation, self).__init__(system = system, \
+        super(ODEsetup, self).__init__(system = system, \
             timegrid = timegrid, \
             umin = umin, umax = umax, uinit = uinit, \
             pmin = pmin, pmax = pmax, pinit = pinit, \
