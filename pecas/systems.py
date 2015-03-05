@@ -83,3 +83,17 @@ class ExplODE(object):
                     cat.entry("f", expr = f)
                 )
             ])
+
+
+class ImplDAE(object):
+
+    def __init__(self, \
+             t = ca.SX.sym("t", 1),
+             u = ca.SX.sym("u", 0), \
+             x = None, \
+             p = None, \
+             y = None, \
+             f = None, \
+             g = ca.SX.sym("g", 0)):
+
+        raise NotImplementedError("Use of implicit DAEs is not yet supported.")

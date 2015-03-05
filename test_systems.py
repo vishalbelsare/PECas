@@ -24,6 +24,7 @@ def test_define_basic_systems():
     assert_raises(TypeError, pecas.systems.BasicSystem, p = None)
     assert_raises(TypeError, pecas.systems.BasicSystem, y = None)
 
+
 def test_define_explode_systems():
 
     t = ca.SX.sym("t", 1)
@@ -42,3 +43,8 @@ def test_define_explode_systems():
     assert_raises(TypeError, pecas.systems.ExplODE, p = None)
     assert_raises(TypeError, pecas.systems.ExplODE, y = None)
     assert_raises(TypeError, pecas.systems.ExplODE, f = None)
+
+
+def test_define_implade_systems():
+
+    assert_raises(NotImplementedError, pecas.systems.ImplDAE)
