@@ -1,6 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+'''
+This modules contains the classes that are used for defining a system for
+which a parameter estimation problem can be solved using PECas. According to a
+system\'s properties, different classes need to be used:
+
+* :class:``BasicSystem``: non-dynamic, contains an output function and possibly
+  equality constraints, possibly dependent on time and/or controls.
+
+* :class:``ExplODE``: dynamic system of explicit ODEs, contains an output
+  function but no algebraic equations, possibly dependent on time and/or
+  controls.
+
+* :class:``ImplDAE``: dynamic system of implicit DAEs (not yet implemented),
+  possibly dependent on time and/or controls.
+
+All systems need also to depend on unknown parameters that will be estimated.
+For more information on the several class, see their documentations.
+'''
+
 import casadi as ca
 import casadi.tools as cat
 
@@ -34,7 +53,7 @@ class BasicSystem(object):
             ])
 
 
-class ExplODE(BasicSystem):
+class ExplODE(object):
 
     def __init__(self, \
                  t = ca.SX.sym("t", 1),
@@ -42,11 +61,10 @@ class ExplODE(BasicSystem):
                  x = None, \
                  p = None, \
                  y = None, \
-                 f = None, \
-                 g = ca.SX.sym("g", 0)):
+                 f = None):
 
         if not all(isinstance(arg, (ca.casadi.SX, ca.casadi.MX)) for \
-            arg in [t, u, x, p, y, f, g]):
+            arg in [t, u, x, p, y, f]):
 
             raise TypeError("Input arguments must be CasADi symbolic types.")
 
@@ -62,7 +80,6 @@ class ExplODE(BasicSystem):
         self.fcn = cat.struct_MX([
                 (
                     cat.entry("y", expr = y),
-                    cat.entry("f", expr = f),
-                    cat.entry("g", expr = g)
+                    cat.entry("f", expr = f)
                 )
             ])

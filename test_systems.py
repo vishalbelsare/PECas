@@ -3,7 +3,7 @@
 
 # dummy_test.py: just something to get the testing working
 
-import pecas
+import pecas.systems
 import casadi as ca
 from nose.tools import assert_raises
 
@@ -32,12 +32,10 @@ def test_define_explode_systems():
     p = ca.SX.sym("p", 1)
     y = ca.SX.sym("y", 1)
     f = ca.SX.sym("f", 1)
-    g = ca.SX.sym("g", 1)
 
     pecas.systems.ExplODE(x = x, p = p, y = y, f = f)
     pecas.systems.ExplODE(t = t, x = x, p = p, y = y, f = f)
     pecas.systems.ExplODE(t = t, u = u, x = x, p = p, y = y, f = f)
-    pecas.systems.ExplODE(t = t, u = u, x = x, p = p, y = y, f = f, g = g)
 
     assert_raises(TypeError, pecas.systems.ExplODE)
     assert_raises(TypeError, pecas.systems.ExplODE, x = None)
