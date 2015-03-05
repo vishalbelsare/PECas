@@ -33,9 +33,7 @@ class BasicSystem(object):
 
         \phi = y(t, u, p)
         0 = g(t, u, p)
-
-
-
+        
     '''
 
     def __init__(self, \
