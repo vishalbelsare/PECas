@@ -8,7 +8,7 @@ python:
 
 # command to install dependencies
 install:
- - travis_retry sudo apt-get install -qq python-numpy python-scipy python-matplotlib #coinor-libipopt-dev libmumps-seq-dev
+ - travis_retry sudo apt-get install -qq python-numpy python-scipy python-matplotlib liblapack3gf liblapack-dev libblas-dev libblas3gf #coinor-libipopt-dev libmumps-seq-dev
  - travis_retry wget https://github.com/casadi/casadi/releases/download/2.2.0/python-casadi_2.2.0-2_amd64.deb
  - sudo dpkg -i python-casadi_2.2.0-2_amd64.deb
  - sudo apt-get install -f

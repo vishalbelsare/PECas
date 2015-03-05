@@ -19,6 +19,7 @@ setup(
     zip_safe=False,
     description='Parameter estimation using CasADi in Python',
     install_requires=["numpy >= 1.8",
-                      "scipy >= 0.13"],
+                      "scipy >= 0.13",
+                      "matplotlib >= 1.3.1"],
     use_2to3=True,
 )
