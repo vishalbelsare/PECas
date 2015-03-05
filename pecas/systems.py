@@ -26,11 +26,13 @@ import casadi.tools as cat
 class BasicSystem(object):
 
     '''
-    :param t: CasADi symbolic variable for the time :math:``t``.
+    :param t: CasADi symbolic variable for the time :math:``t \in \mathbb{R}``.
     :type t: casadi.casadi.SX, casadi.casadi.MX
-    :param u: CasADi symbolic variable for the controls :math:``u``.
+    :param u: CasADi symbolic variable for the controls :math:``u \in
+    \mathbb{R}^{n_{u}}``.
     :type u: casadi.casadi.SX, casadi.casadi.MX
-    :param p: CasADi symbolic variable for the unknow parameters :math:``p``.
+    :param p: CasADi symbolic variable for the unknow parameters :math:``p \in
+    \mathbb{R}^{n_{p}}``.
     :type p: casadi.casadi.SX, casadi.casadi.MX
     :param y: CasADi symbolic variable describing the output function
               :math:``y(t, u, p)``, i. e. the output of the system
@@ -39,8 +41,8 @@ class BasicSystem(object):
     :param p: CasADi symbolic variable describing the equality constraints
               :math:``g(t, u, p)``, while .:math:``0 = g(\dot)``.
 
-    The class :class:``BasicSystem`` is used to define non-dynamic systems for
-    parameter estimation of the following structure:
+    The class :class:``BasicSystem`` can be used to define non-dynamic
+    systems for parameter estimation of the following structure:
 
     .. math::
 
