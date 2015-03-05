@@ -19,5 +19,5 @@ install:
 
 # command to run tests
 script:
-  - python examples/ex1.py
+  # - python examples/ex1.py
   - nosetests pecas

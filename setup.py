@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # todo: license & copywrite
 
 from setuptools import setup
@@ -7,15 +10,17 @@ from setuptools import setup
 setup(
     name='pecas',
     version='0.0.1',
-    author='Adrian Bürger',
+    author='Adrian Buerger',
     author_email='adrian.buerger@hs-karlsruhe.de',
     packages=['pecas',
-              'pecas.pecas'],
+              'pecas.pecas',
+              'pecas.setupmethods',
+              'pecas.systems'],
     package_dir={'pecas': 'pecas'},
         url='http://github.com/adbuerger/PECas/',
-    license='????',
+    license='LGPL',
     zip_safe=False,
-    description='Parameter estimation using CasADi in python.',
+    description='Parameter estimation using CasADi in Python',
     install_requires=["numpy >= 1.8",
                       "scipy >= 0.13"],
     use_2to3=True,
