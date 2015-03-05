@@ -12,12 +12,11 @@ install:
  - travis_retry wget https://github.com/casadi/casadi/releases/download/2.2.0/python-casadi_2.2.0-2_amd64.deb
  - dpkg -i python-casadi_2.2.0-2_amd64.deb
  - rm python-casadi_2.2.0-2_amd64.deb
- - export PYTHONPATH=$PYTHONPATH:~/PECas
-#  - "pip install ."
+ - python setup.py install
+# - "pip install ."
 #  - "pip install -r requirements.txt"
 
 # command to run tests
 script:
   - python examples/ex1.py
-# - nosetests # this is the way to go
-
+  - nosetests pecas
