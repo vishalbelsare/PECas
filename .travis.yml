@@ -5,8 +5,8 @@ python:
   - "3.2"
   - "3.3"
   - "3.4"
-virtualenv:
-  system_site_packages: true
+# virtualenv:
+#   system_site_packages: true
 # command to install dependencies
 before_install:
  - sudo apt-get update
