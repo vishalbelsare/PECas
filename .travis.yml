@@ -22,7 +22,7 @@ install:
 
 # command to run tests
 before_script:
- - export PYTHONPATH=$PYTHONPATH:/usr/lib/python2.7/dist-packages
+ - export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python2.7/dist-packages
 
 script:
   # - python examples/ex1.py
