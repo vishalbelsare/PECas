@@ -25,6 +25,19 @@ import casadi.tools as cat
 
 class BasicSystem(object):
 
+    '''
+    The class :class:``BasicSystem`` is used to define non-dynamic systems for
+    parameter estimation of the following structure:
+
+    .. math::
+
+        \phi = y(t, u, p)
+        0 = g(t, u, p)
+
+
+
+    '''
+
     def __init__(self, \
                  t = ca.SX.sym("t", 1), \
                  u = ca.SX.sym("u", 0), \
