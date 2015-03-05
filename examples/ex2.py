@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # ex2.py: Show the usage of equality constraints and an initial guess in PECas.
 

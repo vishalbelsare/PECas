@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import pylab as pl
 from scipy.constants import C2K

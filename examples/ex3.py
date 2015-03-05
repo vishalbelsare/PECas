@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # ex3.py: Generate and return pseudo measurement data in PECas.
 

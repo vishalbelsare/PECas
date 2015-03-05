@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # ex1.py: A simple example to show the general usage of PECas.
 
