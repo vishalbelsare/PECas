@@ -49,8 +49,8 @@ class SetupMethodsBaseClass(object):
         uinit = pl.zeros(1), \
         pmin = -pl.inf, pmax = pl.inf, pinit = 0.0, \
         xmin = -pl.inf, xmax = pl.inf, xinit = 0.0, \
-        x0min = -pl.inf, x0max = pl.inf, \
-        xNmin = -pl.inf, xNmax = pl.inf):
+        x0min = None, x0max = None, \
+        xNmin = None, xNmax = None):
 
         '''
         :param tbd: tbd
@@ -103,15 +103,21 @@ class SetupMethodsBaseClass(object):
             self.Vmax["X",:,:] = ca.tools.repeated( \
                 ca.tools.repeated(self.__repeat_input(xmax, self.nx)))
 
-            # State at initial time
+            # set state at initial time, if explicitly given
 
-            self.Vmin["X",0,0] = self.__repeat_input(x0min, self.nx)
-            self.Vmax["X",0,0] = self.__repeat_input(x0max, self.nx)
+            if x0min is not None:
+                self.Vmin["X",0,0] = self.__repeat_input(x0min, self.nx)
+            
+            if x0max is not None:
+                self.Vmax["X",0,0] = self.__repeat_input(x0max, self.nx)
 
-            # State at end time
+            # Set state at end time, if explicitly given
 
-            self.Vmin["X",-1,0] = self.__repeat_input(xNmin, self.nx)
-            self.Vmax["X",-1,0] = self.__repeat_input(xNmax, self.nx)
+            if xNmin is not None:
+                self.Vmin["X",-1,0] = self.__repeat_input(xNmin, self.nx)
+
+            if xNmax is not None:
+                self.Vmax["X",-1,0] = self.__repeat_input(xNmax, self.nx)
 
             # Disturbances
 
