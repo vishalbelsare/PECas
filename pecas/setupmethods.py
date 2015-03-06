@@ -115,6 +115,13 @@ class SetupMethodsBaseClass(object):
 
         # Set initials and bounds for the parameters
 
+        if pinit is None:
+            pinit = pl.zeros(self.np)
+        if pmin is None:
+            pmin = -pl.inf * pl.ones(self.np)   
+        if pmax is None:
+            pmax = pl.inf * pl.ones(self.np)
+
         pinit = pl.squeeze(pinit)
         pmin = pl.squeeze(pmin)
         pmax = pl.squeeze(pmax)

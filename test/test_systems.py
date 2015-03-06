@@ -3,7 +3,7 @@
 
 # test the classes fo system definitions
 
-import pecas.systems
+import pecas
 import casadi as ca
 from nose.tools import assert_raises
 
