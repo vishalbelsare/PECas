@@ -1,6 +1,8 @@
 PECas
 =====
 
+[![Build Status](https://secure.travis-ci.com/adbuerger/PECas.png?branch=rework)](http://travis-ci.org/adbuerger/PECas)
+
 Parameter estimation using CasADi
 ---------------------------------
 
