@@ -159,4 +159,5 @@ class ImplDAE(object):
              f = None, \
              g = ca.SX.sym("g", 0)):
 
-        raise NotImplementedError("Use of implicit DAEs is not yet supported.")
+        raise NotImplementedError( \
+            "Support of implicit DAEs is not yet implemented.")

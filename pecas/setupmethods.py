@@ -8,6 +8,8 @@ from abc import ABCMeta, abstractmethod
 
 import systems
 
+from IPython import embed
+
 class SetupMethodsBaseClass(object):
 
     '''The abstract class :class:`SetupMethodsBaseClass` contains the basic
@@ -48,10 +50,9 @@ class SetupMethodsBaseClass(object):
 
 
     def check_and_set_bounds_and_initials(self, \
-        umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
-        uinit = pl.zeros(1), \
-        pmin = -pl.inf, pmax = pl.inf, pinit = 0.0, \
-        xmin = -pl.inf, xmax = pl.inf, xinit = 0.0, \
+        umin = None, umax = None, uinit = None, \
+        pmin = None, pmax = None, pinit = None, \
+        xmin = None, xmax = None, xinit = None, \
         x0min = None, x0max = None, \
         xNmin = None, xNmax = None):
 
@@ -78,16 +79,31 @@ class SetupMethodsBaseClass(object):
 
         if not self.nu == 0:
 
-            # If the number of controls is 1, the array of control values will
-            # be missing its second dimension of length 1, since numpy treats
-            # it as a one-dimensional object instead; the dimension is then
-            # added to avoid dimension mismatch problems
+            if uinit is None:
+                uinit = pl.zeros((self.nu, self.nsteps))
+            if umin is None:
+                umin = -pl.inf * pl.ones((self.nu, self.nsteps))   
+            if umax is None:
+                umax = pl.inf * pl.ones((self.nu, self.nsteps))
 
-            if self.nu == 1:
+            uinit = pl.atleast_2d(uinit)
+            umin = pl.atleast_2d(umin)
+            umax = pl.atleast_2d(umax)
 
-                uinit = uinit[pl.newaxis,:]
-                umin = umin[pl.newaxis,:]
-                umax= umax[pl.newaxis,:]
+            if uinit.shape == (self.nsteps, self.nu):
+                uinit = uinit.T
+            
+            if umin.shape == (self.nsteps, self.nu):
+                umin = umin.T
+            
+            if umax.shape == (self.nsteps, self.nu):
+                umax = umax.T
+
+            if not all(arg.shape == (self.nu, self.nsteps) for \
+                arg in [uinit, umin, umax]):
+
+                raise ValueError( \
+                    "Wrong dimension for argument uinit, umin or umax.")
 
             # Repeatd the values for each collocation point
 
@@ -99,38 +115,99 @@ class SetupMethodsBaseClass(object):
 
         # Set initials and bounds for the parameters
 
-        self.Vinit["P",:] = self.__repeat_input(pinit, self.np)
-        self.Vmin["P",:] = self.__repeat_input(pmin, self.np)
-        self.Vmax["P",:] = self.__repeat_input(pmax, self.np)
+        pinit = pl.squeeze(pinit)
+        pmin = pl.squeeze(pmin)
+        pmax = pl.squeeze(pmax)
+
+        if not all(arg.shape == (self.np,) for \
+            arg in [pinit, pmin, pmax]):
+
+            raise ValueError( \
+                "Wrong dimension for argument pinit, pmin or pmax.")
+
+        self.Vinit["P",:] = pinit
+        self.Vmin["P",:] = pmin
+        self.Vmax["P",:] = pmax
 
         # If it's a dynamic problem, set initials and bounds for the states
 
         if "X" in self.V.keys():
 
-            self.Vinit["X",:,:] = ca.tools.repeated( \
-                ca.tools.repeated(self.__repeat_input(xinit, self.nx)))
+            if xinit is None:
+                xinit = pl.zeros((self.nx, self.nsteps + 1))
+            if xmin is None:
+                xmin = -pl.inf * pl.ones((self.nx, self.nsteps + 1))   
+            if xmax is None:
+                xmax = pl.inf * pl.ones((self.nx, self.nsteps + 1))
 
-            self.Vmin["X",:,:] = ca.tools.repeated( \
-                ca.tools.repeated(self.__repeat_input(xmin, self.nx)))
+            xinit = pl.atleast_2d(xinit)
+            xmin = pl.atleast_2d(xmin)
+            xmax = pl.atleast_2d(xmax)
 
-            self.Vmax["X",:,:] = ca.tools.repeated( \
-                ca.tools.repeated(self.__repeat_input(xmax, self.nx)))
+            if xinit.shape == (self.nsteps + 1, self.nx):
+                xinit = xinit.T
+            
+            if xmin.shape == (self.nsteps + 1, self.nx):
+                xmin = xmin.T
+            
+            if xmax.shape == (self.nsteps + 1, self.nx):
+                xmax = xmax.T
+
+            if not all(arg.shape == (self.nx, self.nsteps + 1) for \
+                arg in [xinit, xmin, xmax]):
+
+                raise ValueError( \
+                    "Wrong dimension for argument xinit, xmin or xmax.")
+
+            for k in range(self.nsteps + 1):
+
+                self.Vinit["X",k,:] = ca.tools.repeated(xinit[:,k])
+                self.Vmin["X",k,:] = ca.tools.repeated(xmin[:,k])
+                self.Vmax["X",k,:] = ca.tools.repeated(xmax[:,k])
 
             # Set the state bounds at the initial time, if explicitly given
 
             if x0min is not None:
-                self.Vmin["X",0,0] = self.__repeat_input(x0min, self.nx)
-            
+
+                x0min = pl.atleast_2d(x0min)
+
+                if not x0min.shape == (1, self.nx):
+
+                    raise ValueError("Wrong dimension for argument x0min.")
+
+                self.Vmin["X",0,0] = x0min
+
             if x0max is not None:
-                self.Vmax["X",0,0] = self.__repeat_input(x0max, self.nx)
+
+                x0max = pl.atleast_2d(x0max)
+
+                if not x0max.shape == (1, self.nx):
+
+                    raise ValueError("Wrong dimension for argument x0max.")
+
+                self.Vmax["X",0,0] = x0max
 
             # Set state bounds at the final time, if explicitly given
 
             if xNmin is not None:
-                self.Vmin["X",-1,0] = self.__repeat_input(xNmin, self.nx)
+
+                xNmin = pl.atleast_2d(xNmin)
+
+                if not xNmin.shape == (1, self.nx):
+
+                    raise ValueError("Wrong dimension for argument xNmin.")
+
+                self.Vmin["X",-1,0] = xNmin
 
             if xNmax is not None:
-                self.Vmax["X",-1,0] = self.__repeat_input(xNmax, self.nx)
+
+                xNmax = pl.atleast_2d(xNmax)
+
+                if not xNmax.shape == (1, self.nx):
+
+                    raise ValueError("Wrong dimension for argument xNmax.")
+
+                self.Vmax["X",-1,0] = xNmax
 
             # Set the bounds on the disturbances
 
@@ -141,15 +218,14 @@ class SetupMethodsBaseClass(object):
 
 class BSsetup(SetupMethodsBaseClass):
 
-    def set_bounds_and_initials(self, \
-        umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
-        uinit = pl.zeros(1), \
-        pmin = -pl.inf, pmax = pl.inf, pinit = 0.0, \
-        xmin = -pl.inf, xmax = pl.inf, xinit = 0.0, \
-        x0min = -pl.inf, x0max = pl.inf, \
-        xNmin = -pl.inf, xNmax = pl.inf):
+    def check_and_set_bounds_and_initials(self, \
+        umin = None, umax = None, uinit = None, \
+        pmin = None, pmax = None, pinit = None, \
+        xmin = None, xmax = None, xinit = None, \
+        x0min = None, x0max = None, \
+        xNmin = None, xNmax = None):
 
-        super(BSsetup, self).set_bounds_and_initials( \
+        super(BSsetup, self).check_and_set_bounds_and_initials( \
             umin = umin, umax = umax, uinit = uinit, \
             pmin = pmin, pmax = pmax, pinit = pinit, \
             xmin = xmin, xmax = xmax, xinit = xinit, \
@@ -158,9 +234,8 @@ class BSsetup(SetupMethodsBaseClass):
 
 
     def __init__(self, system = None, timegrid = None, \
-        umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
-        uinit = pl.zeros(1), \
-        pmin = -pl.inf, pmax = pl.inf, pinit = 0.0):
+        umin = pl.zeros(0), umax = pl.zeros(0), uinit = pl.zeros(0), \
+        pmin = pl.zeros(0), pmax = pl.zeros(0), pinit = pl.zeros(0)):
 
         if not type(system) is systems.BasicSystem:
 
@@ -172,7 +247,18 @@ class BSsetup(SetupMethodsBaseClass):
         self.nu = system.v["u"].shape[0]
         self.np = system.v["p"].shape[0]
 
-        self.timegrid = timegrid
+        if pl.atleast_2d(timegrid).shape[0] == 1:
+
+            self.timegrid = pl.asarray(timegrid)
+
+        elif pl.atleast_2d(timegrid).shape[1] == 1:
+
+                self.timegrid = pl.squeeze(pl.atleast_2d(timegrid).T)
+
+        else:
+
+            raise ValueError("Invalid dimension for argument timegrid.")
+
         self.nsteps = timegrid.shape[0]
 
         # Define the struct holding the variables
@@ -220,15 +306,14 @@ class CollocationBaseClass(SetupMethodsBaseClass):
 
     __metaclass__ = ABCMeta
 
-    def set_bounds_and_initials(self, \
-        umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
-        uinit = pl.zeros(1), \
-        pmin = -pl.inf, pmax = pl.inf, pinit = 0.0, \
-        xmin = -pl.inf, xmax = pl.inf, xinit = 0.0, \
-        x0min = -pl.inf, x0max = pl.inf, \
-        xNmin = -pl.inf, xNmax = pl.inf):
+    def check_and_set_bounds_and_initials(self, \
+        umin = None, umax = None, uinit = None, \
+        pmin = None, pmax = None, pinit = None, \
+        xmin = None, xmax = None, xinit = None, \
+        x0min = None, x0max = None, \
+        xNmin = None, xNmax = None):
 
-        super(CollocationBaseClass, self).set_bounds_and_initials( \
+        super(CollocationBaseClass, self).check_and_set_bounds_and_initials( \
             umin = umin, umax = umax, uinit = uinit, \
             pmin = pmin, pmax = pmax, pinit = pinit, \
             xmin = xmin, xmax = xmax, xinit = xinit, \
@@ -238,12 +323,11 @@ class CollocationBaseClass(SetupMethodsBaseClass):
 
     @abstractmethod
     def __init__(self, system = None, timegrid = None, \
-        umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
-        uinit = pl.zeros(1), \
-        pmin = -pl.inf, pmax = pl.inf, pinit = 0.0, \
-        xmin = -pl.inf, xmax = pl.inf, \
-        x0min = -pl.inf, x0max = pl.inf, \
-        xNmin = -pl.inf, xNmax = pl.inf, xinit = 0.0, \
+        umin = None, umax = None, uinit = None, \
+        pmin = None, pmax = None, pinit = None, \
+        xmin = None, xmax = None, xinit = None, \
+        x0min = None, x0max = None, \
+        xNmin = None, xNmax = None, \
         systemclass = None):
 
         if not type(system) is systemclass:
@@ -257,8 +341,19 @@ class CollocationBaseClass(SetupMethodsBaseClass):
         self.nu = system.v["u"].shape[0]
         self.np = system.v["p"].shape[0]
 
-        self.timegrid = timegrid
-        self.nsteps = timegrid.shape[0] - 1
+        if pl.atleast_2d(timegrid).shape[0] == 1:
+
+            self.timegrid = pl.asarray(timegrid)
+
+        elif pl.atleast_2d(timegrid).shape[1] == 1:
+
+                self.timegrid = pl.squeeze(pl.atleast_2d(timegrid).T)
+
+        else:
+
+            raise ValueError("Invalid dimension for argument timegrid.")
+
+        self.nsteps = self.timegrid.shape[0] - 1
 
         self.tauroot = ca.collocationPoints(3, "radau")
 
@@ -280,7 +375,7 @@ class CollocationBaseClass(SetupMethodsBaseClass):
 
         # Define bounds and initial values
 
-        self.set_bounds_and_initials( \
+        self.check_and_set_bounds_and_initials( \
             umin = umin, umax = umax, uinit = uinit, \
             pmin = pmin, pmax = pmax, pinit = pinit, \
             xmin = xmin, xmax = xmax, xinit = xinit, \
@@ -381,12 +476,11 @@ class CollocationBaseClass(SetupMethodsBaseClass):
 class ODEsetup(CollocationBaseClass):
 
     def __init__(self, system = None, timegrid = None, \
-        umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
-        uinit = pl.zeros(1), \
-        pmin = -pl.inf, pmax = pl.inf, pinit = 0.0, \
-        xmin = -pl.inf, xmax = pl.inf, \
-        x0min = -pl.inf, x0max = pl.inf, \
-        xNmin = -pl.inf, xNmax = pl.inf, xinit = 0.0):
+        umin = None, umax = None, uinit = None, \
+        pmin = None, pmax = None, pinit = None, \
+        xmin = None, xmax = None, xinit = None, \
+        x0min = None, x0max = None, \
+        xNmin = None, xNmax = None):
 
         super(ODEsetup, self).__init__(system = system, \
             timegrid = timegrid, \

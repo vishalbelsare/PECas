@@ -7,8 +7,8 @@ import casadi.tools as cat
 import pylab as pl
 from scipy.misc import comb
 
-# import systems
-# import setupmethods
+import systems
+import setupmethods
 
 from abc import ABCMeta, abstractmethod
 

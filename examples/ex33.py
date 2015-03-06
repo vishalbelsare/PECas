@@ -30,14 +30,20 @@ timegrid = data[:, 0]
 yN = data[:, 1::2]
 stdyN = data[:, 2::2]
 
+pmin = pl.array([1.0, -pl.inf, 1.0, -pl.inf])
+print pmin
+
+xmin = -pl.inf*pl.ones((11, 2)).T
+
 U = pl.array([])
 
 odesol = pecas.setupmethods.ODEsetup( \
     system = op, timegrid = timegrid, \
     x0min = [yN[0,0], yN[0,1]], \
     x0max = [yN[0,0], yN[0,1]], \
+    xmin = xmin, \
     umin = U, umax = U, uinit = U, \
-    pmin = [1.0, -pl.inf, 1.0, -pl.inf], \
+    pmin = pmin, \
     pmax = [1.0, pl.inf, 1.0, pl.inf], \
     pinit = [1.0, 0.5, 1.0, 1.0])
 
