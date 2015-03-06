@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# dummy_test.py: just something to get the testing working
+# test the classes fo system definitions
 
 import pecas.systems
 import casadi as ca

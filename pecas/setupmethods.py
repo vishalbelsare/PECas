@@ -19,7 +19,7 @@ class SetupMethodsBaseClass(object):
     @abstractmethod
     def __init__(self):
 
-        '''Placeholder-function for the according __init__-methods of the
+        '''Placeholder-function for the according __init__()-methods of the
         classes that inherit from :class:`SetupMethodsBaseClass`.'''
 
         pass
@@ -47,7 +47,7 @@ class SetupMethodsBaseClass(object):
             return val
 
 
-    def set_bounds_and_initials(self, \
+    def check_and_set_bounds_and_initials(self, \
         umin = -pl.inf * pl.ones(1), umax = pl.inf * pl.ones(1), \
         uinit = pl.zeros(1), \
         pmin = -pl.inf, pmax = pl.inf, pinit = 0.0, \
@@ -60,20 +60,28 @@ class SetupMethodsBaseClass(object):
         :type tbd: tbd
 
         Define structures for minimum, maximum and initial values for the
-        several variables contained constructing the optimization problem.
+        several variables that build up the optimization problem,
+        and prepare the values provided with the arguments properly.
         Afterwards, the values are stored inside the class variables ``Vmin``,
         ``Vmax`` and ``Vinit``, respectively.
         '''
 
-         # Define bounds and initial values
+        # Define structures from bounds and initial values from the original
+        # variable struct of the problem
 
         self.Vmin = self.V()
         self.Vmax = self.V()
         self.Vinit = self.V()
 
-        # Set control initials and bounds
+        # Set initials and bounds for the controls
+        # (only if the number of controls is not 0)
 
         if not self.nu == 0:
+
+            # If the number of controls is 1, the array of control values will
+            # be missing its second dimension of length 1, since numpy treats
+            # it as a one-dimensional object instead; the dimension is then
+            # added to avoid dimension mismatch problems
 
             if self.nu == 1:
 
@@ -81,19 +89,21 @@ class SetupMethodsBaseClass(object):
                 umin = umin[pl.newaxis,:]
                 umax= umax[pl.newaxis,:]
 
+            # Repeatd the values for each collocation point
+
             for k in range(self.nsteps):
 
                 self.Vinit["U", k, :] = ca.tools.repeated(uinit[:,k])
                 self.Vmin["U", k, :] = ca.tools.repeated(umin[:,k])
                 self.Vmax["U", k, :] = ca.tools.repeated(umax[:,k])
 
-        # Set parameter initials and bounds
+        # Set initials and bounds for the parameters
 
         self.Vinit["P",:] = self.__repeat_input(pinit, self.np)
         self.Vmin["P",:] = self.__repeat_input(pmin, self.np)
         self.Vmax["P",:] = self.__repeat_input(pmax, self.np)
 
-        # Set states initials and bounds, if contained
+        # If it's a dynamic problem, set initials and bounds for the states
 
         if "X" in self.V.keys():
 
@@ -106,7 +116,7 @@ class SetupMethodsBaseClass(object):
             self.Vmax["X",:,:] = ca.tools.repeated( \
                 ca.tools.repeated(self.__repeat_input(xmax, self.nx)))
 
-            # set state at initial time, if explicitly given
+            # Set the state bounds at the initial time, if explicitly given
 
             if x0min is not None:
                 self.Vmin["X",0,0] = self.__repeat_input(x0min, self.nx)
@@ -114,7 +124,7 @@ class SetupMethodsBaseClass(object):
             if x0max is not None:
                 self.Vmax["X",0,0] = self.__repeat_input(x0max, self.nx)
 
-            # Set state at end time, if explicitly given
+            # Set state bounds at the final time, if explicitly given
 
             if xNmin is not None:
                 self.Vmin["X",-1,0] = self.__repeat_input(xNmin, self.nx)
@@ -122,7 +132,7 @@ class SetupMethodsBaseClass(object):
             if xNmax is not None:
                 self.Vmax["X",-1,0] = self.__repeat_input(xNmax, self.nx)
 
-            # Disturbances
+            # Set the bounds on the disturbances
 
             self.Vinit["W",:] = ca.tools.repeated(0.0)
             self.Vmin["W",:] = ca.tools.repeated(-pl.inf)
@@ -177,7 +187,7 @@ class BSsetup(SetupMethodsBaseClass):
 
         # Set bounds and initial values
 
-        self.set_bounds_and_initials( \
+        self.check_and_set_bounds_and_initials( \
             umin = umin, umax = umax, uinit = uinit, \
             pmin = pmin, pmax = pmax, pinit = pinit)
 
