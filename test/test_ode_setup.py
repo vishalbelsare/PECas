@@ -20,11 +20,58 @@ def test_ode_setup():
 
     y = x
 
-    odesys = pecas.systems.ExplODE(y = y, x = x, u = u, p = p, f = f)
+    odesys = pecas.systems.ExplODE(x = x, u = u, p = p, f = f, y = y)
+
+    # Test valid input dimensions for timegrid
 
     timegrid = pl.linspace(0, 10, 11)
 
-    odecoll = pecas.setupmethods.ODEsetup(system = odesys, timegrid = timegrid)
+    pecas.setupmethods.ODEsetup(system = odesys, timegrid = timegrid)
+
+    timegrid = timegrid.T
+
+    pecas.setupmethods.ODEsetup(system = odesys, timegrid = timegrid)
+
+    # Support the wrong system type
+
+    bssys = pecas.systems.BasicSystem(p = p, y = p)
+    assert_raises(TypeError, pecas.setupmethods.ODEsetup, system = bssys, \
+        timegrid = timegrid)
+
+    # Test an invalid input dimension for timegrid
+
+    assert_raises(ValueError, pecas.setupmethods.ODEsetup, \
+        system = odesys, timegrid = timegrid[:-1].reshape(2, 5))
+
+    # Test some wrong values for p-arguments
+
+    pwarglist = [[0, 1, 2], [[2, 3], [2, 3]], pl.asarray([1, 2, 3]), \
+        pl.asarray([[2, 3], [2, 3]])]
+
+    for parg in pwarglist:
+
+        assert_raises(ValueError, pecas.setupmethods.ODEsetup, \
+            system = odesys, timegrid = timegrid, pinit = parg)
+        assert_raises(ValueError, pecas.setupmethods.ODEsetup, \
+            system = odesys, timegrid = timegrid, pmin = parg)
+        assert_raises(ValueError, pecas.setupmethods.ODEsetup, \
+            system = odesys, timegrid = timegrid, pmax = parg)
+
+    # Test some correct values for p-arguments
+
+    parglist = [None, [0, 1, 2, 3], pl.asarray([1, 2, 3, 4]), \
+        pl.asarray([1, 2, 3, 4]).T, pl.asarray([[2], [3], [2], [3]])]
+
+    for parg in parglist:
+
+        pecas.setupmethods.ODEsetup( \
+            system = odesys, timegrid = timegrid, pinit = parg)
+        pecas.setupmethods.ODEsetup( \
+            system = odesys, timegrid = timegrid, pmin = parg)
+        pecas.setupmethods.ODEsetup( \
+            system = odesys, timegrid = timegrid, pmax = parg)
+
+
 
 # data = pl.array(pl.loadtxt("data_ex33.txt"))
 
