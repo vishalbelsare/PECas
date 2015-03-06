@@ -8,8 +8,6 @@ from abc import ABCMeta, abstractmethod
 
 import systems
 
-from IPython import embed
-
 class SetupMethodsBaseClass(object):
 
     '''The abstract class :class:`SetupMethodsBaseClass` contains the basic
