@@ -25,28 +25,6 @@ class SetupMethodsBaseClass(object):
         pass
 
 
-    def __repeat_input(self, val, dim):
-
-        '''
-        :param val: Value that will possibly be repeated.
-        :type val: float, list
-        :param dim: The value for how often ``val`` will possibly be repeated.
-        :type dim: int
-
-        If the input value ``val`` is not of type list, return a list with
-        ``dim`` repetitions of ``val``. Else, return ``val`` without
-        modifications.
-        '''
-
-        if not isinstance(val, list):
-
-            return list(pl.repeat(val, dim))
-
-        else:
-
-            return val
-
-
     def check_and_set_bounds_and_initials(self, \
         umin = None, umax = None, uinit = None, \
         pmin = None, pmax = None, pinit = None, \
@@ -176,6 +154,10 @@ class SetupMethodsBaseClass(object):
 
                 x0min = pl.atleast_2d(x0min)
 
+                if x0min.shape == (self.nx, 1):
+
+                    x0min = x0min.T
+
                 if not x0min.shape == (1, self.nx):
 
                     raise ValueError("Wrong dimension for argument x0min.")
@@ -185,6 +167,10 @@ class SetupMethodsBaseClass(object):
             if x0max is not None:
 
                 x0max = pl.atleast_2d(x0max)
+
+                if x0max.shape == (self.nx, 1):
+
+                    x0max = x0max.T
 
                 if not x0max.shape == (1, self.nx):
 
@@ -198,6 +184,10 @@ class SetupMethodsBaseClass(object):
 
                 xNmin = pl.atleast_2d(xNmin)
 
+                if xNmin.shape == (self.nx, 1):
+
+                    xNmin = xNmin.T
+
                 if not xNmin.shape == (1, self.nx):
 
                     raise ValueError("Wrong dimension for argument xNmin.")
@@ -207,6 +197,10 @@ class SetupMethodsBaseClass(object):
             if xNmax is not None:
 
                 xNmax = pl.atleast_2d(xNmax)
+
+                if xNmax.shape == (self.nx, 1):
+
+                    xNmax = xNmax.T
 
                 if not xNmax.shape == (1, self.nx):
 

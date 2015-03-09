@@ -39,6 +39,16 @@ class TestODESetup(unittest.TestCase):
         self.invalidxargs = [pl.ones((self.x.size() - 1, self.timegrid.size)), \
             pl.ones((self.timegrid.size - 1, self.x.size()))]
 
+        self.validxbvpargs = [None, [1, 1], [[1], [1]], pl.ones((2,1)), \
+            pl.ones((1, 2)), pl.ones(2)]
+
+        self.invalidxbvpargs = [[3, 2, 1], pl.ones(3), \
+            pl.ones((1, 3)), pl.ones((3, 1))]
+
+        # -- TODO! --
+        # None of the checks will detect an invalidxpvbarg of
+        # [[2, 1], [3]], since shape and size both fit.
+        # --> How to check for this?
 
     def test_timegrid_argument(self):
 
@@ -105,6 +115,20 @@ class TestODESetup(unittest.TestCase):
                 system = self.odesys, timegrid = self.timegrid, xmax = xarg)
 
 
+    def test_state_bvp_inputs(self):
+
+        for xbvparg in self.invalidxbvpargs:
+
+            print xbvparg
+
+            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+                system = self.odesys, timegrid = self.timegrid, x0min = xbvparg)
+            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+                system = self.odesys, timegrid = self.timegrid, x0max = xbvparg)
+            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+                system = self.odesys, timegrid = self.timegrid, xNmin = xbvparg)
+            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+                system = self.odesys, timegrid = self.timegrid, xNmax = xbvparg)
 # if __name__ == '__main__':
 #     unittest.main()
 
