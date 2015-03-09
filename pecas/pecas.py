@@ -8,7 +8,7 @@ import pylab as pl
 from scipy.misc import comb
 
 import systems
-import setupmethods
+import setups
 
 from abc import ABCMeta, abstractmethod
 

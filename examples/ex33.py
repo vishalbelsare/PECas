@@ -37,7 +37,7 @@ xmin = -pl.inf*pl.ones((11, 2)).T
 
 U = pl.array([])
 
-odesol = pecas.setupmethods.ODEsetup( \
+odesol = pecas.setups.ODEsetup( \
     system = op, timegrid = timegrid, \
     x0min = [yN[0,0], yN[0,1]], \
     x0max = [yN[0,0], yN[0,1]], \

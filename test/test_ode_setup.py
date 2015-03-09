@@ -15,9 +15,9 @@ class ODESetupTest(object):
 
         # Test valid input dimensions for timegrid
 
-        pecas.setupmethods.ODEsetup(system = self.odesys, \
+        pecas.setups.ODEsetup(system = self.odesys, \
             timegrid = self.timegrid)
-        pecas.setupmethods.ODEsetup(system = self.odesys, timegrid = \
+        pecas.setups.ODEsetup(system = self.odesys, timegrid = \
             self.timegrid.T)
 
 
@@ -26,7 +26,7 @@ class ODESetupTest(object):
         # Support an invalid systems-type
 
         bssys = pecas.systems.BasicSystem(p = self.p, y = self.p)
-        self.assertRaises(TypeError, pecas.setupmethods.ODEsetup, \
+        self.assertRaises(TypeError, pecas.setups.ODEsetup, \
             system = bssys, timegrid = self.timegrid)
 
 
@@ -36,11 +36,11 @@ class ODESetupTest(object):
 
         for parg in self.invalidpargs:
 
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
                 system = self.odesys, timegrid = self.timegrid, pinit = parg)
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
                 system = self.odesys, timegrid = self.timegrid, pmin = parg)
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
                 system = self.odesys, timegrid = self.timegrid, pmax = parg)
 
 
@@ -50,11 +50,11 @@ class ODESetupTest(object):
 
         for parg in self.validpargs:
 
-            pecas.setupmethods.ODEsetup( \
+            pecas.setups.ODEsetup( \
                 system = self.odesys, timegrid = self.timegrid, pinit = parg)
-            pecas.setupmethods.ODEsetup( \
+            pecas.setups.ODEsetup( \
                 system = self.odesys, timegrid = self.timegrid, pmin = parg)
-            pecas.setupmethods.ODEsetup( \
+            pecas.setups.ODEsetup( \
                 system = self.odesys, timegrid = self.timegrid, pmax = parg)
 
 
@@ -64,11 +64,11 @@ class ODESetupTest(object):
 
         for xarg in self.invalidxargs:
 
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
                 system = self.odesys, timegrid = self.timegrid, xinit = xarg)
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
                 system = self.odesys, timegrid = self.timegrid, xmin = xarg)
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
                 system = self.odesys, timegrid = self.timegrid, xmax = xarg)
 
 
@@ -78,11 +78,11 @@ class ODESetupTest(object):
 
         for xarg in self.validxargs:
 
-            pecas.setupmethods.ODEsetup( \
+            pecas.setups.ODEsetup( \
                 system = self.odesys, timegrid = self.timegrid, xinit = xarg)
-            pecas.setupmethods.ODEsetup( \
+            pecas.setups.ODEsetup( \
                 system = self.odesys, timegrid = self.timegrid, xmin = xarg)
-            pecas.setupmethods.ODEsetup( \
+            pecas.setups.ODEsetup( \
                 system = self.odesys, timegrid = self.timegrid, xmax = xarg)
 
 
@@ -92,13 +92,13 @@ class ODESetupTest(object):
 
         for xbvparg in self.invalidxbvpargs:
 
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
                 system = self.odesys, timegrid = self.timegrid, x0min = xbvparg)
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
                 system = self.odesys, timegrid = self.timegrid, x0max = xbvparg)
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
                 system = self.odesys, timegrid = self.timegrid, xNmin = xbvparg)
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
                 system = self.odesys, timegrid = self.timegrid, xNmax = xbvparg)
     
 
@@ -108,13 +108,13 @@ class ODESetupTest(object):
 
         for xbvparg in self.validxbvpargs:
 
-            pecas.setupmethods.ODEsetup( \
+            pecas.setups.ODEsetup( \
                 system = self.odesys, timegrid = self.timegrid, x0min = xbvparg)
-            pecas.setupmethods.ODEsetup( \
+            pecas.setups.ODEsetup( \
                 system = self.odesys, timegrid = self.timegrid, x0max = xbvparg)
-            pecas.setupmethods.ODEsetup( \
+            pecas.setups.ODEsetup( \
                 system = self.odesys, timegrid = self.timegrid, xNmin = xbvparg)
-            pecas.setupmethods.ODEsetup( \
+            pecas.setups.ODEsetup( \
                 system = self.odesys, timegrid = self.timegrid, xNmax = xbvparg)
 
 
@@ -124,11 +124,11 @@ class ODESetupTest(object):
 
         for uarg in self.invaliduargs:
 
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
                 system = self.odesys, timegrid = self.timegrid, uinit = uarg)
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
                 system = self.odesys, timegrid = self.timegrid, umin = uarg)
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
                 system = self.odesys, timegrid = self.timegrid, umax = uarg)
     
 
@@ -138,11 +138,11 @@ class ODESetupTest(object):
 
         for uarg in self.validuargs:
 
-            pecas.setupmethods.ODEsetup( \
+            pecas.setups.ODEsetup( \
                 system = self.odesys, timegrid = self.timegrid, uinit = uarg)
-            pecas.setupmethods.ODEsetup( \
+            pecas.setups.ODEsetup( \
                 system = self.odesys, timegrid = self.timegrid, umin = uarg)
-            pecas.setupmethods.ODEsetup( \
+            pecas.setups.ODEsetup( \
                 system = self.odesys, timegrid = self.timegrid, umax = uarg)
 
 
@@ -312,21 +312,21 @@ class ODESetupTest(object):
 
 #     timegrid = pl.linspace(0, 10, 11)
 
-#     pecas.setupmethods.ODEsetup(system = odesys, timegrid = timegrid)
+#     pecas.setups.ODEsetup(system = odesys, timegrid = timegrid)
 
 #     timegrid = timegrid.T
 
-#     pecas.setupmethods.ODEsetup(system = odesys, timegrid = timegrid)
+#     pecas.setups.ODEsetup(system = odesys, timegrid = timegrid)
 
 #     # Support the invalid system type
 
 #     bssys = pecas.systems.BasicSystem(p = p, y = p)
-#     assert_raises(TypeError, pecas.setupmethods.ODEsetup, system = bssys, \
+#     assert_raises(TypeError, pecas.setups.ODEsetup, system = bssys, \
 #         timegrid = timegrid)
 
 #     # Test an invalid input dimension for timegrid
 
-#     assert_raises(ValueError, pecas.setupmethods.ODEsetup, \
+#     assert_raises(ValueError, pecas.setups.ODEsetup, \
 #         system = odesys, timegrid = timegrid[:-1].reshape(2, 5))
 
     # Test some invalid values for p-arguments
@@ -336,11 +336,11 @@ class ODESetupTest(object):
 
     # for parg in pwarglist:
 
-    #     assert_raises(ValueError, pecas.setupmethods.ODEsetup, \
+    #     assert_raises(ValueError, pecas.setups.ODEsetup, \
     #         system = odesys, timegrid = timegrid, pinit = parg)
-    #     assert_raises(ValueError, pecas.setupmethods.ODEsetup, \
+    #     assert_raises(ValueError, pecas.setups.ODEsetup, \
     #         system = odesys, timegrid = timegrid, pmin = parg)
-    #     assert_raises(ValueError, pecas.setupmethods.ODEsetup, \
+    #     assert_raises(ValueError, pecas.setups.ODEsetup, \
     #         system = odesys, timegrid = timegrid, pmax = parg)
 
     # # Test some valid values for p-arguments
@@ -350,11 +350,11 @@ class ODESetupTest(object):
 
     # for parg in parglist:
 
-    #     pecas.setupmethods.ODEsetup( \
+    #     pecas.setups.ODEsetup( \
     #         system = odesys, timegrid = timegrid, pinit = parg)
-    #     pecas.setupmethods.ODEsetup( \
+    #     pecas.setups.ODEsetup( \
     #         system = odesys, timegrid = timegrid, pmin = parg)
-    #     pecas.setupmethods.ODEsetup( \
+    #     pecas.setups.ODEsetup( \
     #         system = odesys, timegrid = timegrid, pmax = parg)
 
 
@@ -372,7 +372,7 @@ class ODESetupTest(object):
 
 # U = pl.array([])
 
-# odesol = pecas.setupmethods.ODEsetup( \
+# odesol = pecas.setups.ODEsetup( \
 #     system = op, timegrid = timegrid, \
 #     x0min = [yN[0,0], yN[0,1]], \
 #     x0max = [yN[0,0], yN[0,1]], \

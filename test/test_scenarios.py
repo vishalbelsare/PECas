@@ -4,11 +4,11 @@ import pecas
 
 import unittest
 import test_ode_setup
-import test_pe_setup
+import test_lsq_init
 
 class TestLotkaVolterra(unittest.TestCase, \
     test_ode_setup.ODESetupTest, \
-    test_pe_setup.PESetupTest):
+    test_lsq_init.PESetupTest):
 
     def setUp(self):
 
@@ -63,7 +63,7 @@ class TestLotkaVolterra(unittest.TestCase, \
         self.stdyN = data[:, 2::2]
         self.stds = 1e-2
 
-        self.odesol = pecas.setupmethods.ODEsetup( \
+        self.odesol = pecas.setups.ODEsetup( \
             system = self.odesys, timegrid = self.timegrid, \
             x0min = [self.yN[0,0], self.yN[0,1]], \
             x0max = [self.yN[0,0], self.yN[0,1]], \
@@ -77,7 +77,7 @@ class TestLotkaVolterra(unittest.TestCase, \
 
 class Test1DVehicle(unittest.TestCase, \
     test_ode_setup.ODESetupTest, \
-    test_pe_setup.PESetupTest):
+    test_lsq_init.PESetupTest):
 
     def setUp(self):
 
@@ -125,7 +125,7 @@ class Test1DVehicle(unittest.TestCase, \
         self.uN = data[:-1, 2]
         self.stds = 1e-3
 
-        self.odesol = pecas.setupmethods.ODEsetup( \
+        self.odesol = pecas.setups.ODEsetup( \
             system = self.odesys, timegrid = self.timegrid,
             umin = self.uN, umax = self.uN, uinit = self.uN, \
             x0min = self.yN[0], x0max = self.yN[0], \
@@ -154,8 +154,7 @@ class Test2DVehicle(unittest.TestCase, \
                 - self.p[4] * self.x[3]**2 - self.p[5] \
                 - (self.x[3]  * self.x[5])**2 * self.p[1] * self.p[0],
             self.u[0],
-            self.u[1]
-            ])
+            self.u[1]])
 
         self.y = self.x[:4]
 
