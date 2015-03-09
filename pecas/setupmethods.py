@@ -245,6 +245,7 @@ class BSsetup(SetupMethodsBaseClass):
 
         self.nu = system.v["u"].shape[0]
         self.np = system.v["p"].shape[0]
+        self.ny = system.fcn["y"].shape[0]
 
         if pl.atleast_2d(timegrid).shape[0] == 1:
 
@@ -339,6 +340,7 @@ class CollocationBaseClass(SetupMethodsBaseClass):
         self.nx = system.v["x"].shape[0]
         self.nu = system.v["u"].shape[0]
         self.np = system.v["p"].shape[0]
+        self.ny = system.fcn["y"].shape[0]
 
         if pl.atleast_2d(timegrid).shape[0] == 1:
 

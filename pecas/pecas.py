@@ -17,11 +17,40 @@ class PECasBaseClass:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def __init__(self, pesetup = None, yN = None, stdyN = 1, stds = 1e-2):
+    def __init__(self, pesetup = None, yN = None, stdyN = None, stds = 1e-2):
 
         # Store the parameter estimation problem setup
 
         self.pesetup = pesetup
+
+        # Check if the supported measurement data fits to the dimensions of
+        # the output function
+
+        yN = pl.atleast_2d(yN)
+
+        if yN.shape == (pesetup.timegrid.size, pesetup.ny):
+
+            yN = yN.T
+
+        if not yN.shape == (pesetup.ny, pesetup.timegrid.size):
+
+            raise ValueError( \
+                "Wrong dimension for measurement data input.")
+
+        # Check if the supported standard deviations fit to the dimensions of
+        # the measurement data
+
+        stdyN = pl.atleast_2d(stdyN)
+
+        if stdyN.shape == yN.T.shape:
+
+            stdyN = stdyN.T
+
+        if not stdyN.shape == yN.shape:
+
+            raise ValueError('''
+The dimension of the standard deviations input does not match the dimensions
+of the measurement data.''')
 
         # Get the measurement values and standard deviations into the
         # necessary order of apperance and dimensions
@@ -29,14 +58,21 @@ class PECasBaseClass:
         self.yN = pl.zeros(pl.size(yN))
         self.stdyN = pl.zeros(pl.size(yN))
 
-        for k in range(yN.shape[1]):
+        for k in range(yN.shape[0]):
 
-            self.yN[k:yN.shape[1]*yN.shape[0]+1:yN.shape[1]] = \
-                yN[:, k]
-            self.stdyN[k:yN.shape[1]*yN.shape[0]+1:yN.shape[1]] = \
-                stdyN[:, k]
+            self.yN[k:yN.shape[0]*yN.shape[1]+1:yN.shape[0]] = \
+                yN[k, :]
+            self.stdyN[k:yN.shape[0]*yN.shape[1]+1:yN.shape[0]] = \
+                stdyN[k, :]
 
-        self.stds = stds * pl.ones(pesetup.s.shape[0])
+        stds = pl.atleast_2d(stds)
+
+        if not stds.shape == (1,1):
+
+            raise ValueError( \
+                "Wrong dimension for disturbance weight input.")
+
+        self.stds = pl.squeeze(stds * pl.ones(pesetup.s.shape[0]))
 
         # Set up the covariance matrix for the measurements
 
@@ -49,7 +85,7 @@ class LSq(PECasBaseClass):
     '''The class :class:`LSq` is used to define and solve least
     squares parameter estimation problems with PECas.'''
 
-    def __init__(self, pesetup = None, yN = None, stdyN = 1, stds = 10e-2):
+    def __init__(self, pesetup = None, yN = None, stdyN = None, stds = 10e-2):
 
         super(LSq, self).__init__(pesetup = pesetup, yN = yN, stdyN = stdyN, stds = stds)
 
