@@ -4,9 +4,11 @@ import pecas
 
 import unittest
 import test_ode_setup
+import test_pe_setup
 
 class TestLotkaVolterra(unittest.TestCase, \
-    test_ode_setup.BaseClassODESetupTest):
+    test_ode_setup.ODESetupTest, \
+    test_pe_setup.PESetupTest):
 
     def setUp(self):
 
@@ -59,8 +61,9 @@ class TestLotkaVolterra(unittest.TestCase, \
 
         self.yN = data[:, 1::2]
         self.stdyN = data[:, 2::2]
+        self.stds = 1e-2
 
-        self.odesol = pecas.setupmethods.ODEsetup(
+        self.odesol = pecas.setupmethods.ODEsetup( \
             system = self.odesys, timegrid = self.timegrid, \
             x0min = [self.yN[0,0], self.yN[0,1]], \
             x0max = [self.yN[0,0], self.yN[0,1]], \
@@ -68,12 +71,13 @@ class TestLotkaVolterra(unittest.TestCase, \
             pmax = [1.0, pl.inf, 1.0, pl.inf], \
             pinit = [1.0, 0.5, 1.0, 1.0])
 
-        self.lsqpe = pecas.LSq(pesetup = self.odesol, yN = self.yN, \
-            stdyN = self.stdyN)
+        # self.lsqpe = pecas.LSq(pesetup = self.odesol, yN = self.yN, \
+        #     stdyN = self.stdyN)
 
 
 class Test1DVehicle(unittest.TestCase, \
-    test_ode_setup.BaseClassODESetupTest):
+    test_ode_setup.ODESetupTest, \
+    test_pe_setup.PESetupTest):
 
     def setUp(self):
 
@@ -92,7 +96,9 @@ class Test1DVehicle(unittest.TestCase, \
 
         # Inputs
 
-        self.timegrid = pl.linspace(0, 6, 100)
+        data = pl.array(pl.loadtxt("test/data_1d_vehicle.txt"))
+
+        self.timegrid = data[:, 0]
 
         self.invalidpargs = [[0, 1], [[2, 3], [2, 3]], \
             pl.asarray([1, 2, 3, 4]), pl.asarray([[2, 3], [2, 3]])]
@@ -114,9 +120,23 @@ class Test1DVehicle(unittest.TestCase, \
             self.timegrid.size - 1)), \
             pl.ones((self.timegrid.size - 1, self.u.size()))]
 
+        self.yN = data[:, 1]
+        self.stdyN = 0.01 * pl.ones(self.yN.shape)
+        self.uN = data[:-1, 2]
+        self.stds = 1e-3
+
+        self.odesol = pecas.setupmethods.ODEsetup( \
+            system = self.odesys, timegrid = self.timegrid,
+            umin = self.uN, umax = self.uN, uinit = self.uN, \
+            x0min = self.yN[0], x0max = self.yN[0], \
+            xNmin = self.yN[-1:], xNmax = self.yN[-1:], \
+            pmin = [10, 0.0, 0.4], pmax = [10, 2, 0.7], \
+            pinit = [10, 0.08, 0.5])
+
+
 
 class Test2DVehicle(unittest.TestCase, \
-    test_ode_setup.BaseClassODESetupTest):
+    test_ode_setup.ODESetupTest):
 
     def setUp(self):
 

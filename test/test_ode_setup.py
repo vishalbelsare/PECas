@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# test the ODE's setup mehthod (collocation struct builder)
+# Test the ODE's setup mehthod (collocation struct builder)
 
 import casadi as ca
 import pylab as pl
@@ -9,9 +9,9 @@ import pecas
 
 import unittest
 
-class BaseClassODESetupTest(object):
+class ODESetupTest(object):
 
-    def test_timegrid_argument(self):
+    def test_valid_timegrid_inputs(self):
 
         # Test valid input dimensions for timegrid
 
@@ -21,7 +21,7 @@ class BaseClassODESetupTest(object):
             self.timegrid.T)
 
 
-    def test_systems_argument(self):
+    def test_invalid_systems_input(self):
 
         # Support an invalid systems-type
 
@@ -30,7 +30,7 @@ class BaseClassODESetupTest(object):
             system = bssys, timegrid = self.timegrid)
 
 
-    def test_parameter_bounds_initials_inputs(self):
+    def test_invalid_parameter_bounds_and_initials(self):
 
         # Test some invalid values for p-arguments
 
@@ -42,6 +42,9 @@ class BaseClassODESetupTest(object):
                 system = self.odesys, timegrid = self.timegrid, pmin = parg)
             self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
                 system = self.odesys, timegrid = self.timegrid, pmax = parg)
+
+
+    def test_valid_parameter_bounds_and_initials(self):
 
         # Test some valid values for p-arguments
 
@@ -55,7 +58,7 @@ class BaseClassODESetupTest(object):
                 system = self.odesys, timegrid = self.timegrid, pmax = parg)
 
 
-    def test_state_bounds_initials_inputs(self):
+    def test_invalid_state_bounds_and_initials(self):
 
         # Test some invalid values for x-arguments
 
@@ -67,6 +70,9 @@ class BaseClassODESetupTest(object):
                 system = self.odesys, timegrid = self.timegrid, xmin = xarg)
             self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
                 system = self.odesys, timegrid = self.timegrid, xmax = xarg)
+
+
+    def test_valid_state_bounds_and_initials(self):
 
         # Test some valid values for x-arguments
 
@@ -80,7 +86,7 @@ class BaseClassODESetupTest(object):
                 system = self.odesys, timegrid = self.timegrid, xmax = xarg)
 
 
-    def test_state_bvp_inputs(self):
+    def test_invalid_state_bvp_inputs(self):
 
         # Test some invalid values for xbvp-arguments
 
@@ -94,6 +100,9 @@ class BaseClassODESetupTest(object):
                 system = self.odesys, timegrid = self.timegrid, xNmin = xbvparg)
             self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
                 system = self.odesys, timegrid = self.timegrid, xNmax = xbvparg)
+    
+
+    def test_valid_state_bvp_inputs(self):
 
         # Test some valid values for xbvp-arguments
 
@@ -109,7 +118,7 @@ class BaseClassODESetupTest(object):
                 system = self.odesys, timegrid = self.timegrid, xNmax = xbvparg)
 
 
-    def test_control_inputs(self):
+    def test_invalid_control_bounds_and_initials_inputs(self):
 
         # Test some invalid values for u-arguments       
 
@@ -121,6 +130,9 @@ class BaseClassODESetupTest(object):
                 system = self.odesys, timegrid = self.timegrid, umin = uarg)
             self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
                 system = self.odesys, timegrid = self.timegrid, umax = uarg)
+    
+
+    def test_valid_control_bounds_and_initials_inputs(self):
 
         # Test some valid values for u-arguments
 

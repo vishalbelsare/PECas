@@ -1,51 +1,58 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# test the classes fo system definitions
+# Test the classes fo system definitions
 
 import pecas
 import casadi as ca
-from nose.tools import assert_raises
 
-def test_define_basic_systems():
+import unittest
 
-    t = ca.SX.sym("t", 1)
-    u = ca.SX.sym("u", 1)
-    p = ca.SX.sym("p", 1)
-    y = ca.SX.sym("y", 1)
-    g = ca.SX.sym("g", 1)
+class TestSystemsInit(unittest.TestCase):
 
-    pecas.systems.BasicSystem(p = p, y = y)
-    pecas.systems.BasicSystem(t = t, p = p, y = y)
-    pecas.systems.BasicSystem(t = t, u = u, p = p, y = y)
-    pecas.systems.BasicSystem(t = t, u = u, p = p, y = y, g =g)
+    def test_basic_system_init(self):
 
-    assert_raises(TypeError, pecas.systems.BasicSystem)
-    assert_raises(TypeError, pecas.systems.BasicSystem, p = None)
-    assert_raises(TypeError, pecas.systems.BasicSystem, y = None)
+        self.t = ca.SX.sym("t", 1)
+        self.u = ca.SX.sym("u", 1)
+        self.p = ca.SX.sym("p", 1)
+        self.y = ca.SX.sym("y", 1)
+        self.g = ca.SX.sym("g", 1)
 
+        pecas.systems.BasicSystem(p = self.p, y = self.y)
+        pecas.systems.BasicSystem(t = self.t, p = self.p, y = self.y)
+        pecas.systems.BasicSystem(t = self.t, u = self.u, p = self.p, \
+            y = self.y)
+        pecas.systems.BasicSystem(t = self.t, u = self.u, p = self.p, \
+            y = self.y, g = self.g)
 
-def test_define_explode_systems():
-
-    t = ca.SX.sym("t", 1)
-    u = ca.SX.sym("u", 1)
-    x = ca.SX.sym("x", 1)
-    p = ca.SX.sym("p", 1)
-    y = ca.SX.sym("y", 1)
-    f = ca.SX.sym("f", 1)
-
-    pecas.systems.ExplODE(x = x, p = p, y = y, f = f)
-    pecas.systems.ExplODE(t = t, x = x, p = p, y = y, f = f)
-    pecas.systems.ExplODE(t = t, u = u, x = x, p = p, y = y, f = f)
-
-    assert_raises(TypeError, pecas.systems.ExplODE)
-    assert_raises(TypeError, pecas.systems.ExplODE, x = None)
-    assert_raises(TypeError, pecas.systems.ExplODE, p = None)
-    assert_raises(TypeError, pecas.systems.ExplODE, y = None)
-    assert_raises(TypeError, pecas.systems.ExplODE, f = None)
+        self.assertRaises(TypeError, pecas.systems.BasicSystem)
+        self.assertRaises(TypeError, pecas.systems.BasicSystem, p = None)
+        self.assertRaises(TypeError, pecas.systems.BasicSystem, y = None)
 
 
-def test_define_implade_systems():
+    def test_explode_system_init(self):
 
-    assert_raises(NotImplementedError, pecas.systems.ImplDAE)
+        self.t = ca.SX.sym("t", 1)
+        self.u = ca.SX.sym("u", 1)
+        self.x = ca.SX.sym("x", 1)
+        self.p = ca.SX.sym("p", 1)
+        self.y = ca.SX.sym("y", 1)
+        self.f = ca.SX.sym("f", 1)
+
+        pecas.systems.ExplODE(x = self.x, p = self.p, y = self.y, f = self.f)
+        pecas.systems.ExplODE(t = self.t, x = self.x, p = self.p, y = self.y, \
+            f = self.f)
+        pecas.systems.ExplODE(t = self.t, u = self.u, x = self.x, p = self.p, \
+            y = self.y, f = self.f)
+
+        self.assertRaises(TypeError, pecas.systems.ExplODE)
+        self.assertRaises(TypeError, pecas.systems.ExplODE, x = None)
+        self.assertRaises(TypeError, pecas.systems.ExplODE, p = None)
+        self.assertRaises(TypeError, pecas.systems.ExplODE, y = None)
+        self.assertRaises(TypeError, pecas.systems.ExplODE, f = None)
+
+
+    def test_implade_system_init(self):
+
+        self.assertRaises(NotImplementedError, pecas.systems.ImplDAE)
     
