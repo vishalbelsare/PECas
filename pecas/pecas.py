@@ -34,8 +34,15 @@ class PECasBaseClass:
 
         if not yN.shape == (pesetup.ny, pesetup.timegrid.size):
 
-            raise ValueError( \
-                "Wrong dimension for measurement data input.")
+            raise ValueError('''
+The dimension of the measurement data given in yN does not match the
+dimension of output function and/or timegrid.
+
+Valid dimensions for yN for the given data are:
+    {0} or {1},
+but you supported yN of dimension:
+    {2}.'''.format(str((pesetup.timegrid.size, pesetup.ny)), \
+    str((pesetup.ny, pesetup.timegrid.size)), str(yN.shape)))
 
         # Check if the supported standard deviations fit to the dimensions of
         # the measurement data
@@ -49,8 +56,13 @@ class PECasBaseClass:
         if not stdyN.shape == yN.shape:
 
             raise ValueError('''
-The dimension of the standard deviations input does not match the dimensions
-of the measurement data.''')
+The dimension of the standard deviations given in stdyN does not match the
+dimensions of the measurement data.
+
+Valid dimensions for stdyN for the given data are:
+    {0} or {1},
+but you supported stdyN of dimension:
+    {2}.'''.format(str(yN.shape), str(yN.T.shape), str(stdyN.shape)))
 
         # Get the measurement values and standard deviations into the
         # necessary order of apperance and dimensions
@@ -69,8 +81,10 @@ of the measurement data.''')
 
         if not stds.shape == (1,1):
 
-            raise ValueError( \
-                "Wrong dimension for disturbance weight input.")
+            raise ValueError('''
+The input for the weight of the disturbances in stds has to be
+a scalar value or an array of dimension (1, 1),
+but you supported stds of dimension: {0}.'''.format(stds.shape))
 
         self.stds = pl.squeeze(stds * pl.ones(pesetup.s.shape[0]))
 
