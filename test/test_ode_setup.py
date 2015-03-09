@@ -9,7 +9,130 @@ import pecas
 
 import unittest
 
-class TestODESetup(unittest.TestCase):
+class BaseClassODESetupTest(object):
+
+    def test_timegrid_argument(self):
+
+        # Test valid input dimensions for timegrid
+
+        pecas.setupmethods.ODEsetup(system = self.odesys, timegrid = self.timegrid)
+        pecas.setupmethods.ODEsetup(system = self.odesys, timegrid = self.timegrid.T)
+
+
+    def test_systems_argument(self):
+
+        # Support an invalid systems-type
+
+        bssys = pecas.systems.BasicSystem(p = self.p, y = self.p)
+        self.assertRaises(TypeError, pecas.setupmethods.ODEsetup, system = bssys, \
+            timegrid = self.timegrid)
+
+
+    def test_parameter_bounds_initials_inputs(self):
+
+        # Test some invalid values for p-arguments
+
+        for parg in self.invalidpargs:
+
+            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+                system = self.odesys, timegrid = self.timegrid, pinit = parg)
+            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+                system = self.odesys, timegrid = self.timegrid, pmin = parg)
+            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+                system = self.odesys, timegrid = self.timegrid, pmax = parg)
+
+        # Test some valid values for p-arguments
+
+        for parg in self.validpargs:
+
+            pecas.setupmethods.ODEsetup( \
+                system = self.odesys, timegrid = self.timegrid, pinit = parg)
+            pecas.setupmethods.ODEsetup( \
+                system = self.odesys, timegrid = self.timegrid, pmin = parg)
+            pecas.setupmethods.ODEsetup( \
+                system = self.odesys, timegrid = self.timegrid, pmax = parg)
+
+
+    def test_state_bounds_initials_inputs(self):
+
+        # Test some invalid values for x-arguments
+
+        for xarg in self.invalidxargs:
+
+            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+                system = self.odesys, timegrid = self.timegrid, xinit = xarg)
+            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+                system = self.odesys, timegrid = self.timegrid, xmin = xarg)
+            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+                system = self.odesys, timegrid = self.timegrid, xmax = xarg)
+
+        # Test some valid values for x-arguments
+
+        for xarg in self.validxargs:
+
+            pecas.setupmethods.ODEsetup( \
+                system = self.odesys, timegrid = self.timegrid, xinit = xarg)
+            pecas.setupmethods.ODEsetup( \
+                system = self.odesys, timegrid = self.timegrid, xmin = xarg)
+            pecas.setupmethods.ODEsetup( \
+                system = self.odesys, timegrid = self.timegrid, xmax = xarg)
+
+
+    def test_state_bvp_inputs(self):
+
+        # Test some invalid values for xbvp-arguments
+
+        for xbvparg in self.invalidxbvpargs:
+
+            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+                system = self.odesys, timegrid = self.timegrid, x0min = xbvparg)
+            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+                system = self.odesys, timegrid = self.timegrid, x0max = xbvparg)
+            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+                system = self.odesys, timegrid = self.timegrid, xNmin = xbvparg)
+            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+                system = self.odesys, timegrid = self.timegrid, xNmax = xbvparg)
+
+        # Test some valid values for xbvp-arguments
+
+        for xbvparg in self.validxbvpargs:
+
+            pecas.setupmethods.ODEsetup( \
+                system = self.odesys, timegrid = self.timegrid, x0min = xbvparg)
+            pecas.setupmethods.ODEsetup( \
+                system = self.odesys, timegrid = self.timegrid, x0max = xbvparg)
+            pecas.setupmethods.ODEsetup( \
+                system = self.odesys, timegrid = self.timegrid, xNmin = xbvparg)
+            pecas.setupmethods.ODEsetup( \
+                system = self.odesys, timegrid = self.timegrid, xNmax = xbvparg)
+
+
+    def test_control_inputs(self):
+
+        # Test some invalid values for u-arguments       
+
+        for uarg in self.invaliduargs:
+
+            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+                system = self.odesys, timegrid = self.timegrid, uinit = uarg)
+            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+                system = self.odesys, timegrid = self.timegrid, umin = uarg)
+            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
+                system = self.odesys, timegrid = self.timegrid, umax = uarg)
+
+        # Test some valid values for u-arguments
+
+        for uarg in self.validuargs:
+
+            pecas.setupmethods.ODEsetup( \
+                system = self.odesys, timegrid = self.timegrid, uinit = uarg)
+            pecas.setupmethods.ODEsetup( \
+                system = self.odesys, timegrid = self.timegrid, umin = uarg)
+            pecas.setupmethods.ODEsetup( \
+                system = self.odesys, timegrid = self.timegrid, umax = uarg)
+
+
+class TestLotkaVolterra(unittest.TestCase, BaseClassODESetupTest):
 
     def setUp(self):
 
@@ -28,107 +151,34 @@ class TestODESetup(unittest.TestCase):
 
         self.timegrid = pl.linspace(0, 10, 11)
 
-        self.validpargs = [None, [0, 1, 2, 3], pl.asarray([1, 2, 3, 4]), \
-            pl.asarray([1, 2, 3, 4]).T, pl.asarray([[2], [3], [2], [3]])]
         self.invalidpargs = [[0, 1, 2], [[2, 3], [2, 3]], pl.asarray([1, 2, 3]), \
             pl.asarray([[2, 3], [2, 3]])]
-
-        self.validxargs = [None, pl.ones((self.x.size(), self.timegrid.size)), \
-            pl.ones((self.timegrid.size, self.x.size()))]
+        self.validpargs = [None, [0, 1, 2, 3], pl.asarray([1, 2, 3, 4]), \
+            pl.asarray([1, 2, 3, 4]).T, pl.asarray([[2], [3], [2], [3]])]
 
         self.invalidxargs = [pl.ones((self.x.size() - 1, self.timegrid.size)), \
             pl.ones((self.timegrid.size - 1, self.x.size()))]
-
-        self.validxbvpargs = [None, [1, 1], [[1], [1]], pl.ones((2,1)), \
-            pl.ones((1, 2)), pl.ones(2)]
+        self.validxargs = [None, pl.ones((self.x.size(), self.timegrid.size)), \
+            pl.ones((self.timegrid.size, self.x.size()))]
 
         self.invalidxbvpargs = [[3, 2, 1], pl.ones(3), \
             pl.ones((1, 3)), pl.ones((3, 1))]
+        self.validxbvpargs = [None, [1, 1], [[1], [1]], pl.ones((2,1)), \
+            pl.ones((1, 2)), pl.ones(2)]
+
+        # Since the supported values are never used, there is no case of
+        # invalid u-arguments in this testcase
+
+        self.invaliduargs = []
+        self.validuargs = [None, [], [1, 2, 3]]
 
         # -- TODO! --
         # None of the checks will detect an invalidxpvbarg of
         # [[2, 1], [3]], since shape and size both fit.
         # --> How to check for this?
 
-    def test_timegrid_argument(self):
-
-        # Test valid input dimensions for timegrid
-
-        pecas.setupmethods.ODEsetup(system = self.odesys, timegrid = self.timegrid)
-        pecas.setupmethods.ODEsetup(system = self.odesys, timegrid = self.timegrid.T)
 
 
-    def test_systems_argument(self):
-
-        # Support the wrong system type
-
-        bssys = pecas.systems.BasicSystem(p = self.p, y = self.p)
-        self.assertRaises(TypeError, pecas.setupmethods.ODEsetup, system = bssys, \
-            timegrid = self.timegrid)
-
-    def test_parameter_bounds_initials_inputs(self):
-
-        # Test some wrong values for p-arguments
-
-        for parg in self.invalidpargs:
-
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, pinit = parg)
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, pmin = parg)
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, pmax = parg)
-
-        # Test some correct values for p-arguments
-
-        for parg in self.validpargs:
-
-            pecas.setupmethods.ODEsetup( \
-                system = self.odesys, timegrid = self.timegrid, pinit = parg)
-            pecas.setupmethods.ODEsetup( \
-                system = self.odesys, timegrid = self.timegrid, pmin = parg)
-            pecas.setupmethods.ODEsetup( \
-                system = self.odesys, timegrid = self.timegrid, pmax = parg)
-
-    def test_state_bounds_initials_inputs(self):
-
-        # Test some wrong values for x-arguments       
-
-        for xarg in self.invalidxargs:
-
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, xinit = xarg)
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, xmin = xarg)
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, xmax = xarg)
-
-        # Test some correct values for p-arguments
-
-        for xarg in self.validxargs:
-
-            pecas.setupmethods.ODEsetup( \
-                system = self.odesys, timegrid = self.timegrid, xinit = xarg)
-            pecas.setupmethods.ODEsetup( \
-                system = self.odesys, timegrid = self.timegrid, xmin = xarg)
-            pecas.setupmethods.ODEsetup( \
-                system = self.odesys, timegrid = self.timegrid, xmax = xarg)
-
-
-    def test_state_bvp_inputs(self):
-
-        for xbvparg in self.invalidxbvpargs:
-
-            print xbvparg
-
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, x0min = xbvparg)
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, x0max = xbvparg)
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, xNmin = xbvparg)
-            self.assertRaises(ValueError, pecas.setupmethods.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, xNmax = xbvparg)
 # if __name__ == '__main__':
 #     unittest.main()
 
@@ -156,7 +206,7 @@ class TestODESetup(unittest.TestCase):
 
 #     pecas.setupmethods.ODEsetup(system = odesys, timegrid = timegrid)
 
-#     # Support the wrong system type
+#     # Support the invalid system type
 
 #     bssys = pecas.systems.BasicSystem(p = p, y = p)
 #     assert_raises(TypeError, pecas.setupmethods.ODEsetup, system = bssys, \
@@ -167,7 +217,7 @@ class TestODESetup(unittest.TestCase):
 #     assert_raises(ValueError, pecas.setupmethods.ODEsetup, \
 #         system = odesys, timegrid = timegrid[:-1].reshape(2, 5))
 
-    # Test some wrong values for p-arguments
+    # Test some invalid values for p-arguments
 
     # pwarglist = [[0, 1, 2], [[2, 3], [2, 3]], pl.asarray([1, 2, 3]), \
     #     pl.asarray([[2, 3], [2, 3]])]
@@ -181,7 +231,7 @@ class TestODESetup(unittest.TestCase):
     #     assert_raises(ValueError, pecas.setupmethods.ODEsetup, \
     #         system = odesys, timegrid = timegrid, pmax = parg)
 
-    # # Test some correct values for p-arguments
+    # # Test some valid values for p-arguments
 
     # parglist = [None, [0, 1, 2, 3], pl.asarray([1, 2, 3, 4]), \
     #     pl.asarray([1, 2, 3, 4]).T, pl.asarray([[2], [3], [2], [3]])]
