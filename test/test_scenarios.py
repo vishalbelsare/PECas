@@ -75,9 +75,6 @@ class TestLotkaVolterra(unittest.TestCase, \
             pmax = [1.0, pl.inf, 1.0, pl.inf], \
             pinit = [1.0, 0.5, 1.0, 1.0])
 
-        # self.lsqpe = pecas.LSq(pesetup = self.odesetup, yN = self.yN, \
-        #     stdyN = self.stdyN)
-
 
 class Test1DVehicle(unittest.TestCase, \
     test_ode_setup.ODESetupTest, \
