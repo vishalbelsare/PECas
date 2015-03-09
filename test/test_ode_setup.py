@@ -372,7 +372,7 @@ class ODESetupTest(object):
 
 # U = pl.array([])
 
-# odesol = pecas.setups.ODEsetup( \
+# odesetup = pecas.setups.ODEsetup( \
 #     system = op, timegrid = timegrid, \
 #     x0min = [yN[0,0], yN[0,1]], \
 #     x0max = [yN[0,0], yN[0,1]], \
@@ -383,18 +383,18 @@ class ODESetupTest(object):
 #     pinit = [1.0, 0.5, 1.0, 1.0])
 
 
-# lsqprob = pecas.LSq(pesetup=odesol, yN=yN, stdyN = stdyN)
+# lsqprob = pecas.LSq(pesetup=odesetup, yN=yN, stdyN = stdyN)
 # lsqprob.run_parameter_estimation()
 
-# phat = odesol.V()(lsqprob.Vhat)["P"]
+# phat = odesetup.V()(lsqprob.Vhat)["P"]
 # print phat
 
 # pl.scatter(timegrid, yN[:,0], color = 'b')
 # pl.scatter(timegrid, yN[:,1], color = 'r')
 
-# pl.plot(timegrid, ca.vertcat(odesol.V()(lsqprob.Vhat)["X",:,0])[::2], \
+# pl.plot(timegrid, ca.vertcat(odesetup.V()(lsqprob.Vhat)["X",:,0])[::2], \
 #     color='b', ls = '--')
-# pl.plot(timegrid, ca.vertcat(odesol.V()(lsqprob.Vhat)["X",:,0])[1::2], \
+# pl.plot(timegrid, ca.vertcat(odesetup.V()(lsqprob.Vhat)["X",:,0])[1::2], \
 #     color='r', ls = '--')
 
 # tgridint = pl.linspace(0,10,1000)

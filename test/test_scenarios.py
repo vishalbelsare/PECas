@@ -5,10 +5,12 @@ import pecas
 import unittest
 import test_ode_setup
 import test_lsq_init
+import test_lsq_run
 
 class TestLotkaVolterra(unittest.TestCase, \
     test_ode_setup.ODESetupTest, \
-    test_lsq_init.PESetupTest):
+    test_lsq_init.PESetupTest, \
+    test_lsq_run.PERunTest):
 
     def setUp(self):
 
@@ -63,7 +65,9 @@ class TestLotkaVolterra(unittest.TestCase, \
         self.stdyN = data[:, 2::2]
         self.stds = 1e-2
 
-        self.odesol = pecas.setups.ODEsetup( \
+        self.phat = [1, 0.703278, 1, 0.342208]
+
+        self.odesetup = pecas.setups.ODEsetup( \
             system = self.odesys, timegrid = self.timegrid, \
             x0min = [self.yN[0,0], self.yN[0,1]], \
             x0max = [self.yN[0,0], self.yN[0,1]], \
@@ -71,13 +75,14 @@ class TestLotkaVolterra(unittest.TestCase, \
             pmax = [1.0, pl.inf, 1.0, pl.inf], \
             pinit = [1.0, 0.5, 1.0, 1.0])
 
-        # self.lsqpe = pecas.LSq(pesetup = self.odesol, yN = self.yN, \
+        # self.lsqpe = pecas.LSq(pesetup = self.odesetup, yN = self.yN, \
         #     stdyN = self.stdyN)
 
 
 class Test1DVehicle(unittest.TestCase, \
     test_ode_setup.ODESetupTest, \
-    test_lsq_init.PESetupTest):
+    test_lsq_init.PESetupTest, \
+    test_lsq_run.PERunTest):
 
     def setUp(self):
 
@@ -125,13 +130,15 @@ class Test1DVehicle(unittest.TestCase, \
         self.uN = data[:-1, 2]
         self.stds = 1e-3
 
-        self.odesol = pecas.setups.ODEsetup( \
+        self.phat = [10.0, 0.000236, 0.614818]
+
+        self.odesetup = pecas.setups.ODEsetup( \
             system = self.odesys, timegrid = self.timegrid,
             umin = self.uN, umax = self.uN, uinit = self.uN, \
             x0min = self.yN[0], x0max = self.yN[0], \
             xNmin = self.yN[-1:], xNmax = self.yN[-1:], \
-            pmin = [10, 0.0, 0.4], pmax = [10, 2, 0.7], \
-            pinit = [10, 0.08, 0.5])
+            pmin = [10.0, 0.0, 0.4], pmax = [10.0, 2, 0.7], \
+            pinit = [10.0, 0.08, 0.5])
 
 
 
