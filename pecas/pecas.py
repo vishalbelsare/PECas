@@ -96,8 +96,8 @@ but you supported stds of dimension: {0}.'''.format(stds.shape))
 
 class LSq(PECasBaseClass):
 
-    '''The class :class:`LSq` is used to define and solve least
-    squares parameter estimation problems with PECas.'''
+    '''The class :class:`LSq` is used to solve least squares parameter
+    estimation problems with PECas for a given set of measurement data.'''
 
     def __init__(self, pesetup = None, yN = None, stdyN = None, stds = 10e-2):
 
@@ -108,7 +108,7 @@ class LSq(PECasBaseClass):
 
         r'''
         This functions will run a least sqaures parameter estimation for the
-        given problem.
+        given problem and data set.
 
         For this, the least squares parameter estimation problem
 
