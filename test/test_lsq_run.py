@@ -21,7 +21,5 @@ class PERunTest(object):
         lsqpe.run_parameter_estimation()
         phat = self.odesetup.V()(lsqpe.Vhat)["P"]
 
-        print phat
-
         for k, pk in enumerate(phat):
             self.assertAlmostEqual(pk, self.phat[k], places = 5)
