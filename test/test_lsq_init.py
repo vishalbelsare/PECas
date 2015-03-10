@@ -9,7 +9,25 @@ import pecas
 
 import unittest
 
-class PESetupTest(object):
+class BSPESetupTest(object):
+
+    def test_valid_lsq_init(self):
+
+        # Test valid setup cases
+
+        pecas.LSq(pesetup = self.bssetup, yN = self.yN, stdyN = self.stdyN)
+        pecas.LSq(pesetup = self.bssetup, yN = self.yN.T, stdyN = self.stdyN)
+        pecas.LSq(pesetup = self.bssetup, yN = self.yN, stdyN = self.stdyN.T)
+
+    def test_invalid_lsq_init(self):
+
+        self.assertRaises(ValueError, pecas.LSq, pesetup = self.bssetup, \
+            yN = pl.atleast_2d(self.yN)[:, :-1], stdyN = self.stdyN)
+        self.assertRaises(ValueError, pecas.LSq, pesetup = self.bssetup, \
+            yN = self.yN, stdyN = pl.atleast_2d(self.stdyN)[:-1])
+
+
+class ODEPESetupTest(object):
 
     def test_valid_lsq_init(self):
 

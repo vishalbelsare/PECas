@@ -86,7 +86,13 @@ The input for the weight of the disturbances in stds has to be
 a scalar value or an array of dimension (1, 1),
 but you supported stds of dimension: {0}.'''.format(stds.shape))
 
-        self.stds = pl.squeeze(stds * pl.ones(pesetup.s.shape[0]))
+        try:
+
+            self.stds = pl.squeeze(stds * pl.ones(pesetup.s.shape[0]))
+
+        except AttributeError:
+
+            self.stds = []
 
         # Set up the covariance matrix for the measurements
 

@@ -98,9 +98,9 @@ class SetupsBaseClass(object):
         if pmax is None:
             pmax = pl.inf * pl.ones(self.np)
 
-        pinit = pl.squeeze(pinit)
-        pmin = pl.squeeze(pmin)
-        pmax = pl.squeeze(pmax)
+        pinit = pl.atleast_1d(pl.squeeze(pinit))
+        pmin = pl.atleast_1d(pl.squeeze(pmin))
+        pmax = pl.atleast_1d(pl.squeeze(pmax))
 
         if not all(arg.shape == (self.np,) for \
             arg in [pinit, pmin, pmax]):
@@ -233,8 +233,8 @@ class BSsetup(SetupsBaseClass):
 
 
     def __init__(self, system = None, timegrid = None, \
-        umin = pl.zeros(0), umax = pl.zeros(0), uinit = pl.zeros(0), \
-        pmin = pl.zeros(0), pmax = pl.zeros(0), pinit = pl.zeros(0)):
+        umin = None, umax = None, uinit = None, \
+        pmin = None, pmax = None, pinit = None):
 
         if not type(system) is systems.BasicSystem:
 
@@ -266,8 +266,8 @@ class BSsetup(SetupsBaseClass):
         self.V = cat.struct_symMX([
                 (
                     cat.entry("U", repeat = [self.nsteps, 1], \
-                        shape = system.v["u"].shape),
-                    cat.entry("P", shape = system.v["p"].shape),
+                        shape = self.nu),
+                    cat.entry("P", shape = self.np),
                 )
             ])
 
@@ -279,7 +279,7 @@ class BSsetup(SetupsBaseClass):
 
         # Set up phiN
 
-        phiN = []
+        self.phiN = []
 
         yfcn = ca.SXFunction([system.v["t"], system.v["u"], system.v["p"]], \
             [system.fcn["y"]])
@@ -366,7 +366,8 @@ class CollocationBaseClass(SetupsBaseClass):
 
         self.V = cat.struct_symMX([
                 (
-                    cat.entry("U", repeat = [self.nsteps, self.ntauroot], shape = self.nu),
+                    cat.entry("U", repeat = [self.nsteps, self.ntauroot], \
+                        shape = self.nu),
                     cat.entry("X", repeat = [self.nsteps+1, self.ntauroot+1], \
                         shape = self.nx),
                     cat.entry("P", shape = self.np),

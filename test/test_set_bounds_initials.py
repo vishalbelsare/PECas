@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Test the ODE's setup mehthod (collocation struct builder)
+# Test the function for setting bounds and initials
 
 import casadi as ca
 import pylab as pl
@@ -9,7 +9,85 @@ import pecas
 
 import unittest
 
-class ODESetupTest(object):
+class BSSetBoundsInitialsTest(object):
+
+    def test_valid_timegrid_inputs(self):
+
+        # Test valid input dimensions for timegrid
+
+        pecas.setups.BSsetup(system = self.bsys, \
+            timegrid = self.timegrid)
+        pecas.setups.BSsetup(system = self.bsys, timegrid = \
+            self.timegrid.T)
+
+
+    def test_invalid_systems_input(self):
+
+        # Support an invalid systems-type
+
+        odesys = pecas.systems.ExplODE(p = self.p, y = self.p, x = self.p, \
+            f = self.p)
+        self.assertRaises(TypeError, pecas.setups.BSsetup, \
+            system = odesys, timegrid = self.timegrid)
+
+
+    def test_invalid_parameter_bounds_and_initials(self):
+
+        # Test some invalid values for p-arguments
+
+        for parg in self.invalidpargs:
+
+            self.assertRaises(ValueError, pecas.setups.BSsetup, \
+                system = self.bsys, timegrid = self.timegrid, pinit = parg)
+            self.assertRaises(ValueError, pecas.setups.BSsetup, \
+                system = self.bsys, timegrid = self.timegrid, pmin = parg)
+            self.assertRaises(ValueError, pecas.setups.BSsetup, \
+                system = self.bsys, timegrid = self.timegrid, pmax = parg)
+
+
+    def test_valid_parameter_bounds_and_initials(self):
+
+        # Test some valid values for p-arguments
+
+        for parg in self.validpargs:
+
+            pecas.setups.BSsetup( \
+                system = self.bsys, timegrid = self.timegrid, pinit = parg)
+            pecas.setups.BSsetup( \
+                system = self.bsys, timegrid = self.timegrid, pmin = parg)
+            pecas.setups.BSsetup( \
+                system = self.bsys, timegrid = self.timegrid, pmax = parg)
+
+
+    def test_invalid_control_bounds_and_initials_inputs(self):
+
+        # Test some invalid values for u-arguments       
+
+        for uarg in self.invaliduargs:
+
+            self.assertRaises(ValueError, pecas.setups.BSsetup, \
+                system = self.bsys, timegrid = self.timegrid, uinit = uarg)
+            self.assertRaises(ValueError, pecas.setups.BSsetup, \
+                system = self.bsys, timegrid = self.timegrid, umin = uarg)
+            self.assertRaises(ValueError, pecas.setups.BSsetup, \
+                system = self.bsys, timegrid = self.timegrid, umax = uarg)
+    
+
+    def test_valid_control_bounds_and_initials_inputs(self):
+
+        # Test some valid values for u-arguments
+
+        for uarg in self.validuargs:
+
+            pecas.setups.BSsetup( \
+                system = self.bsys, timegrid = self.timegrid, uinit = uarg)
+            pecas.setups.BSsetup( \
+                system = self.bsys, timegrid = self.timegrid, umin = uarg)
+            pecas.setups.BSsetup( \
+                system = self.bsys, timegrid = self.timegrid, umax = uarg)
+
+
+class ODESetBoundsInitialsTest(object):
 
     def test_valid_timegrid_inputs(self):
 

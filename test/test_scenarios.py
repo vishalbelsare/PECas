@@ -3,14 +3,61 @@ import pylab as pl
 import pecas
 
 import unittest
-import test_ode_setup
+import test_set_bounds_initials
 import test_lsq_init
 import test_lsq_run
 
+class TestBasicSystem(unittest.TestCase, \
+    test_set_bounds_initials.BSSetBoundsInitialsTest, \
+    test_lsq_init.BSPESetupTest, \
+    test_lsq_run.BSPERunTest):
+
+    def setUp(self):
+
+        # System
+
+        self.u = ca.SX.sym("u", 1)
+        self.p = ca.SX.sym("p", 1)
+
+        self.y = self.u * self.p
+
+        self.bsys = pecas.systems.BasicSystem(u = self.u, p = self.p, \
+            y = self.y)
+
+        # Inputs
+
+        self.timegrid = pl.linspace(0, 3, 4)
+
+        self.invalidpargs = [[0, 1], [[2, 3], [2, 3]], \
+            pl.asarray([1, 2]), pl.asarray([[2, 3], [2, 3]])]
+        self.validpargs = [None, 1, [0], pl.asarray([1]), \
+            pl.asarray([1]).T, pl.asarray([[2]])]
+
+        self.invaliduargs = [pl.ones((self.u.size(), \
+            self.timegrid.size - 1)), \
+            pl.ones((self.timegrid.size - 1, self.u.size()))]
+        self.validuargs = [None, pl.ones((self.u.size(), self.timegrid.size)), \
+            pl.ones((self.timegrid.size, self.u.size()))]
+
+        self.yN = pl.asarray([2.5, 4.1, 6.3, 8.2])
+        self.stdyN = pl.asarray([0.1] * 4)
+
+        self.uN = (1. / 3.) * pl.linspace(1, 4, 4)
+
+        self.phat = [6.24]
+
+        self.bssetup = pecas.setups.BSsetup( \
+            system = self.bsys, timegrid = self.timegrid, \
+            umin = self.uN, umax = self.uN, uinit = self.uN)
+
+
 class TestLotkaVolterra(unittest.TestCase, \
-    test_ode_setup.ODESetupTest, \
-    test_lsq_init.PESetupTest, \
-    test_lsq_run.PERunTest):
+    test_set_bounds_initials.ODESetBoundsInitialsTest, \
+    test_lsq_init.ODEPESetupTest, \
+    test_lsq_run.ODEPERunTest):
+
+    # (model and data taken from Bock, Sager et al.: Uebungen Numerische
+    # Mathematik II, Blatt 9, IWR, Universitaet Heidelberg, 2006)
 
     def setUp(self):
 
@@ -77,9 +124,12 @@ class TestLotkaVolterra(unittest.TestCase, \
 
 
 class Test1DVehicle(unittest.TestCase, \
-    test_ode_setup.ODESetupTest, \
-    test_lsq_init.PESetupTest, \
-    test_lsq_run.PERunTest):
+    test_set_bounds_initials.ODESetBoundsInitialsTest, \
+    test_lsq_init.ODEPESetupTest, \
+    test_lsq_run.ODEPERunTest):
+
+    # (model and data taken from Diehl, Moritz: Course on System Identification,
+    # Exercises 5 and 6, SYSCOP, IMTEK, University of Freiburg, 2014/2015)
 
     def setUp(self):
 
@@ -139,9 +189,12 @@ class Test1DVehicle(unittest.TestCase, \
 
 
 class Test2DVehicle(unittest.TestCase, \
-    test_ode_setup.ODESetupTest, \
-    test_lsq_init.PESetupTest): # \,
-    # test_lsq_run.PERunTest):
+    test_set_bounds_initials.ODESetBoundsInitialsTest, \
+    test_lsq_init.ODEPESetupTest): # \,
+    # test_lsq_run.ODEPERunTest):
+
+    # (model and data taken from Verschueren, Robin: Design and implementation 
+    # of a time-optimal controller for model race cars, KU Leuven, 2014)
 
     def setUp(self):
 
@@ -206,7 +259,6 @@ class Test2DVehicle(unittest.TestCase, \
         self.yN = data[::100, 1:5]
         self.stdyN = 0.01 * pl.ones(self.yN.shape)
         self.uN = data[:-1:100, 5:]
-        print self.uN.shape
         self.stds = 1e-3
 
         self.phat = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
