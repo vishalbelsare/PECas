@@ -8,9 +8,9 @@ from abc import ABCMeta, abstractmethod
 
 import systems
 
-class SetupMethodsBaseClass(object):
+class SetupsBaseClass(object):
 
-    '''The abstract class :class:`SetupMethodsBaseClass` contains the basic
+    '''The abstract class :class:`SetupsBaseClass` contains the basic
     functionalities of all other classes.'''
 
     __metaclass__ = ABCMeta
@@ -20,7 +20,7 @@ class SetupMethodsBaseClass(object):
     def __init__(self):
 
         '''Placeholder-function for the according __init__()-methods of the
-        classes that inherit from :class:`SetupMethodsBaseClass`.'''
+        classes that inherit from :class:`SetupsBaseClass`.'''
 
         pass
 
@@ -215,7 +215,7 @@ class SetupMethodsBaseClass(object):
             self.Vmax["W",:] = ca.tools.repeated(pl.inf)
 
 
-class BSsetup(SetupMethodsBaseClass):
+class BSsetup(SetupsBaseClass):
 
     def check_and_set_bounds_and_initials(self, \
         umin = None, umax = None, uinit = None, \
@@ -302,7 +302,7 @@ class BSsetup(SetupMethodsBaseClass):
         self.g = system.fcn["g"]
 
 
-class CollocationBaseClass(SetupMethodsBaseClass):
+class CollocationBaseClass(SetupsBaseClass):
 
     __metaclass__ = ABCMeta
 

@@ -150,6 +150,12 @@ class ExplODE(object):
 
 class ImplDAE(object):
 
+    '''
+    The class :class:``ImplDAE`` will be used to define dynamic systems of 
+    implicit DAEs for parameter estimation, but is not supported yet.
+
+    '''
+
     def __init__(self, \
              t = ca.SX.sym("t", 1),
              u = ca.SX.sym("u", 0), \

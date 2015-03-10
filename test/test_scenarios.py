@@ -139,9 +139,9 @@ class Test1DVehicle(unittest.TestCase, \
 
 
 class Test2DVehicle(unittest.TestCase, \
-    # test_ode_setup.ODESetupTest, \
-    # test_lsq_init.PESetupTest, \
-    test_lsq_run.PERunTest):
+    test_ode_setup.ODESetupTest, \
+    test_lsq_init.PESetupTest): # \,
+    # test_lsq_run.PERunTest):
 
     def setUp(self):
 
