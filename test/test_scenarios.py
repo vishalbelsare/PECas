@@ -7,10 +7,12 @@ import test_set_bounds_initials
 import test_lsq_init
 import test_lsq_run
 
-class TestBasicSystem(unittest.TestCase, \
+class TestBasicSystemNoConstraints(unittest.TestCase, \
     test_set_bounds_initials.BSSetBoundsInitialsTest, \
     test_lsq_init.BSPESetupTest, \
     test_lsq_run.BSPERunTest):
+
+    _multiprocess_can_split_ = True
 
     def setUp(self):
 
@@ -49,6 +51,53 @@ class TestBasicSystem(unittest.TestCase, \
         self.bssetup = pecas.setups.BSsetup( \
             system = self.bsys, timegrid = self.timegrid, \
             umin = self.uN, umax = self.uN, uinit = self.uN)
+
+
+class TestBasicSystemConstraints(unittest.TestCase, \
+    test_set_bounds_initials.BSSetBoundsInitialsTest, \
+    test_lsq_init.BSPESetupTest, \
+    test_lsq_run.BSPERunTest):
+
+    def setUp(self):
+
+        # System
+
+        self.u = ca.SX.sym("u", 2)
+        self.p = ca.SX.sym("p", 2)
+
+        self.y = self.u[0] * self.p[0] + self.u[1] * self.p[1]**2
+        self.g = (2 - ca.mul(self.p.T, self.p))
+        self.pinit = [1, 1]
+
+        self.bsys = pecas.systems.BasicSystem(u = self.u, p = self.p, \
+            y = self.y, g = self.g)
+
+        # Inputs
+
+        self.timegrid = pl.linspace(0, 3, 4)
+
+        self.invalidpargs = [[0, 1, 2], [[2, 2, 3], [2, 2, 3]], \
+            pl.asarray([1, 2, 2]), pl.asarray([[2, 3, 3], [2, 3, 3]])]
+        self.validpargs = [None, [0, 1], pl.asarray([1, 1]), \
+            pl.asarray([1, 2]).T, pl.asarray([[2], [2]])]
+
+        self.invaliduargs = [pl.ones((self.u.size(), \
+            self.timegrid.size - 1)), \
+            pl.ones((self.timegrid.size - 1, self.u.size()))]
+        self.validuargs = [None, pl.ones((self.u.size(), self.timegrid.size)), \
+            pl.ones((self.timegrid.size, self.u.size()))]
+
+        self.yN = pl.asarray([2.23947, 2.84568, 4.55041, 5.08583])
+        self.stdyN = pl.asarray([0.5] * 4)
+
+        self.uN = pl.vstack([pl.ones(4), pl.linspace(1, 4, 4)])
+
+        self.phat = [0.961943, 1.03666]
+
+        self.bssetup = pecas.setups.BSsetup( \
+            system = self.bsys, timegrid = self.timegrid, \
+            umin = self.uN, umax = self.uN, uinit = self.uN, \
+            pinit = self.pinit)
 
 
 class TestLotkaVolterra(unittest.TestCase, \

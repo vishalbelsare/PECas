@@ -299,7 +299,13 @@ class BSsetup(SetupsBaseClass):
 
         # Set up g
 
-        self.g = system.fcn["g"]
+        # TODO! Can/should/must gfcn depend on u and/or t?
+
+        gfcn = ca.SXFunction([system.v["p"]], [system.fcn["g"]])
+        gfcn.setOption("name", "yfcn")
+        gfcn.init()
+
+        self.g = gfcn.call([self.V["P"]])[0]
 
 
 class CollocationBaseClass(SetupsBaseClass):
