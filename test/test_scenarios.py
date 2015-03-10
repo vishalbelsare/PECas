@@ -138,9 +138,10 @@ class Test1DVehicle(unittest.TestCase, \
             pinit = [10.0, 0.08, 0.5])
 
 
-
 class Test2DVehicle(unittest.TestCase, \
-    test_ode_setup.ODESetupTest):
+    # test_ode_setup.ODESetupTest, \
+    # test_lsq_init.PESetupTest, \
+    test_lsq_run.PERunTest):
 
     def setUp(self):
 
@@ -151,13 +152,21 @@ class Test2DVehicle(unittest.TestCase, \
         self.u = ca.SX.sym("u", 2)
 
         self.f = ca.vertcat( \
-            [self.x[3] * pl.cos(self.x[2] + self.p[0] * self.x[4]),
-            self.x[3] * pl.sin(self.x[2] + self.p[0] * self.x[4]),
-            self.x[3] * self.x[4] * self.p[1],
-            self.p[2] * self.x[5] - self.p[3] * self.x[5] * self.x[3] \
-                - self.p[4] * self.x[3]**2 - self.p[5] \
-                - (self.x[3]  * self.x[5])**2 * self.p[1] * self.p[0],
+
+            [self.x[3] * pl.cos(self.x[2] + 0.6 * self.p[0] * self.x[4]),
+
+            self.x[3] * pl.sin(self.x[2] + 0.6 * self.p[0] * self.x[4]),
+
+            self.x[3] * self.x[4] * 16.5 * self.p[1],
+
+            11.5 * self.p[2] * self.x[5] \
+                - 1.5 * self.p[3] * self.x[5] * self.x[3] \
+                - 0.15 * self.p[4] * self.x[3]**2 - 0.5 * self.p[5] \
+                - (self.x[3]  * self.x[5])**2 \
+                * 16.5 * self.p[1] * 0.6 * self.p[0],
+
             self.u[0],
+
             self.u[1]])
 
         self.y = self.x[:4]
@@ -167,7 +176,9 @@ class Test2DVehicle(unittest.TestCase, \
 
         # Inputs
 
-        self.timegrid = pl.linspace(0, 6, 100)
+        data = pl.array(pl.loadtxt("test/data_2d_vehicle.txt"))
+
+        self.timegrid = data[::100, 0]
 
         self.invalidpargs = [[0, 1], [[2, 3], [2, 3]], \
             pl.asarray([1, 2, 3, 4, 5]), pl.asarray([[2, 3], [2, 3]])]
@@ -191,3 +202,21 @@ class Test2DVehicle(unittest.TestCase, \
         self.validuargs = [None, pl.ones((self.u.size(), \
             self.timegrid.size - 1)), \
             pl.ones((self.timegrid.size - 1, self.u.size()))]
+
+        self.yN = data[::100, 1:5]
+        self.stdyN = 0.01 * pl.ones(self.yN.shape)
+        self.uN = data[:-1:100, 5:]
+        print self.uN.shape
+        self.stds = 1e-3
+
+        self.phat = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
+
+        self.odesetup = pecas.setups.ODEsetup( \
+            system = self.odesys, timegrid = self.timegrid,
+            umin = self.uN, umax = self.uN, uinit = self.uN, \
+            # pmin = [0.4, 16.0, 11.0, 1.0, 0.05, 0.4], \
+            # pmax = [0.7, 18.0, 13.2, 3, 0.2, 0.75], \
+            # pinit = [0.6, 16.5, 11.5, 2.7, 0.07, 0.7])
+            pmin = [0.1] * 6, \
+            pmax = [2] * 6, \
+            pinit = [1] * 6)
