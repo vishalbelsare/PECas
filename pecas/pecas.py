@@ -96,7 +96,9 @@ but you supported stds of dimension: {0}.'''.format(stds.shape))
 
         # Set up the covariance matrix for the measurements
 
-        self.CovyNs = pl.square(pl.diag(pl.concatenate((self.stdyN, self.stds))))
+        self.CovyNs = ca.solve( \
+            pl.square(pl.diag(pl.concatenate((self.stdyN, self.stds)))), \
+            pl.eye(self.stdyN.size + self.stds.size))
 
 
 
