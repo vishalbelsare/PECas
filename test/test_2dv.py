@@ -7,6 +7,10 @@ import test_lsq_run
 
 import test_scenarios
 
+import time
+
+tstart = time.time()
+
 # System
 
 x = ca.SX.sym("x", 4)
@@ -47,15 +51,15 @@ data = pl.array(pl.loadtxt( \
     "controlReadings_ACADO_MPC_Betterweights.dat", \
     delimiter = ", ", skiprows = 1))
 
-timegrid = data[200:300, 0]
+timegrid = data[120:300, 0]
 
 
-yN = data[200:300, [2, 4, 6, 8]]
-stdyN = 1e-2 * pl.ones(yN.shape)
-stdyN[:, 2] = 1e-1
-stdyN[:, 3] = 1
-uN = data[200:299, [9, 10]]
-stds = 1e-2
+yN = 1e-1 * data[120:300, [2, 4, 6, 8]]
+stdyN = pl.ones(yN.shape)
+# stdyN[:, 2] = 1e-1
+# stdyN[:, 3] = 1
+uN = data[120:299, [9, 10]]
+stds = 100
 
 porig = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
 # phat = [12.0, 0.1, 0.6]
@@ -68,9 +72,9 @@ odesetup = pecas.setups.ODEsetup( \
     # pmax = [12.0, 10, pl.inf, pl.inf], \
     # pinit = [12.0, 0.1, 0.6, 17.06])
     # xmin = yN - 0.1 * abs(yN), xmax = yN + 0.1 * abs(yN), xinit = yN,
-    pmin = [0.5, 17.06, 0.0, 0, 0.0, 0.0], \
-    pmax = [0.5, 17.06, 13.2, 100, 400, 3], \
-    pinit = [0.5, 17.06, 11.5, 5, 0.07, 0.7])
+    pmin = [0.5, 17.06, 0.0, -10.0, -1000.0, -10.0], \
+    pmax = [0.5, 17.06, 13.2, 200, 500, 3], \
+    pinit = [0.5, 17.06, 11.5, 5, 0.07, 0.70])
     # pmin = [0.1] * 6, \
     # pmax = [2] * 6, \
     # pinit = [1] * 6)
@@ -93,19 +97,33 @@ vhat = odesetup.V()(lsqpe.Vhat)["X",:,0,3]
 pl.close("all")
 
 pl.figure()
+pl.subplot(4, 1, 1)
 pl.plot(xhat)
 pl.plot(yN[:,0])
 
-pl.figure()
+pl.subplot(4, 1, 2)
 pl.plot(yhat)
 pl.plot(yN[:,1])
 
-pl.figure()
+pl.subplot(4, 1, 3)
 pl.plot(psihat)
 pl.plot(yN[:, 2])
 
-pl.figure()
+pl.subplot(4, 1, 4)
 pl.plot(vhat)
 pl.plot(yN[:, 3])
 
+pl.figure()
+pl.plot(xhat, yhat)
+pl.plot(yN[:,0], yN[:, 1])
+
+# pl.figure()
+# pl.plot(sum(odesetup.V()(lsqpe.Vhat)["X",:,:,0], []))
+
 pl.show()
+
+tend = time.time()
+dur = tend - tstart
+print "started: " + time.ctime(tstart)
+print "ended: " + time.ctime(tend)
+print "duration: " + str(dur) + "sec"
