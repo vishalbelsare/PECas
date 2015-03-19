@@ -96,11 +96,7 @@ but you supported stds of dimension: {0}.'''.format(stds.shape))
 
         # Set up the covariance matrix for the measurements
 
-        self.CovyNs = ca.solve( \
-            pl.square(pl.diag(pl.concatenate((self.stdyN, self.stds)))), \
-            pl.eye(self.stdyN.size + self.stds.size))
-
-
+        self.W = pl.diag(pl.concatenate((self.stdyN, self.stds)))
 
 class LSq(PECasBaseClass):
 
@@ -138,13 +134,9 @@ class LSq(PECasBaseClass):
           can be returned using the function :func:`get_Rhat()`.
         '''          
 
-        # Set up the residual function reslsq
+        A = ca.vertcat([self.pesetup.phiN - self.yN, self.pesetup.s])
 
-        A = ca.mul(pl.linalg.solve(pl.sqrt(self.CovyNs), \
-            pl.eye(pl.size(self.yN) + pl.size(self.stds))), \
-            ca.vertcat([self.pesetup.phiN - self.yN, self.pesetup.s]))
-
-        reslsq = ca.mul(A.T, A)
+        reslsq = ca.mul([A.T, self.W, A])
 
         # If equality constraints exists, set then for the solver as well
         # as the cost function
