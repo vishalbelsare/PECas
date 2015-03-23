@@ -17,7 +17,7 @@ class PECasBaseClass:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def __init__(self, pesetup = None, yN = None, stdyN = None, stds = 1e-2):
+    def __init__(self, pesetup = None, yN = None, wy = None, ws = 1e-2):
 
         # Store the parameter estimation problem setup
 
@@ -47,65 +47,65 @@ but you supported yN of dimension:
         # Check if the supported standard deviations fit to the dimensions of
         # the measurement data
 
-        stdyN = pl.atleast_2d(stdyN)
+        wy = pl.atleast_2d(wy)
 
-        if stdyN.shape == yN.T.shape:
+        if wy.shape == yN.T.shape:
 
-            stdyN = stdyN.T
+            wy = wy.T
 
-        if not stdyN.shape == yN.shape:
+        if not wy.shape == yN.shape:
 
             raise ValueError('''
-The dimension of the standard deviations given in stdyN does not match the
+The dimension of the standard deviations given in wy does not match the
 dimensions of the measurement data.
 
-Valid dimensions for stdyN for the given data are:
+Valid dimensions for wy for the given data are:
     {0} or {1},
-but you supported stdyN of dimension:
-    {2}.'''.format(str(yN.shape), str(yN.T.shape), str(stdyN.shape)))
+but you supported wy of dimension:
+    {2}.'''.format(str(yN.shape), str(yN.T.shape), str(wy.shape)))
 
         # Get the measurement values and standard deviations into the
         # necessary order of apperance and dimensions
 
         self.yN = pl.zeros(pl.size(yN))
-        self.stdyN = pl.zeros(pl.size(yN))
+        self.wy = pl.zeros(pl.size(yN))
 
         for k in range(yN.shape[0]):
 
             self.yN[k:yN.shape[0]*yN.shape[1]+1:yN.shape[0]] = \
                 yN[k, :]
-            self.stdyN[k:yN.shape[0]*yN.shape[1]+1:yN.shape[0]] = \
-                stdyN[k, :]
+            self.wy[k:yN.shape[0]*yN.shape[1]+1:yN.shape[0]] = \
+                wy[k, :]
 
-        stds = pl.atleast_2d(stds)
+        ws = pl.atleast_2d(ws)
 
-        if not stds.shape == (1,1):
+        if not ws.shape == (1,1):
 
             raise ValueError('''
-The input for the weight of the disturbances in stds has to be
+The input for the weight of the disturbances in ws has to be
 a scalar value or an array of dimension (1, 1),
-but you supported stds of dimension: {0}.'''.format(stds.shape))
+but you supported ws of dimension: {0}.'''.format(ws.shape))
 
         try:
 
-            self.stds = pl.squeeze(stds * pl.ones(pesetup.s.shape[0]))
+            self.ws = pl.squeeze(ws * pl.ones(pesetup.s.shape[0]))
 
         except AttributeError:
 
-            self.stds = []
+            self.ws = []
 
         # Set up the covariance matrix for the measurements
 
-        self.W = pl.diag(pl.concatenate((self.stdyN, self.stds)))
+        self.W = pl.diag(pl.concatenate((self.wy, self.ws)))
 
 class LSq(PECasBaseClass):
 
     '''The class :class:`LSq` is used to solve least squares parameter
     estimation problems with PECas for a given set of measurement data.'''
 
-    def __init__(self, pesetup = None, yN = None, stdyN = None, stds = 10e-2):
+    def __init__(self, pesetup = None, yN = None, wy = None, ws = 10e-2):
 
-        super(LSq, self).__init__(pesetup = pesetup, yN = yN, stdyN = stdyN, stds = stds)
+        super(LSq, self).__init__(pesetup = pesetup, yN = yN, wy = wy, ws = ws)
 
 
     def run_parameter_estimation(self):

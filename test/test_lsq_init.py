@@ -15,16 +15,16 @@ class BSPESetupTest(object):
 
         # Test valid setup cases
 
-        pecas.LSq(pesetup = self.bssetup, yN = self.yN, stdyN = self.stdyN)
-        pecas.LSq(pesetup = self.bssetup, yN = self.yN.T, stdyN = self.stdyN)
-        pecas.LSq(pesetup = self.bssetup, yN = self.yN, stdyN = self.stdyN.T)
+        pecas.LSq(pesetup = self.bssetup, yN = self.yN, wy = self.wy)
+        pecas.LSq(pesetup = self.bssetup, yN = self.yN.T, wy = self.wy)
+        pecas.LSq(pesetup = self.bssetup, yN = self.yN, wy = self.wy.T)
 
     def test_invalid_lsq_init(self):
 
         self.assertRaises(ValueError, pecas.LSq, pesetup = self.bssetup, \
-            yN = pl.atleast_2d(self.yN)[:, :-1], stdyN = self.stdyN)
+            yN = pl.atleast_2d(self.yN)[:, :-1], wy = self.wy)
         self.assertRaises(ValueError, pecas.LSq, pesetup = self.bssetup, \
-            yN = self.yN, stdyN = pl.atleast_2d(self.stdyN)[:-1])
+            yN = self.yN, wy = pl.atleast_2d(self.wy)[:-1])
 
 
 class ODEPESetupTest(object):
@@ -33,22 +33,22 @@ class ODEPESetupTest(object):
 
         # Test valid setup cases
 
-        pecas.LSq(pesetup = self.odesetup, yN = self.yN, stdyN = self.stdyN)
-        pecas.LSq(pesetup = self.odesetup, yN = self.yN.T, stdyN = self.stdyN)
-        pecas.LSq(pesetup = self.odesetup, yN = self.yN, stdyN = self.stdyN.T)
+        pecas.LSq(pesetup = self.odesetup, yN = self.yN, wy = self.wy)
+        pecas.LSq(pesetup = self.odesetup, yN = self.yN.T, wy = self.wy)
+        pecas.LSq(pesetup = self.odesetup, yN = self.yN, wy = self.wy.T)
         
-        pecas.LSq(pesetup = self.odesetup, yN = self.yN, stdyN = self.stdyN, \
-            stds = self.stds)
-        pecas.LSq(pesetup = self.odesetup, yN = self.yN, stdyN = self.stdyN, \
-            stds = [self.stds])
-        pecas.LSq(pesetup = self.odesetup, yN = self.yN, stdyN = self.stdyN, \
-            stds = pl.atleast_1d(self.stds))
+        pecas.LSq(pesetup = self.odesetup, yN = self.yN, wy = self.wy, \
+            ws = self.ws)
+        pecas.LSq(pesetup = self.odesetup, yN = self.yN, wy = self.wy, \
+            ws = [self.ws])
+        pecas.LSq(pesetup = self.odesetup, yN = self.yN, wy = self.wy, \
+            ws = pl.atleast_1d(self.ws))
 
     def test_invalid_lsq_init(self):
 
         self.assertRaises(ValueError, pecas.LSq, pesetup = self.odesetup, \
-            yN = pl.atleast_2d(self.yN)[:, :-1], stdyN = self.stdyN)
+            yN = pl.atleast_2d(self.yN)[:, :-1], wy = self.wy)
         self.assertRaises(ValueError, pecas.LSq, pesetup = self.odesetup, \
-            yN = self.yN, stdyN = pl.atleast_2d(self.stdyN)[:-1])
+            yN = self.yN, wy = pl.atleast_2d(self.wy)[:-1])
         self.assertRaises(ValueError, pecas.LSq, pesetup = self.odesetup, \
-            yN = self.yN, stdyN = self.stdyN, stds = [1, 2])
+            yN = self.yN, wy = self.wy, ws = [1, 2])
