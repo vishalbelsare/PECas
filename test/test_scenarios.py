@@ -225,7 +225,7 @@ class Test1DVehicle(unittest.TestCase, \
         self.yN = data[:, 1]
         self.wy = 1/(0.01**2) * pl.ones(self.yN.shape)
         self.uN = data[:-1, 2]
-        self.ws = 1e-2
+        self.ws = 1 / 1e-6
 
         self.phat = [10.0, 0.000236, 0.614818]
 
