@@ -67,7 +67,7 @@ class BasicSystem(object):
 
             raise TypeError("Input arguments must be CasADi symbolic types.")
 
-        self.v = cat.struct_MX([
+        self.vars = cat.struct_MX([
                 (
                     cat.entry("t", expr = t),
                     cat.entry("u", expr = u),
@@ -135,7 +135,7 @@ class ExplODE(object):
 
             raise TypeError("Input arguments must be CasADi symbolic types.")
 
-        self.v = cat.struct_MX([
+        self.vars = cat.struct_MX([
                 (
                     cat.entry("t", expr = t),
                     cat.entry("u", expr = u),

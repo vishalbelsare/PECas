@@ -214,11 +214,11 @@ class SetupsBaseClass(object):
             self.Varsmin["W",:] = ca.tools.repeated(-pl.inf)
             self.Varsmax["W",:] = ca.tools.repeated(pl.inf)
 
-            # Set the bounds on the measurement errors
+        # Set the bounds on the measurement errors
 
-            self.Varsinit["V",:] = ca.tools.repeated(0.0)
-            self.Varsmin["V",:] = ca.tools.repeated(-pl.inf)
-            self.Varsmax["V",:] = ca.tools.repeated(pl.inf)
+        self.Varsinit["V",:] = ca.tools.repeated(0.0)
+        self.Varsmin["V",:] = ca.tools.repeated(-pl.inf)
+        self.Varsmax["V",:] = ca.tools.repeated(pl.inf)
 
 
 class BSsetup(SetupsBaseClass):
@@ -249,8 +249,9 @@ class BSsetup(SetupsBaseClass):
 
         # Dimensions
 
-        self.nu = system.v["u"].shape[0]
-        self.np = system.v["p"].shape[0]
+        self.nu = system.vars["u"].shape[0]
+        self.np = system.vars["p"].shape[0]
+        self.nv = system.vars["v"].shape[0]
         self.ny = system.fcn["y"].shape[0]
 
         if pl.atleast_2d(timegrid).shape[0] == 1:
@@ -274,6 +275,8 @@ class BSsetup(SetupsBaseClass):
                     cat.entry("U", repeat = [self.nsteps, 1], \
                         shape = self.nu),
                     cat.entry("P", shape = self.np),
+                    cat.entry("V", repeat = [self.nsteps], \
+                        shape = self.nv),
                 )
             ])
 
@@ -287,19 +290,20 @@ class BSsetup(SetupsBaseClass):
 
         self.phiN = []
 
-        yfcn = ca.SXFunction([system.v["t"], system.v["u"], system.v["p"]], \
-            [system.fcn["y"]])
+        yfcn = ca.SXFunction([system.vars["t"], system.vars["u"], \
+            system.vars["p"], system.vars["v"]], [system.fcn["y"]])
         yfcn.setOption("name", "yfcn")
         yfcn.init()
 
         for k in range(self.nsteps):
 
-            self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["U", k, 0], \
-                self.Vars["P"]])[0])
+            self.phiN.append(yfcn.call([self.timegrid[k], \
+                self.Vars["U", k, 0], self.Vars["P"], \
+                self.Vars["V", k, 0]])[0])
 
         self.phiN = ca.vertcat(self.phiN)
 
-        # Set up s
+        # Set up w
 
         self.w = []
 
@@ -307,7 +311,7 @@ class BSsetup(SetupsBaseClass):
 
         # TODO! Can/should/must gfcn depend on u and/or t?
 
-        gfcn = ca.SXFunction([system.v["p"]], [system.fcn["g"]])
+        gfcn = ca.SXFunction([system.vars["p"]], [system.fcn["g"]])
         gfcn.setOption("name", "yfcn")
         gfcn.init()
 
@@ -349,9 +353,9 @@ class CollocationBaseClass(SetupsBaseClass):
 
         # Dimensions
 
-        self.nx = system.v["x"].shape[0]
-        self.nu = system.v["u"].shape[0]
-        self.np = system.v["p"].shape[0]
+        self.nx = system.vars["x"].shape[0]
+        self.nu = system.vars["u"].shape[0]
+        self.np = system.vars["p"].shape[0]
         self.ny = system.fcn["y"].shape[0]
 
         if pl.atleast_2d(timegrid).shape[0] == 1:
@@ -400,8 +404,8 @@ class CollocationBaseClass(SetupsBaseClass):
 
         self.phiN = []
 
-        yfcn = ca.SXFunction([system.v["t"], system.v["x"], \
-            system.v["p"]], [system.fcn["y"]])
+        yfcn = ca.SXFunction([system.vars["t"], system.vars["x"], \
+            system.vars["p"]], [system.fcn["y"]])
         yfcn.setOption("name", "yfcn")
         yfcn.init()
 
@@ -505,8 +509,8 @@ class ODEsetup(CollocationBaseClass):
             xNmin = xNmin, xNmax = xNmax, \
             systemclass = systems.ExplODE)
 
-        ffcn = ca.SXFunction([system.v["t"], system.v["x"], system.v["u"], \
-            system.v["p"]], [system.fcn["f"]])
+        ffcn = ca.SXFunction([system.vars["t"], system.vars["x"], \
+            system.vars["u"], system.vars["p"]], [system.fcn["f"]])
         ffcn.setOption("name", "ffcn")
         ffcn.init()
 
