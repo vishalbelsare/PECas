@@ -312,7 +312,7 @@ class BSsetup(SetupsBaseClass):
         # TODO! Can/should/must gfcn depend on u and/or t?
 
         gfcn = ca.SXFunction([system.vars["p"]], [system.fcn["g"]])
-        gfcn.setOption("name", "yfcn")
+        gfcn.setOption("name", "gfcn")
         gfcn.init()
 
         self.g = gfcn.call([self.Vars["P"]])[0]

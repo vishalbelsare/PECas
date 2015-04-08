@@ -154,7 +154,7 @@ class LSq(PECasBaseClass):
 
         g = ca.vertcat([self.pesetup.phiN - self.yN])
 
-        if not self.pesetup.g.size():
+        if self.pesetup.g.size():
 
             g = ca.vertcat([g, self.pesetup.g])
 
