@@ -132,22 +132,34 @@ class LSq(PECasBaseClass):
           can be returned using the function :func:`get_Rhat()`.
         '''          
 
-        A = ca.vertcat([self.pesetup.phiN - self.yN, self.pesetup.w])
+        # A = ca.vertcat([self.pesetup.phiN - self.yN, self.pesetup.w])
+        
+        A = ca.vertcat([self.pesetup.Vars["V", :]])
+
+        if "W" in self.pesetup.Vars.keys():
+
+            A = ca.vertcat([A, self.pesetup.Vars["W", :]])
 
         reslsq = ca.mul([A.T, self.W, A])
 
         # If equality constraints exists, set then for the solver as well
         # as the cost function
 
+        # if not self.pesetup.g.size():
+
+        #     reslsqfcn = ca.MXFunction(ca.nlpIn(x=self.pesetup.Vars), \
+        #         ca.nlpOut(f=reslsq))
+
+        # else:
+
+        g = ca.vertcat([self.pesetup.phiN - self.yN])
+
         if not self.pesetup.g.size():
 
-            reslsqfcn = ca.MXFunction(ca.nlpIn(x=self.pesetup.Vars), \
-                ca.nlpOut(f=reslsq))
+            g = ca.vertcat([g, self.pesetup.g])
 
-        else:
-
-            reslsqfcn = ca.MXFunction(ca.nlpIn(x=self.pesetup.Vars), \
-                ca.nlpOut(f=reslsq, g=self.pesetup.g))
+        reslsqfcn = ca.MXFunction(ca.nlpIn(x=self.pesetup.Vars), \
+            ca.nlpOut(f=reslsq, g=g))
 
         reslsqfcn.init()
 
@@ -159,8 +171,8 @@ class LSq(PECasBaseClass):
 
         if self.pesetup.g.size():
 
-            solver.setInput(pl.zeros(self.pesetup.g.size()), "lbg")
-            solver.setInput(pl.zeros(self.pesetup.g.size()), "ubg")
+            solver.setInput(g.size(), "lbg")
+            solver.setInput(g.size(), "ubg")
 
         # Set the initial guess and bounds for the solver
 
@@ -174,7 +186,7 @@ class LSq(PECasBaseClass):
 
         # Store the results of the computation
 
-        self.Vhat = solver.getOutput("x")
+        self.Varhat = solver.getOutput("x")
         self.rhat = solver.getOutput("f")
 
 
