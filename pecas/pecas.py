@@ -134,7 +134,7 @@ class LSq(PECasBaseClass):
 
         # A = ca.vertcat([self.pesetup.phiN - self.yN, self.pesetup.w])
         
-        A = ca.vertcat([self.pesetup.Vars["V", :]])
+        A = ca.vertcat(self.pesetup.Vars["V", :])
 
         if "W" in self.pesetup.Vars.keys():
 
@@ -169,12 +169,12 @@ class LSq(PECasBaseClass):
 
         # If equality constraints exist, set the bounds for the solver
 
-        if self.pesetup.g.size():
+        # if self.pesetup.g.size():
 
-            solver.setInput(g.size(), "lbg")
-            solver.setInput(g.size(), "ubg")
+        solver.setInput(pl.zeros(g.size()), "lbg")
+        solver.setInput(pl.zeros(g.size()), "ubg")
 
-        # Set the initial guess and bounds for the solver
+        # Set the initial guess and bounds for the solver]
 
         solver.setInput(self.pesetup.Varsinit, "x0")
         solver.setInput(self.pesetup.Varsmin, "lbx")
@@ -186,7 +186,7 @@ class LSq(PECasBaseClass):
 
         # Store the results of the computation
 
-        self.Varhat = solver.getOutput("x")
+        self.Varshat = solver.getOutput("x")
         self.rhat = solver.getOutput("f")
 
 

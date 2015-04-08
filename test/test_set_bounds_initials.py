@@ -26,7 +26,7 @@ class BSSetBoundsInitialsTest(object):
         # Support an invalid systems-type
 
         odesys = pecas.systems.ExplODE(p = self.p, y = self.p, x = self.p, \
-            f = self.p)
+            v = self.p, w = self.p, f = self.p)
         self.assertRaises(TypeError, pecas.setups.BSsetup, \
             system = odesys, timegrid = self.timegrid)
 

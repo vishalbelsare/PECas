@@ -16,10 +16,10 @@ class BSPERunTest(object):
         # Run parameter estimation and assure that the results is correct
 
         lsqpe = pecas.LSq(pesetup = self.bssetup, yN = self.yN, \
-            wy = self.wy)
+            wv = self.wv)
 
         lsqpe.run_parameter_estimation()
-        phat = self.bssetup.V()(lsqpe.Vhat)["P"]
+        phat = self.bssetup.Vars()(lsqpe.Varshat)["P"]
         print phat
 
         for k, pk in enumerate(phat):
@@ -32,10 +32,10 @@ class ODEPERunTest(object):
         # Run parameter estimation and assure that the results is correct
 
         lsqpe = pecas.LSq(pesetup = self.odesetup, yN = self.yN, \
-            wy = self.wy, ws = self.ws)
+            wv = self.wv, ws = self.ws)
 
         lsqpe.run_parameter_estimation()
-        phat = self.odesetup.V()(lsqpe.Vhat)["P"]
+        phat = self.odesetup.Vars()(lsqpe.Varshat)["P"]
         print phat
 
         for k, pk in enumerate(phat):
