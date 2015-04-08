@@ -88,7 +88,7 @@ but you supported ws of dimension: {0}.'''.format(ws.shape))
 
         try:
 
-            self.ws = pl.squeeze(ws * pl.ones(pesetup.s.shape[0]))
+            self.ws = pl.squeeze(ws * pl.ones(pesetup.w.shape[0]))
 
         except AttributeError:
 
@@ -134,7 +134,7 @@ class LSq(PECasBaseClass):
           can be returned using the function :func:`get_Rhat()`.
         '''          
 
-        A = ca.vertcat([self.pesetup.phiN - self.yN, self.pesetup.s])
+        A = ca.vertcat([self.pesetup.phiN - self.yN, self.pesetup.w])
 
         reslsq = ca.mul([A.T, self.W, A])
 
