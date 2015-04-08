@@ -301,7 +301,7 @@ class BSsetup(SetupsBaseClass):
 
         # Set up s
 
-        self.s = []
+        self.w = []
 
         # Set up g
 
@@ -480,7 +480,7 @@ class CollocationBaseClass(SetupsBaseClass):
 
         # Set up s
 
-        self.s = ca.vertcat(self.Vars["W", :])
+        self.w = ca.vertcat(self.Vars["W", :])
 
         # Set up g
 
