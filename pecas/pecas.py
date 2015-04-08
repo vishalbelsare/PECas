@@ -143,12 +143,12 @@ class LSq(PECasBaseClass):
 
         if not self.pesetup.g.size():
 
-            reslsqfcn = ca.MXFunction(ca.nlpIn(x=self.pesetup.V), \
+            reslsqfcn = ca.MXFunction(ca.nlpIn(x=self.pesetup.Vars), \
                 ca.nlpOut(f=reslsq))
 
         else:
 
-            reslsqfcn = ca.MXFunction(ca.nlpIn(x=self.pesetup.V), \
+            reslsqfcn = ca.MXFunction(ca.nlpIn(x=self.pesetup.Vars), \
                 ca.nlpOut(f=reslsq, g=self.pesetup.g))
 
         reslsqfcn.init()
@@ -166,9 +166,9 @@ class LSq(PECasBaseClass):
 
         # Set the initial guess and bounds for the solver
 
-        solver.setInput(self.pesetup.Vinit, "x0")
-        solver.setInput(self.pesetup.Vmin, "lbx")
-        solver.setInput(self.pesetup.Vmax, "ubx")
+        solver.setInput(self.pesetup.Varsinit, "x0")
+        solver.setInput(self.pesetup.Varsmin, "lbx")
+        solver.setInput(self.pesetup.Varsmax, "ubx")
 
         # Run the optimization problem
 

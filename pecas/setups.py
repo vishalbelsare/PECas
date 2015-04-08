@@ -39,16 +39,16 @@ class SetupsBaseClass(object):
         Define structures for minimum, maximum and initial values for the
         several variables that build up the optimization problem,
         and prepare the values provided with the arguments properly.
-        Afterwards, the values are stored inside the class variables ``Vmin``,
-        ``Vmax`` and ``Vinit``, respectively.
+        Afterwards, the values are stored inside the class variables
+        ``Varsmin``, ``Varsmax`` and ``Varsinit``, respectively.
         '''
 
         # Define structures from bounds and initial values from the original
         # variable struct of the problem
 
-        self.Vmin = self.V()
-        self.Vmax = self.V()
-        self.Vinit = self.V()
+        self.Varsmin = self.Vars()
+        self.Varsmax = self.Vars()
+        self.Varsinit = self.Vars()
 
         # Set initials and bounds for the controls
         # (only if the number of controls is not 0)
@@ -85,9 +85,9 @@ class SetupsBaseClass(object):
 
             for k in range(self.nsteps):
 
-                self.Vinit["U", k, :] = ca.tools.repeated(uinit[:,k])
-                self.Vmin["U", k, :] = ca.tools.repeated(umin[:,k])
-                self.Vmax["U", k, :] = ca.tools.repeated(umax[:,k])
+                self.Varsinit["U", k, :] = ca.tools.repeated(uinit[:,k])
+                self.Varsmin["U", k, :] = ca.tools.repeated(umin[:,k])
+                self.Varsmax["U", k, :] = ca.tools.repeated(umax[:,k])
 
         # Set initials and bounds for the parameters
 
@@ -108,13 +108,13 @@ class SetupsBaseClass(object):
             raise ValueError( \
                 "Wrong dimension for argument pinit, pmin or pmax.")
 
-        self.Vinit["P",:] = pinit
-        self.Vmin["P",:] = pmin
-        self.Vmax["P",:] = pmax
+        self.Varsinit["P",:] = pinit
+        self.Varsmin["P",:] = pmin
+        self.Varsmax["P",:] = pmax
 
         # If it's a dynamic problem, set initials and bounds for the states
 
-        if "X" in self.V.keys():
+        if "X" in self.Vars.keys():
 
             if xinit is None:
                 xinit = pl.zeros((self.nx, self.nsteps + 1))
@@ -144,9 +144,9 @@ class SetupsBaseClass(object):
 
             for k in range(self.nsteps + 1):
 
-                self.Vinit["X",k,:] = ca.tools.repeated(xinit[:,k])
-                self.Vmin["X",k,:] = ca.tools.repeated(xmin[:,k])
-                self.Vmax["X",k,:] = ca.tools.repeated(xmax[:,k])
+                self.Varsinit["X",k,:] = ca.tools.repeated(xinit[:,k])
+                self.Varsmin["X",k,:] = ca.tools.repeated(xmin[:,k])
+                self.Varsmax["X",k,:] = ca.tools.repeated(xmax[:,k])
 
             # Set the state bounds at the initial time, if explicitly given
 
@@ -162,7 +162,7 @@ class SetupsBaseClass(object):
 
                     raise ValueError("Wrong dimension for argument x0min.")
 
-                self.Vmin["X",0,0] = x0min
+                self.Varsmin["X",0,0] = x0min
 
             if x0max is not None:
 
@@ -176,7 +176,7 @@ class SetupsBaseClass(object):
 
                     raise ValueError("Wrong dimension for argument x0max.")
 
-                self.Vmax["X",0,0] = x0max
+                self.Varsmax["X",0,0] = x0max
 
             # Set state bounds at the final time, if explicitly given
 
@@ -192,7 +192,7 @@ class SetupsBaseClass(object):
 
                     raise ValueError("Wrong dimension for argument xNmin.")
 
-                self.Vmin["X",-1,0] = xNmin
+                self.Varsmin["X",-1,0] = xNmin
 
             if xNmax is not None:
 
@@ -206,13 +206,19 @@ class SetupsBaseClass(object):
 
                     raise ValueError("Wrong dimension for argument xNmax.")
 
-                self.Vmax["X",-1,0] = xNmax
+                self.Varsmax["X",-1,0] = xNmax
 
-            # Set the bounds on the disturbances
+            # Set the bounds on the equation errors
 
-            self.Vinit["W",:] = ca.tools.repeated(0.0)
-            self.Vmin["W",:] = ca.tools.repeated(-pl.inf)
-            self.Vmax["W",:] = ca.tools.repeated(pl.inf)
+            self.Varsinit["W",:] = ca.tools.repeated(0.0)
+            self.Varsmin["W",:] = ca.tools.repeated(-pl.inf)
+            self.Varsmax["W",:] = ca.tools.repeated(pl.inf)
+
+            # Set the bounds on the measurement errors
+
+            self.Varsinit["V",:] = ca.tools.repeated(0.0)
+            self.Varsmin["V",:] = ca.tools.repeated(-pl.inf)
+            self.Varsmax["V",:] = ca.tools.repeated(pl.inf)
 
 
 class BSsetup(SetupsBaseClass):
@@ -263,7 +269,7 @@ class BSsetup(SetupsBaseClass):
 
         # Define the struct holding the variables
 
-        self.V = cat.struct_symMX([
+        self.Vars = cat.struct_symMX([
                 (
                     cat.entry("U", repeat = [self.nsteps, 1], \
                         shape = self.nu),
@@ -288,8 +294,8 @@ class BSsetup(SetupsBaseClass):
 
         for k in range(self.nsteps):
 
-            self.phiN.append(yfcn.call([self.timegrid[k], self.V["U", k, 0], \
-                self.V["P"]])[0])
+            self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["U", k, 0], \
+                self.Vars["P"]])[0])
 
         self.phiN = ca.vertcat(self.phiN)
 
@@ -305,7 +311,7 @@ class BSsetup(SetupsBaseClass):
         gfcn.setOption("name", "yfcn")
         gfcn.init()
 
-        self.g = gfcn.call([self.V["P"]])[0]
+        self.g = gfcn.call([self.Vars["P"]])[0]
 
 
 class CollocationBaseClass(SetupsBaseClass):
@@ -370,7 +376,7 @@ class CollocationBaseClass(SetupsBaseClass):
 
         # Define the struct holding the variables
 
-        self.V = cat.struct_symMX([
+        self.Vars = cat.struct_symMX([
                 (
                     cat.entry("U", repeat = [self.nsteps, self.ntauroot], \
                         shape = self.nu),
@@ -402,9 +408,9 @@ class CollocationBaseClass(SetupsBaseClass):
         for k in range(self.nsteps + 1):
 
             # DEPENDECY ON U NOT POSSIBLE AT THIS POINT! len(U) = N, not N + 1!
-            # self.phiN.append(yfcn.call([self.timegrid[k], self.V["U", k, 0], \
-            self.phiN.append(yfcn.call([self.timegrid[k], self.V["X", k, 0], \
-                self.V["P"]])[0])
+            # self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["U", k, 0], \
+            self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["X", k, 0], \
+                self.Vars["P"]])[0])
 
         self.phiN = ca.vertcat(self.phiN)
 
@@ -474,7 +480,7 @@ class CollocationBaseClass(SetupsBaseClass):
 
         # Set up s
 
-        self.s = ca.vertcat(self.V["W", :])
+        self.s = ca.vertcat(self.Vars["W", :])
 
         # Set up g
 
@@ -519,12 +525,12 @@ class ODEsetup(CollocationBaseClass):
                 
                 for r in range(self.ntauroot + 1):
                     
-                    xp_jk += self.C[r,j] * self.V["X",k,r]
+                    xp_jk += self.C[r,j] * self.Vars["X",k,r]
           
                 # Add collocation equations to the NLP
 
-                [fk] = ffcn.call([self.T[k][j], self.V["X",k,j], \
-                    self.V["U",k,j-1], self.V["P"]])
+                [fk] = ffcn.call([self.T[k][j], self.Vars["X",k,j], \
+                    self.Vars["U",k,j-1], self.Vars["P"]])
                 self.g.append((self.timegrid[k+1] - \
                     self.timegrid[k]) * fk - xp_jk)
 
@@ -535,11 +541,11 @@ class ODEsetup(CollocationBaseClass):
 
             for r in range(self.ntauroot + 1):
 
-                xf_k += self.D[r] * self.V["X",k,r]
+                xf_k += self.D[r] * self.Vars["X",k,r]
             
             # Add the continuity equation to NLP
             
-            self.g.append(self.V["X",k+1,0] - xf_k + self.V["W", k])
+            self.g.append(self.Vars["X",k+1,0] - xf_k + self.Vars["W", k])
 
         # Concatenate constraints
 
