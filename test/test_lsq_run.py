@@ -32,7 +32,7 @@ class ODEPERunTest(object):
         # Run parameter estimation and assure that the results is correct
 
         lsqpe = pecas.LSq(pesetup = self.odesetup, yN = self.yN, \
-            wv = self.wv, ws = self.ws)
+            wv = self.wv, ww = self.ww)
 
         lsqpe.run_parameter_estimation()
         phat = self.odesetup.Vars()(lsqpe.Varshat)["P"]

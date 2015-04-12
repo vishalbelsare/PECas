@@ -10,6 +10,8 @@ from scipy.misc import comb
 import systems
 import setups
 
+import pdb
+
 from abc import ABCMeta, abstractmethod
 
 class PECasBaseClass:
@@ -17,7 +19,7 @@ class PECasBaseClass:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def __init__(self, pesetup = None, yN = None, wv = None, ww = 1e-2):
+    def __init__(self, pesetup = None, yN = None, wv = None, ww = None):
 
         # Store the parameter estimation problem setup
 
@@ -79,21 +81,42 @@ but you supported wv of dimension:
 
         ww = pl.atleast_2d(ww)
 
-        if not ww.shape == (1,1):
+        try:
 
-            raise ValueError('''
+            if ww.shape == (1, self.pesetup.nw):
+
+                ww = ww.T
+
+            if not ww.shape == (self.pesetup.nw, 1):
+
+                raise ValueError('''
 The dimensions of the weights of the equation errors given in ww does not
 match the dimensions of the differential equations.''')
 
+            self.ww = ww
+
+        except AttributeError:
+
+            pass
+
         try:
 
-            self.ww = pl.squeeze(ww * pl.ones(pesetup.w.shape[0]))
+            if self.ww is not None:
+
+                # pdb.set_trace()
+            # self.ww = pl.squeeze(ww * pl.ones(pesetup.w.shape[0]))
+                self.ww = pl.squeeze(ca.repmat(ww, self.pesetup.nsteps * (len(self.pesetup.tauroot)-1), 1))
 
         except AttributeError:
 
             self.ww = []
 
         # Set up the covariance matrix for the measurements
+
+        # pdb.set_trace()
+
+
+        print self.ww
 
         self.W = pl.diag(pl.concatenate((self.wv, self.ww)))
 
@@ -102,7 +125,7 @@ class LSq(PECasBaseClass):
     '''The class :class:`LSq` is used to solve least squares parameter
     estimation problems with PECas for a given set of measurement data.'''
 
-    def __init__(self, pesetup = None, yN = None, wv = None, ww = 10e-2):
+    def __init__(self, pesetup = None, yN = None, wv = None, ww = None):
 
         super(LSq, self).__init__(pesetup = pesetup, yN = yN, wv = wv, ww = ww)
 
@@ -134,11 +157,34 @@ class LSq(PECasBaseClass):
 
         # A = ca.vertcat([self.pesetup.phiN - self.yN, self.pesetup.w])
         
-        A = ca.vertcat(self.pesetup.Vars["V", :])
+        # A = ca.vertcat(self.pesetup.Vars["V", :])
+
+        # pdb.set_trace()
+
+
+        A = []
+
+        for k, elem in enumerate(self.pesetup.Vars["V"]):
+        
+            A.append(elem)
+
+        # print self.pesetup.Vars.keys()
+        # print self.W
 
         if "W" in self.pesetup.Vars.keys():
 
-            A = ca.vertcat([A, self.pesetup.Vars["W", :]])
+
+            W = []
+
+            for k, elem in enumerate(self.pesetup.Vars["W"]):
+
+                W.append(elem)
+
+            # pdb.set_trace()
+
+            A = A + sum(W, [])
+
+        A = ca.vertcat(A)
 
         reslsq = ca.mul([A.T, self.W, A])
 
@@ -181,6 +227,8 @@ class LSq(PECasBaseClass):
         solver.setInput(self.pesetup.Varsmax, "ubx")
 
         # Run the optimization problem
+
+        pdb.set_trace()
 
         solver.evaluate()
 

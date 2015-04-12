@@ -356,6 +356,8 @@ class CollocationBaseClass(SetupsBaseClass):
         self.nx = system.vars["x"].shape[0]
         self.nu = system.vars["u"].shape[0]
         self.np = system.vars["p"].shape[0]
+        self.nv = system.vars["v"].shape[0]
+        self.nw = system.vars["w"].shape[0]
         self.ny = system.fcn["y"].shape[0]
 
         if pl.atleast_2d(timegrid).shape[0] == 1:
@@ -387,7 +389,10 @@ class CollocationBaseClass(SetupsBaseClass):
                     cat.entry("X", repeat = [self.nsteps+1, self.ntauroot+1], \
                         shape = self.nx),
                     cat.entry("P", shape = self.np),
-                    cat.entry("W", repeat = [self.nsteps], shape = self.nx)
+                    cat.entry("V", repeat = [self.nsteps+1], \
+                        shape = self.nv),
+                    cat.entry("W", repeat = [self.nsteps, self.ntauroot], \
+                        shape = self.nw)
                 )
             ])
 
@@ -405,7 +410,7 @@ class CollocationBaseClass(SetupsBaseClass):
         self.phiN = []
 
         yfcn = ca.SXFunction([system.vars["t"], system.vars["x"], \
-            system.vars["p"]], [system.fcn["y"]])
+            system.vars["p"], system.vars["v"]], [system.fcn["y"]])
         yfcn.setOption("name", "yfcn")
         yfcn.init()
 
@@ -414,7 +419,7 @@ class CollocationBaseClass(SetupsBaseClass):
             # DEPENDECY ON U NOT POSSIBLE AT THIS POINT! len(U) = N, not N + 1!
             # self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["U", k, 0], \
             self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["X", k, 0], \
-                self.Vars["P"]])[0])
+                self.Vars["P"], self.Vars["V", k, 0]])[0])
 
         self.phiN = ca.vertcat(self.phiN)
 
@@ -510,7 +515,8 @@ class ODEsetup(CollocationBaseClass):
             systemclass = systems.ExplODE)
 
         ffcn = ca.SXFunction([system.vars["t"], system.vars["x"], \
-            system.vars["u"], system.vars["p"]], [system.fcn["f"]])
+            system.vars["u"], system.vars["p"], system.vars["w"]], \
+            [system.fcn["f"]])
         ffcn.setOption("name", "ffcn")
         ffcn.init()
 
@@ -534,7 +540,9 @@ class ODEsetup(CollocationBaseClass):
                 # Add collocation equations to the NLP
 
                 [fk] = ffcn.call([self.T[k][j], self.Vars["X",k,j], \
-                    self.Vars["U",k,j-1], self.Vars["P"]])
+                    self.Vars["U",k,j-1], self.Vars["P"], \
+                    self.Vars["W", k, j-1]])
+
                 self.g.append((self.timegrid[k+1] - \
                     self.timegrid[k]) * fk - xp_jk)
 
@@ -549,7 +557,7 @@ class ODEsetup(CollocationBaseClass):
             
             # Add the continuity equation to NLP
             
-            self.g.append(self.Vars["X",k+1,0] - xf_k + self.Vars["W", k])
+            self.g.append(self.Vars["X",k+1,0] - xf_k) # + self.Vars["W", k])
 
         # Concatenate constraints
 

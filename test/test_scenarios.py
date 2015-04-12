@@ -103,76 +103,79 @@ class TestBasicSystemConstraints(unittest.TestCase, \
             pinit = self.pinit)
 
 
-# class TestLotkaVolterra(unittest.TestCase, \
-#     test_set_bounds_initials.ODESetBoundsInitialsTest, \
-#     test_lsq_init.ODEPESetupTest, \
-#     test_lsq_run.ODEPERunTest):
+class TestLotkaVolterra(unittest.TestCase, \
+    test_set_bounds_initials.ODESetBoundsInitialsTest, \
+    test_lsq_init.ODEPESetupTest, \
+    test_lsq_run.ODEPERunTest):
 
-#     # (model and data taken from Bock, Sager et al.: Uebungen Numerische
-#     # Mathematik II, Blatt 9, IWR, Universitaet Heidelberg, 2006)
+    # (model and data taken from Bock, Sager et al.: Uebungen Numerische
+    # Mathematik II, Blatt 9, IWR, Universitaet Heidelberg, 2006)
 
-#     def setUp(self):
+    def setUp(self):
 
-#         # System
+        # System
 
-#         self.x = ca.SX.sym("x", 2)
-#         self.p = ca.SX.sym("p", 4)
-#         self.u = ca.SX.sym("u", 0)
+        self.x = ca.SX.sym("x", 2)
+        self.p = ca.SX.sym("p", 4)
+        self.u = ca.SX.sym("u", 0)
 
-#         self.f = ca.vertcat( \
-#             [-self.p[0] * self.x[0] + self.p[1] * self.x[0] * self.x[1], 
-#             self.p[2] * self.x[1] - self.p[3] * self.x[0] * self.x[1]])
+        self.v = ca.SX.sym("v", 2)
+        self.w = ca.SX.sym("w", 2)
 
-#         self.y = self.x
+        self.f = ca.vertcat( \
+            [-self.p[0] * self.x[0] + self.p[1] * self.x[0] * self.x[1], 
+            self.p[2] * self.x[1] - self.p[3] * self.x[0] * self.x[1]]) + self.w
 
-#         self.odesys = pecas.systems.ExplODE(x = self.x, u = self.u, \
-#             p = self.p, f = self.f, y = self.y)
+        self.y = self.x + self.v
 
-#         # Inputs
+        self.odesys = pecas.systems.ExplODE(x = self.x, u = self.u, \
+            p = self.p, v = self.v, w = self.w, f = self.f, y = self.y)
 
-#         data = pl.array(pl.loadtxt("test/data_lotka_volterra.txt"))
+        # Inputs
 
-#         self.timegrid = data[:, 0]
+        data = pl.array(pl.loadtxt("test/data_lotka_volterra.txt"))
 
-#         self.invalidpargs = [[0, 1, 2], [[2, 3], [2, 3]], \
-#             pl.asarray([1, 2, 3]), pl.asarray([[2, 3], [2, 3]])]
-#         self.validpargs = [None, [0, 1, 2, 3], pl.asarray([1, 2, 3, 4]), \
-#             pl.asarray([1, 2, 3, 4]).T, pl.asarray([[2], [3], [2], [3]])]
+        self.timegrid = data[:, 0]
 
-#         self.invalidxargs = [pl.ones((self.x.size() - 1, self.timegrid.size)), \
-#             pl.ones((self.timegrid.size - 1, self.x.size()))]
-#         self.validxargs = [None, pl.ones((self.x.size(), self.timegrid.size)), \
-#             pl.ones((self.timegrid.size, self.x.size()))]
+        self.invalidpargs = [[0, 1, 2], [[2, 3], [2, 3]], \
+            pl.asarray([1, 2, 3]), pl.asarray([[2, 3], [2, 3]])]
+        self.validpargs = [None, [0, 1, 2, 3], pl.asarray([1, 2, 3, 4]), \
+            pl.asarray([1, 2, 3, 4]).T, pl.asarray([[2], [3], [2], [3]])]
 
-#         self.invalidxbvpargs = [[3, 2, 1], pl.ones(3), \
-#             pl.ones((1, 3)), pl.ones((3, 1))]
-#         self.validxbvpargs = [None, [1, 1], [[1], [1]], pl.ones((2,1)), \
-#             pl.ones((1, 2)), pl.ones(2)]
+        self.invalidxargs = [pl.ones((self.x.size() - 1, self.timegrid.size)), \
+            pl.ones((self.timegrid.size - 1, self.x.size()))]
+        self.validxargs = [None, pl.ones((self.x.size(), self.timegrid.size)), \
+            pl.ones((self.timegrid.size, self.x.size()))]
 
-#         # Since the supported values are never used, there is no case of
-#         # invalid u-arguments in this testcase
+        self.invalidxbvpargs = [[3, 2, 1], pl.ones(3), \
+            pl.ones((1, 3)), pl.ones((3, 1))]
+        self.validxbvpargs = [None, [1, 1], [[1], [1]], pl.ones((2,1)), \
+            pl.ones((1, 2)), pl.ones(2)]
 
-#         self.invaliduargs = []
-#         self.validuargs = [None, [], [1, 2, 3]]
+        # Since the supported values are never used, there is no case of
+        # invalid u-arguments in this testcase
 
-#         # -- TODO! --
-#         # None of the checks will detect an invalidxpvbarg of
-#         # [[2, 1], [3]], since shape and size both fit.
-#         # --> How to check for this?
+        self.invaliduargs = []
+        self.validuargs = [None, [], [1, 2, 3]]
 
-#         self.yN = data[:, 1::2]
-#         self.wy = 1.0 / data[:, 2::2]**2
-#         self.ws = 1.0 / 1e-4
+        # -- TODO! --
+        # None of the checks will detect an invalidxpvbarg of
+        # [[2, 1], [3]], since shape and size both fit.
+        # --> How to check for this?
 
-#         self.phat = [1, 0.703278, 1, 0.342208]
+        self.yN = data[:, 1::2]
+        self.wv = 1.0 / data[:, 2::2]**2
+        self.ww = [1.0 / 1e-4, 1.0 / 1e-4]
 
-#         self.odesetup = pecas.setups.ODEsetup( \
-#             system = self.odesys, timegrid = self.timegrid, \
-#             x0min = [self.yN[0,0], self.yN[0,1]], \
-#             x0max = [self.yN[0,0], self.yN[0,1]], \
-#             pmin = [1.0, -pl.inf, 1.0, -pl.inf], \
-#             pmax = [1.0, pl.inf, 1.0, pl.inf], \
-#             pinit = [1.0, 0.5, 1.0, 1.0])
+        self.phat = [1, 0.703278, 1, 0.342208]
+
+        self.odesetup = pecas.setups.ODEsetup( \
+            system = self.odesys, timegrid = self.timegrid, \
+            x0min = [self.yN[0,0], self.yN[0,1]], \
+            x0max = [self.yN[0,0], self.yN[0,1]], \
+            pmin = [1.0, -pl.inf, 1.0, -pl.inf], \
+            pmax = [1.0, pl.inf, 1.0, pl.inf], \
+            pinit = [1.0, 0.5, 1.0, 1.0])
 
 
 # class Test1DVehicle(unittest.TestCase, \

@@ -103,7 +103,7 @@ class ODESetBoundsInitialsTest(object):
 
         # Support an invalid systems-type
 
-        bssys = pecas.systems.BasicSystem(p = self.p, y = self.p)
+        bssys = pecas.systems.BasicSystem(p = self.p, y = self.p, v = self.p)
         self.assertRaises(TypeError, pecas.setups.ODEsetup, \
             system = bssys, timegrid = self.timegrid)
 
