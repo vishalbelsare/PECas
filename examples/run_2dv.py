@@ -2,11 +2,6 @@ import casadi as ca
 import pylab as pl
 import pecas
 
-# import unittest
-# import test_lsq_run
-
-# import test_scenarios
-
 import time
 
 tstart = time.time()

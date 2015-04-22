@@ -211,262 +211,276 @@ class LSq(PECasBaseClass):
         self.rhat = solver.getOutput("f")
 
 
-    ##########################################################################
-    ########## 5. Functions for parameter estimation interpretation ##########
-    ##########################################################################
-
     def compute_covariance_matrix(self):
-        
-        r'''
-        :raises: AttributeError
 
-        This function will compute the covariance matrix
-        :math:`\Sigma_{\hat{x}} \in \mathbb{R}^{d\,x\,d}` for the
-        estimated parameters :math:`\hat{x}` and the residual
-        :math:`\hat{R}`. It can not be used before function
-        :func:`run_parameter_estimation()` has been used.
+        raise NotImplementedError( \
+'''
+This feature of PECas is currently disabled, but will be available again in a
+future version of PECas.
+''')
+ 
+        # r'''
+        # :raises: AttributeError
+
+        # This function will compute the covariance matrix
+        # :math:`\Sigma_{\hat{x}} \in \mathbb{R}^{d\,x\,d}` for the
+        # estimated parameters :math:`\hat{x}` and the residual
+        # :math:`\hat{R}`. It can not be used before function
+        # :func:`run_parameter_estimation()` has been used.
 
 
-        :math:`\Sigma_{\hat{x}}` is then computed as
+        # :math:`\Sigma_{\hat{x}}` is then computed as
 
-        .. math::
+        # .. math::
 
-            \Sigma_{\hat{x}} = \beta \cdot J^{+}
-                \begin{pmatrix} J^{+} \end{pmatrix}^{T}
+        #     \Sigma_{\hat{x}} = \beta \cdot J^{+}
+        #         \begin{pmatrix} J^{+} \end{pmatrix}^{T}
 
-        with
+        # with
 
-        .. math::
+        # .. math::
 
-            \beta = \frac{\hat{R}}{N + m - d}
+        #     \beta = \frac{\hat{R}}{N + m - d}
 
-        and
+        # and
 
-        .. math::
+        # .. math::
 
-            J^{+} = \begin{pmatrix} {I} & {0} \end{pmatrix}
-                \begin{pmatrix} {J_{1}^{T} J_{1}} & {J_{2}^{T}} \\
-                {J_{2}} & {0} \end{pmatrix}^{-1}
-                \begin{pmatrix} {J_{1}^{T}} \\ {0} \end{pmatrix}
+        #     J^{+} = \begin{pmatrix} {I} & {0} \end{pmatrix}
+        #         \begin{pmatrix} {J_{1}^{T} J_{1}} & {J_{2}^{T}} \\
+        #         {J_{2}} & {0} \end{pmatrix}^{-1}
+        #         \begin{pmatrix} {J_{1}^{T}} \\ {0} \end{pmatrix}
 
-        while
+        # while
 
-        .. math::
+        # .. math::
 
-            J_{1} = \Sigma_{\epsilon}^{\mathbf{^{-1}/_{2}}} \frac{\partial M}{\partial x}
+        #     J_{1} = \Sigma_{\epsilon}^{\mathbf{^{-1}/_{2}}} \frac{\partial M}{\partial x}
 
-        and
+        # and
 
-        .. math::
+        # .. math::
 
-            J_{2} = \frac{\partial G}{\partial x} .
+        #     J_{2} = \frac{\partial G}{\partial x} .
 
-        If the number of equality constraints :math:`m = 0`, computation of
-        :math:`J^{+}` simplifies to
+        # If the number of equality constraints :math:`m = 0`, computation of
+        # :math:`J^{+}` simplifies to
 
-        .. math::
+        # .. math::
 
-            J^{+} = \begin{pmatrix} {J_{1}^{T} J_{1}}\end{pmatrix}^{-1}
-                {J_{1}^{T}}
+        #     J^{+} = \begin{pmatrix} {J_{1}^{T} J_{1}}\end{pmatrix}^{-1}
+        #         {J_{1}^{T}}
 
-        Afterwards,
+        # Afterwards,
 
-          - the value of :math:`\beta` 
-            can be returned using the function :func:`get_beta()`, and
-          - the matrix :math:`\Sigma_{\hat{x}}`
-            can be returned using the function :func:`get_Covx()`.
-        '''
+        #   - the value of :math:`\beta` 
+        #     can be returned using the function :func:`get_beta()`, and
+        #   - the matrix :math:`\Sigma_{\hat{x}}`
+        #     can be returned using the function :func:`get_Covx()`.
+        # '''
 
-        # Compute beta
+        # # Compute beta
 
-        if self.get_m() is not None:
+        # if self.get_m() is not None:
 
-            self.__beta = self.__Rhat / (self.__N + self.__m - self.__d)
+        #     self.__beta = self.__Rhat / (self.__N + self.__m - self.__d)
 
-        else:
+        # else:
 
-            self.__beta = self.__Rhat / (self.__N - self.__d)
+        #     self.__beta = self.__Rhat / (self.__N - self.__d)
 
-        # Compute J1, J2
+        # # Compute J1, J2
 
-        Mx = self.__CasADiFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
-        Mx.init()
+        # Mx = self.__CasADiFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
+        # Mx.init()
 
-        self.__J1 = ca.mul(ca.solve(pl.sqrt(self.__Sigma_eps), \
-            pl.eye(self.__N)), Mx.jac("x", "f"))
+        # self.__J1 = ca.mul(ca.solve(pl.sqrt(self.__Sigma_eps), \
+        #     pl.eye(self.__N)), Mx.jac("x", "f"))
 
-        # Compute Jplus and covariance matrix
+        # # Compute Jplus and covariance matrix
 
-        if self.get_G(msg = False) is not None:
+        # if self.get_G(msg = False) is not None:
 
-            Gx = self.__CasADiFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__G))
-            Gx.init()
+        #     Gx = self.__CasADiFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__G))
+        #     Gx.init()
 
-            self.__J2 = Gx.jac("x", "f")
+        #     self.__J2 = Gx.jac("x", "f")
 
-            self.__Jplus = ca.mul([ \
+        #     self.__Jplus = ca.mul([ \
 
-                ca.horzcat((pl.eye(self.__d),pl.zeros((self.__d, self.__m)))),\
+        #         ca.horzcat((pl.eye(self.__d),pl.zeros((self.__d, self.__m)))),\
 
-                ca.solve(ca.vertcat(( \
+        #         ca.solve(ca.vertcat(( \
                 
-                    ca.horzcat((ca.mul(self.__J1.T, self.__J1), self.__J2.T)),\
-                    ca.horzcat((self.__J2, pl.zeros((self.__m, self.__m)))) \
+        #             ca.horzcat((ca.mul(self.__J1.T, self.__J1), self.__J2.T)),\
+        #             ca.horzcat((self.__J2, pl.zeros((self.__m, self.__m)))) \
                 
-                )), pl.eye(self.__d + self.__m)), \
+        #         )), pl.eye(self.__d + self.__m)), \
 
-                ca.vertcat((self.__J1.T, pl.zeros((self.__m, self.__N)))) \
+        #         ca.vertcat((self.__J1.T, pl.zeros((self.__m, self.__N)))) \
 
-                ])
+        #         ])
 
-        else:
+        # else:
 
-            self.__Jplus = ca.mul(ca.solve(ca.mul(self.__J1.T, self.__J1), \
-                pl.eye(self.__d)), self.__J1.T)
+        #     self.__Jplus = ca.mul(ca.solve(ca.mul(self.__J1.T, self.__J1), \
+        #         pl.eye(self.__d)), self.__J1.T)
 
-        self.__fCov = self.__beta * ca.mul([self.__Jplus, self.__Jplus.T])
+        # self.__fCov = self.__beta * ca.mul([self.__Jplus, self.__Jplus.T])
 
-        # Evaluate covariance matrix for xhat
+        # # Evaluate covariance matrix for xhat
 
-        self.__fCovx = self.__CasADiFunction(ca.nlpIn(x=self.__x), \
-            ca.nlpOut(f=self.__fCov))
-        self.__fCovx.init()
+        # self.__fCovx = self.__CasADiFunction(ca.nlpIn(x=self.__x), \
+        #     ca.nlpOut(f=self.__fCov))
+        # self.__fCovx.init()
 
-        self.__fCovx.setInput(self.__xhat, "x")
-        self.__fCovx.evaluate()
+        # self.__fCovx.setInput(self.__xhat, "x")
+        # self.__fCovx.evaluate()
 
-        # Store the covariance matrix in Covx
+        # # Store the covariance matrix in Covx
 
-        self.__Covx = self.__fCovx.getOutput("f")
+        # self.__Covx = self.__fCovx.getOutput("f")
 
 
     def print_results(self):
 
-        r'''
-        :raises: AttributeError
-
-        This function displays the results of the parameter estimation
-        computations. It can not be used before function
-        :func:`compute_covariance_matrix()` has been used. The results
-        displayed by the function contain
-
-          - the value of :math:`\beta`,
-          - the values of the estimated parameters :math:`\hat{x}`
-            and their corresponding standard deviations, and
-          - the values of the covariance matrix
-            :math:`\Sigma_{\hat{x}}` for the
-            estimated parameters.
-        '''
-
-        if (self.get_xhat(msg = False) is None) or \
-            (self.get_Covx(msg = False) is None):
-
-            raise AttributeError('''
-You must execute both run_parameter_estimation() and
-compute_covariance_matrix() before all results can be displayed.
+        raise NotImplementedError( \
+'''
+This feature of PECas is currently disabled, but will be available again in a
+future version of PECas.
 ''')
 
+#         r'''
+#         :raises: AttributeError
 
-        print('\n\n## Begin of parameter estimation results ## \n')
+#         This function displays the results of the parameter estimation
+#         computations. It can not be used before function
+#         :func:`compute_covariance_matrix()` has been used. The results
+#         displayed by the function contain
 
-        print("Factor beta and residual Rhat:\n")
-        print("beta = {0}".format(self.get_beta()))
-        print("Rhat = {0}\n".format(self.get_Rhat()))
+#           - the value of :math:`\beta`,
+#           - the values of the estimated parameters :math:`\hat{x}`
+#             and their corresponding standard deviations, and
+#           - the values of the covariance matrix
+#             :math:`\Sigma_{\hat{x}}` for the
+#             estimated parameters.
+#         '''
 
-        print("\nEstimated parameters xi:\n")
-        for i, xi in enumerate(self.get_xhat()):
+#         if (self.get_xhat(msg = False) is None) or \
+#             (self.get_Covx(msg = False) is None):
 
-            print("x{0:<3} = {1:10} +/- {2:10}".format(\
-                i, xi, pl.sqrt(self.get_Covx()[i, i])))
+#             raise AttributeError('''
+# You must execute both run_parameter_estimation() and
+# compute_covariance_matrix() before all results can be displayed.
+# ''')
 
-        print("\n\nCovariance matrix Cov(x):\n")
 
-        print(pl.vectorize("%03.05e".__mod__)(self.get_Covx()))
+#         print('\n\n## Begin of parameter estimation results ## \n')
 
-        print('\n\n##  End of parameter estimation results  ## \n')
+#         print("Factor beta and residual Rhat:\n")
+#         print("beta = {0}".format(self.get_beta()))
+#         print("Rhat = {0}\n".format(self.get_Rhat()))
+
+#         print("\nEstimated parameters xi:\n")
+#         for i, xi in enumerate(self.get_xhat()):
+
+#             print("x{0:<3} = {1:10} +/- {2:10}".format(\
+#                 i, xi, pl.sqrt(self.get_Covx()[i, i])))
+
+#         print("\n\nCovariance matrix Cov(x):\n")
+
+#         print(pl.vectorize("%03.05e".__mod__)(self.get_Covx()))
+
+#         print('\n\n##  End of parameter estimation results  ## \n')
 
 
     def plot_confidence_ellipsoids(self, indices = []):
 
-        '''
-        This function plots the confidence ellipsoids pairwise for all
-        parameters defined in ``indices``. The plots are displayed in subplots
-        inside of one plot window. For naming the plots, the variable names
-        defined within the SX/MX-variables that contain the parameters are used.
-
-        :param indices: List of the indices of the parameters in :math:`x` for
-                        which the confidence ellipsoids shall be plotted.
-                        The indices must be defined by list entries of type
-                        *int*. If an empty list is supported (which is also
-                        the default case),
-                        the ellipsoids for all parameters are plotted.
-        :type indices: list
-        :raises: AttributeError, ValueError, TypeError
-
-        '''
-
-        if (self.get_xhat(msg = False) is None) or \
-            (self.get_Covx(msg = False) is None):
-
-            raise AttributeError('''
-You must execute both run_parameter_estimation() and
-compute_covariance_matrix() before the confidece ellipsoids can be plotted.
+        raise NotImplementedError( \
+'''
+This feature of PECas is currently disabled, but will be available again in a
+future version of PECas.
 ''')
 
-        if type(indices) is not list:
-            raise TypeError('''
-The variable containing the indices of the parameters has to be of type list.
-''')
+#         '''
+#         This function plots the confidence ellipsoids pairwise for all
+#         parameters defined in ``indices``. The plots are displayed in subplots
+#         inside of one plot window. For naming the plots, the variable names
+#         defined within the SX/MX-variables that contain the parameters are used.
 
-        # If the list of indices is empty, create a list that contains
-        # all indices
+#         :param indices: List of the indices of the parameters in :math:`x` for
+#                         which the confidence ellipsoids shall be plotted.
+#                         The indices must be defined by list entries of type
+#                         *int*. If an empty list is supported (which is also
+#                         the default case),
+#                         the ellipsoids for all parameters are plotted.
+#         :type indices: list
+#         :raises: AttributeError, ValueError, TypeError
 
-        if len(indices) == 0:
-            indices = range(0, self.__d)
+#         '''
 
-        if len(indices) == 1:
-            raise ValueError('''
-A confidence ellipsoid can not be plotted for only one single parameter. The
-list of indices must therefor contain more than only one entry.
-''')            
+#         if (self.get_xhat(msg = False) is None) or \
+#             (self.get_Covx(msg = False) is None):
 
-        for ind in indices:
-            if type(ind) is not int:
-                raise TypeError('''
-All list entries for the indices have to be of type int.
-''')
+#             raise AttributeError('''
+# You must execute both run_parameter_estimation() and
+# compute_covariance_matrix() before the confidece ellipsoids can be plotted.
+# ''')
 
-        nplots = int(round(comb(len(indices), 2)))
-        plotfig = pl.figure()
-        plcount = 1
+#         if type(indices) is not list:
+#             raise TypeError('''
+# The variable containing the indices of the parameters has to be of type list.
+# ''')
 
-        xy = pl.array([pl.cos(pl.linspace(0,2*pl.pi,100)), \
-                    pl.sin(pl.linspace(0,2*pl.pi,100))])
+#         # If the list of indices is empty, create a list that contains
+#         # all indices
 
-        for j, ind1 in enumerate(indices):
+#         if len(indices) == 0:
+#             indices = range(0, self.__d)
 
-            for k, ind2 in enumerate(indices[j+1:]):
+#         if len(indices) == 1:
+#             raise ValueError('''
+# A confidence ellipsoid can not be plotted for only one single parameter. The
+# list of indices must therefor contain more than only one entry.
+# ''')            
 
-                covs = pl.array([ \
+#         for ind in indices:
+#             if type(ind) is not int:
+#                 raise TypeError('''
+# All list entries for the indices have to be of type int.
+# ''')
 
-                        [self.__Covx[ind1, ind1], self.__Covx[ind1, ind2]], \
-                        [self.__Covx[ind2, ind1], self.__Covx[ind2, ind2]] \
+#         nplots = int(round(comb(len(indices), 2)))
+#         plotfig = pl.figure()
+#         plcount = 1
 
-                    ])
+#         xy = pl.array([pl.cos(pl.linspace(0,2*pl.pi,100)), \
+#                     pl.sin(pl.linspace(0,2*pl.pi,100))])
 
-                w, v = pl.linalg.eig(covs)
+#         for j, ind1 in enumerate(indices):
 
-                ellipse = ca.mul(pl.array([self.__xhat[ind1], \
-                    self.__xhat[ind2]]), \
-                    pl.ones([1,100])) + ca.mul([v, pl.diag(w), xy])
+#             for k, ind2 in enumerate(indices[j+1:]):
 
-                ax = plotfig.add_subplot(nplots, 1, plcount)
-                ax.plot(pl.array(ellipse[0,:]).T, pl.array(ellipse[1,:]).T, \
-                    label = str(self.__x[ind1].getName()) + ' - ' + \
-                    str(self.__x[ind2].getName()))
-                ax.scatter(self.__xhat[ind1], self.__xhat[ind2])
-                ax.legend(loc="upper left")
+#                 covs = pl.array([ \
 
-                plcount += 1
+#                         [self.__Covx[ind1, ind1], self.__Covx[ind1, ind2]], \
+#                         [self.__Covx[ind2, ind1], self.__Covx[ind2, ind2]] \
 
-        pl.show()
+#                     ])
+
+#                 w, v = pl.linalg.eig(covs)
+
+#                 ellipse = ca.mul(pl.array([self.__xhat[ind1], \
+#                     self.__xhat[ind2]]), \
+#                     pl.ones([1,100])) + ca.mul([v, pl.diag(w), xy])
+
+#                 ax = plotfig.add_subplot(nplots, 1, plcount)
+#                 ax.plot(pl.array(ellipse[0,:]).T, pl.array(ellipse[1,:]).T, \
+#                     label = str(self.__x[ind1].getName()) + ' - ' + \
+#                     str(self.__x[ind2].getName()))
+#                 ax.scatter(self.__xhat[ind1], self.__xhat[ind2])
+#                 ax.legend(loc="upper left")
+
+#                 plcount += 1
+
+#         pl.show()
