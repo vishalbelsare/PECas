@@ -168,6 +168,11 @@ class LSq(PECasBaseClass):
         
             A.append(elem)
 
+            # pdb.set_trace()
+
+        g = ca.vertcat([self.pesetup.phiN - self.yN + ca.vertcat(A)])
+
+
         # print self.pesetup.Vars.keys()
         # print self.W
 
@@ -198,7 +203,6 @@ class LSq(PECasBaseClass):
 
         # else:
 
-        g = ca.vertcat([self.pesetup.phiN - self.yN])
 
         if self.pesetup.g.size():
 
@@ -228,7 +232,7 @@ class LSq(PECasBaseClass):
 
         # Run the optimization problem
 
-        pdb.set_trace()
+        # pdb.set_trace()
 
         solver.evaluate()
 

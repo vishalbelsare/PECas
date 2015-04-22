@@ -22,7 +22,8 @@ class TestBasicSystemNoConstraints(unittest.TestCase, \
         self.p = ca.SX.sym("p", 1)
         self.v = ca.SX.sym("v", 1)
 
-        self.y = self.u * self.p + self.v
+        self.y = self.u * self.p # + self.v
+        # self.y = self.u * self.p + self.v
 
         self.bsys = pecas.systems.BasicSystem(u = self.u, p = self.p, \
             v = self.v, y = self.y)
@@ -67,7 +68,8 @@ class TestBasicSystemConstraints(unittest.TestCase, \
         self.p = ca.SX.sym("p", 2)
         self.v = ca.SX.sym("v", 1)
 
-        self.y = self.u[0] * self.p[0] + self.u[1] * self.p[1]**2 + self.v
+        self.y = self.u[0] * self.p[0] + self.u[1] * self.p[1]**2 # + self.v
+        # self.y = self.u[0] * self.p[0] + self.u[1] * self.p[1]**2 + self.v
         self.g = (2 - ca.mul(self.p.T, self.p))
         self.pinit = [1, 1]
 
@@ -126,7 +128,8 @@ class TestLotkaVolterra(unittest.TestCase, \
             [-self.p[0] * self.x[0] + self.p[1] * self.x[0] * self.x[1], 
             self.p[2] * self.x[1] - self.p[3] * self.x[0] * self.x[1]]) + self.w
 
-        self.y = self.x + self.v
+        self.y = self.x # + self.v
+        # self.y = self.x + self.v
 
         self.odesys = pecas.systems.ExplODE(x = self.x, u = self.u, \
             p = self.p, v = self.v, w = self.w, f = self.f, y = self.y)
