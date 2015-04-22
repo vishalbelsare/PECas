@@ -2,10 +2,10 @@ import casadi as ca
 import pylab as pl
 import pecas
 
-import unittest
-import test_lsq_run
+# import unittest
+# import test_lsq_run
 
-import test_scenarios
+# import test_scenarios
 
 import time
 
@@ -16,34 +16,25 @@ tstart = time.time()
 x = ca.SX.sym("x", 4)
 p = ca.SX.sym("p", 6)
 u = ca.SX.sym("u", 2)
+w = ca.SX.sym("w", 4)
 
 f = ca.vertcat( \
 
-    [x[3] * pl.cos(x[2] + p[0] * u[0]),
-    # [x[3] * pl.cos(x[2] + 0.5 * u[0]),
+    [x[3] * pl.cos(x[2] + p[0] * u[0]) + w[0],
 
-    x[3] * pl.sin(x[2] + p[0] * u[0]),
-    # x[3] * pl.sin(x[2] + 0.5 * u[0]),
+    x[3] * pl.sin(x[2] + p[0] * u[0]) + w[1],
 
-    x[3] * u[0] * p[1],
-    # x[3] * u[0] * p[3],
+    x[3] * u[0] * p[1] + w[2],
 
     p[2] * u[1] \
         - p[3] * u[1] * x[3] \
         - p[4] * x[3]**2 \
         - p[5] \
-        - (x[3] * u[0])**2 * p[1] * p[0]])
-
-    # p[0] * u[1] \
-    #     - 2.17 * u[1] * x[3] \
-    #     - p[1] * x[3]**2 - p[2] \
-    #     - (x[3]  * u[0])**2 \
-    #     * p[3] * 0.5])
+        - (x[3] * u[0])**2 * p[1] * p[0] + w[3]])
 
 y = x
 
-odesys = pecas.systems.ExplODE(x = x, u = u, \
-    p = p, f = f, y = y)
+odesys = pecas.systems.ExplODE(x = x, u = u, p = p, w = w, f = f, y = y)
 
 # Inputs
 
@@ -51,15 +42,13 @@ data = pl.array(pl.loadtxt( \
     "controlReadings_ACADO_MPC_Betterweights.dat", \
     delimiter = ", ", skiprows = 1))
 
-timegrid = data[120:300, 0]
+timegrid = data[200:250, 1]
 
 
-yN = 1e-1 * data[120:300, [2, 4, 6, 8]]
-stdyN = pl.ones(yN.shape)
-# stdyN[:, 2] = 1e-1
-# stdyN[:, 3] = 1
-uN = data[120:299, [9, 10]]
-stds = 100
+yN = data[200:250, [2, 4, 6, 8]]
+wv = 1 / (0.1**2) * pl.ones(yN.shape)
+uN = data[200:249, [9, 10]]
+ww = [1 / 1e-4] * 4
 
 porig = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
 # phat = [12.0, 0.1, 0.6]
@@ -67,32 +56,23 @@ porig = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
 odesetup = pecas.setups.ODEsetup( \
     system = odesys, timegrid = timegrid,
     umin = uN, umax = uN, uinit = uN, \
-    # x0min = yN[0,:], x0max = yN[0,:], \
-    # pmin = [12.0, 0, -pl.inf, 0], \
-    # pmax = [12.0, 10, pl.inf, pl.inf], \
-    # pinit = [12.0, 0.1, 0.6, 17.06])
-    # xmin = yN - 0.1 * abs(yN), xmax = yN + 0.1 * abs(yN), xinit = yN,
     pmin = [0.5, 17.06, 0.0, -10.0, -1000.0, -10.0], \
     pmax = [0.5, 17.06, 13.2, 200, 500, 3], \
     pinit = [0.5, 17.06, 11.5, 5, 0.07, 0.70])
-    # pmin = [0.1] * 6, \
-    # pmax = [2] * 6, \
-    # pinit = [1] * 6)
 
 # Run parameter estimation and assure that the results is correct
 
-lsqpe = pecas.LSq(pesetup =odesetup, yN =yN, \
-            stdyN = stdyN, stds =stds)
+lsqpe = pecas.LSq(pesetup =odesetup, yN =yN, wv = wv, ww = ww)
 
 lsqpe.run_parameter_estimation()
-phat = odesetup.V()(lsqpe.Vhat)["P"]
+phat = odesetup.Vars()(lsqpe.Varshat)["P"]
 print porig
 print phat
 
-xhat = odesetup.V()(lsqpe.Vhat)["X",:,0,0]
-yhat = odesetup.V()(lsqpe.Vhat)["X",:,0,1]
-psihat = odesetup.V()(lsqpe.Vhat)["X",:,0,2]
-vhat = odesetup.V()(lsqpe.Vhat)["X",:,0,3]
+xhat = odesetup.Vars()(lsqpe.Varshat)["X",:,0,0]
+yhat = odesetup.Vars()(lsqpe.Varshat)["X",:,0,1]
+psihat = odesetup.Vars()(lsqpe.Varshat)["X",:,0,2]
+vhat = odesetup.Vars()(lsqpe.Varshat)["X",:,0,3]
 
 pl.close("all")
 
