@@ -176,158 +176,152 @@ class TestLotkaVolterra(unittest.TestCase, \
             pinit = [1.0, 0.5, 1.0, 1.0])
 
 
-# class Test1DVehicle(unittest.TestCase, \
-#     test_set_bounds_initials.ODESetBoundsInitialsTest, \
-#     test_lsq_init.ODEPESetupTest, \
-#     test_lsq_run.ODEPERunTest):
+class Test1DVehicle(unittest.TestCase, \
+    test_set_bounds_initials.ODESetBoundsInitialsTest, \
+    test_lsq_init.ODEPESetupTest, \
+    test_lsq_run.ODEPERunTest):
 
-#     # (model and data taken from Diehl, Moritz: Course on System Identification,
-#     # Exercises 5 and 6, SYSCOP, IMTEK, University of Freiburg, 2014/2015)
+    # (model and data taken from Diehl, Moritz: Course on System Identification,
+    # Exercises 5 and 6, SYSCOP, IMTEK, University of Freiburg, 2014/2015)
 
-#     def setUp(self):
+    def setUp(self):
 
-#         # System
+        # System
 
-#         self.x = ca.SX.sym("x", 1)
-#         self.p = ca.SX.sym("p", 3)
-#         self.u = ca.SX.sym("u", 1)
+        self.x = ca.SX.sym("x", 1)
+        self.p = ca.SX.sym("p", 3)
+        self.u = ca.SX.sym("u", 1)
+        self.w = ca.SX.sym("w", 1)
 
-#         self.f = self.p[0] * self.u - self.p[1] - self.p[2] * self.x
+        self.f = self.p[0] * self.u - self.p[1] - self.p[2] * self.x + self.w
 
-#         self.y = self.x
+        self.y = self.x
 
-#         self.odesys = pecas.systems.ExplODE(x = self.x, u = self.u, \
-#             p = self.p, f = self.f, y = self.y)
+        self.odesys = pecas.systems.ExplODE(x = self.x, u = self.u, \
+            p = self.p, w = self.w, f = self.f, y = self.y)
 
-#         # Inputs
+        # Inputs
 
-#         data = pl.array(pl.loadtxt("test/data_1d_vehicle.txt"))
+        data = pl.array(pl.loadtxt("test/data_1d_vehicle.txt"))
 
-#         self.timegrid = data[:, 0]
+        self.timegrid = data[:, 0]
 
-#         self.invalidpargs = [[0, 1], [[2, 3], [2, 3]], \
-#             pl.asarray([1, 2, 3, 4]), pl.asarray([[2, 3], [2, 3]])]
-#         self.validpargs = [None, [0, 1, 2], pl.asarray([3, 4, 5]), \
-#             pl.asarray([1, 2, 1]).T, pl.asarray([[2], [3], [4]])]
+        self.invalidpargs = [[0, 1], [[2, 3], [2, 3]], \
+            pl.asarray([1, 2, 3, 4]), pl.asarray([[2, 3], [2, 3]])]
+        self.validpargs = [None, [0, 1, 2], pl.asarray([3, 4, 5]), \
+            pl.asarray([1, 2, 1]).T, pl.asarray([[2], [3], [4]])]
 
-#         self.invalidxargs = [pl.ones((self.x.size() - 1, self.timegrid.size)), \
-#             pl.ones((self.timegrid.size - 1, self.x.size()))]
-#         self.validxargs = [None, pl.ones((self.x.size(), self.timegrid.size)), \
-#             pl.ones((self.timegrid.size, self.x.size()))]
+        self.invalidxargs = [pl.ones((self.x.size() - 1, self.timegrid.size)), \
+            pl.ones((self.timegrid.size - 1, self.x.size()))]
+        self.validxargs = [None, pl.ones((self.x.size(), self.timegrid.size)), \
+            pl.ones((self.timegrid.size, self.x.size()))]
 
-#         self.invalidxbvpargs = [[3, 2], pl.ones(3), \
-#             pl.ones((1, 3)), pl.ones((3, 1))]
-#         self.validxbvpargs = [None, [1], 1, pl.ones(1), pl.ones((1, 1))]
+        self.invalidxbvpargs = [[3, 2], pl.ones(3), \
+            pl.ones((1, 3)), pl.ones((3, 1))]
+        self.validxbvpargs = [None, [1], 1, pl.ones(1), pl.ones((1, 1))]
 
-#         self.invaliduargs = [pl.ones((self.u.size(), self.timegrid.size)), \
-#             pl.ones((self.timegrid.size, self.u.size()))]
-#         self.validuargs = [None, pl.ones((self.u.size(), \
-#             self.timegrid.size - 1)), \
-#             pl.ones((self.timegrid.size - 1, self.u.size()))]
+        self.invaliduargs = [pl.ones((self.u.size(), self.timegrid.size)), \
+            pl.ones((self.timegrid.size, self.u.size()))]
+        self.validuargs = [None, pl.ones((self.u.size(), \
+            self.timegrid.size - 1)), \
+            pl.ones((self.timegrid.size - 1, self.u.size()))]
 
-#         self.yN = data[:, 1]
-#         self.wy = 1/(0.01**2) * pl.ones(self.yN.shape)
-#         self.uN = data[:-1, 2]
-#         self.ws = 1 / 1e-6
+        self.yN = data[:, 1]
+        self.wv = 1 / (0.01**2) * pl.ones(self.yN.shape)
+        self.uN = data[:-1, 2]
+        self.ww = 1 / 1e-4
 
-#         self.phat = [10.0, 0.000236, 0.614818]
+        # self.phat = [10.0, 0.000236, 0.614818]
+        self.phat = [10, 0.0299196, 0.604329]
 
-#         self.odesetup = pecas.setups.ODEsetup( \
-#             system = self.odesys, timegrid = self.timegrid,
-#             umin = self.uN, umax = self.uN, uinit = self.uN, \
-#             x0min = self.yN[0], x0max = self.yN[0], \
-#             xNmin = self.yN[-1:], xNmax = self.yN[-1:], \
-#             pmin = [10.0, 0.0, 0.4], pmax = [10.0, 2, 0.7], \
-#             pinit = [10.0, 0.08, 0.5])
+        self.odesetup = pecas.setups.ODEsetup( \
+            system = self.odesys, timegrid = self.timegrid,
+            umin = self.uN, umax = self.uN, uinit = self.uN, \
+            x0min = self.yN[0], x0max = self.yN[0], \
+            xNmin = self.yN[-1:], xNmax = self.yN[-1:], \
+            pmin = [10.0, 0.0, 0.4], pmax = [10.0, 2, 0.7], \
+            pinit = [10.0, 0.08, 0.5])
 
 
-# class Test2DVehicle(unittest.TestCase, \
-#     test_set_bounds_initials.ODESetBoundsInitialsTest, \
-#     test_lsq_init.ODEPESetupTest, \
-#     # test_lsq_run.ODEPERunTest, \
-#     ):
+class Test2DVehicle(unittest.TestCase, \
+    test_set_bounds_initials.ODESetBoundsInitialsTest, \
+    test_lsq_init.ODEPESetupTest, \
+    test_lsq_run.ODEPERunTest, \
+    ):
 
-#     # (model and data taken from Verschueren, Robin: Design and implementation 
-#     # of a time-optimal controller for model race cars, KU Leuven, 2014)
+    # (model and data taken from Verschueren, Robin: Design and implementation 
+    # of a time-optimal controller for model race cars, KU Leuven, 2014)
 
-#     def setUp(self):
+    def setUp(self):
 
-#         # System
+        # System
 
-#         self.x = ca.SX.sym("x", 4)
-#         self.p = ca.SX.sym("p", 3)
-#         self.u = ca.SX.sym("u", 2)
+        self.x = ca.SX.sym("x", 4)
+        self.p = ca.SX.sym("p", 6)
+        self.u = ca.SX.sym("u", 2)
+        self.w = ca.SX.sym("w", 4)
 
-#         self.f = ca.vertcat( \
+        self.f = ca.vertcat( \
 
-#             # [self.x[3] * pl.cos(self.x[2] + self.p[0] * self.u[0]),
-#             [self.x[3] * pl.cos(self.x[2] + 0.5 * self.u[0]),
+            [self.x[3] * pl.cos(self.x[2] + self.p[0] * self.u[0] + self.w[0]),
 
-#             # self.x[3] * pl.sin(self.x[2] + self.p[0] * self.u[0]),
-#             self.x[3] * pl.sin(self.x[2] + 0.5 * self.u[0]),
+            self.x[3] * pl.sin(self.x[2] + self.p[0] * self.u[0] + self.w[1]),
 
-#             # self.x[3] * self.u[0] * self.p[1],
-#             self.x[3] * self.u[0] * 17.06,
+            self.x[3] * self.u[0] * self.p[1] + self.w[2],
 
-#             # self.p[2] * self.u[1] \
-#             #     - self.p[3] * self.u[1] * self.x[3] \
-#             #     - self.p[4] * self.x[3]**2 - self.p[5] \
-#             #     - (self.x[3]  * self.u[0])**2 \
-#             #     * self.p[1] * self.p[0]])
+            self.p[2] * self.u[1] \
+                - self.p[3] * self.u[1] * self.x[3] \
+                - self.p[4] * self.x[3]**2 \
+                - self.p[5] \
+                - (self.x[3] * self.u[0])**2 * self.p[1] * self.p[0] + self.w[3]])
 
-#             self.p[0] * self.u[1] \
-#                 - 2.17 * self.u[1] * self.x[3] \
-#                 - self.p[1] * self.x[3]**2 - self.p[2] \
-#                 - (self.x[3]  * self.u[0])**2 \
-#                 * 17.06 * 0.5])
+        self.y = self.x
 
-#         self.y = self.x
+        self.odesys = pecas.systems.ExplODE(x = self.x, u = self.u, \
+            p = self.p, w = self.w, f = self.f, y = self.y)
 
-#         self.odesys = pecas.systems.ExplODE(x = self.x, u = self.u, \
-#             p = self.p, f = self.f, y = self.y)
+        # Inputs
 
-#         # Inputs
+        data = pl.array(pl.loadtxt( \
+            "test/controlReadings_ACADO_MPC_rates_Betterweights.dat", \
+            delimiter = ", ", skiprows = 1))
 
-#         data = pl.array(pl.loadtxt( \
-#             "test/controlReadings_ACADO_MPC_rates_Betterweights.dat", \
-#             delimiter = ", ", skiprows = 1))
+        self.timegrid = data[200:250, 1]
 
-#         self.timegrid = data[200:250, 0]
+        self.invalidpargs = [[0, 1], [[2, 3], [2, 3]], \
+            pl.asarray([1, 2, 3, 4, 5]), pl.asarray([[2, 3], [2, 3]])]
+        self.validpargs = [None, pl.asarray([3, 4, 5, 5, 6, 7]), \
+            pl.asarray([1, 2, 1, 5, 6, 7]).T, \
+            pl.asarray([[2], [3], [4], [5], [6], [7]]), \
+            [1, 2, 3, 4, 5, 6]]
 
-#         self.invalidpargs = [[0, 1], [[2, 3], [2, 3]], \
-#             pl.asarray([1, 2, 3, 4, 5]), pl.asarray([[2, 3], [2, 3]])]
-#         self.validpargs = [None, pl.asarray([3, 4, 5, 5, 6, 7]), \
-#             pl.asarray([1, 2, 1, 5, 6, 7]).T, \
-#             pl.asarray([[2], [3], [4], [5], [6], [7]]), \
-#             [1, 2, 3, 4, 5, 6]]
+        self.invalidxargs = [pl.ones((self.x.size() - 1, self.timegrid.size)), \
+            pl.ones((self.timegrid.size - 1, self.x.size()))]
+        self.validxargs = [None, pl.ones((self.x.size(), self.timegrid.size)), \
+            pl.ones((self.timegrid.size, self.x.size()))]
 
-#         self.invalidxargs = [pl.ones((self.x.size() - 1, self.timegrid.size)), \
-#             pl.ones((self.timegrid.size - 1, self.x.size()))]
-#         self.validxargs = [None, pl.ones((self.x.size(), self.timegrid.size)), \
-#             pl.ones((self.timegrid.size, self.x.size()))]
+        self.invalidxbvpargs = [[3, 2, 5], pl.ones(5), \
+            pl.ones((1, 5)), pl.ones((3, 1))]
+        self.validxbvpargs = [None, [1] * 4, pl.ones(4), pl.ones((1, 4)), \
+            pl.ones((4, 1))]
 
-#         self.invalidxbvpargs = [[3, 2, 5], pl.ones(5), \
-#             pl.ones((1, 5)), pl.ones((3, 1))]
-#         self.validxbvpargs = [None, [1] * 4, pl.ones(4), pl.ones((1, 4)), \
-#             pl.ones((4, 1))]
+        self.invaliduargs = [pl.ones((self.u.size(), self.timegrid.size)), \
+            pl.ones((self.timegrid.size, self.u.size()))]
+        self.validuargs = [None, pl.ones((self.u.size(), \
+            self.timegrid.size - 1)), \
+            pl.ones((self.timegrid.size - 1, self.u.size()))]
 
-#         self.invaliduargs = [pl.ones((self.u.size(), self.timegrid.size)), \
-#             pl.ones((self.timegrid.size, self.u.size()))]
-#         self.validuargs = [None, pl.ones((self.u.size(), \
-#             self.timegrid.size - 1)), \
-#             pl.ones((self.timegrid.size - 1, self.u.size()))]
+        self.yN = data[200:250, [2, 4, 6, 8]]
+        self.wv = 1 / (0.1**2) * pl.ones(self.yN.shape)
+        self.uN = data[200:249, [9, 10]]
+        self.ww = [1 / 1e-4] * 4
 
-#         self.yN = data[200:250, [2, 4, 6, 8]]
-#         self.wy = 0.01 * pl.ones(self.yN.shape)
-#         self.wy[:, 3] = 1e-1
-#         self.uN = data[200:249, [9, 10]]
-#         self.ws = 1e-2
+        # self.phat = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
+        self.phat = [0.5, 17.06, 3.98281, -10, -7.57932, 3]
 
-#         self.phat = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
-
-#         self.odesetup = pecas.setups.ODEsetup( \
-#             system = self.odesys, timegrid = self.timegrid,
-#             umin = self.uN, umax = self.uN, uinit = self.uN, \
-#             pmin = [0.5, 17.06, 0.0, 0, 0.0, 0.0], \
-#             pmax = [0.5, 17.06, 13.2, 10, 10, 3], \
-#             pinit = [0.5, 17.06, 11.5, 5, 0.07, 0.7])
+        self.odesetup = pecas.setups.ODEsetup( \
+            system = self.odesys, timegrid = self.timegrid,
+            umin = self.uN, umax = self.uN, uinit = self.uN, \
+            pmin = [0.5, 17.06, 0.0, -10.0, -1000.0, -10.0], \
+            pmax = [0.5, 17.06, 13.2, 200, 500, 3], \
+            pinit = [0.5, 17.06, 11.5, 5, 0.07, 0.70])

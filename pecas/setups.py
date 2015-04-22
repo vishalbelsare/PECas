@@ -252,7 +252,6 @@ class BSsetup(SetupsBaseClass):
         self.nu = system.vars["u"].shape[0]
         self.np = system.vars["p"].shape[0]
         self.nv = system.fcn["y"].shape[0]
-        # self.nv = system.vars["v"].shape[0]
         self.ny = system.fcn["y"].shape[0]
 
         if pl.atleast_2d(timegrid).shape[0] == 1:
@@ -293,7 +292,6 @@ class BSsetup(SetupsBaseClass):
 
         yfcn = ca.SXFunction([system.vars["t"], system.vars["u"], \
             system.vars["p"]], [system.fcn["y"]])
-            # system.vars["p"], system.vars["v"]], [system.fcn["y"]])
         yfcn.setOption("name", "yfcn")
         yfcn.init()
 
@@ -301,7 +299,6 @@ class BSsetup(SetupsBaseClass):
 
             self.phiN.append(yfcn.call([self.timegrid[k], \
                 self.Vars["U", k, 0], self.Vars["P"]])[0])
-                # self.Vars["V", k, 0]])[0])
 
         self.phiN = ca.vertcat(self.phiN)
 
