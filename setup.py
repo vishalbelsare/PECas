@@ -9,7 +9,7 @@ from setuptools import setup
 
 setup(
     name='pecas',
-    version='0.0.1',
+    version='0.2',
     author='Adrian Buerger',
     author_email='adrian.buerger@hs-karlsruhe.de',
     packages=['pecas'],
