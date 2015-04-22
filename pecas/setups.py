@@ -251,7 +251,8 @@ class BSsetup(SetupsBaseClass):
 
         self.nu = system.vars["u"].shape[0]
         self.np = system.vars["p"].shape[0]
-        self.nv = system.vars["v"].shape[0]
+        self.nv = system.fcn["y"].shape[0]
+        # self.nv = system.vars["v"].shape[0]
         self.ny = system.fcn["y"].shape[0]
 
         if pl.atleast_2d(timegrid).shape[0] == 1:
@@ -304,10 +305,6 @@ class BSsetup(SetupsBaseClass):
 
         self.phiN = ca.vertcat(self.phiN)
 
-        # Set up w
-
-        # self.w = []
-
         # Set up g
 
         # TODO! Can/should/must gfcn depend on u and/or t?
@@ -357,7 +354,7 @@ class CollocationBaseClass(SetupsBaseClass):
         self.nx = system.vars["x"].shape[0]
         self.nu = system.vars["u"].shape[0]
         self.np = system.vars["p"].shape[0]
-        self.nv = system.vars["v"].shape[0]
+        self.nv = system.fcn["y"].shape[0]
         self.nw = system.vars["w"].shape[0]
         self.ny = system.fcn["y"].shape[0]
 
@@ -412,7 +409,6 @@ class CollocationBaseClass(SetupsBaseClass):
 
         yfcn = ca.SXFunction([system.vars["t"], system.vars["x"], \
             system.vars["p"]], [system.fcn["y"]])
-            # system.vars["p"], system.vars["v"]], [system.fcn["y"]])
         yfcn.setOption("name", "yfcn")
         yfcn.init()
 
@@ -422,7 +418,6 @@ class CollocationBaseClass(SetupsBaseClass):
             # self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["U", k, 0], \
             self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["X", k, 0], \
                 self.Vars["P"]])[0])
-                # self.Vars["P"], self.Vars["V", k, 0]])[0])
 
         self.phiN = ca.vertcat(self.phiN)
 
@@ -490,11 +485,7 @@ class CollocationBaseClass(SetupsBaseClass):
                 tfcn.evaluate()
                 self.C[j,r] = tfcn.getOutput()
 
-        # Set up s
-
-        # self.w = ca.vertcat(self.Vars["W", :])
-
-        # Set up g
+        # Start setting up g
 
         self.g = []
 
@@ -560,7 +551,7 @@ class ODEsetup(CollocationBaseClass):
             
             # Add the continuity equation to NLP
             
-            self.g.append(self.Vars["X",k+1,0] - xf_k) # + self.Vars["W", k])
+            self.g.append(self.Vars["X",k+1,0] - xf_k)
 
         # Concatenate constraints
 

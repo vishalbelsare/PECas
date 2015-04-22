@@ -20,13 +20,11 @@ class TestBasicSystemNoConstraints(unittest.TestCase, \
 
         self.u = ca.SX.sym("u", 1)
         self.p = ca.SX.sym("p", 1)
-        self.v = ca.SX.sym("v", 1)
 
-        self.y = self.u * self.p # + self.v
-        # self.y = self.u * self.p + self.v
+        self.y = self.u * self.p
 
         self.bsys = pecas.systems.BasicSystem(u = self.u, p = self.p, \
-            v = self.v, y = self.y)
+            y = self.y)
 
         # Inputs
 
@@ -66,15 +64,13 @@ class TestBasicSystemConstraints(unittest.TestCase, \
 
         self.u = ca.SX.sym("u", 2)
         self.p = ca.SX.sym("p", 2)
-        self.v = ca.SX.sym("v", 1)
 
-        self.y = self.u[0] * self.p[0] + self.u[1] * self.p[1]**2 # + self.v
-        # self.y = self.u[0] * self.p[0] + self.u[1] * self.p[1]**2 + self.v
+        self.y = self.u[0] * self.p[0] + self.u[1] * self.p[1]**2
         self.g = (2 - ca.mul(self.p.T, self.p))
         self.pinit = [1, 1]
 
         self.bsys = pecas.systems.BasicSystem(u = self.u, p = self.p, \
-            v = self.v, y = self.y, g = self.g)
+            y = self.y, g = self.g)
 
         # Inputs
 
@@ -93,7 +89,6 @@ class TestBasicSystemConstraints(unittest.TestCase, \
 
         self.yN = pl.asarray([2.23947, 2.84568, 4.55041, 5.08583])
         self.wv = pl.asarray([1.0 / (0.5**2)] * 4)
-        # self.ws = 1.0 / 1e-2
 
         self.uN = pl.vstack([pl.ones(4), pl.linspace(1, 4, 4)])
 
@@ -121,18 +116,17 @@ class TestLotkaVolterra(unittest.TestCase, \
         self.p = ca.SX.sym("p", 4)
         self.u = ca.SX.sym("u", 0)
 
-        self.v = ca.SX.sym("v", 2)
+        # self.v = ca.SX.sym("v", 2)
         self.w = ca.SX.sym("w", 2)
 
         self.f = ca.vertcat( \
             [-self.p[0] * self.x[0] + self.p[1] * self.x[0] * self.x[1], 
             self.p[2] * self.x[1] - self.p[3] * self.x[0] * self.x[1]]) + self.w
 
-        self.y = self.x # + self.v
-        # self.y = self.x + self.v
+        self.y = self.x
 
         self.odesys = pecas.systems.ExplODE(x = self.x, u = self.u, \
-            p = self.p, v = self.v, w = self.w, f = self.f, y = self.y)
+            p = self.p, w = self.w, f = self.f, y = self.y)
 
         # Inputs
 
@@ -170,7 +164,8 @@ class TestLotkaVolterra(unittest.TestCase, \
         self.wv = 1.0 / data[:, 2::2]**2
         self.ww = [1.0 / 1e-4, 1.0 / 1e-4]
 
-        self.phat = [1, 0.703278, 1, 0.342208]
+        # self.phat = [1, 0.703278, 1, 0.342208]
+        self.phat = [1, 0.703902, 1, 0.342233]
 
         self.odesetup = pecas.setups.ODEsetup( \
             system = self.odesys, timegrid = self.timegrid, \

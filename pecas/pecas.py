@@ -103,8 +103,6 @@ match the dimensions of the differential equations.''')
 
             if self.ww is not None:
 
-                # pdb.set_trace()
-            # self.ww = pl.squeeze(ww * pl.ones(pesetup.w.shape[0]))
                 self.ww = pl.squeeze(ca.repmat(ww, self.pesetup.nsteps * (len(self.pesetup.tauroot)-1), 1))
 
         except AttributeError:
@@ -113,12 +111,8 @@ match the dimensions of the differential equations.''')
 
         # Set up the covariance matrix for the measurements
 
-        # pdb.set_trace()
-
-
-        print self.ww
-
         self.W = pl.diag(pl.concatenate((self.wv, self.ww)))
+
 
 class LSq(PECasBaseClass):
 
@@ -155,26 +149,14 @@ class LSq(PECasBaseClass):
           can be returned using the function :func:`get_Rhat()`.
         '''          
 
-        # A = ca.vertcat([self.pesetup.phiN - self.yN, self.pesetup.w])
-        
-        # A = ca.vertcat(self.pesetup.Vars["V", :])
-
-        # pdb.set_trace()
-
-
         A = []
 
         for k, elem in enumerate(self.pesetup.Vars["V"]):
         
             A.append(elem)
 
-            # pdb.set_trace()
-
         g = ca.vertcat([self.pesetup.phiN - self.yN + ca.vertcat(A)])
 
-
-        # print self.pesetup.Vars.keys()
-        # print self.W
 
         if "W" in self.pesetup.Vars.keys():
 
@@ -185,23 +167,12 @@ class LSq(PECasBaseClass):
 
                 W.append(elem)
 
-            # pdb.set_trace()
-
             A = A + sum(W, [])
+
 
         A = ca.vertcat(A)
 
         reslsq = ca.mul([A.T, self.W, A])
-
-        # If equality constraints exists, set then for the solver as well
-        # as the cost function
-
-        # if not self.pesetup.g.size():
-
-        #     reslsqfcn = ca.MXFunction(ca.nlpIn(x=self.pesetup.Vars), \
-        #         ca.nlpOut(f=reslsq))
-
-        # else:
 
 
         if self.pesetup.g.size():
@@ -213,13 +184,13 @@ class LSq(PECasBaseClass):
 
         reslsqfcn.init()
 
+        # Initialize the solver
+
         solver = ca.NlpSolver("ipopt", reslsqfcn)
         solver.setOption("tol", 1e-10)
         solver.init()
 
-        # If equality constraints exist, set the bounds for the solver
-
-        # if self.pesetup.g.size():
+        # Set equality constraints
 
         solver.setInput(pl.zeros(g.size()), "lbg")
         solver.setInput(pl.zeros(g.size()), "ubg")
@@ -230,9 +201,7 @@ class LSq(PECasBaseClass):
         solver.setInput(self.pesetup.Varsmin, "lbx")
         solver.setInput(self.pesetup.Varsmax, "ubx")
 
-        # Run the optimization problem
-
-        # pdb.set_trace()
+        # Solve the optimization problem
 
         solver.evaluate()
 

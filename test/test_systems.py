@@ -15,21 +15,18 @@ class TestSystemsInit(unittest.TestCase):
         self.t = ca.SX.sym("t", 1)
         self.u = ca.SX.sym("u", 1)
         self.p = ca.SX.sym("p", 1)
-        self.v = ca.SX.sym("v", 1)
         self.y = ca.SX.sym("y", 1)
         self.g = ca.SX.sym("g", 1)
 
-        pecas.systems.BasicSystem(p = self.p, y = self.y, v = self.v)
-        pecas.systems.BasicSystem(t = self.t, p = self.p, y = self.y, \
-            v = self.v)
+        pecas.systems.BasicSystem(p = self.p, y = self.y)
+        pecas.systems.BasicSystem(t = self.t, p = self.p, y = self.y)
         pecas.systems.BasicSystem(t = self.t, u = self.u, p = self.p, \
-            v = self.v, y = self.y)
+            y = self.y)
         pecas.systems.BasicSystem(t = self.t, u = self.u, p = self.p, \
-            v = self.v, y = self.y, g = self.g)
+            y = self.y, g = self.g)
 
         self.assertRaises(TypeError, pecas.systems.BasicSystem)
         self.assertRaises(TypeError, pecas.systems.BasicSystem, p = None)
-        self.assertRaises(TypeError, pecas.systems.BasicSystem, v = None)
         self.assertRaises(TypeError, pecas.systems.BasicSystem, y = None)
 
 
@@ -39,22 +36,20 @@ class TestSystemsInit(unittest.TestCase):
         self.u = ca.SX.sym("u", 1)
         self.x = ca.SX.sym("x", 1)
         self.p = ca.SX.sym("p", 1)
-        self.v = ca.SX.sym("v", 1)
         self.w = ca.SX.sym("w", 1)
         self.y = ca.SX.sym("y", 1)
         self.f = ca.SX.sym("f", 1)
 
-        pecas.systems.ExplODE(x = self.x, p = self.p, v = self.v, w = self.w, \
+        pecas.systems.ExplODE(x = self.x, p = self.p, w = self.w, \
             y = self.y, f = self.f)
-        pecas.systems.ExplODE(t = self.t, x = self.x, p = self.p, v = self.v, \
+        pecas.systems.ExplODE(t = self.t, x = self.x, p = self.p, \
             w = self.w, y = self.y, f = self.f)
         pecas.systems.ExplODE(t = self.t, u = self.u, x = self.x, p = self.p, \
-            v = self.v, w = self.w, y = self.y, f = self.f)
+            w = self.w, y = self.y, f = self.f)
 
         self.assertRaises(TypeError, pecas.systems.ExplODE)
         self.assertRaises(TypeError, pecas.systems.ExplODE, x = None)
         self.assertRaises(TypeError, pecas.systems.ExplODE, p = None)
-        self.assertRaises(TypeError, pecas.systems.ExplODE, v = None)
         self.assertRaises(TypeError, pecas.systems.ExplODE, w = None)
         self.assertRaises(TypeError, pecas.systems.ExplODE, y = None)
         self.assertRaises(TypeError, pecas.systems.ExplODE, f = None)

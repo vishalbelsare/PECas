@@ -59,7 +59,6 @@ class BasicSystem(object):
                  u = ca.SX.sym("u", 0), \
                  p = None, \
                  y = None, \
-                 v = None, \
                  g = ca.SX.sym("g", 0)):
 
         if not all(isinstance(arg, (ca.casadi.SX, ca.casadi.MX)) for \
@@ -72,7 +71,6 @@ class BasicSystem(object):
                     cat.entry("t", expr = t),
                     cat.entry("u", expr = u),
                     cat.entry("p", expr = p),
-                    cat.entry("v", expr = v)
                 )
             ])
 
@@ -125,8 +123,7 @@ class ExplODE(object):
                  u = ca.SX.sym("u", 0), \
                  x = None, \
                  p = None, \
-                 v = None, \
-                 w = None, \
+                 w = ca.SX.sym("w", 0), \
                  y = None, \
                  f = None):
 
@@ -140,7 +137,6 @@ class ExplODE(object):
                     cat.entry("t", expr = t),
                     cat.entry("u", expr = u),
                     cat.entry("x", expr = x),
-                    cat.entry("v", expr = v),
                     cat.entry("w", expr = w),
                     cat.entry("p", expr = p)
                 )
@@ -167,11 +163,10 @@ class ImplDAE(object):
              u = ca.SX.sym("u", 0), \
              x = None, \
              p = None, \
-             v = None, \
-             w = None, \
+             w = ca.SX.sym("w", 0), \
              y = None, \
              f = None, \
              g = ca.SX.sym("g", 0)):
 
         raise NotImplementedError( \
-            "Support of implicit DAEs is not yet implemented.")
+            "Support of implicit DAEs is not implemented yet.")
