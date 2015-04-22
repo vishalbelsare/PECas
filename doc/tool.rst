@@ -1,5 +1,7 @@
 Documentation on PECas class and functions
 ==========================================
 
-.. automodule:: pecas
-    :members:
+The documentation is under construction, and can soon be found here.
+
+.. .. automodule:: pecas
+..    :members:

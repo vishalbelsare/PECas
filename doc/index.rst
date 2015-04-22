@@ -6,7 +6,7 @@
 PECas - Parameter Estimation using CasADi
 =========================================
 
-PECas holds a user-friendly environment for solving parameter estimation problems and for interpretation of the results received. It does so by providing a Python class that can be initialized with the problem specifications, while the computations are then easily performed using class functions.
+PECas holds a user-friendly environment for solving parameter estimation problems and for interpretation of the results received. It does so by providing Python classes that can be initialized with the problem specifications, while the computations can then easily be performed by using the available class functions.
 
 As it's name suggests, PECas makes use of the optimization framework
 `CasADi <http://casadi.org>`_ to solve parameter estimation problems.

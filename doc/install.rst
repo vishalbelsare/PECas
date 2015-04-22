@@ -9,10 +9,15 @@ Prerequisites
 
 In order to use PECas, please make sure that
 `Python <https://www.python.org/>`_ as well as
-`Python Numpy <http://www.numpy.org/>`_,
-`PyLab <http://wiki.scipy.org/PyLab>`_
-and a recent version of `CasADi <http://casadi.org>`_ are
-installed on your system.
+`Python Numpy <http://www.numpy.org/>`_ and
+`PyLab <http://wiki.scipy.org/PyLab>`_ are installed on your system. On Ubuntu, this can easily be ensured by running
+
+.. code:: bash
+
+    sudo apt-get update
+    sudo apt-get install python python-numpy python-scipy python-matplotlib
+
+Note that you need root privileges to do this. Also, a recent version of `CasADi <http://casadi.org>`_ needs to be installed on your system. You can obtain a recent version from the `CasADi web page <http://casadi.org>`_, and follow the installation instructions there.
 
 PECas has only been run on Ubuntu Linux systems so far, and has not been tested for Windows. However, if the prerequisites are met, usage on Windows should also be possible.
 
@@ -27,17 +32,10 @@ To obtain the zip-file you do not need to have `git <http://git-scm.com/>`_ inst
 Install PECas
 -------------
 
-If you meet the requirements from the above sections, you can run PECas directly from within the 
-directory in which you obtained or unpacked it,
-or copy ``pecas.py`` to another destination.
-If you
-want to use PECas from multiple locations and not only from the containing
-directory, consider adding the PECas directory to your PYTHONPATH by running
+You can install PECas on Ubuntu by running the command
 
 .. code:: bash
     
-    export PYTHONPATH=$PYTHONPATH:/path/to/PECas
+    sudo python setup.py install
 
-inside your shell. If you also want to permanently add PECas to your
-PYTHONPATH, you can e. g. on Ubuntu add the above line at the end of your
-``.bashrc`` file, which is usually located in your home directory.
+from within the PECas directory. Note that you need root privileges to be able to do this. If you are planning to install PECas on systems different from Ubuntu, this command might need to be adapted.
