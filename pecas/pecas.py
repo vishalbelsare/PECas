@@ -113,6 +113,7 @@ match the dimensions of the differential equations.''')
 
         self.W = pl.diag(pl.concatenate((self.wv, self.ww)))
 
+        self.EstimationDone = False
 
 class LSq(PECasBaseClass):
 
@@ -209,7 +210,37 @@ class LSq(PECasBaseClass):
 
         self.Varshat = solver.getOutput("x")
         self.rhat = solver.getOutput("f")
+    
+        self.EstimationDone = True
 
+
+    @property        
+    def Phat(self):       
+        if self.EstimationDone == False:
+
+            raise AttributeError('''
+            The method run_parameter_estimation
+            must be run first, before trying to
+            obtain the optimal values''')
+
+        return self.pesetup.Vars()(self.Varshat)["P"]
+
+    @property    
+    def Xhat(self):
+        
+        if self.EstimationDone == False:
+
+            raise AttributeError('''
+            The method run_parameter_estimation
+            must be run first, before trying to
+            obtain the optimal values''')
+        
+        xhat = []
+
+        for i in range (self.pesetup.nx):
+            xhat.append(self.pesetup.Vars()(self.Varshat)["X",:,0,i])
+            
+        return xhat
 
     def compute_covariance_matrix(self):
 
