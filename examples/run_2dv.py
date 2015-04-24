@@ -60,14 +60,17 @@ odesetup = pecas.setups.ODEsetup( \
 lsqpe = pecas.LSq(pesetup =odesetup, yN =yN, wv = wv, ww = ww)
 
 lsqpe.run_parameter_estimation()
-phat = odesetup.Vars()(lsqpe.Varshat)["P"]
+phat = lsqpe.Phat
+
 print porig
 print phat
 
-xhat = odesetup.Vars()(lsqpe.Varshat)["X",:,0,0]
-yhat = odesetup.Vars()(lsqpe.Varshat)["X",:,0,1]
-psihat = odesetup.Vars()(lsqpe.Varshat)["X",:,0,2]
-vhat = odesetup.Vars()(lsqpe.Varshat)["X",:,0,3]
+Xhat = lsqpe.Xhat
+
+xhat = lsqpe.Xhat[0]
+yhat = lsqpe.Xhat[1]
+psihat = lsqpe.Xhat[2]
+vhat = lsqpe.Xhat[3]
 
 pl.close("all")
 
