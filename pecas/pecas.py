@@ -79,34 +79,34 @@ but you supported wv of dimension:
             self.wv[k:yN.shape[0]*yN.shape[1]+1:yN.shape[0]] = \
                 wv[k, :]
 
-        ww = pl.atleast_2d(ww)
+        if ww is not None:
+            
+            ww = pl.atleast_2d(ww)
+            try:
+    
+                if ww.shape == (1, self.pesetup.nw):
+    
+                    ww = ww.T
+    
+                if not ww.shape == (self.pesetup.nw, 1):
+    
+                    raise ValueError('''
+    The dimensions of the weights of the equation errors given in ww does not
+    match the dimensions of the differential equations.''')
 
-        try:
+            except AttributeError:
+    
+                pass
 
-            if ww.shape == (1, self.pesetup.nw):
-
-                ww = ww.T
-
-            if not ww.shape == (self.pesetup.nw, 1):
-
-                raise ValueError('''
-The dimensions of the weights of the equation errors given in ww does not
-match the dimensions of the differential equations.''')
-
-            self.ww = ww
-
-        except AttributeError:
-
-            pass
-
-        try:
-
-            if self.ww is not None:
-
+            try:
+    
                 self.ww = pl.squeeze(ca.repmat(ww, self.pesetup.nsteps * (len(self.pesetup.tauroot)-1), 1))
+    
+            except AttributeError:
+    
+                self.ww = []
 
-        except AttributeError:
-
+        else:
             self.ww = []
 
         # Set up the covariance matrix for the measurements
