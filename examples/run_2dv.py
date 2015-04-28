@@ -69,33 +69,33 @@ yhat = lsqpe.Xhat[1]
 psihat = lsqpe.Xhat[2]
 vhat = lsqpe.Xhat[3]
 
-pl.close("all")
+# pl.close("all")
 
-pl.figure()
-pl.subplot(4, 1, 1)
-pl.plot(xhat)
-pl.plot(yN[:,0])
+# pl.figure()
+# pl.subplot(4, 1, 1)
+# pl.plot(xhat)
+# pl.plot(yN[:,0])
 
-pl.subplot(4, 1, 2)
-pl.plot(yhat)
-pl.plot(yN[:,1])
+# pl.subplot(4, 1, 2)
+# pl.plot(yhat)
+# pl.plot(yN[:,1])
 
-pl.subplot(4, 1, 3)
-pl.plot(psihat)
-pl.plot(yN[:, 2])
+# pl.subplot(4, 1, 3)
+# pl.plot(psihat)
+# pl.plot(yN[:, 2])
 
-pl.subplot(4, 1, 4)
-pl.plot(vhat)
-pl.plot(yN[:, 3])
+# pl.subplot(4, 1, 4)
+# pl.plot(vhat)
+# pl.plot(yN[:, 3])
 
-pl.figure()
-pl.plot(xhat, yhat)
-pl.plot(yN[:,0], yN[:, 1])
+# pl.figure()
+# pl.plot(xhat, yhat)
+# pl.plot(yN[:,0], yN[:, 1])
 
 # pl.figure()
 # pl.plot(sum(odesetup.V()(lsqpe.Vhat)["X",:,:,0], []))
 
-pl.show()
+# pl.show()
 
 tend = time.time()
 dur = tend - tstart
