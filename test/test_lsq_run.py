@@ -19,7 +19,7 @@ class BSPERunTest(object):
             wv = self.wv)
 
         lsqpe.run_parameter_estimation()
-        phat = self.bssetup.Vars()(lsqpe.Varshat)["P"]
+        phat = lsqpe.phat
         print phat
 
         for k, pk in enumerate(phat):
@@ -35,7 +35,7 @@ class ODEPERunTest(object):
             wv = self.wv, ww = self.ww)
 
         lsqpe.run_parameter_estimation()
-        phat = self.odesetup.Vars()(lsqpe.Varshat)["P"]
+        phat = lsqpe.phat
         print phat
 
         for k, pk in enumerate(phat):

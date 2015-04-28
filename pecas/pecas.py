@@ -114,6 +114,40 @@ match the dimensions of the differential equations.''')
         self.W = pl.diag(pl.concatenate((self.wv, self.ww)))
 
 
+    @property
+    def phat(self):
+
+        try:
+            
+            return self.pesetup.Vars()(self.Varshat)["P"]
+
+        except AttributeError:
+
+            raise AttributeError('''
+The method run_parameter_estimation() must be run first, before trying to
+obtain the optimal values.
+''')
+
+
+    @property
+    def Xhat(self):
+
+        try:
+
+            for i in range (self.pesetup.nx):
+
+                xhat.append(self.pesetup.Vars()(self.Varshat)["X",:,0,i])
+            
+            return xhat
+
+        except AttributeError:
+
+            raise AttributeError('''
+The method run_parameter_estimation() must be run first, before trying to
+obtain the optimal values.
+''')     
+
+
 class LSq(PECasBaseClass):
 
     '''The class :class:`LSq` is used to solve least squares parameter
