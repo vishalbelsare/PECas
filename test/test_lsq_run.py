@@ -26,9 +26,6 @@ class BSPERunTest(object):
         phat = lsqpe.phat
         print phat
 
-        Xhat = lsqpe.Xhat
-        print Xhat
-
         for k, pk in enumerate(phat):
             self.assertAlmostEqual(pk, self.phat[k], places = 5)
 
