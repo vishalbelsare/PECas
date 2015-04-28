@@ -50,7 +50,7 @@ class TestBasicSystemNoConstraints(unittest.TestCase, \
 
         self.bssetup = pecas.setups.BSsetup( \
             system = self.bsys, timegrid = self.timegrid, \
-            umin = self.uN, umax = self.uN, uinit = self.uN)
+            u = self.uN)
 
 
 class TestBasicSystemConstraints(unittest.TestCase, \
@@ -96,7 +96,7 @@ class TestBasicSystemConstraints(unittest.TestCase, \
 
         self.bssetup = pecas.setups.BSsetup( \
             system = self.bsys, timegrid = self.timegrid, \
-            umin = self.uN, umax = self.uN, uinit = self.uN, \
+            u = self.uN, \
             pinit = self.pinit)
 
 
@@ -236,7 +236,7 @@ class Test1DVehicle(unittest.TestCase, \
 
         self.odesetup = pecas.setups.ODEsetup( \
             system = self.odesys, timegrid = self.timegrid,
-            umin = self.uN, umax = self.uN, uinit = self.uN, \
+            u = self.uN, \
             x0min = self.yN[0], x0max = self.yN[0], \
             xNmin = self.yN[-1:], xNmax = self.yN[-1:], \
             pmin = [10.0, 0.0, 0.4], pmax = [10.0, 2, 0.7], \
@@ -321,7 +321,7 @@ class Test2DVehicle(unittest.TestCase, \
 
         self.odesetup = pecas.setups.ODEsetup( \
             system = self.odesys, timegrid = self.timegrid,
-            umin = self.uN, umax = self.uN, uinit = self.uN, \
+            u = self.uN, \
             pmin = [0.5, 17.06, 0.0, -10.0, -1000.0, -10.0], \
             pmax = [0.5, 17.06, 13.2, 200, 500, 3], \
             pinit = [0.5, 17.06, 11.5, 5, 0.07, 0.70])

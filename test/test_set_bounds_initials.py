@@ -66,11 +66,7 @@ class BSSetBoundsInitialsTest(object):
         for uarg in self.invaliduargs:
 
             self.assertRaises(ValueError, pecas.setups.BSsetup, \
-                system = self.bsys, timegrid = self.timegrid, uinit = uarg)
-            self.assertRaises(ValueError, pecas.setups.BSsetup, \
-                system = self.bsys, timegrid = self.timegrid, umin = uarg)
-            self.assertRaises(ValueError, pecas.setups.BSsetup, \
-                system = self.bsys, timegrid = self.timegrid, umax = uarg)
+                system = self.bsys, timegrid = self.timegrid, u = uarg)
     
 
     def test_valid_control_bounds_and_initials_inputs(self):
@@ -80,11 +76,7 @@ class BSSetBoundsInitialsTest(object):
         for uarg in self.validuargs:
 
             pecas.setups.BSsetup( \
-                system = self.bsys, timegrid = self.timegrid, uinit = uarg)
-            pecas.setups.BSsetup( \
-                system = self.bsys, timegrid = self.timegrid, umin = uarg)
-            pecas.setups.BSsetup( \
-                system = self.bsys, timegrid = self.timegrid, umax = uarg)
+                system = self.bsys, timegrid = self.timegrid, u = uarg)
 
 
 class ODESetBoundsInitialsTest(object):
@@ -203,11 +195,7 @@ class ODESetBoundsInitialsTest(object):
         for uarg in self.invaliduargs:
 
             self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, uinit = uarg)
-            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, umin = uarg)
-            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, umax = uarg)
+                system = self.odesys, timegrid = self.timegrid, u = uarg)
     
 
     def test_valid_control_bounds_and_initials_inputs(self):
@@ -217,8 +205,4 @@ class ODESetBoundsInitialsTest(object):
         for uarg in self.validuargs:
 
             pecas.setups.ODEsetup( \
-                system = self.odesys, timegrid = self.timegrid, uinit = uarg)
-            pecas.setups.ODEsetup( \
-                system = self.odesys, timegrid = self.timegrid, umin = uarg)
-            pecas.setups.ODEsetup( \
-                system = self.odesys, timegrid = self.timegrid, umax = uarg)
+                system = self.odesys, timegrid = self.timegrid, u = uarg)
