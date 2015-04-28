@@ -79,41 +79,89 @@ but you supported wv of dimension:
             self.wv[k:yN.shape[0]*yN.shape[1]+1:yN.shape[0]] = \
                 wv[k, :]
 
-        if ww is not None:
-            
-            ww = pl.atleast_2d(ww)
-            try:
-    
-                if ww.shape == (1, self.pesetup.nw):
-    
-                    ww = ww.T
-    
-                if not ww.shape == (self.pesetup.nw, 1):
-    
-                    raise ValueError('''
-    The dimensions of the weights of the equation errors given in ww does not
-    match the dimensions of the differential equations.''')
 
-            except AttributeError:
-    
-                pass
+        self.ww = []
 
-            try:
-    
-                self.ww = pl.squeeze(ca.repmat(ww, self.pesetup.nsteps * (len(self.pesetup.tauroot)-1), 1))
-    
-            except AttributeError:
-    
-                self.ww = []
+        try:
 
-        else:
-            self.ww = []
+            if self.pesetup.nw != 0:
+
+                ww = pl.atleast_2d(ww)
+
+                try:
+
+                    if ww.shape == (1, self.pesetup.nw):
+
+                        ww = ww.T
+
+                    if not ww.shape == (self.pesetup.nw, 1):
+
+                        raise ValueError('''
+The dimensions of the weights of the equation errors given in ww does not
+match the dimensions of the differential equations.''')
+
+                    self.ww = ww
+
+                except AttributeError:
+
+                    pass
+
+                try:
+
+                    # if self.ww is not None:
+
+                        self.ww = pl.squeeze(ca.repmat(ww, self.pesetup.nsteps * \
+                            (len(self.pesetup.tauroot)-1), 1))
+
+                except AttributeError:
+
+                    self.ww = []
+
+        except AttributeError:
+
+            pass
 
         # Set up the covariance matrix for the measurements
 
         self.W = pl.diag(pl.concatenate((self.wv, self.ww)))
 
         self.EstimationDone = False
+
+    @property
+    def phat(self):
+
+        try:
+            
+            return self.pesetup.Vars()(self.Varshat)["P"]
+
+        except AttributeError:
+
+            raise AttributeError('''
+The method run_parameter_estimation() must be run first, before trying to
+obtain the optimal values.
+''')
+
+
+    @property
+    def Xhat(self):
+
+        xhat = []
+
+        try:
+
+            for i in range (self.pesetup.nx):
+
+                xhat.append(self.pesetup.Vars()(self.Varshat)["X",:,0,i])
+            
+            return xhat
+
+        except AttributeError:
+
+            raise AttributeError('''
+The method run_parameter_estimation() must be run first, before trying to
+obtain the optimal values.
+''')     
+
 
 class LSq(PECasBaseClass):
 

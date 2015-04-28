@@ -18,8 +18,12 @@ class BSPERunTest(object):
         lsqpe = pecas.LSq(pesetup = self.bssetup, yN = self.yN, \
             wv = self.wv)
 
+        self.assertRaises(AttributeError, getattr, lsqpe, "phat")
+        self.assertRaises(AttributeError, getattr, lsqpe, "Xhat")
+
         lsqpe.run_parameter_estimation()
-        phat = self.bssetup.Vars()(lsqpe.Varshat)["P"]
+
+        phat = lsqpe.phat
         print phat
 
         for k, pk in enumerate(phat):
@@ -34,9 +38,16 @@ class ODEPERunTest(object):
         lsqpe = pecas.LSq(pesetup = self.odesetup, yN = self.yN, \
             wv = self.wv, ww = self.ww)
 
+        self.assertRaises(AttributeError, getattr, lsqpe, "phat")
+        self.assertRaises(AttributeError, getattr, lsqpe, "Xhat")
+
         lsqpe.run_parameter_estimation()
-        phat = self.odesetup.Vars()(lsqpe.Varshat)["P"]
+
+        phat = lsqpe.phat
         print phat
+        
+        Xhat = lsqpe.Xhat
+        print Xhat
 
         for k, pk in enumerate(phat):
             self.assertAlmostEqual(pk, self.phat[k], places = 5)

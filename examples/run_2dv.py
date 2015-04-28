@@ -50,7 +50,7 @@ porig = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
 
 odesetup = pecas.setups.ODEsetup( \
     system = odesys, timegrid = timegrid,
-    umin = uN, umax = uN, uinit = uN, \
+    u = uN, \
     pmin = [0.5, 17.06, 0.0, -10.0, -1000.0, -10.0], \
     pmax = [0.5, 17.06, 13.2, 200, 500, 3], \
     pinit = [0.5, 17.06, 11.5, 5, 0.07, 0.70])
@@ -60,12 +60,9 @@ odesetup = pecas.setups.ODEsetup( \
 lsqpe = pecas.LSq(pesetup =odesetup, yN =yN, wv = wv, ww = ww)
 
 lsqpe.run_parameter_estimation()
-phat = lsqpe.Phat
-
+phat = lsqpe.phat
 print porig
 print phat
-
-Xhat = lsqpe.Xhat
 
 xhat = lsqpe.Xhat[0]
 yhat = lsqpe.Xhat[1]

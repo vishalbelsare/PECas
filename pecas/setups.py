@@ -7,6 +7,7 @@ import pylab as pl
 from abc import ABCMeta, abstractmethod
 
 import systems
+import pdb
 
 class SetupsBaseClass(object):
 
@@ -26,7 +27,7 @@ class SetupsBaseClass(object):
 
 
     def check_and_set_bounds_and_initials(self, \
-        umin = None, umax = None, uinit = None, \
+        u = None, \
         pmin = None, pmax = None, pinit = None, \
         xmin = None, xmax = None, xinit = None, \
         x0min = None, x0max = None, \
@@ -50,44 +51,29 @@ class SetupsBaseClass(object):
         self.Varsmax = self.Vars()
         self.Varsinit = self.Vars()
 
-        # Set initials and bounds for the controls
-        # (only if the number of controls is not 0)
+        # Set controls values
+        # (only if the number of controls is not 0, else set them 0)
 
         if not self.nu == 0:
 
-            if uinit is None:
-                uinit = pl.zeros((self.nu, self.nsteps))
-            if umin is None:
-                umin = -pl.inf * pl.ones((self.nu, self.nsteps))   
-            if umax is None:
-                umax = pl.inf * pl.ones((self.nu, self.nsteps))
+            if u is None:
+                u = pl.zeros((self.nu, self.nsteps))
 
-            uinit = pl.atleast_2d(uinit)
-            umin = pl.atleast_2d(umin)
-            umax = pl.atleast_2d(umax)
+            u = pl.atleast_2d(u)
 
-            if uinit.shape == (self.nsteps, self.nu):
-                uinit = uinit.T
-            
-            if umin.shape == (self.nsteps, self.nu):
-                umin = umin.T
-            
-            if umax.shape == (self.nsteps, self.nu):
-                umax = umax.T
+            if u.shape == (self.nsteps, self.nu):
+                u = u.T
 
-            if not all(arg.shape == (self.nu, self.nsteps) for \
-                arg in [uinit, umin, umax]):
+            if not u.shape == (self.nu, self.nsteps):
 
                 raise ValueError( \
-                    "Wrong dimension for argument uinit, umin or umax.")
+                    "Wrong dimension for control values u.")
 
-            # Repeatd the values for each collocation point
+            self.u = u
 
-            for k in range(self.nsteps):
+        else:
 
-                self.Varsinit["U", k, :] = ca.tools.repeated(uinit[:,k])
-                self.Varsmin["U", k, :] = ca.tools.repeated(umin[:,k])
-                self.Varsmax["U", k, :] = ca.tools.repeated(umax[:,k])
+            self.u = pl.zeros((1, self.nsteps))
 
         # Set initials and bounds for the parameters
 
@@ -224,14 +210,14 @@ class SetupsBaseClass(object):
 class BSsetup(SetupsBaseClass):
 
     def check_and_set_bounds_and_initials(self, \
-        umin = None, umax = None, uinit = None, \
+        u = None,
         pmin = None, pmax = None, pinit = None, \
         xmin = None, xmax = None, xinit = None, \
         x0min = None, x0max = None, \
         xNmin = None, xNmax = None):
 
         super(BSsetup, self).check_and_set_bounds_and_initials( \
-            umin = umin, umax = umax, uinit = uinit, \
+            u = u,
             pmin = pmin, pmax = pmax, pinit = pinit, \
             xmin = xmin, xmax = xmax, xinit = xinit, \
             x0min = x0min, x0max = x0max, \
@@ -239,7 +225,7 @@ class BSsetup(SetupsBaseClass):
 
 
     def __init__(self, system = None, timegrid = None, \
-        umin = None, umax = None, uinit = None, \
+        u = None, \
         pmin = None, pmax = None, pinit = None):
 
         if not type(system) is systems.BasicSystem:
@@ -272,8 +258,6 @@ class BSsetup(SetupsBaseClass):
 
         self.Vars = cat.struct_symMX([
                 (
-                    cat.entry("U", repeat = [self.nsteps, 1], \
-                        shape = self.nu),
                     cat.entry("P", shape = self.np),
                     cat.entry("V", repeat = [self.nsteps], \
                         shape = self.nv),
@@ -283,7 +267,7 @@ class BSsetup(SetupsBaseClass):
         # Set bounds and initial values
 
         self.check_and_set_bounds_and_initials( \
-            umin = umin, umax = umax, uinit = uinit, \
+            u = u,
             pmin = pmin, pmax = pmax, pinit = pinit)
 
         # Set up phiN
@@ -295,10 +279,12 @@ class BSsetup(SetupsBaseClass):
         yfcn.setOption("name", "yfcn")
         yfcn.init()
 
+        # pdb.set_trace()
+
         for k in range(self.nsteps):
 
             self.phiN.append(yfcn.call([self.timegrid[k], \
-                self.Vars["U", k, 0], self.Vars["P"]])[0])
+                self.u[:, k], self.Vars["P"]])[0])
 
         self.phiN = ca.vertcat(self.phiN)
 
@@ -318,14 +304,14 @@ class CollocationBaseClass(SetupsBaseClass):
     __metaclass__ = ABCMeta
 
     def check_and_set_bounds_and_initials(self, \
-        umin = None, umax = None, uinit = None, \
+        u = None, \
         pmin = None, pmax = None, pinit = None, \
         xmin = None, xmax = None, xinit = None, \
         x0min = None, x0max = None, \
         xNmin = None, xNmax = None):
 
         super(CollocationBaseClass, self).check_and_set_bounds_and_initials( \
-            umin = umin, umax = umax, uinit = uinit, \
+            u = u, \
             pmin = pmin, pmax = pmax, pinit = pinit, \
             xmin = xmin, xmax = xmax, xinit = xinit, \
             x0min = x0min, x0max = x0max, \
@@ -334,7 +320,7 @@ class CollocationBaseClass(SetupsBaseClass):
 
     @abstractmethod
     def __init__(self, system = None, timegrid = None, \
-        umin = None, umax = None, uinit = None, \
+        u = None, \
         pmin = None, pmax = None, pinit = None, \
         xmin = None, xmax = None, xinit = None, \
         x0min = None, x0max = None, \
@@ -379,8 +365,6 @@ class CollocationBaseClass(SetupsBaseClass):
 
         self.Vars = cat.struct_symMX([
                 (
-                    cat.entry("U", repeat = [self.nsteps, self.ntauroot], \
-                        shape = self.nu),
                     cat.entry("X", repeat = [self.nsteps+1, self.ntauroot+1], \
                         shape = self.nx),
                     cat.entry("P", shape = self.np),
@@ -394,7 +378,7 @@ class CollocationBaseClass(SetupsBaseClass):
         # Define bounds and initial values
 
         self.check_and_set_bounds_and_initials( \
-            umin = umin, umax = umax, uinit = uinit, \
+            u = u, \
             pmin = pmin, pmax = pmax, pinit = pinit, \
             xmin = xmin, xmax = xmax, xinit = xinit, \
             x0min = x0min, x0max = x0max, \
@@ -490,7 +474,7 @@ class CollocationBaseClass(SetupsBaseClass):
 class ODEsetup(CollocationBaseClass):
 
     def __init__(self, system = None, timegrid = None, \
-        umin = None, umax = None, uinit = None, \
+        u = None, \
         pmin = None, pmax = None, pinit = None, \
         xmin = None, xmax = None, xinit = None, \
         x0min = None, x0max = None, \
@@ -498,7 +482,7 @@ class ODEsetup(CollocationBaseClass):
 
         super(ODEsetup, self).__init__(system = system, \
             timegrid = timegrid, \
-            umin = umin, umax = umax, uinit = uinit, \
+            u = u, \
             pmin = pmin, pmax = pmax, pinit = pinit, \
             xmin = xmin, xmax = xmax, xinit = xinit, \
             x0min = x0min, x0max = x0max, \
@@ -531,7 +515,7 @@ class ODEsetup(CollocationBaseClass):
                 # Add collocation equations to the NLP
 
                 [fk] = ffcn.call([self.T[k][j], self.Vars["X",k,j], \
-                    self.Vars["U",k,j-1], self.Vars["P"], \
+                    self.u[:, k], self.Vars["P"], \
                     self.Vars["W", k, j-1]])
 
                 self.g.append((self.timegrid[k+1] - \

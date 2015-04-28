@@ -52,14 +52,16 @@ uN = [psi] * (N-1)
 # Finally, the optimization problem is initialized using some random vector
 # [phi,w,K] = [1,1,1], and the vector with all the measurement is created.
 #==============================================================================
-sigmaphi = pl.ones(timegrid.size)*pl.std(phim, ddof=1)
-sigmaw = pl.ones(timegrid.size)*pl.std(wm, ddof=1)
+
+sigmaphi = 1.0 / (pl.ones(timegrid.size)*pl.std(phim, ddof=1)**2)
+sigmaw = 1.0 / (pl.ones(timegrid.size)*pl.std(wm, ddof=1)**2)
+
 wv = pl.array([sigmaphi, sigmaw])
 
 
 odesetup = pecas.setups.ODEsetup( \
     system = odesys, timegrid = timegrid,
-    umin = uN, umax = uN, uinit = uN, \
+    u = uN, \
     pinit = 1, pmax = 50, pmin = 0 )
 
 # Run parameter estimation and assure that the results is correct
@@ -67,7 +69,7 @@ odesetup = pecas.setups.ODEsetup( \
 lsqpe = pecas.LSq(pesetup =odesetup, yN =yN, wv = wv)
 
 lsqpe.run_parameter_estimation()
-phat = lsqpe.Phat
+phat = lsqpe.phat
 
 print "Khat: " + str(phat)
 
