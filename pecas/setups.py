@@ -256,7 +256,7 @@ class BSsetup(SetupsBaseClass):
 
         # Define the struct holding the variables
 
-        self.Vars = cat.struct_symMX([
+        self.Vars = cat.struct_symSX([
                 (
                     cat.entry("P", shape = self.np),
                     cat.entry("V", repeat = [self.nsteps], \
@@ -363,7 +363,7 @@ class CollocationBaseClass(SetupsBaseClass):
 
         # Define the struct holding the variables
 
-        self.Vars = cat.struct_symMX([
+        self.Vars = cat.struct_symSX([
                 (
                     cat.entry("X", repeat = [self.nsteps+1, self.ntauroot+1], \
                         shape = self.nx),

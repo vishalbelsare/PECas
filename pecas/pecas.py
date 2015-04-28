@@ -227,7 +227,7 @@ class LSq(PECasBaseClass):
 
             g = ca.vertcat([g, self.pesetup.g])
 
-        reslsqfcn = ca.MXFunction(ca.nlpIn(x=self.pesetup.Vars), \
+        reslsqfcn = ca.SXFunction(ca.nlpIn(x=self.pesetup.Vars), \
             ca.nlpOut(f=reslsq, g=g))
 
         reslsqfcn.init()
