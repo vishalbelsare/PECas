@@ -132,6 +132,8 @@ obtain the optimal values.
     @property
     def Xhat(self):
 
+        xhat = []
+
         try:
 
             for i in range (self.pesetup.nx):
