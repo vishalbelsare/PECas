@@ -96,9 +96,9 @@ class ExplODE(object):
     :param p: CasADi symbolic variable for the unknow parameters :math:``p \in
     \mathbb{R}^{n_{p}}``.
     :type p: casadi.casadi.SX
-    :param p: CasADi symbolic variable for the equation errors :math:``w \in
+    :param w: CasADi symbolic variable for the equation errors :math:``w \in
     \mathbb{R}^{n_{w}}``.
-    :type p: casadi.casadi.SX
+    :type w: casadi.casadi.SX
     :param y: CasADi symbolic variable describing the output function
               :math:``y(t, p) \in \mathbb{R}^{n_{y}}``, i. e. the output of
               the system :math:``\phi = y(\dot)`` that can be measured, and

@@ -455,7 +455,7 @@ class CollocationBaseClass(SetupsBaseClass):
 
             # Evaluate the time derivative of the polynomial at all 
             # collocation points to get the coefficients of the
-            # continuity equation
+            # collocation equation
             
             tfcn = lfcn.tangent()
             tfcn.init()
