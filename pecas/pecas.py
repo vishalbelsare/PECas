@@ -82,7 +82,7 @@ but you supported wv of dimension:
 
         self.ww = []
 
-        if ww is not None:
+        if self.pesetup.nw != 0:
 
             ww = pl.atleast_2d(ww)
 

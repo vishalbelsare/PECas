@@ -325,3 +325,87 @@ class Test2DVehicle(unittest.TestCase, \
             pmin = [0.5, 17.06, 0.0, -10.0, -1000.0, -10.0], \
             pmax = [0.5, 17.06, 13.2, 200, 500, 3], \
             pinit = [0.5, 17.06, 11.5, 5, 0.07, 0.70])
+
+
+class PedulumBar(unittest.TestCase, \
+    test_set_bounds_initials.ODESetBoundsInitialsTest, \
+    test_lsq_init.ODEPESetupTest, \
+    test_lsq_run.ODEPERunTest, \
+    ):
+
+    def setUp(self):
+
+        # System
+
+        m = 1
+        L = 3
+        g = 9.81
+        psi = pl.pi/2
+
+        # System
+
+        self.x = ca.SX.sym("x", 2)
+        self.p = ca.SX.sym("p", 1)
+        self.u = ca.SX.sym("u", 1)
+
+        self.f = ca.vertcat([ \
+            
+            self.x[1], \
+            self.p[0]/(m*(L**2))*(self.u-self.x[0]) - g/L * pl.sin(self.x[0]) \
+
+            ])
+
+        self.y = self.x
+
+        self.odesys = pecas.systems.ExplODE(x = self.x, u = self.u, p = self.p, \
+            f = self.f, y = self.y)
+
+        # Inputs
+
+        data = pl.loadtxt('test/ex6data.txt')
+
+        self.timegrid = data[:50, 0]
+
+        self.invalidpargs = [[0, 1], [[2, 3], [2, 3]], \
+            pl.asarray([1, 2]), pl.asarray([[2, 3], [2, 3]])]
+        self.validpargs = [None, 1, [0], pl.asarray([1]), \
+            pl.asarray([1]).T, pl.asarray([[2]])]
+
+        self.invalidxargs = [pl.ones((self.x.size() - 1, self.timegrid.size)), \
+            pl.ones((self.timegrid.size - 1, self.x.size()))]
+        self.validxargs = [None, pl.ones((self.x.size(), self.timegrid.size)), \
+            pl.ones((self.timegrid.size, self.x.size()))]
+
+        self.invalidxbvpargs = [[3, 2, 1], pl.ones(3), \
+            pl.ones((1, 3)), pl.ones((3, 1))]
+        self.validxbvpargs = [None, [1, 1], [[1], [1]], pl.ones((2,1)), \
+            pl.ones((1, 2)), pl.ones(2)]
+
+        self.invaliduargs = [pl.ones((self.u.size(), self.timegrid.size)), \
+            pl.ones((self.timegrid.size, self.u.size()))]
+        self.validuargs = [None, pl.ones((self.u.size(), \
+            self.timegrid.size - 1)), \
+            pl.ones((self.timegrid.size - 1, self.u.size()))]
+
+        N = self.timegrid.size
+        phim = data[:50, 1]
+        wm = data[:50, 2]
+
+        self.yN = pl.array([phim, wm])
+        self.uN = [psi] * (N-1)
+
+        self.wv = pl.array([
+
+                1.0 / (pl.ones(N)*pl.std(phim, ddof=1)**2),
+                1.0 / (pl.ones(N)*pl.std(wm, ddof=1)**2)
+
+            ])
+
+        self.ww = None
+
+        self.phat = [2.98427]
+
+        self.odesetup = pecas.setups.ODEsetup( \
+            system = self.odesys, timegrid = self.timegrid,
+            u = self.uN, \
+            pinit = 1, pmax = 50, pmin = 0 )
