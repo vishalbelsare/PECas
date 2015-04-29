@@ -9,6 +9,8 @@ from abc import ABCMeta, abstractmethod
 import systems
 import pdb
 
+import time
+
 class SetupsBaseClass(object):
 
     '''The abstract class :class:`SetupsBaseClass` contains the basic
@@ -233,6 +235,8 @@ class BSsetup(SetupsBaseClass):
             raise TypeError("Setup-method " + self.__class__.__name__ + \
                 " not allowed for system of type " + str(type(system)) + ".")
 
+        self.system = system
+
         # Dimensions
 
         self.nu = system.vars["u"].shape[0]
@@ -402,6 +406,11 @@ class CollocationBaseClass(SetupsBaseClass):
 
         self.phiN = ca.vertcat(self.phiN)
 
+        self.phiNfcn = ca.SXFunction([self.Vars], [self.phiN])
+        self.phiNfcn.setOption("name", "phiNfcn")
+        self.phiNfcn.init()
+
+
         # Set tp the collocation coefficients
 
         # Coefficients of the collocation equation
@@ -479,7 +488,9 @@ class ODEsetup(CollocationBaseClass):
         xmin = None, xmax = None, xinit = None, \
         x0min = None, x0max = None, \
         xNmin = None, xNmax = None):
-
+            
+        self.setupStart = time.time()
+            
         super(ODEsetup, self).__init__(system = system, \
             timegrid = timegrid, \
             u = u, \
@@ -537,3 +548,5 @@ class ODEsetup(CollocationBaseClass):
         # Concatenate constraints
 
         self.g = ca.vertcat(self.g)
+        
+        self.setupDura = time.time() - self.setupStart
