@@ -36,9 +36,9 @@ odesys = pecas.systems.ExplODE(x = x, u = u, p = p, f = f, y = y)
 # Loading data
 #==============================================================================
 data = pl.loadtxt('ex6data.txt')
-timegrid = data[:50, 0]
-phim = data[:50, 1]
-wm = data[:50, 2]
+timegrid = data[:200, 0]
+phim = data[:200, 1]
+wm = data[:200, 2]
 N = timegrid.size
 yN = pl.array([phim,wm])
 uN = [psi] * (N-1)
@@ -79,6 +79,14 @@ what = lsqpe.Xhat[1]
 print "Phi0hat: " + str(phihat[0])
 print "w0hat: " + str(what[0])
 
+tend = time.time()
+dur = tend - tstart
+print "started: " + time.ctime(tstart)
+print "ended: " + time.ctime(tend)
+print "duration: " + str(dur) + "sec"
+
+lsqpe.print_results()
+
 pl.close("all")
 
 pl.figure()
@@ -98,9 +106,3 @@ pl.plot(phim, wm)
 # pl.plot(sum(odesetup.V()(lsqpe.Vhat)["X",:,:,0], []))
 
 pl.show()
-
-tend = time.time()
-dur = tend - tstart
-print "started: " + time.ctime(tstart)
-print "ended: " + time.ctime(tend)
-print "duration: " + str(dur) + "sec"
