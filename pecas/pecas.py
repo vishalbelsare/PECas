@@ -10,6 +10,8 @@ from scipy.misc import comb
 import systems
 import setups
 
+import time
+
 import pdb
 
 from abc import ABCMeta, abstractmethod
@@ -126,6 +128,7 @@ match the dimensions of the differential equations.''')
         self.W = pl.diag(pl.concatenate((self.wv, self.ww)))
 
         self.EstimationDone = False
+        self.CovCal = False
 
     @property
     def phat(self):
@@ -198,6 +201,8 @@ class LSq(PECasBaseClass):
           can be returned using the function :func:`get_Rhat()`.
         '''          
 
+        self.tstart = time.time()
+
         A = []
 
         for k, elem in enumerate(self.pesetup.Vars["V"]):
@@ -260,8 +265,16 @@ class LSq(PECasBaseClass):
         self.rhat = solver.getOutput("f")
     
         self.EstimationDone = True
+        
+        Ysim = self.pesetup.phiNfcn([self.Varshat])[0]
+        Ym = pl.reshape(self.yN.T,(Ysim.shape))
+        res = Ym-Ysim
+        self.residual = ca.mul([res.T,res])
 
+        self.est_duration = time.time() - self.tstart
 
+        self.Rsquared = 1 - self.residual/ca.mul([Ym.T,Ym])
+        
     @property        
     def Phat(self):       
         if self.EstimationDone == False:
@@ -271,7 +284,7 @@ class LSq(PECasBaseClass):
             must be run first, before trying to
             obtain the optimal values''')
 
-        return self.pesetup.Vars()(self.Varshat)["P"]
+        return pl.array(self.pesetup.Vars()(self.Varshat)["P"])
 
     @property    
     def Xhat(self):
@@ -288,7 +301,7 @@ class LSq(PECasBaseClass):
         for i in range (self.pesetup.nx):
             xhat.append(self.pesetup.Vars()(self.Varshat)["X",:,0,i])
             
-        return xhat
+        return pl.array(xhat)
 
     def compute_covariance_matrix(self):
 
@@ -297,7 +310,9 @@ class LSq(PECasBaseClass):
 This feature of PECas is currently disabled, but will be available again in a
 future version of PECas.
 ''')
- 
+
+
+        self.CovCal = True
         # r'''
         # :raises: AttributeError
 
@@ -423,42 +438,62 @@ future version of PECas.
 
     def print_results(self):
 
-        raise NotImplementedError( \
-'''
-This feature of PECas is currently disabled, but will be available again in a
-future version of PECas.
-''')
+         r'''
+         :raises: AttributeError
 
-#         r'''
-#         :raises: AttributeError
+         This function displays the results of the parameter estimation
+         computations. It can not be used before function
+         :func:`run_parameter_estimation()` has been used. The results
+         displayed by the function contain
 
-#         This function displays the results of the parameter estimation
-#         computations. It can not be used before function
-#         :func:`compute_covariance_matrix()` has been used. The results
-#         displayed by the function contain
+           - the value of :math:`R^2` measuring the goodness of fit
+             of the estimated parameters,
+           - the values of the estimated parameters :math:`\hat{p}`
+             and their corresponding standard deviations
+             (the value of the standar deviation is represented
+             only if the covariance matrix is computed)
+           - the values of the covariance matrix
+             :math:`\Sigma_{\hat{x}}` for the
+             estimated parameters (if is computed),
+           - in the case of the estimation of a dynamic
+             system, the optimal value of the first state 
+             :math:`\Sigma_{\hat{X0}}` and the optimal value 
+             of the last state :math:`\Sigma_{\hat{XN}}`
+           - the running time of the estimation 
+         '''
 
-#           - the value of :math:`\beta`,
-#           - the values of the estimated parameters :math:`\hat{x}`
-#             and their corresponding standard deviations, and
-#           - the values of the covariance matrix
-#             :math:`\Sigma_{\hat{x}}` for the
-#             estimated parameters.
-#         '''
+         if (self.EstimationDone == False):
+             raise AttributeError('''
+ You must execute both run_parameter_estimation() and
+ compute_covariance_matrix() before all results can be displayed.
+ ''')
 
-#         if (self.get_xhat(msg = False) is None) or \
-#             (self.get_Covx(msg = False) is None):
+         if self.CovCal == False:
+            print('\n\n## Begin of parameter estimation results ##')
+             
+            print("\nEstimated parameters pi:")
+            for i, xi in enumerate(self.Phat):
+            
+                print("p{0:<3} = {1:10}".format(\
+                     i, xi))
+            
+            print("\nEstimated initial value x0:  ")
+            print self.Xhat[:,0]             
+            
+            print("\nEstimated final value xN:  ")
+            print self.Xhat[:,-1]  
+                     
+            print("\nGoodness of fit R-squared:  ")
+            print("R^2 = {0}".format(self.Rsquared))
 
-#             raise AttributeError('''
-# You must execute both run_parameter_estimation() and
-# compute_covariance_matrix() before all results can be displayed.
-# ''')
+            print("\nDuration of the problem setup:  ")
+            print self.pesetup.setupDura
+            
+            print("\nDuration of the simulation:  ")
+            print self.est_duration
+             
+            print('\n\n##  End of parameter estimation results  ## \n')
 
-
-#         print('\n\n## Begin of parameter estimation results ## \n')
-
-#         print("Factor beta and residual Rhat:\n")
-#         print("beta = {0}".format(self.get_beta()))
-#         print("Rhat = {0}\n".format(self.get_Rhat()))
 
 #         print("\nEstimated parameters xi:\n")
 #         for i, xi in enumerate(self.get_xhat()):
