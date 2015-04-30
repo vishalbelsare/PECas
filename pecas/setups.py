@@ -235,8 +235,6 @@ class BSsetup(SetupsBaseClass):
             raise TypeError("Setup-method " + self.__class__.__name__ + \
                 " not allowed for system of type " + str(type(system)) + ".")
 
-        self.system = system
-
         # Dimensions
 
         self.nu = system.vars["u"].shape[0]
