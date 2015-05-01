@@ -292,6 +292,10 @@ class BSsetup(SetupsBaseClass):
 
         self.phiN = ca.vertcat(self.phiN)
 
+        self.phiNfcn = ca.SXFunction([self.Vars], [self.phiN])
+        self.phiNfcn.setOption("name", "phiNfcn")
+        self.phiNfcn.init()
+
         # Set up g
 
         # TODO! Can/should/must gfcn depend on u and/or t?
