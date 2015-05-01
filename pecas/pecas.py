@@ -475,7 +475,7 @@ future version of PECas.
             for i, xi in enumerate(self.Phat):
             
                 print("p{0:<3} = {1:10}".format(\
-                     i, xi))
+                     i, xi[0]))
             
             print("\nEstimated initial value x0:  ")
             print self.Xhat[:,0]             
@@ -507,6 +507,69 @@ future version of PECas.
 
 #         print('\n\n##  End of parameter estimation results  ## \n')
 
+
+    def show_system_information(self, showEquations = False):
+        
+        print('\n\n## Begin of system information ##')
+
+        if isinstance(self.pesetup.system, systems.BasicSystem):
+            
+            print("""\The system is a non-dynamic systems with the general 
+input-output structure and contrain equations: """)
+            
+            print("Phi = y(t, u, p), g(t, u, p)=0 ")
+            
+            print("""\nWith {0} inputs u, {1} parameters p and {2} outputs y
+            """.format(self.pesetup.nu,self.pesetup.np,self.pesetup.ny))
+
+
+            if showEquations:
+                
+                print("\nAnd where Phi is defined by: ")
+                for i, yi in enumerate(self.pesetup.system.fcn['y']):         
+                    print("y[{0}] = {1}".format(\
+                         i, yi))
+                         
+                print("\nAnd where g is defined by: ")
+                for i, gi in enumerate(self.pesetup.system.fcn['g']):              
+                    print("g[{0}] = {1}".format(\
+                         i, gi))
+
+        elif isinstance(self.pesetup.system, systems.ExplODE):
+
+            print("""\nThe system is a dynamic defined by a set of explicit ODEs 
+xdot which stablish the system state x:
+    xdot = f(t, u, x, p, w) )
+and by an output function y which sets the system measurements:
+    Phi = y(t, x, p)
+""")
+            
+            
+            print("""Particularly, the system has:
+    {0} inputs u
+    {1} parameters p
+    {2} states x
+    {3} outputs y""".format(self.pesetup.nu,self.pesetup.np,\
+                                self.pesetup.nx, self.pesetup.ny))
+
+            if showEquations:
+                
+                print("\nWhere xdot is defined by: ")
+                for i, xi in enumerate(self.pesetup.system.fcn['f']):         
+                    print("xdot[{0}] = {1}".format(\
+                         i, xi))
+                         
+                print("\nAnd where y is defined by: ")
+                for i, yi in enumerate(self.pesetup.system.fcn['y']):              
+                    print("y[{0}] = {1}".format(\
+                         i, yi))   
+        else:
+            raise NotImplementedError('''
+This feature of PECas is currently disabled, but will be 
+available when the DAE systems are implemented.
+''')
+
+        print('\n\n##  End of system information  ## \n')
 
     def plot_confidence_ellipsoids(self, indices = []):
 
