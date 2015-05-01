@@ -4,8 +4,6 @@ import pecas
 
 import time
 
-tstart = time.time()
-
 #==============================================================================
 # Defining constant problem parameters: 
 #     - m: representing the ball of the mass in Kg
@@ -71,38 +69,28 @@ lsqpe = pecas.LSq(pesetup =odesetup, yN =yN, wv = wv)
 lsqpe.run_parameter_estimation()
 phat = lsqpe.phat
 
-print "Khat: " + str(phat)
-
 phihat = lsqpe.Xhat[0]
 what = lsqpe.Xhat[1]
 
-print "Phi0hat: " + str(phihat[0])
-print "w0hat: " + str(what[0])
-
-tend = time.time()
-dur = tend - tstart
-print "started: " + time.ctime(tstart)
-print "ended: " + time.ctime(tend)
-print "duration: " + str(dur) + "sec"
-
+lsqpe.show_system_information(showEquations = True)
 lsqpe.print_results()
 
-pl.close("all")
-
-pl.figure()
-pl.subplot(2, 1, 1)
-pl.plot(phihat)
-pl.plot(phim)
-
-pl.subplot(2, 1, 2)
-pl.plot(what)
-pl.plot(wm)
-
-pl.figure()
-pl.plot(phihat, what)
-pl.plot(phim, wm)
-
-# pl.figure()
-# pl.plot(sum(odesetup.V()(lsqpe.Vhat)["X",:,:,0], []))
-
-pl.show()
+#pl.close("all")
+#
+#pl.figure()
+#pl.subplot(2, 1, 1)
+#pl.plot(phihat)
+#pl.plot(phim)
+#
+#pl.subplot(2, 1, 2)
+#pl.plot(what)
+#pl.plot(wm)
+#
+#pl.figure()
+#pl.plot(phihat, what)
+#pl.plot(phim, wm)
+#
+## pl.figure()
+## pl.plot(sum(odesetup.V()(lsqpe.Vhat)["X",:,:,0], []))
+#
+#pl.show()

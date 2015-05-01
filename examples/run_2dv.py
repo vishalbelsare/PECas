@@ -4,8 +4,6 @@ import pecas
 
 import time
 
-tstart = time.time()
-
 # System
 
 x = ca.SX.sym("x", 4)
@@ -60,9 +58,9 @@ odesetup = pecas.setups.ODEsetup( \
 lsqpe = pecas.LSq(pesetup =odesetup, yN =yN, wv = wv, ww = ww)
 
 lsqpe.run_parameter_estimation()
-phat = lsqpe.phat
-print porig
-print phat
+
+lsqpe.show_system_information(showEquations = True)
+lsqpe.print_results()
 
 xhat = lsqpe.Xhat[0]
 yhat = lsqpe.Xhat[1]
@@ -96,9 +94,3 @@ vhat = lsqpe.Xhat[3]
 # pl.plot(sum(odesetup.V()(lsqpe.Vhat)["X",:,:,0], []))
 
 # pl.show()
-
-tend = time.time()
-dur = tend - tstart
-print "started: " + time.ctime(tstart)
-print "ended: " + time.ctime(tend)
-print "duration: " + str(dur) + "sec"
