@@ -269,7 +269,7 @@ class LSq(PECasBaseClass):
         Ysim = self.pesetup.phiNfcn([self.Varshat])[0]
         Ym = pl.reshape(self.yN.T,(Ysim.shape))
         res = Ym-Ysim
-        self.residual = ca.mul([res.T,res])
+        self.residual = (pl.norm(res))**2
 
         self.est_duration = time.time() - self.tstart
 
