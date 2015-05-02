@@ -2,8 +2,6 @@ import casadi as ca
 import pylab as pl
 import pecas
 
-import time
-
 #==============================================================================
 # Defining constant problem parameters: 
 #     - m: representing the ball of the mass in Kg
