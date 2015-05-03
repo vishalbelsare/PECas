@@ -105,7 +105,7 @@ class SetupsBaseClass(object):
         if "X" in self.Vars.keys():
 
             if xinit is None:
-                xinit = pl.ones((self.nx, self.nsteps + 1))
+                xinit = pl.zeros((self.nx, self.nsteps + 1))
             if xmin is None:
                 xmin = -pl.inf * pl.ones((self.nx, self.nsteps + 1))   
             if xmax is None:
