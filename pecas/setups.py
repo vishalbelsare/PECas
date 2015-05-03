@@ -105,7 +105,7 @@ class SetupsBaseClass(object):
         if "X" in self.Vars.keys():
 
             if xinit is None:
-                xinit = pl.zeros((self.nx, self.nsteps + 1))
+                xinit = pl.ones((self.nx, self.nsteps + 1))
             if xmin is None:
                 xmin = -pl.inf * pl.ones((self.nx, self.nsteps + 1))   
             if xmax is None:
@@ -403,7 +403,7 @@ class CollocationBaseClass(SetupsBaseClass):
         yfcn.setOption("name", "yfcn")
         yfcn.init()
 
-        for k in range(self.nsteps + 1):
+        for k in range(self.nsteps+1):
 
             # DEPENDECY ON U NOT POSSIBLE AT THIS POINT! len(U) = N, not N + 1!
             # self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["U", k, 0], \
