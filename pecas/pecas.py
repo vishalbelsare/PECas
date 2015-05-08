@@ -486,6 +486,10 @@ future version of PECas.
             print("\nGoodness of fit R-squared:  ")
             print("R^2 = {0}".format(self.Rsquared))
 
+            print("\nResidual:  ")
+            print("R^2 = {0}".format(self.residual))
+
+
             print("\nDuration of the problem setup:  ")
             print self.pesetup.setupDura
             
