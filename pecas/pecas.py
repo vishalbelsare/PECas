@@ -487,7 +487,7 @@ future version of PECas.
             print("R^2 = {0}".format(self.Rsquared))
 
             print("\nResidual:  ")
-            print("R^2 = {0}".format(self.residual))
+            print("Residual = {0}".format(self.residual))
 
 
             print("\nDuration of the problem setup:  ")
