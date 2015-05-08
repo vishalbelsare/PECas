@@ -273,7 +273,7 @@ class LSq(PECasBaseClass):
 
         self.est_duration = time.time() - self.tstart
 
-        self.Rsquared = 1 - self.residual/ca.mul([Ym.T,Ym])
+        self.Rsquared = 1 - self.residual/(pl.norm(Ym))**2
         
     @property        
     def Phat(self):       
