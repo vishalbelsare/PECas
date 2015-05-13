@@ -263,7 +263,7 @@ class LSq(PECasBaseClass):
 
         self.Varshat = solver.getOutput("x")
         self.rhat = solver.getOutput("f")
-    
+        
         self.EstimationDone = True
         
         Ysim = self.pesetup.phiNfcn([self.Varshat])[0]
