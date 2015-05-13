@@ -399,16 +399,19 @@ class CollocationBaseClass(SetupsBaseClass):
         self.phiN = []
 
         yfcn = ca.SXFunction([system.vars["t"], system.vars["x"], \
-            system.vars["p"]], [system.fcn["y"]])
+            system.vars["p"],system.vars["u"]], [system.fcn["y"]])
         yfcn.setOption("name", "yfcn")
         yfcn.init()
 
-        for k in range(self.nsteps+1):
+        for k in range(self.nsteps):
 
             # DEPENDECY ON U NOT POSSIBLE AT THIS POINT! len(U) = N, not N + 1!
             # self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["U", k, 0], \
             self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["X", k, 0], \
-                self.Vars["P"]])[0])
+                self.Vars["P"],u[k,:]])[0])
+
+        self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["X", -1, 0], \
+            self.Vars["P"],u[-1,:]])[0])
 
         self.phiN = ca.vertcat(self.phiN)
 
