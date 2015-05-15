@@ -269,11 +269,15 @@ class LSq(PECasBaseClass):
         Ysim = self.pesetup.phiNfcn([self.Varshat])[0]
         Ym = pl.reshape(self.yN.T,(Ysim.shape))
         res = Ym-Ysim
-        self.residual = (pl.norm(res))**2
+        self.residual = []
+        self.Rsquared = []
+        dataSize = self.pesetup.timegrid.size
+        for i in range(self.pesetup.ny):            
+            self.residual.append((pl.norm(res[i*dataSize:(i+1)*dataSize]))**2)
+            self.Rsquared.append(1 - self.residual[i]/(pl.norm(Ym[i*dataSize:(i+1)*dataSize]))**2)
 
         self.est_duration = time.time() - self.tstart
 
-        self.Rsquared = 1 - self.residual/(pl.norm(Ym))**2
         
     @property        
     def Phat(self):       
@@ -484,10 +488,12 @@ future version of PECas.
             print self.Xhat[:,-1]  
                      
             print("\nGoodness of fit R-squared:  ")
-            print("R^2 = {0}".format(self.Rsquared))
+            for i in range(self.pesetup.ny):
+                print("R^2 - X{0}= {1}".format(i,self.Rsquared[i]))
 
             print("\nResidual:  ")
-            print("Residual = {0}".format(self.residual))
+            for i in range(self.pesetup.ny):
+                print("R - X{0} = {1}".format(i,self.residual[i]))
 
 
             print("\nDuration of the problem setup:  ")
