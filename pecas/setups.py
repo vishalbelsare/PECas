@@ -6,8 +6,10 @@ import casadi.tools as cat
 import pylab as pl
 from abc import ABCMeta, abstractmethod
 
-import systems
 import pdb
+import time
+
+import systems
 
 class SetupsBaseClass(object):
 
@@ -216,6 +218,8 @@ class BSsetup(SetupsBaseClass):
         x0min = None, x0max = None, \
         xNmin = None, xNmax = None):
 
+        self.tstart_setup = time.time()
+
         super(BSsetup, self).check_and_set_bounds_and_initials( \
             u = u,
             pmin = pmin, pmax = pmax, pinit = pinit, \
@@ -232,6 +236,8 @@ class BSsetup(SetupsBaseClass):
 
             raise TypeError("Setup-method " + self.__class__.__name__ + \
                 " not allowed for system of type " + str(type(system)) + ".")
+
+        self.system = system
 
         # Dimensions
 
@@ -288,6 +294,10 @@ class BSsetup(SetupsBaseClass):
 
         self.phiN = ca.vertcat(self.phiN)
 
+        self.phiNfcn = ca.SXFunction([self.Vars], [self.phiN])
+        self.phiNfcn.setOption("name", "phiNfcn")
+        self.phiNfcn.init()
+
         # Set up g
 
         # TODO! Can/should/must gfcn depend on u and/or t?
@@ -297,6 +307,9 @@ class BSsetup(SetupsBaseClass):
         gfcn.init()
 
         self.g = gfcn.call([self.Vars["P"]])[0]
+
+        self.tend_setup = time.time()
+        self.duration_setup = self.tend_setup - self.tstart_setup
 
 
 class CollocationBaseClass(SetupsBaseClass):
@@ -331,6 +344,8 @@ class CollocationBaseClass(SetupsBaseClass):
 
             raise TypeError("Setup-method " + self.__class__.__name__ + \
                 " not allowed for system of type " + str(type(system)) + ".")
+
+        self.system = system
 
         # Dimensions
 
@@ -389,18 +404,28 @@ class CollocationBaseClass(SetupsBaseClass):
         self.phiN = []
 
         yfcn = ca.SXFunction([system.vars["t"], system.vars["x"], \
-            system.vars["p"]], [system.fcn["y"]])
+            system.vars["p"], system.vars["u"]], [system.fcn["y"]])
         yfcn.setOption("name", "yfcn")
         yfcn.init()
 
-        for k in range(self.nsteps + 1):
+        # pdb.set_trace()
+
+        for k in range(self.nsteps):
 
             # DEPENDECY ON U NOT POSSIBLE AT THIS POINT! len(U) = N, not N + 1!
             # self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["U", k, 0], \
             self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["X", k, 0], \
-                self.Vars["P"]])[0])
+                self.Vars["P"], self.u[:, k]])[0])
+
+        self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["X", -1, 0], \
+            self.Vars["P"], self.u[:, -1]])[0])
 
         self.phiN = ca.vertcat(self.phiN)
+
+        self.phiNfcn = ca.SXFunction([self.Vars], [self.phiN])
+        self.phiNfcn.setOption("name", "phiNfcn")
+        self.phiNfcn.init()
+
 
         # Set tp the collocation coefficients
 
@@ -480,6 +505,8 @@ class ODEsetup(CollocationBaseClass):
         x0min = None, x0max = None, \
         xNmin = None, xNmax = None):
 
+        self.tstart_setup = time.time()
+
         super(ODEsetup, self).__init__(system = system, \
             timegrid = timegrid, \
             u = u, \
@@ -537,3 +564,6 @@ class ODEsetup(CollocationBaseClass):
         # Concatenate constraints
 
         self.g = ca.vertcat(self.g)
+
+        self.tend_setup = time.time()
+        self.duration_setup = self.tend_setup - self.tstart_setup

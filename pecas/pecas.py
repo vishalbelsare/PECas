@@ -7,10 +7,11 @@ import casadi.tools as cat
 import pylab as pl
 from scipy.misc import comb
 
+import pdb
+import time
+
 import systems
 import setups
-
-import pdb
 
 from abc import ABCMeta, abstractmethod
 
@@ -131,7 +132,7 @@ match the dimensions of the differential equations.''')
 
         try:
             
-            return self.pesetup.Vars()(self.Varshat)["P"]
+            return pl.array(self.pesetup.Vars()(self.Varshat)["P"])
 
         except AttributeError:
 
@@ -152,7 +153,7 @@ obtain the optimal values.
 
                 xhat.append(self.pesetup.Vars()(self.Varshat)["X",:,0,i])
             
-            return xhat
+            return pl.array(xhat)
 
         except AttributeError:
 
@@ -196,6 +197,8 @@ class LSq(PECasBaseClass):
         - the value of the residual :math:`\hat{R}`
           can be returned using the function :func:`get_Rhat()`.
         '''          
+
+        self.tstart_estimation = time.time()
 
         A = []
 
@@ -257,6 +260,17 @@ class LSq(PECasBaseClass):
 
         self.Varshat = solver.getOutput("x")
         self.rhat = solver.getOutput("f")
+        
+        Ysim = self.pesetup.phiNfcn([self.Varshat])[0]
+        Ym = pl.reshape(self.yN.T,(Ysim.shape))
+        res = Ym-Ysim
+        self.residual = (pl.norm(res))**2
+
+        self.tend_estimation = time.time()
+        self.duration_estimation = self.tend_estimation - \
+            self.tstart_estimation
+
+        self.Rsquared = 1 - self.residual/(pl.norm(Ym))**2
 
 
     def compute_covariance_matrix(self):
@@ -390,56 +404,139 @@ future version of PECas.
         # self.__Covx = self.__fCovx.getOutput("f")
 
 
-    def print_results(self):
+    def show_results(self):
 
-        raise NotImplementedError( \
-'''
-This feature of PECas is currently disabled, but will be available again in a
-future version of PECas.
+        r'''
+        :raises: AttributeError
+
+        This function displays the results of the parameter estimation
+        computations. It can not be used before function
+        :func:`run_parameter_estimation()` has been used. The results
+        displayed by the function contain
+
+          - the value of :math:`R^2` measuring the goodness of fit
+            of the estimated parameters,
+          - the values of the estimated parameters :math:`\hat{p}`
+            and their corresponding standard deviations
+            (the value of the standar deviation is represented
+            only if the covariance matrix is computed)
+          - the values of the covariance matrix
+            :math:`\Sigma_{\hat{x}}` for the
+            estimated parameters (if is computed),
+          - in the case of the estimation of a dynamic
+            system, the optimal value of the first state 
+            :math:`\Sigma_{\hat{X0}}` and the optimal value 
+            of the last state :math:`\Sigma_{\hat{XN}}`
+          - the running time of the estimation 
+        '''
+
+        try:
+
+            print('\n\n## Begin of parameter estimation results ##')
+             
+            print("\nEstimated parameters pi:")
+            for i, xi in enumerate(self.phat):
+            
+                print("p{0:<3} = {1:10}".format(\
+                     i, xi[0]))
+            
+            try:
+
+                print("\nEstimated initial value x0:  ")
+                print(self.Xhat[:,0])
+                
+                print("\nEstimated final value xN:  ")
+                print(self.Xhat[:,-1])
+                   
+            except AttributeError:
+
+                pass
+
+            print("\nGoodness of fit R-squared:  ")
+            print("R^2 = {0}".format(self.Rsquared))
+
+            print("\nResidual:  ")
+            print("Residual = {0}".format(self.residual))
+
+            print("\nDuration of the problem setup:  ")
+            print(self.pesetup.duration_setup)
+            
+            print("\nDuration of the simulation:  ")
+            print(self.duration_estimation)
+             
+            print('\n\n##  End of parameter estimation results  ## \n')
+
+
+        except AttributeError:
+
+            raise AttributeError('''
+You must execute at least run_parameter_estimation() to obtain results,
+and compute_covariance_matrix() before all results can be displayed.
+''')   
+
+
+    def show_system_information(self, showEquations = False):
+        
+        print('\n\n## Begin of system information ##')
+
+        if isinstance(self.pesetup.system, systems.BasicSystem):
+            
+            print("""\The system is a non-dynamic systems with the general 
+input-output structure and contrain equations: """)
+            
+            print("Phi = y(t, u, p), g(t, u, p)=0 ")
+            
+            print("""\nWith {0} inputs u, {1} parameters p and {2} outputs y
+            """.format(self.pesetup.nu,self.pesetup.np,self.pesetup.ny))
+
+
+            if showEquations:
+                
+                print("\nAnd where Phi is defined by: ")
+                for i, yi in enumerate(self.pesetup.system.fcn['y']):         
+                    print("y[{0}] = {1}".format(\
+                         i, yi))
+                         
+                print("\nAnd where g is defined by: ")
+                for i, gi in enumerate(self.pesetup.system.fcn['g']):              
+                    print("g[{0}] = {1}".format(\
+                         i, gi))
+
+        elif isinstance(self.pesetup.system, systems.ExplODE):
+
+            print("""\nThe system is a dynamic defined by a set of explicit ODEs 
+xdot which stablish the system state x:
+    xdot = f(t, u, x, p, w) )
+and by an output function y which sets the system measurements:
+    Phi = y(t, x, p)
+""")
+            
+            
+            print("""Particularly, the system has:
+    {0} inputs u
+    {1} parameters p
+    {2} states x
+    {3} outputs y""".format(self.pesetup.nu,self.pesetup.np,\
+                                self.pesetup.nx, self.pesetup.ny))
+
+            if showEquations:
+                
+                print("\nWhere xdot is defined by: ")
+                for i, xi in enumerate(self.pesetup.system.fcn['f']):         
+                    print("xdot[{0}] = {1}".format(\
+                         i, xi))
+                         
+                print("\nAnd where y is defined by: ")
+                for i, yi in enumerate(self.pesetup.system.fcn['y']):              
+                    print("y[{0}] = {1}".format(\
+                         i, yi))   
+        else:
+            raise NotImplementedError('''
+This feature of PECas is currently disabled, but will be 
+available when the DAE systems are implemented.
 ''')
 
-#         r'''
-#         :raises: AttributeError
-
-#         This function displays the results of the parameter estimation
-#         computations. It can not be used before function
-#         :func:`compute_covariance_matrix()` has been used. The results
-#         displayed by the function contain
-
-#           - the value of :math:`\beta`,
-#           - the values of the estimated parameters :math:`\hat{x}`
-#             and their corresponding standard deviations, and
-#           - the values of the covariance matrix
-#             :math:`\Sigma_{\hat{x}}` for the
-#             estimated parameters.
-#         '''
-
-#         if (self.get_xhat(msg = False) is None) or \
-#             (self.get_Covx(msg = False) is None):
-
-#             raise AttributeError('''
-# You must execute both run_parameter_estimation() and
-# compute_covariance_matrix() before all results can be displayed.
-# ''')
-
-
-#         print('\n\n## Begin of parameter estimation results ## \n')
-
-#         print("Factor beta and residual Rhat:\n")
-#         print("beta = {0}".format(self.get_beta()))
-#         print("Rhat = {0}\n".format(self.get_Rhat()))
-
-#         print("\nEstimated parameters xi:\n")
-#         for i, xi in enumerate(self.get_xhat()):
-
-#             print("x{0:<3} = {1:10} +/- {2:10}".format(\
-#                 i, xi, pl.sqrt(self.get_Covx()[i, i])))
-
-#         print("\n\nCovariance matrix Cov(x):\n")
-
-#         print(pl.vectorize("%03.05e".__mod__)(self.get_Covx()))
-
-#         print('\n\n##  End of parameter estimation results  ## \n')
+        print('\n\n##  End of system information  ## \n')
 
 
     def plot_confidence_ellipsoids(self, indices = []):

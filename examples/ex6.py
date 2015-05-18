@@ -58,7 +58,6 @@ sigmaw = 1.0 / (pl.ones(timegrid.size)*pl.std(wm, ddof=1)**2)
 
 wv = pl.array([sigmaphi, sigmaw])
 
-
 odesetup = pecas.setups.ODEsetup( \
     system = odesys, timegrid = timegrid,
     u = uN, \
@@ -71,36 +70,39 @@ lsqpe = pecas.LSq(pesetup =odesetup, yN =yN, wv = wv)
 lsqpe.run_parameter_estimation()
 phat = lsqpe.phat
 
-print "Khat: " + str(phat)
+# print "Khat: " + str(phat)
 
 phihat = lsqpe.Xhat[0]
 what = lsqpe.Xhat[1]
 
-print "Phi0hat: " + str(phihat[0])
-print "w0hat: " + str(what[0])
+lsqpe.show_system_information(showEquations = True)
+lsqpe.print_results()
 
-pl.close("all")
+# print "Phi0hat: " + str(phihat[0])
+# print "w0hat: " + str(what[0])
 
-pl.figure()
-pl.subplot(2, 1, 1)
-pl.plot(phihat)
-pl.plot(phim)
+# pl.close("all")
 
-pl.subplot(2, 1, 2)
-pl.plot(what)
-pl.plot(wm)
+# pl.figure()
+# pl.subplot(2, 1, 1)
+# pl.plot(phihat)
+# pl.plot(phim)
 
-pl.figure()
-pl.plot(phihat, what)
-pl.plot(phim, wm)
+# pl.subplot(2, 1, 2)
+# pl.plot(what)
+# pl.plot(wm)
+
+# pl.figure()
+# pl.plot(phihat, what)
+# pl.plot(phim, wm)
 
 # pl.figure()
 # pl.plot(sum(odesetup.V()(lsqpe.Vhat)["X",:,:,0], []))
 
-pl.show()
+# pl.show()
 
-tend = time.time()
-dur = tend - tstart
-print "started: " + time.ctime(tstart)
-print "ended: " + time.ctime(tend)
-print "duration: " + str(dur) + "sec"
+# tend = time.time()
+# dur = tend - tstart
+# print "started: " + time.ctime(tstart)
+# print "ended: " + time.ctime(tend)
+# print "duration: " + str(dur) + "sec"
