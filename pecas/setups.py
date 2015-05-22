@@ -10,6 +10,7 @@ import pdb
 import time
 
 import systems
+import intro
 
 class SetupsBaseClass(object):
 
@@ -25,7 +26,10 @@ class SetupsBaseClass(object):
         '''Placeholder-function for the according __init__()-methods of the
         classes that inherit from :class:`SetupsBaseClass`.'''
 
-        pass
+        intro.pecas_intro()
+        print('\n' + 24 * '-' + \
+            ' PECas system initialization ' + 25 * '-')
+        print('\nStart system initialization ...')
 
 
     def check_and_set_bounds_and_initials(self, \
@@ -232,6 +236,8 @@ class BSsetup(SetupsBaseClass):
         u = None, \
         pmin = None, pmax = None, pinit = None):
 
+        SetupsBaseClass.__init__(self)
+
         if not type(system) is systems.BasicSystem:
 
             raise TypeError("Setup-method " + self.__class__.__name__ + \
@@ -311,6 +317,8 @@ class BSsetup(SetupsBaseClass):
         self.tend_setup = time.time()
         self.duration_setup = self.tend_setup - self.tstart_setup
 
+        print('Initialization of BasicSystem system sucessful.')
+
 
 class CollocationBaseClass(SetupsBaseClass):
 
@@ -339,6 +347,8 @@ class CollocationBaseClass(SetupsBaseClass):
         x0min = None, x0max = None, \
         xNmin = None, xNmax = None, \
         systemclass = None):
+
+        SetupsBaseClass.__init__(self)
 
         if not type(system) is systemclass:
 
@@ -567,3 +577,5 @@ class ODEsetup(CollocationBaseClass):
 
         self.tend_setup = time.time()
         self.duration_setup = self.tend_setup - self.tstart_setup
+
+        print('Initialization of ExplODE system sucessful.')

@@ -67,6 +67,8 @@ odesetup = pecas.setups.ODEsetup( \
 
 lsqpe = pecas.LSq(pesetup =odesetup, yN =yN, wv = wv)
 
+lsqpe.show_system_information(showEquations = True)
+
 lsqpe.run_parameter_estimation()
 phat = lsqpe.phat
 
@@ -75,8 +77,7 @@ phat = lsqpe.phat
 phihat = lsqpe.Xhat[0]
 what = lsqpe.Xhat[1]
 
-lsqpe.show_system_information(showEquations = True)
-lsqpe.print_results()
+lsqpe.show_results()
 
 # print "Phi0hat: " + str(phihat[0])
 # print "w0hat: " + str(what[0])

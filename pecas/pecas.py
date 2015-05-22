@@ -12,6 +12,7 @@ import time
 
 import systems
 import setups
+import intro
 
 from abc import ABCMeta, abstractmethod
 
@@ -21,6 +22,11 @@ class PECasBaseClass:
 
     @abstractmethod
     def __init__(self, pesetup = None, yN = None, wv = None, ww = None):
+
+        intro.pecas_intro()
+        print('\n' + 22 * '-' + \
+            ' PECas parameter estimation setup ' + 22 * '-')
+        print('\nStarting parameter estimation problem setup ...') 
 
         # Store the parameter estimation problem setup
 
@@ -126,6 +132,8 @@ match the dimensions of the differential equations.''')
 
         self.W = pl.diag(pl.concatenate((self.wv, self.ww)))
 
+        print('Setup of the parameter estimation problem sucessful.')        
+
 
     @property
     def phat(self):
@@ -166,7 +174,8 @@ obtain the optimal values.
 class LSq(PECasBaseClass):
 
     '''The class :class:`LSq` is used to solve least squares parameter
-    estimation problems with PECas for a given set of measurement data.'''
+    estimation problems for previously defined systems using a given set
+    of measurement data and weightings.'''
 
     def __init__(self, pesetup = None, yN = None, wv = None, ww = None):
 
@@ -176,7 +185,7 @@ class LSq(PECasBaseClass):
     def run_parameter_estimation(self):
 
         r'''
-        This functions will run a least sqaures parameter estimation for the
+        This functions will run a least squares parameter estimation for the
         given problem and data set.
 
         For this, the least squares parameter estimation problem
@@ -197,6 +206,15 @@ class LSq(PECasBaseClass):
         - the value of the residual :math:`\hat{R}`
           can be returned using the function :func:`get_Rhat()`.
         '''          
+
+        intro.pecas_intro()
+        print('\n' + 18 * '-' + \
+            ' PECas least squares parameter estimation ' + 18 * '-')
+
+        print('''
+Starting least squares parameter estimation using IPOPT, 
+this might take some time ...
+''')
 
         self.tstart_estimation = time.time()
 
@@ -272,8 +290,18 @@ class LSq(PECasBaseClass):
 
         self.Rsquared = 1 - self.residual/(pl.norm(Ym))**2
 
+        print('''
+Parameter estimation finished. Check IPOPT output for status information.
+''')
+
 
     def compute_covariance_matrix(self):
+
+        r'''
+
+        --- docstring tbd ---
+        
+        '''
 
         raise NotImplementedError( \
 '''
@@ -412,59 +440,58 @@ future version of PECas.
         This function displays the results of the parameter estimation
         computations. It can not be used before function
         :func:`run_parameter_estimation()` has been used. The results
-        displayed by the function contain
+        displayed by the function contain:
 
           - the value of :math:`R^2` measuring the goodness of fit
             of the estimated parameters,
           - the values of the estimated parameters :math:`\hat{p}`
             and their corresponding standard deviations
             (the value of the standar deviation is represented
-            only if the covariance matrix is computed)
+            only if the covariance matrix is computed),
           - the values of the covariance matrix
             :math:`\Sigma_{\hat{x}}` for the
             estimated parameters (if is computed),
           - in the case of the estimation of a dynamic
             system, the optimal value of the first state 
-            :math:`\Sigma_{\hat{X0}}` and the optimal value 
-            of the last state :math:`\Sigma_{\hat{XN}}`
-          - the running time of the estimation 
+            :math:`\hat{x}(t_{0})` and the optimal value 
+            of the last state :math:`\hat{x}(t_{N})`, and
+          - the durations of the setup and the estimation.
         '''
+
+        intro.pecas_intro()
 
         try:
 
-            print('\n\n## Begin of parameter estimation results ##')
+            print('\n' + 21 * '-' + \
+                ' PECas Parameter estimation results ' + 21 * '-')
              
-            print("\nEstimated parameters pi:")
+            print("\nEstimated parameters p_i:")
             for i, xi in enumerate(self.phat):
             
-                print("p{0:<3} = {1:10}".format(\
+                print("    p_{0:<3} = {1:10}".format(\
                      i, xi[0]))
             
             try:
 
-                print("\nEstimated initial value x0:  ")
-                print(self.Xhat[:,0])
+                print("\nEstimated initial states value:  ")
+                print("    x(t_0) = " + str(self.Xhat[:,0]))
                 
-                print("\nEstimated final value xN:  ")
-                print(self.Xhat[:,-1])
+                print("\nEstimated final states value:  ")
+                print("    x(t_N) = " + str(self.Xhat[:,-1]))
                    
             except AttributeError:
 
                 pass
 
-            print("\nGoodness of fit R-squared:  ")
-            print("R^2 = {0}".format(self.Rsquared))
+            print("\nGoodness of fit R^2..............: {0}".format(self.Rsquared))
 
-            print("\nResidual:  ")
-            print("Residual = {0}".format(self.residual))
+            print("Residual.........................: {0}".format(self.residual))
 
-            print("\nDuration of the problem setup:  ")
-            print(self.pesetup.duration_setup)
+            print("\nDuration of the problem setup....: " + \
+                str(self.pesetup.duration_setup) + " s")
             
-            print("\nDuration of the simulation:  ")
-            print(self.duration_estimation)
-             
-            print('\n\n##  End of parameter estimation results  ## \n')
+            print("Duration of the estimation.......: " + \
+                str(self.duration_estimation) + " s")
 
 
         except AttributeError:
@@ -476,15 +503,24 @@ and compute_covariance_matrix() before all results can be displayed.
 
 
     def show_system_information(self, showEquations = False):
+
+        r'''
+
+        --- docstring tbd ---
+
+        '''
         
-        print('\n\n## Begin of system information ##')
+        intro.pecas_intro()
+
+        print('\n' + 26 * '-' + \
+            ' PECas system information ' + 26 * '-')
 
         if isinstance(self.pesetup.system, systems.BasicSystem):
             
             print("""\The system is a non-dynamic systems with the general 
 input-output structure and contrain equations: """)
             
-            print("Phi = y(t, u, p), g(t, u, p)=0 ")
+            print("phi = y(t, u, p), g(t, u, p) = 0 ")
             
             print("""\nWith {0} inputs u, {1} parameters p and {2} outputs y
             """.format(self.pesetup.nu,self.pesetup.np,self.pesetup.ny))
@@ -504,11 +540,11 @@ input-output structure and contrain equations: """)
 
         elif isinstance(self.pesetup.system, systems.ExplODE):
 
-            print("""\nThe system is a dynamic defined by a set of explicit ODEs 
-xdot which stablish the system state x:
-    xdot = f(t, u, x, p, w) )
+            print("""\nThe system is a dynamic system defined by a set of
+explicit ODEs xdot which establish the system state x:
+    xdot = f(t, u, x, p, w)
 and by an output function y which sets the system measurements:
-    Phi = y(t, x, p)
+    phi = y(t, x, p).
 """)
             
             
@@ -536,10 +572,14 @@ This feature of PECas is currently disabled, but will be
 available when the DAE systems are implemented.
 ''')
 
-        print('\n\n##  End of system information  ## \n')
-
 
     def plot_confidence_ellipsoids(self, indices = []):
+
+        r'''
+
+        --- docstring tbd ---
+        
+        '''
 
         raise NotImplementedError( \
 '''
