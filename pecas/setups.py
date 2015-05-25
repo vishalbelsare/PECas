@@ -403,7 +403,7 @@ class CollocationBaseClass(SetupsBaseClass):
         yfcn.setOption("name", "yfcn")
         yfcn.init()
 
-        for k in range(self.nsteps):
+        for k in range(self.nsteps+1):
 
             # DEPENDECY ON U NOT POSSIBLE AT THIS POINT! len(U) = N, not N + 1!
             # self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["U", k, 0], \
