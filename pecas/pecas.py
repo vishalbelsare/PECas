@@ -271,10 +271,9 @@ class LSq(PECasBaseClass):
         res = Ym-Ysim
         self.residual = []
         self.Rsquared = []
-        dataSize = self.pesetup.timegrid.size
         for i in range(self.pesetup.ny):            
-            self.residual.append((pl.norm(res[i*dataSize:(i+1)*dataSize]))**2)
-            self.Rsquared.append(1 - self.residual[i]/(pl.norm(Ym[i*dataSize:(i+1)*dataSize]))**2)
+            self.residual.append((pl.norm(res[i:-1:self.pesetup.ny]))**2)
+            self.Rsquared.append(1 - self.residual[i]/(pl.norm(Ym[i:-1:self.pesetup.ny]))**2)
 
         self.est_duration = time.time() - self.tstart
 
@@ -489,11 +488,11 @@ future version of PECas.
                      
             print("\nGoodness of fit R-squared:  ")
             for i in range(self.pesetup.ny):
-                print("R^2 - X{0}= {1}".format(i,self.Rsquared[i]))
+                print("R^2 - Y{0}= {1}".format(i,self.Rsquared[i]))
 
             print("\nResidual:  ")
             for i in range(self.pesetup.ny):
-                print("R - X{0} = {1}".format(i,self.residual[i]))
+                print("R - Y{0} = {1}".format(i,self.residual[i]))
 
 
             print("\nDuration of the problem setup:  ")
