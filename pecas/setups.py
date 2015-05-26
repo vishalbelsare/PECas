@@ -134,11 +134,15 @@ class SetupsBaseClass(object):
                 raise ValueError( \
                     "Wrong dimension for argument xinit, xmin or xmax.")
 
-            for k in range(self.nsteps + 1):
+            for k in range(self.nsteps):
 
                 self.Varsinit["X",k,:] = ca.tools.repeated(xinit[:,k])
                 self.Varsmin["X",k,:] = ca.tools.repeated(xmin[:,k])
                 self.Varsmax["X",k,:] = ca.tools.repeated(xmax[:,k])
+
+            self.Varsinit["XF"] = xinit[:,-1]
+            self.Varsmin["XF"] = xmin[:,-1]
+            self.Varsmax["XF"] = xmax[:,-1]
 
             # Set the state bounds at the initial time, if explicitly given
 
@@ -184,7 +188,7 @@ class SetupsBaseClass(object):
 
                     raise ValueError("Wrong dimension for argument xNmin.")
 
-                self.Varsmin["X",-1,0] = xNmin
+                self.Varsmin["XF"] = xNmin
 
             if xNmax is not None:
 
@@ -198,7 +202,7 @@ class SetupsBaseClass(object):
 
                     raise ValueError("Wrong dimension for argument xNmax.")
 
-                self.Varsmax["X",-1,0] = xNmax
+                self.Varsmax["XF"] = xNmax
 
             # Set the bounds on the equation errors
 
@@ -290,8 +294,6 @@ class BSsetup(SetupsBaseClass):
             system.vars["p"]], [system.fcn["y"]])
         yfcn.setOption("name", "yfcn")
         yfcn.init()
-
-        # pdb.set_trace()
 
         for k in range(self.nsteps):
 
@@ -390,9 +392,10 @@ class CollocationBaseClass(SetupsBaseClass):
 
         self.Vars = cat.struct_symSX([
                 (
-                    cat.entry("X", repeat = [self.nsteps+1, self.ntauroot+1], \
-                        shape = self.nx),
-                    cat.entry("P", shape = self.np),
+                    cat.entry("X", repeat = [self.nsteps, self.ntauroot+1], \
+                        shape = self.nx), \
+                    cat.entry("XF", shape = self.nx), \
+                    cat.entry("P", shape = self.np), \
                     cat.entry("V", repeat = [self.nsteps+1], \
                         shape = self.nv),
                     cat.entry("W", repeat = [self.nsteps, self.ntauroot], \
@@ -418,8 +421,6 @@ class CollocationBaseClass(SetupsBaseClass):
         yfcn.setOption("name", "yfcn")
         yfcn.init()
 
-        # pdb.set_trace()
-
         for k in range(self.nsteps):
 
             # DEPENDECY ON U NOT POSSIBLE AT THIS POINT! len(U) = N, not N + 1!
@@ -427,7 +428,7 @@ class CollocationBaseClass(SetupsBaseClass):
             self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["X", k, 0], \
                 self.Vars["P"], self.u[:, k]])[0])
 
-        self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["X", -1, 0], \
+        self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["XF"], \
             self.Vars["P"], self.u[:, -1]])[0])
 
         self.phiN = ca.vertcat(self.phiN)
@@ -532,6 +533,8 @@ class ODEsetup(CollocationBaseClass):
         ffcn.setOption("name", "ffcn")
         ffcn.init()
 
+        print self.nsteps
+
         # For all finite elements
 
         for k in range(self.nsteps):
@@ -569,7 +572,13 @@ class ODEsetup(CollocationBaseClass):
             
             # Add the continuity equation to NLP
             
-            self.g.append(self.Vars["X",k+1,0] - xf_k)
+            if k == (self.nsteps - 1):
+
+                self.g.append(self.Vars["XF"] - xf_k)
+
+            else:
+
+                self.g.append(self.Vars["X",k+1,0] - xf_k)
 
         # Concatenate constraints
 
