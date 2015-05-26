@@ -127,7 +127,7 @@ class ExplODE(object):
 
     .. math::
 
-        \phi = y(t, x, p)
+        \phi = y(t, u, x, p)
         \dot{x} = f(t, u, x, p, w)
         
     '''
