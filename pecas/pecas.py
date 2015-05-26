@@ -130,7 +130,7 @@ match the dimensions of the differential equations.''')
 
         # Set up the covariance matrix for the measurements
 
-        self.W = pl.diag(pl.concatenate((self.wv, self.ww)))
+        self.W = ca.diag(pl.concatenate((self.wv, self.ww)))
 
         print('Setup of the parameter estimation problem sucessful.')        
 
@@ -243,12 +243,17 @@ this might take some time ...
 
         reslsq = ca.mul([A.T, self.W, A])
 
+        self.A = A
+
 
         if self.pesetup.g.size():
 
             g = ca.vertcat([g, self.pesetup.g])
 
-        reslsqfcn = ca.SXFunction(ca.nlpIn(x=self.pesetup.Vars), \
+        self.g = g
+
+
+        reslsqfcn = ca.MXFunction(ca.nlpIn(x=self.pesetup.Vars), \
             ca.nlpOut(f=reslsq, g=g))
 
         reslsqfcn.init()
@@ -308,6 +313,29 @@ Parameter estimation finished. Check IPOPT output for status information.
 This feature of PECas is currently disabled, but will be available again in a
 future version of PECas.
 ''')
+
+        # self.J1 = ca.mul(self.W, ca.jacobian(self.A, self.pesetup.Vars))
+
+        # self.J2 = ca.jacobian(self.g, self.pesetup.Vars)
+
+        # invW = ca.solve(self.W, ca.MX.eye(self.W.size1()), "csparse")
+
+        # bl = ca.blockcat([[ca.mul([self.J1.T, invW, self.J1]), self.J2.T], \
+        #     [self.J2, ca.MX(self.g.size1(), self.g.size1())]])
+
+        # rhs = ca.vertcat((self.J1.T, ca.MX(self.g.size1(), \
+        #     self.A.size1())))
+
+
+        # Jp = ca.solve(bl, rhs, "csparse")[:self.pesetup.Vars.size, :]
+
+        # fcov = ca.MXFunction([self.pesetup.Vars], [ca.mul(Jp, Jp.T)])
+        # fcov.init()
+
+        # self.fcov = fcov
+
+        # [self.Covx] = fcov([self.Varshat])
+
  
         # r'''
         # :raises: AttributeError
@@ -379,57 +407,11 @@ future version of PECas.
 
         #     self.__beta = self.__Rhat / (self.__N - self.__d)
 
-        # # Compute J1, J2
-
-        # Mx = self.__CasADiFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
-        # Mx.init()
-
-        # self.__J1 = ca.mul(ca.solve(pl.sqrt(self.__Sigma_eps), \
-        #     pl.eye(self.__N)), Mx.jac("x", "f"))
-
-        # # Compute Jplus and covariance matrix
-
-        # if self.get_G(msg = False) is not None:
-
-        #     Gx = self.__CasADiFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__G))
-        #     Gx.init()
-
-        #     self.__J2 = Gx.jac("x", "f")
-
-        #     self.__Jplus = ca.mul([ \
-
-        #         ca.horzcat((pl.eye(self.__d),pl.zeros((self.__d, self.__m)))),\
-
-        #         ca.solve(ca.vertcat(( \
-                
-        #             ca.horzcat((ca.mul(self.__J1.T, self.__J1), self.__J2.T)),\
-        #             ca.horzcat((self.__J2, pl.zeros((self.__m, self.__m)))) \
-                
-        #         )), pl.eye(self.__d + self.__m)), \
-
-        #         ca.vertcat((self.__J1.T, pl.zeros((self.__m, self.__N)))) \
-
-        #         ])
-
-        # else:
-
-        #     self.__Jplus = ca.mul(ca.solve(ca.mul(self.__J1.T, self.__J1), \
-        #         pl.eye(self.__d)), self.__J1.T)
+        # ... 
 
         # self.__fCov = self.__beta * ca.mul([self.__Jplus, self.__Jplus.T])
 
-        # # Evaluate covariance matrix for xhat
-
-        # self.__fCovx = self.__CasADiFunction(ca.nlpIn(x=self.__x), \
-        #     ca.nlpOut(f=self.__fCov))
-        # self.__fCovx.init()
-
-        # self.__fCovx.setInput(self.__xhat, "x")
-        # self.__fCovx.evaluate()
-
-        # # Store the covariance matrix in Covx
-
-        # self.__Covx = self.__fCovx.getOutput("f")
+        # ...
 
 
     def show_results(self):

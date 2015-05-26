@@ -272,7 +272,7 @@ class BSsetup(SetupsBaseClass):
 
         # Define the struct holding the variables
 
-        self.Vars = cat.struct_symSX([
+        self.Vars = cat.struct_symMX([
                 (
                     cat.entry("P", shape = self.np),
                     cat.entry("V", repeat = [self.nsteps], \
@@ -302,7 +302,7 @@ class BSsetup(SetupsBaseClass):
 
         self.phiN = ca.vertcat(self.phiN)
 
-        self.phiNfcn = ca.SXFunction([self.Vars], [self.phiN])
+        self.phiNfcn = ca.MXFunction([self.Vars], [self.phiN])
         self.phiNfcn.setOption("name", "phiNfcn")
         self.phiNfcn.init()
 
@@ -390,7 +390,7 @@ class CollocationBaseClass(SetupsBaseClass):
 
         # Define the struct holding the variables
 
-        self.Vars = cat.struct_symSX([
+        self.Vars = cat.struct_symMX([
                 (
                     cat.entry("X", repeat = [self.nsteps, self.ntauroot+1], \
                         shape = self.nx), \
@@ -433,7 +433,7 @@ class CollocationBaseClass(SetupsBaseClass):
 
         self.phiN = ca.vertcat(self.phiN)
 
-        self.phiNfcn = ca.SXFunction([self.Vars], [self.phiN])
+        self.phiNfcn = ca.MXFunction([self.Vars], [self.phiN])
         self.phiNfcn.setOption("name", "phiNfcn")
         self.phiNfcn.init()
 
@@ -532,8 +532,6 @@ class ODEsetup(CollocationBaseClass):
             [system.fcn["f"]])
         ffcn.setOption("name", "ffcn")
         ffcn.init()
-
-        print self.nsteps
 
         # For all finite elements
 
