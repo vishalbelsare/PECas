@@ -18,8 +18,8 @@ class TestBasicSystemNoConstraints(unittest.TestCase, \
 
         # System
 
-        self.u = ca.SX.sym("u", 1)
-        self.p = ca.SX.sym("p", 1)
+        self.u = ca.MX.sym("u", 1)
+        self.p = ca.MX.sym("p", 1)
 
         self.y = self.u * self.p
 
@@ -62,8 +62,8 @@ class TestBasicSystemConstraints(unittest.TestCase, \
 
         # System
 
-        self.u = ca.SX.sym("u", 2)
-        self.p = ca.SX.sym("p", 2)
+        self.u = ca.MX.sym("u", 2)
+        self.p = ca.MX.sym("p", 2)
 
         self.y = self.u[0] * self.p[0] + self.u[1] * self.p[1]**2
         self.g = (2 - ca.mul(self.p.T, self.p))
@@ -112,12 +112,12 @@ class TestLotkaVolterra(unittest.TestCase, \
 
         # System
 
-        self.x = ca.SX.sym("x", 2)
-        self.p = ca.SX.sym("p", 4)
-        self.u = ca.SX.sym("u", 0)
+        self.x = ca.MX.sym("x", 2)
+        self.p = ca.MX.sym("p", 4)
+        self.u = ca.MX.sym("u", 0)
 
-        # self.v = ca.SX.sym("v", 2)
-        self.w = ca.SX.sym("w", 2)
+        # self.v = ca.MX.sym("v", 2)
+        self.w = ca.MX.sym("w", 2)
 
         self.f = ca.vertcat( \
             [-self.p[0] * self.x[0] + self.p[1] * self.x[0] * self.x[1], 
@@ -188,10 +188,10 @@ class Test1DVehicle(unittest.TestCase, \
 
         # System
 
-        self.x = ca.SX.sym("x", 1)
-        self.p = ca.SX.sym("p", 3)
-        self.u = ca.SX.sym("u", 1)
-        self.w = ca.SX.sym("w", 1)
+        self.x = ca.MX.sym("x", 1)
+        self.p = ca.MX.sym("p", 3)
+        self.u = ca.MX.sym("u", 1)
+        self.w = ca.MX.sym("w", 1)
 
         self.f = self.p[0] * self.u - self.p[1] - self.p[2] * self.x + self.w
 
@@ -256,10 +256,10 @@ class Test2DVehicle(unittest.TestCase, \
 
         # System
 
-        self.x = ca.SX.sym("x", 4)
-        self.p = ca.SX.sym("p", 6)
-        self.u = ca.SX.sym("u", 2)
-        self.w = ca.SX.sym("w", 4)
+        self.x = ca.MX.sym("x", 4)
+        self.p = ca.MX.sym("p", 6)
+        self.u = ca.MX.sym("u", 2)
+        self.w = ca.MX.sym("w", 4)
 
         self.f = ca.vertcat( \
 
@@ -344,9 +344,9 @@ class PedulumBar(unittest.TestCase, \
 
         # System
 
-        self.x = ca.SX.sym("x", 2)
-        self.p = ca.SX.sym("p", 1)
-        self.u = ca.SX.sym("u", 1)
+        self.x = ca.MX.sym("x", 2)
+        self.p = ca.MX.sym("p", 1)
+        self.u = ca.MX.sym("u", 1)
 
         self.f = ca.vertcat([ \
             

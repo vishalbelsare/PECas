@@ -311,33 +311,30 @@ Parameter estimation finished. Check IPOPT output for status information.
         
         '''
 
-        raise NotImplementedError( \
-'''
-This feature of PECas is currently disabled, but will be available again in a
-future version of PECas.
-''')
+        self.beta = self.rhat / (self.yN.size + self.g.size1() - \
+            self.pesetup.Vars.size)
 
-        # self.J1 = ca.mul(self.W, ca.jacobian(self.A, self.pesetup.Vars))
+        self.J1 = ca.mul(self.W, ca.jacobian(self.A, self.pesetup.Vars))
 
-        # self.J2 = ca.jacobian(self.g, self.pesetup.Vars)
+        self.J2 = ca.jacobian(self.g, self.pesetup.Vars)
 
-        # invW = ca.solve(self.W, ca.MX.eye(self.W.size1()), "csparse")
+        invW = ca.solve(self.W, ca.MX.eye(self.W.size1()), "csparse")
 
-        # bl = ca.blockcat([[ca.mul([self.J1.T, invW, self.J1]), self.J2.T], \
-        #     [self.J2, ca.MX(self.g.size1(), self.g.size1())]])
+        bl = ca.blockcat([[ca.mul([self.J1.T, invW, self.J1]), self.J2.T], \
+            [self.J2, ca.MX(self.g.size1(), self.g.size1())]])
 
-        # rhs = ca.vertcat((self.J1.T, ca.MX(self.g.size1(), \
-        #     self.A.size1())))
+        rhs = ca.vertcat((self.J1.T, ca.MX(self.g.size1(), \
+            self.A.size1())))
 
 
-        # Jp = ca.solve(bl, rhs, "csparse")[:self.pesetup.Vars.size, :]
+        Jp = ca.solve(bl, rhs, "csparse")[:self.pesetup.Vars.size, :]
 
-        # fcov = ca.MXFunction([self.pesetup.Vars], [ca.mul(Jp, Jp.T)])
-        # fcov.init()
+        fcov = ca.MXFunction([self.pesetup.Vars], [self.beta * ca.mul(Jp, Jp.T)])
+        fcov.init()
 
-        # self.fcov = fcov
+        self.fcov = fcov
 
-        # [self.Covx] = fcov([self.Varshat])
+        [self.Covx] = fcov([self.Varshat])
 
  
         # r'''

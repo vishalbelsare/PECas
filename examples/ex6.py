@@ -22,9 +22,9 @@ psi = pl.pi/2
 
 # System
 
-x = ca.SX.sym("x", 2)
-p = ca.SX.sym("p", 1)
-u = ca.SX.sym("u", 1)
+x = ca.MX.sym("x", 2)
+p = ca.MX.sym("p", 1)
+u = ca.MX.sym("u", 1)
 
 f = ca.vertcat([x[1], p[0]/(m*(L**2))*(u-x[0]) - g/L * pl.sin(x[0])])
 
@@ -36,9 +36,9 @@ odesys = pecas.systems.ExplODE(x = x, u = u, p = p, f = f, y = y)
 # Loading data
 #==============================================================================
 data = pl.loadtxt('ex6data.txt')
-timegrid = data[:50, 0]
-phim = data[:50, 1]
-wm = data[:50, 2]
+timegrid = data[:500, 0]
+phim = data[:500, 1]
+wm = data[:500, 2]
 N = timegrid.size
 yN = pl.array([phim,wm])
 uN = [psi] * (N-1)
@@ -72,38 +72,26 @@ lsqpe.show_system_information(showEquations = True)
 lsqpe.run_parameter_estimation()
 phat = lsqpe.phat
 
-# print "Khat: " + str(phat)
-
 phihat = lsqpe.Xhat[0]
 what = lsqpe.Xhat[1]
 
 lsqpe.show_results()
 
-# print "Phi0hat: " + str(phihat[0])
-# print "w0hat: " + str(what[0])
+lsqpe.compute_covariance_matrix()
 
-# pl.close("all")
+pl.close("all")
 
-# pl.figure()
-# pl.subplot(2, 1, 1)
-# pl.plot(phihat)
-# pl.plot(phim)
+pl.figure()
+pl.subplot(2, 1, 1)
+pl.plot(phihat)
+pl.plot(phim)
 
-# pl.subplot(2, 1, 2)
-# pl.plot(what)
-# pl.plot(wm)
+pl.subplot(2, 1, 2)
+pl.plot(what)
+pl.plot(wm)
 
-# pl.figure()
-# pl.plot(phihat, what)
-# pl.plot(phim, wm)
+pl.figure()
+pl.plot(phihat, what)
+pl.plot(phim, wm)
 
-# pl.figure()
-# pl.plot(sum(odesetup.V()(lsqpe.Vhat)["X",:,:,0], []))
-
-# pl.show()
-
-# tend = time.time()
-# dur = tend - tstart
-# print "started: " + time.ctime(tstart)
-# print "ended: " + time.ctime(tend)
-# print "duration: " + str(dur) + "sec"
+pl.show()
