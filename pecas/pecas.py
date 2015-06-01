@@ -513,11 +513,19 @@ matrix for the estimated parameters can be computed.''')
 '''    Covariance matrix for the estimated parameters not yet computed.
     Run class function compute_covariance_matrix() to do so.''')
 
-            print( \
-                "\nGoodness of fit R^2" + 30 * "." + ": {0:10.8e}".format(\
-                    self.Rsquared))
+            # print( \
+            #     "\nGoodness of fit R^2" + 30 * "." + ": {0:10.8e}".format(\
+            #         self.Rsquared))
+            
+            print("\nGoodness of fit R-squared:  ")
+            for i in range(self.pesetup.ny):
+                print("R^2 - Y_{0} = {1: 10.8e}".format(i,self.Rsquared[i]))
 
-            print("Residual" + 41 * "." + ": {0:10.8e}".format(self.residual))
+            # print("Residual" + 41 * "." + ": {0:10.8e}".format(self.residual))
+
+            print("\nResidual:  ")
+            for i in range(self.pesetup.ny):
+                print("R - Y_{0} = {1: 10.8e}".format(i,self.residual[i]))
 
             print("\nDuration of the problem setup"+ 20 * "." + \
                 ": {0:10.8e} s".format(self.pesetup.duration_setup))
