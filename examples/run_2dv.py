@@ -2,10 +2,6 @@ import casadi as ca
 import pylab as pl
 import pecas
 
-import time
-
-# tstart = time.time()
-
 # System
 
 x = ca.MX.sym("x", 4)
@@ -39,14 +35,13 @@ data = pl.array(pl.loadtxt( \
 
 timegrid = data[300:400, 1]
 
-
 yN = data[300:400, [2, 4, 6, 8]]
 wv = 1 / (0.1**2) * pl.ones(yN.shape)
 uN = data[300:399, [9, 10]]
 ww = [1 / 1e-4] * 4
 
 porig = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
-# phat = [12.0, 0.1, 0.6]
+
 odesetup = pecas.setups.ODEsetup( \
     system = odesys, timegrid = timegrid,
     u = uN, \
@@ -55,42 +50,40 @@ odesetup = pecas.setups.ODEsetup( \
 # Run parameter estimation and assure that the results is correct
 
 lsqpe = pecas.LSq(pesetup =odesetup, yN =yN, wv = wv, ww = ww)
+lsqpe.show_system_information(showEquations = True)
 
 lsqpe.run_parameter_estimation()
-
-# lsqpe.show_system_information(showEquations = True)
-# lsqpe.show_results()
+lsqpe.show_results()
 
 lsqpe.compute_covariance_matrix()
+lsqpe.show_results()
 
-# print lsqpe.Covx[:6, :6]
+xhat = lsqpe.Xhat[0]
+yhat = lsqpe.Xhat[1]
+psihat = lsqpe.Xhat[2]
+vhat = lsqpe.Xhat[3]
 
-# xhat = lsqpe.Xhat[0]
-# yhat = lsqpe.Xhat[1]
-# psihat = lsqpe.Xhat[2]
-# vhat = lsqpe.Xhat[3]
+pl.close("all")
 
-# pl.close("all")
+pl.figure()
+pl.subplot(4, 1, 1)
+pl.plot(xhat)
+pl.plot(yN[:,0])
 
-# pl.figure()
-# pl.subplot(4, 1, 1)
-# pl.plot(xhat)
-# pl.plot(yN[:,0])
+pl.subplot(4, 1, 2)
+pl.plot(yhat)
+pl.plot(yN[:,1])
 
-# pl.subplot(4, 1, 2)
-# pl.plot(yhat)
-# pl.plot(yN[:,1])
+pl.subplot(4, 1, 3)
+pl.plot(psihat)
+pl.plot(yN[:, 2])
 
-# pl.subplot(4, 1, 3)
-# pl.plot(psihat)
-# pl.plot(yN[:, 2])
+pl.subplot(4, 1, 4)
+pl.plot(vhat)
+pl.plot(yN[:, 3])
 
-# pl.subplot(4, 1, 4)
-# pl.plot(vhat)
-# pl.plot(yN[:, 3])
+pl.figure()
+pl.plot(xhat, yhat)
+pl.plot(yN[:,0], yN[:, 1])
 
-# pl.figure()
-# pl.plot(xhat, yhat)
-# pl.plot(yN[:,0], yN[:, 1])
-
-# pl.show()
+pl.show()

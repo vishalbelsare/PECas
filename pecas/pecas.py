@@ -299,17 +299,27 @@ this might take some time ...
         self.Rsquared = 1 - self.residual/(pl.norm(Ym))**2
 
         print('''
-Parameter estimation finished. Check IPOPT output for status information.
-''')
+Parameter estimation finished. Check IPOPT output for status information.''')
 
 
     def compute_covariance_matrix(self):
+
+        intro.pecas_intro()
+        print('\n' + 20 * '-' + \
+            ' PECas covariance matrix computation ' + 21 * '-')
+
+        print('''
+Computing covariance matrix for the estimated parameters, 
+this might take some time ...
+''')
 
         r'''
 
         --- docstring tbd ---
         
         '''
+
+        self.tstart_cov_computation = time.time()
 
         self.beta = self.rhat / (self.yN.size + self.g.size1() - \
             self.pesetup.Vars.size)
@@ -336,7 +346,13 @@ Parameter estimation finished. Check IPOPT output for status information.
 
         [self.Covx] = fcov([self.Varshat])
 
- 
+        self.tend_cov_computation = time.time()
+        self.duration_cov_computation = self.tend_cov_computation - \
+            self.tstart_cov_computation
+
+        print( \
+"Covariance matrix computation finished, run show_results() to visualize.")
+
         # r'''
         # :raises: AttributeError
 
@@ -442,6 +458,9 @@ Parameter estimation finished. Check IPOPT output for status information.
 
         intro.pecas_intro()
 
+        pl.set_printoptions(linewidth = 200, \
+            formatter={'float': lambda x: format(x, ' 10.8e')})
+
         try:
 
             print('\n' + 21 * '-' + \
@@ -450,31 +469,54 @@ Parameter estimation finished. Check IPOPT output for status information.
             print("\nEstimated parameters p_i:")
             for i, xi in enumerate(self.phat):
             
-                print("    p_{0:<3} = {1:10}".format(\
+                print("    p_{0:<3} = {1: 10.8e}".format(\
                      i, xi[0]))
             
             try:
 
                 print("\nEstimated initial states value:  ")
-                print("    x(t_0) = " + str(self.Xhat[:,0]))
+                print("    x(t_0) = {0}".format(self.Xhat[:,0]))
                 
                 print("\nEstimated final states value:  ")
-                print("    x(t_N) = " + str(self.Xhat[:,-1]))
-                   
+                print("    x(t_N) = {0}".format(self.Xhat[:,-1]))
+            
             except AttributeError:
 
                 pass
 
-            print("\nGoodness of fit R^2..............: {0}".format(self.Rsquared))
+            print("\nCovariance matrix for the estimated parameters:")
 
-            print("Residual.........................: {0}".format(self.residual))
+            try:
 
-            print("\nDuration of the problem setup....: " + \
-                str(self.pesetup.duration_setup) + " s")
+                print(pl.atleast_2d(self.Covx[:self.phat.size, \
+                    :self.phat.size]))
+
+            except AttributeError:
+
+                print( \
+'''    Covariance matrix for the estimated parameters not yet computed.
+    Run class function compute_covariance_matrix() to do so.''')
+
+            print( \
+                "\nGoodness of fit R^2" + 30 * "." + ": {0:10.8e}".format(\
+                    self.Rsquared))
+
+            print("Residual" + 41 * "." + ": {0:10.8e}".format(self.residual))
+
+            print("\nDuration of the problem setup"+ 20 * "." + \
+                ": {0:10.8e} s".format(self.pesetup.duration_setup))
             
-            print("Duration of the estimation.......: " + \
-                str(self.duration_estimation) + " s")
+            print("Duration of the estimation" + 23 * "." + \
+                ": {0:10.8e} s".format(self.duration_estimation))
 
+            try:
+
+                print("Duration of the covariance matrix computation...." + \
+                    ": {0:10.8e} s".format(self.duration_cov_computation))
+
+            except AttributeError:
+
+                pass
 
         except AttributeError:
 
@@ -482,6 +524,10 @@ Parameter estimation finished. Check IPOPT output for status information.
 You must execute at least run_parameter_estimation() to obtain results,
 and compute_covariance_matrix() before all results can be displayed.
 ''')   
+
+        finally:
+
+            pl.set_printoptions()
 
 
     def show_system_information(self, showEquations = False):

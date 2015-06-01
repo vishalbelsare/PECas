@@ -70,14 +70,13 @@ lsqpe = pecas.LSq(pesetup =odesetup, yN =yN, wv = wv)
 lsqpe.show_system_information(showEquations = True)
 
 lsqpe.run_parameter_estimation()
-phat = lsqpe.phat
-
-phihat = lsqpe.Xhat[0]
-what = lsqpe.Xhat[1]
-
 lsqpe.show_results()
 
 lsqpe.compute_covariance_matrix()
+lsqpe.show_results()
+
+phihat = lsqpe.Xhat[0]
+what = lsqpe.Xhat[1]
 
 pl.close("all")
 
