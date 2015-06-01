@@ -4,6 +4,7 @@ python:
 
 before_install:
  # - travis_retry sudo apt-get install -y -qq python-numpy python-scipy python-matplotlib #liblapack3gf liblapack-dev libblas-dev libblas3gf #coinor-libipopt-dev libmumps-seq-dev
+ - sudo apt-get install -y -qq libblas3 liblapack3
  - travis_retry wget http://cz.archive.ubuntu.com/ubuntu/pool/main/p/python-numpy/python-numpy_1.8.1-1ubuntu1_amd64.deb
  - sudo dpkg -i python-numpy_1.8.1-1ubuntu1_amd64.deb
  - sudo apt-get install -y -f
