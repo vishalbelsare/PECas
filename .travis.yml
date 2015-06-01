@@ -4,7 +4,8 @@ python:
 
 before_install:
  # - travis_retry sudo apt-get install -y -qq python-numpy python-scipy python-matplotlib #liblapack3gf liblapack-dev libblas-dev libblas3gf #coinor-libipopt-dev libmumps-seq-dev
- - sudo apt-get install -y -qq libgfortran3
+ - sudo apt-get remove -y libblas3gf liblapack3gf 
+ - sudo apt-get install -y libgfortran3
  - travis_retry wget http://cz.archive.ubuntu.com/ubuntu/pool/main/b/blas/libblas3_1.2.20110419-7_amd64.deb
  - sudo dpkg -i libblas3_1.2.20110419-7_amd64.deb
  - rm libblas3_1.2.20110419-7_amd64.deb
