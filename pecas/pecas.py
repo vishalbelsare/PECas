@@ -304,54 +304,68 @@ Parameter estimation finished. Check IPOPT output for status information.''')
 
     def compute_covariance_matrix(self):
 
-        intro.pecas_intro()
-        print('\n' + 20 * '-' + \
-            ' PECas covariance matrix computation ' + 21 * '-')
-
-        print('''
-Computing covariance matrix for the estimated parameters, 
-this might take some time ...
-''')
-
         r'''
 
         --- docstring tbd ---
         
         '''
 
+        intro.pecas_intro()
+        
+        print('\n' + 20 * '-' + \
+            ' PECas covariance matrix computation ' + 21 * '-')
+
+        print('''
+Computing the covariance matrix for the estimated parameters, 
+this might take some time ...
+''')
+
         self.tstart_cov_computation = time.time()
 
-        self.beta = self.rhat / (self.yN.size + self.g.size1() - \
-            self.pesetup.Vars.size)
+        try:
 
-        self.J1 = ca.mul(self.W, ca.jacobian(self.A, self.pesetup.Vars))
+            self.beta = self.rhat / (self.yN.size + self.g.size1() - \
+                self.pesetup.Vars.size)
 
-        self.J2 = ca.jacobian(self.g, self.pesetup.Vars)
+            self.J1 = ca.mul(self.W, ca.jacobian(self.A, self.pesetup.Vars))
 
-        invW = ca.solve(self.W, ca.MX.eye(self.W.size1()), "csparse")
+            self.J2 = ca.jacobian(self.g, self.pesetup.Vars)
 
-        bl = ca.blockcat([[ca.mul([self.J1.T, invW, self.J1]), self.J2.T], \
-            [self.J2, ca.MX(self.g.size1(), self.g.size1())]])
+            invW = ca.solve(self.W, ca.MX.eye(self.W.size1()), "csparse")
 
-        rhs = ca.vertcat((self.J1.T, ca.MX(self.g.size1(), \
-            self.A.size1())))
+            bl = ca.blockcat([[ca.mul([self.J1.T, invW, self.J1]), self.J2.T], \
+                [self.J2, ca.MX(self.g.size1(), self.g.size1())]])
+
+            rhs = ca.vertcat((self.J1.T, ca.MX(self.g.size1(), \
+                self.A.size1())))
 
 
-        Jp = ca.solve(bl, rhs, "csparse")[:self.pesetup.Vars.size, :]
+            Jp = ca.solve(bl, rhs, "csparse")[:self.pesetup.Vars.size, :]
 
-        fcov = ca.MXFunction([self.pesetup.Vars], [self.beta * ca.mul(Jp, Jp.T)])
-        fcov.init()
+            fcov = ca.MXFunction([self.pesetup.Vars], [self.beta * ca.mul(Jp, Jp.T)])
+            fcov.init()
 
-        self.fcov = fcov
+            self.fcov = fcov
 
-        [self.Covx] = fcov([self.Varshat])
+            [self.Covx] = fcov([self.Varshat])
 
-        self.tend_cov_computation = time.time()
-        self.duration_cov_computation = self.tend_cov_computation - \
-            self.tstart_cov_computation
+            print( \
+'''Covariance matrix computation finished, run show_results() to visualize.''')
 
-        print( \
-"Covariance matrix computation finished, run show_results() to visualize.")
+
+        except AttributeError:
+
+            print( \
+'''You must execute run_parameter_estimation() first before the covariance
+matrix for the estimated parameters can be computed.''')
+
+
+        finally:
+
+            self.tend_cov_computation = time.time()
+            self.duration_cov_computation = self.tend_cov_computation - \
+                self.tstart_cov_computation
+
 
         # r'''
         # :raises: AttributeError
