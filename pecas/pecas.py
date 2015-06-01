@@ -474,8 +474,10 @@ matrix for the estimated parameters can be computed.''')
 
         intro.pecas_intro()
 
-        pl.set_printoptions(linewidth = 200, \
-            formatter={'float': lambda x: format(x, ' 10.8e')})
+        # pl.set_printoptions(linewidth = 200, \
+        #     formatter={'float': lambda x: format(x, ' 10.8e')})
+
+        pl.set_printoptions(linewidth = 200)
 
         try:
 
