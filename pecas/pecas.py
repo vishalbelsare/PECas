@@ -290,13 +290,15 @@ this might take some time ...
         Ysim = self.pesetup.phiNfcn([self.Varshat])[0]
         Ym = pl.reshape(self.yN.T,(Ysim.shape))
         res = Ym-Ysim
-        self.residual = (pl.norm(res))**2
+        self.residual = []
+        self.Rsquared = []
+        for i in range(self.pesetup.ny):            
+            self.residual.append((pl.norm(res[i:-1:self.pesetup.ny]))**2)
+            self.Rsquared.append(1 - self.residual[i]/(pl.norm(Ym[i:-1:self.pesetup.ny]))**2)
 
         self.tend_estimation = time.time()
         self.duration_estimation = self.tend_estimation - \
             self.tstart_estimation
-
-        self.Rsquared = 1 - self.residual/(pl.norm(Ym))**2
 
         print('''
 Parameter estimation finished. Check IPOPT output for status information.
@@ -468,9 +470,13 @@ future version of PECas.
 
                 pass
 
-            print("\nGoodness of fit R^2..............: {0}".format(self.Rsquared))
+            print("\nGoodness of fit R-squared:  ")
+            for i in range(self.pesetup.ny):
+                print("R^2 - Y{0}= {1}".format(i,self.Rsquared[i]))
 
-            print("Residual.........................: {0}".format(self.residual))
+            print("\nResidual:  ")
+            for i in range(self.pesetup.ny):
+                print("R - Y{0} = {1}".format(i,self.residual[i]))
 
             print("\nDuration of the problem setup....: " + \
                 str(self.pesetup.duration_setup) + " s")
