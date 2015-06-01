@@ -4,6 +4,8 @@ import pecas
 
 import time
 
+# tstart = time.time()
+
 # System
 
 x = ca.SX.sym("x", 4)
@@ -35,13 +37,13 @@ data = pl.array(pl.loadtxt( \
     "controlReadings_ACADO_MPC_Betterweights.dat", \
     delimiter = ", ", skiprows = 1))
 
-timegrid = data[200:250, 1]
+timegrid = data[150:400, 1]
 
 
-yN = data[200:250, [2, 4, 6, 8]]
+yN = data[150:400, [2, 4, 6, 8]]
 wv = 1 / (0.1**2) * pl.ones(yN.shape)
-uN = data[200:249, [9, 10]]
-ww = [1 / 1e-4] * 4
+uN = data[150:399, [9, 10]]
+ww = [1 / 1e-1] * 4
 
 porig = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
 # phat = [12.0, 0.1, 0.6]
@@ -58,39 +60,48 @@ odesetup = pecas.setups.ODEsetup( \
 lsqpe = pecas.LSq(pesetup =odesetup, yN =yN, wv = wv, ww = ww)
 
 lsqpe.run_parameter_estimation()
+# phat = lsqpe.phat
+# print porig
+# print phat
 
 lsqpe.show_system_information(showEquations = True)
-lsqpe.print_results()
+lsqpe.show_results()
 
 xhat = lsqpe.Xhat[0]
 yhat = lsqpe.Xhat[1]
 psihat = lsqpe.Xhat[2]
 vhat = lsqpe.Xhat[3]
 
-# pl.close("all")
+pl.close("all")
 
-# pl.figure()
-# pl.subplot(4, 1, 1)
-# pl.plot(xhat)
-# pl.plot(yN[:,0])
+pl.figure()
+pl.subplot(4, 1, 1)
+pl.plot(xhat)
+pl.plot(yN[:,0])
 
-# pl.subplot(4, 1, 2)
-# pl.plot(yhat)
-# pl.plot(yN[:,1])
+pl.subplot(4, 1, 2)
+pl.plot(yhat)
+pl.plot(yN[:,1])
 
-# pl.subplot(4, 1, 3)
-# pl.plot(psihat)
-# pl.plot(yN[:, 2])
+pl.subplot(4, 1, 3)
+pl.plot(psihat)
+pl.plot(yN[:, 2])
 
-# pl.subplot(4, 1, 4)
-# pl.plot(vhat)
-# pl.plot(yN[:, 3])
+pl.subplot(4, 1, 4)
+pl.plot(vhat)
+pl.plot(yN[:, 3])
 
-# pl.figure()
-# pl.plot(xhat, yhat)
-# pl.plot(yN[:,0], yN[:, 1])
+pl.figure()
+pl.plot(xhat, yhat)
+pl.plot(yN[:,0], yN[:, 1])
 
 # pl.figure()
 # pl.plot(sum(odesetup.V()(lsqpe.Vhat)["X",:,:,0], []))
 
-# pl.show()
+pl.show()
+
+# tend = time.time()
+# dur = tend - tstart
+# print "started: " + time.ctime(tstart)
+# print "ended: " + time.ctime(tend)
+# print "duration: " + str(dur) + "sec"

@@ -24,10 +24,14 @@ class BSPERunTest(object):
         lsqpe.run_parameter_estimation()
 
         phat = lsqpe.phat
-        print phat
+        print(phat)
 
         for k, pk in enumerate(phat):
             self.assertAlmostEqual(pk, self.phat[k], places = 5)
+
+        lsqpe.show_system_information(showEquations = True)
+        lsqpe.show_results()
+
 
 class ODEPERunTest(object):
 
@@ -44,10 +48,13 @@ class ODEPERunTest(object):
         lsqpe.run_parameter_estimation()
 
         phat = lsqpe.phat
-        print phat
+        print(phat)
         
         Xhat = lsqpe.Xhat
-        print Xhat
+        print(Xhat)
 
         for k, pk in enumerate(phat):
             self.assertAlmostEqual(pk, self.phat[k], places = 5)
+
+        lsqpe.show_system_information(showEquations = True)
+        lsqpe.show_results()

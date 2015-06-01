@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+##!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import casadi as ca
@@ -7,12 +7,12 @@ import casadi.tools as cat
 import pylab as pl
 from scipy.misc import comb
 
-import systems
-import setups
-
+import pdb
 import time
 
-import pdb
+import systems
+import setups
+import intro
 
 from abc import ABCMeta, abstractmethod
 
@@ -22,6 +22,11 @@ class PECasBaseClass:
 
     @abstractmethod
     def __init__(self, pesetup = None, yN = None, wv = None, ww = None):
+
+        intro.pecas_intro()
+        print('\n' + 22 * '-' + \
+            ' PECas parameter estimation setup ' + 22 * '-')
+        print('\nStarting parameter estimation problem setup ...') 
 
         # Store the parameter estimation problem setup
 
@@ -41,7 +46,6 @@ class PECasBaseClass:
             raise ValueError('''
 The dimension of the measurement data given in yN does not match the
 dimension of output function and/or timegrid.
-
 Valid dimensions for yN for the given data are:
     {0} or {1},
 but you supported yN of dimension:
@@ -62,7 +66,6 @@ but you supported yN of dimension:
             raise ValueError('''
 The dimension of weights of the measurement errors given in wv does not
 match the dimensions of the measurement data.
-
 Valid dimensions for wv for the given data are:
     {0} or {1},
 but you supported wv of dimension:
@@ -125,17 +128,17 @@ match the dimensions of the differential equations.''')
 
         # Set up the covariance matrix for the measurements
 
-        self.W = pl.diag(pl.concatenate((self.wv, self.ww)))
+        self.W = ca.diag(pl.concatenate((self.wv, self.ww)))
 
-        self.EstimationDone = False
-        self.CovCal = False
+        print('Setup of the parameter estimation problem sucessful.')        
+
 
     @property
     def phat(self):
 
         try:
             
-            return self.pesetup.Vars()(self.Varshat)["P"]
+            return pl.array(self.pesetup.Vars()(self.Varshat)["P"])
 
         except AttributeError:
 
@@ -156,7 +159,7 @@ obtain the optimal values.
 
                 xhat.append(self.pesetup.Vars()(self.Varshat)["X",:,0,i])
             
-            return xhat
+            return pl.array(xhat)
 
         except AttributeError:
 
@@ -169,7 +172,8 @@ obtain the optimal values.
 class LSq(PECasBaseClass):
 
     '''The class :class:`LSq` is used to solve least squares parameter
-    estimation problems with PECas for a given set of measurement data.'''
+    estimation problems for previously defined systems using a given set
+    of measurement data and weightings.'''
 
     def __init__(self, pesetup = None, yN = None, wv = None, ww = None):
 
@@ -179,29 +183,31 @@ class LSq(PECasBaseClass):
     def run_parameter_estimation(self):
 
         r'''
-        This functions will run a least sqaures parameter estimation for the
+        This functions will run a least squares parameter estimation for the
         given problem and data set.
-
         For this, the least squares parameter estimation problem
-
         .. math::
-
             ~ & \hat{x} = \text{arg}\, & \underset{x}{\text{min}}\|M(x)-Y\|_{\Sigma_{\epsilon}^{-1}}^{2}\\
             \text{s. t.}&~&~\\
             ~ & ~ & G = 0\\
             ~ & ~ & x_{0} = x_{init}
-
-
         will be set up, and solved using IPOPT. Afterwards,
-
         - the value of :math:`\hat{x}`
           can be returned using the function :func:`get_xhat()`, and
-
         - the value of the residual :math:`\hat{R}`
           can be returned using the function :func:`get_Rhat()`.
         '''          
 
-        self.tstart = time.time()
+        intro.pecas_intro()
+        print('\n' + 18 * '-' + \
+            ' PECas least squares parameter estimation ' + 18 * '-')
+
+        print('''
+Starting least squares parameter estimation using IPOPT, 
+this might take some time ...
+''')
+
+        self.tstart_estimation = time.time()
 
         A = []
 
@@ -228,12 +234,17 @@ class LSq(PECasBaseClass):
 
         reslsq = ca.mul([A.T, self.W, A])
 
+        self.A = A
+
 
         if self.pesetup.g.size():
 
             g = ca.vertcat([g, self.pesetup.g])
 
-        reslsqfcn = ca.SXFunction(ca.nlpIn(x=self.pesetup.Vars), \
+        self.g = g
+
+
+        reslsqfcn = ca.MXFunction(ca.nlpIn(x=self.pesetup.Vars), \
             ca.nlpOut(f=reslsq, g=g))
 
         reslsqfcn.init()
@@ -264,49 +275,28 @@ class LSq(PECasBaseClass):
         self.Varshat = solver.getOutput("x")
         self.rhat = solver.getOutput("f")
         
-        self.EstimationDone = True
-        
         Ysim = self.pesetup.phiNfcn([self.Varshat])[0]
         Ym = pl.reshape(self.yN.T,(Ysim.shape))
         res = Ym-Ysim
-        self.residual = []
-        self.Rsquared = []
-        for i in range(self.pesetup.ny):            
-            self.residual.append((pl.norm(res[i:-1:self.pesetup.ny]))**2)
-            self.Rsquared.append(1 - self.residual[i]/(pl.norm(Ym[i:-1:self.pesetup.ny]))**2)
+        self.residual = (pl.norm(res))**2
 
-        self.est_duration = time.time() - self.tstart
+        self.tend_estimation = time.time()
+        self.duration_estimation = self.tend_estimation - \
+            self.tstart_estimation
 
-        
-    @property        
-    def Phat(self):       
-        if self.EstimationDone == False:
+        self.Rsquared = 1 - self.residual/(pl.norm(Ym))**2
 
-            raise AttributeError('''
-            The method run_parameter_estimation
-            must be run first, before trying to
-            obtain the optimal values''')
+        print('''
+Parameter estimation finished. Check IPOPT output for status information.
+''')
 
-        return pl.array(self.pesetup.Vars()(self.Varshat)["P"])
-
-    @property    
-    def Xhat(self):
-        
-        if self.EstimationDone == False:
-
-            raise AttributeError('''
-            The method run_parameter_estimation
-            must be run first, before trying to
-            obtain the optimal values''')
-        
-        xhat = []
-
-        for i in range (self.pesetup.nx):
-            xhat.append(self.pesetup.Vars()(self.Varshat)["X",:,0,i])
-            
-        return pl.array(xhat)
 
     def compute_covariance_matrix(self):
+
+        r'''
+        --- docstring tbd ---
+        
+        '''
 
         raise NotImplementedError( \
 '''
@@ -314,8 +304,29 @@ This feature of PECas is currently disabled, but will be available again in a
 future version of PECas.
 ''')
 
+        # self.J1 = ca.mul(self.W, ca.jacobian(self.A, self.pesetup.Vars))
 
-        self.CovCal = True
+        # self.J2 = ca.jacobian(self.g, self.pesetup.Vars)
+
+        # invW = ca.solve(self.W, ca.MX.eye(self.W.size1()), "csparse")
+
+        # bl = ca.blockcat([[ca.mul([self.J1.T, invW, self.J1]), self.J2.T], \
+        #     [self.J2, ca.MX(self.g.size1(), self.g.size1())]])
+
+        # rhs = ca.vertcat((self.J1.T, ca.MX(self.g.size1(), \
+        #     self.A.size1())))
+
+
+        # Jp = ca.solve(bl, rhs, "csparse")[:self.pesetup.Vars.size, :]
+
+        # fcov = ca.MXFunction([self.pesetup.Vars], [ca.mul(Jp, Jp.T)])
+        # fcov.init()
+
+        # self.fcov = fcov
+
+        # [self.Covx] = fcov([self.Varshat])
+
+ 
         # r'''
         # :raises: AttributeError
 
@@ -386,147 +397,98 @@ future version of PECas.
 
         #     self.__beta = self.__Rhat / (self.__N - self.__d)
 
-        # # Compute J1, J2
-
-        # Mx = self.__CasADiFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__M))
-        # Mx.init()
-
-        # self.__J1 = ca.mul(ca.solve(pl.sqrt(self.__Sigma_eps), \
-        #     pl.eye(self.__N)), Mx.jac("x", "f"))
-
-        # # Compute Jplus and covariance matrix
-
-        # if self.get_G(msg = False) is not None:
-
-        #     Gx = self.__CasADiFunction(ca.nlpIn(x=self.__x), ca.nlpOut(f=self.__G))
-        #     Gx.init()
-
-        #     self.__J2 = Gx.jac("x", "f")
-
-        #     self.__Jplus = ca.mul([ \
-
-        #         ca.horzcat((pl.eye(self.__d),pl.zeros((self.__d, self.__m)))),\
-
-        #         ca.solve(ca.vertcat(( \
-                
-        #             ca.horzcat((ca.mul(self.__J1.T, self.__J1), self.__J2.T)),\
-        #             ca.horzcat((self.__J2, pl.zeros((self.__m, self.__m)))) \
-                
-        #         )), pl.eye(self.__d + self.__m)), \
-
-        #         ca.vertcat((self.__J1.T, pl.zeros((self.__m, self.__N)))) \
-
-        #         ])
-
-        # else:
-
-        #     self.__Jplus = ca.mul(ca.solve(ca.mul(self.__J1.T, self.__J1), \
-        #         pl.eye(self.__d)), self.__J1.T)
+        # ... 
 
         # self.__fCov = self.__beta * ca.mul([self.__Jplus, self.__Jplus.T])
 
-        # # Evaluate covariance matrix for xhat
-
-        # self.__fCovx = self.__CasADiFunction(ca.nlpIn(x=self.__x), \
-        #     ca.nlpOut(f=self.__fCov))
-        # self.__fCovx.init()
-
-        # self.__fCovx.setInput(self.__xhat, "x")
-        # self.__fCovx.evaluate()
-
-        # # Store the covariance matrix in Covx
-
-        # self.__Covx = self.__fCovx.getOutput("f")
+        # ...
 
 
-    def print_results(self):
+    def show_results(self):
 
-         r'''
-         :raises: AttributeError
+        r'''
+        :raises: AttributeError
+        This function displays the results of the parameter estimation
+        computations. It can not be used before function
+        :func:`run_parameter_estimation()` has been used. The results
+        displayed by the function contain:
+          - the value of :math:`R^2` measuring the goodness of fit
+            of the estimated parameters,
+          - the values of the estimated parameters :math:`\hat{p}`
+            and their corresponding standard deviations
+            (the value of the standar deviation is represented
+            only if the covariance matrix is computed),
+          - the values of the covariance matrix
+            :math:`\Sigma_{\hat{x}}` for the
+            estimated parameters (if is computed),
+          - in the case of the estimation of a dynamic
+            system, the optimal value of the first state 
+            :math:`\hat{x}(t_{0})` and the optimal value 
+            of the last state :math:`\hat{x}(t_{N})`, and
+          - the durations of the setup and the estimation.
+        '''
 
-         This function displays the results of the parameter estimation
-         computations. It can not be used before function
-         :func:`run_parameter_estimation()` has been used. The results
-         displayed by the function contain
+        intro.pecas_intro()
 
-           - the value of :math:`R^2` measuring the goodness of fit
-             of the estimated parameters,
-           - the values of the estimated parameters :math:`\hat{p}`
-             and their corresponding standard deviations
-             (the value of the standar deviation is represented
-             only if the covariance matrix is computed)
-           - the values of the covariance matrix
-             :math:`\Sigma_{\hat{x}}` for the
-             estimated parameters (if is computed),
-           - in the case of the estimation of a dynamic
-             system, the optimal value of the first state 
-             :math:`\Sigma_{\hat{X0}}` and the optimal value 
-             of the last state :math:`\Sigma_{\hat{XN}}`
-           - the running time of the estimation 
-         '''
+        try:
 
-         if (self.EstimationDone == False):
-             raise AttributeError('''
- You must execute both run_parameter_estimation() and
- compute_covariance_matrix() before all results can be displayed.
- ''')
-
-         if self.CovCal == False:
-            print('\n\n## Begin of parameter estimation results ##')
+            print('\n' + 21 * '-' + \
+                ' PECas Parameter estimation results ' + 21 * '-')
              
-            print("\nEstimated parameters pi:")
-            for i, xi in enumerate(self.Phat):
+            print("\nEstimated parameters p_i:")
+            for i, xi in enumerate(self.phat):
             
-                print("p{0:<3} = {1:10}".format(\
+                print("    p_{0:<3} = {1:10}".format(\
                      i, xi[0]))
             
-            print("\nEstimated initial value x0:  ")
-            print self.Xhat[:,0]             
+            try:
+
+                print("\nEstimated initial states value:  ")
+                print("    x(t_0) = " + str(self.Xhat[:,0]))
+                
+                print("\nEstimated final states value:  ")
+                print("    x(t_N) = " + str(self.Xhat[:,-1]))
+                   
+            except AttributeError:
+
+                pass
+
+            print("\nGoodness of fit R^2..............: {0}".format(self.Rsquared))
+
+            print("Residual.........................: {0}".format(self.residual))
+
+            print("\nDuration of the problem setup....: " + \
+                str(self.pesetup.duration_setup) + " s")
             
-            print("\nEstimated final value xN:  ")
-            print self.Xhat[:,-1]  
-                     
-            print("\nGoodness of fit R-squared:  ")
-            for i in range(self.pesetup.ny):
-                print("R^2 - Y{0}= {1}".format(i,self.Rsquared[i]))
-
-            print("\nResidual:  ")
-            for i in range(self.pesetup.ny):
-                print("R - Y{0} = {1}".format(i,self.residual[i]))
+            print("Duration of the estimation.......: " + \
+                str(self.duration_estimation) + " s")
 
 
-            print("\nDuration of the problem setup:  ")
-            print self.pesetup.setupDura
-            
-            print("\nDuration of the simulation:  ")
-            print self.est_duration
-             
-            print('\n\n##  End of parameter estimation results  ## \n')
+        except AttributeError:
 
-
-#         print("\nEstimated parameters xi:\n")
-#         for i, xi in enumerate(self.get_xhat()):
-
-#             print("x{0:<3} = {1:10} +/- {2:10}".format(\
-#                 i, xi, pl.sqrt(self.get_Covx()[i, i])))
-
-#         print("\n\nCovariance matrix Cov(x):\n")
-
-#         print(pl.vectorize("%03.05e".__mod__)(self.get_Covx()))
-
-#         print('\n\n##  End of parameter estimation results  ## \n')
+            raise AttributeError('''
+You must execute at least run_parameter_estimation() to obtain results,
+and compute_covariance_matrix() before all results can be displayed.
+''')   
 
 
     def show_system_information(self, showEquations = False):
+
+        r'''
+        --- docstring tbd ---
+        '''
         
-        print('\n\n## Begin of system information ##')
+        intro.pecas_intro()
+
+        print('\n' + 26 * '-' + \
+            ' PECas system information ' + 26 * '-')
 
         if isinstance(self.pesetup.system, systems.BasicSystem):
             
             print("""\The system is a non-dynamic systems with the general 
 input-output structure and contrain equations: """)
             
-            print("Phi = y(t, u, p), g(t, u, p)=0 ")
+            print("phi = y(t, u, p), g(t, u, p) = 0 ")
             
             print("""\nWith {0} inputs u, {1} parameters p and {2} outputs y
             """.format(self.pesetup.nu,self.pesetup.np,self.pesetup.ny))
@@ -546,11 +508,11 @@ input-output structure and contrain equations: """)
 
         elif isinstance(self.pesetup.system, systems.ExplODE):
 
-            print("""\nThe system is a dynamic defined by a set of explicit ODEs 
-xdot which stablish the system state x:
-    xdot = f(t, u, x, p, w) )
+            print("""\nThe system is a dynamic system defined by a set of
+explicit ODEs xdot which establish the system state x:
+    xdot = f(t, u, x, p, w)
 and by an output function y which sets the system measurements:
-    Phi = y(t, x, p)
+    phi = y(t, x, p).
 """)
             
             
@@ -578,9 +540,13 @@ This feature of PECas is currently disabled, but will be
 available when the DAE systems are implemented.
 ''')
 
-        print('\n\n##  End of system information  ## \n')
 
     def plot_confidence_ellipsoids(self, indices = []):
+
+        r'''
+        --- docstring tbd ---
+        
+        '''
 
         raise NotImplementedError( \
 '''

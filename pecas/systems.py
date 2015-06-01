@@ -23,6 +23,8 @@ For more information on the several class, see their documentations.
 import casadi as ca
 import casadi.tools as cat
 
+import intro
+
 class BasicSystem(object):
 
     '''
@@ -61,10 +63,17 @@ class BasicSystem(object):
                  y = None, \
                  g = ca.SX.sym("g", 0)):
 
+        intro.pecas_intro()
+        print('\n' + 26 * '-' + \
+            ' PECas system definition ' + 27 * '-')
+        print('\nStarting definition of BasicSystem system ...')
+
         if not all(isinstance(arg, ca.casadi.SX) for \
             arg in [t, u, p, y, g]):
 
-            raise TypeError("Input arguments must be CasADi symbolic types.")
+            raise TypeError('''
+Missing input argument for system definition or wrong variable type for an
+input argument. Input arguments must be CasADi symbolic types.''')
 
         self.vars = cat.struct_MX([
                 (
@@ -80,6 +89,8 @@ class BasicSystem(object):
                     cat.entry("g", expr = g)
                 )
             ])
+
+        print('\nDefinition of BasicSystem system sucessful.')
 
 
 class ExplODE(object):
@@ -116,7 +127,7 @@ class ExplODE(object):
 
     .. math::
 
-        \phi = y(t, x, p)
+        \phi = y(t, u, x, p)
         \dot{x} = f(t, u, x, p, w)
         
     '''
@@ -130,10 +141,17 @@ class ExplODE(object):
                  y = None, \
                  f = None):
 
+        intro.pecas_intro()
+        print('\n' + 26 * '-' + \
+            ' PECas system definition ' + 27 * '-')
+        print('\nStarting definition of ExplODE system ...')
+
         if not all(isinstance(arg, ca.casadi.SX) for \
             arg in [t, u, x, p, y, f]):
 
-            raise TypeError("Input arguments must be CasADi symbolic types.")
+            raise TypeError('''
+Missing input argument for system definition or wrong variable type for an
+input argument. Input arguments must be CasADi symbolic types.''')
 
         self.vars = cat.struct_MX([
                 (
@@ -151,6 +169,8 @@ class ExplODE(object):
                     cat.entry("f", expr = f)
                 )
             ])
+
+        print('Definition of ExplODE system sucessful.')
 
 
 class ImplDAE(object):

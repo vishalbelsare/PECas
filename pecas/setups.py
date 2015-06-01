@@ -6,8 +6,11 @@ import casadi.tools as cat
 import pylab as pl
 from abc import ABCMeta, abstractmethod
 
-import systems
 import pdb
+import time
+
+import systems
+import intro
 
 import time
 
@@ -25,7 +28,10 @@ class SetupsBaseClass(object):
         '''Placeholder-function for the according __init__()-methods of the
         classes that inherit from :class:`SetupsBaseClass`.'''
 
-        pass
+        intro.pecas_intro()
+        print('\n' + 24 * '-' + \
+            ' PECas system initialization ' + 25 * '-')
+        print('\nStart system initialization ...')
 
 
     def check_and_set_bounds_and_initials(self, \
@@ -130,11 +136,15 @@ class SetupsBaseClass(object):
                 raise ValueError( \
                     "Wrong dimension for argument xinit, xmin or xmax.")
 
-            for k in range(self.nsteps + 1):
+            for k in range(self.nsteps):
 
                 self.Varsinit["X",k,:] = ca.tools.repeated(xinit[:,k])
                 self.Varsmin["X",k,:] = ca.tools.repeated(xmin[:,k])
                 self.Varsmax["X",k,:] = ca.tools.repeated(xmax[:,k])
+
+            self.Varsinit["XF"] = xinit[:,-1]
+            self.Varsmin["XF"] = xmin[:,-1]
+            self.Varsmax["XF"] = xmax[:,-1]
 
             # Set the state bounds at the initial time, if explicitly given
 
@@ -180,7 +190,7 @@ class SetupsBaseClass(object):
 
                     raise ValueError("Wrong dimension for argument xNmin.")
 
-                self.Varsmin["X",-1,0] = xNmin
+                self.Varsmin["XF"] = xNmin
 
             if xNmax is not None:
 
@@ -194,7 +204,7 @@ class SetupsBaseClass(object):
 
                     raise ValueError("Wrong dimension for argument xNmax.")
 
-                self.Varsmax["X",-1,0] = xNmax
+                self.Varsmax["XF"] = xNmax
 
             # Set the bounds on the equation errors
 
@@ -218,6 +228,8 @@ class BSsetup(SetupsBaseClass):
         x0min = None, x0max = None, \
         xNmin = None, xNmax = None):
 
+        self.tstart_setup = time.time()
+
         super(BSsetup, self).check_and_set_bounds_and_initials( \
             u = u,
             pmin = pmin, pmax = pmax, pinit = pinit, \
@@ -229,6 +241,8 @@ class BSsetup(SetupsBaseClass):
     def __init__(self, system = None, timegrid = None, \
         u = None, \
         pmin = None, pmax = None, pinit = None):
+
+        SetupsBaseClass.__init__(self)
 
         if not type(system) is systems.BasicSystem:
 
@@ -260,7 +274,7 @@ class BSsetup(SetupsBaseClass):
 
         # Define the struct holding the variables
 
-        self.Vars = cat.struct_symSX([
+        self.Vars = cat.struct_symMX([
                 (
                     cat.entry("P", shape = self.np),
                     cat.entry("V", repeat = [self.nsteps], \
@@ -283,8 +297,6 @@ class BSsetup(SetupsBaseClass):
         yfcn.setOption("name", "yfcn")
         yfcn.init()
 
-        # pdb.set_trace()
-
         for k in range(self.nsteps):
 
             self.phiN.append(yfcn.call([self.timegrid[k], \
@@ -292,7 +304,7 @@ class BSsetup(SetupsBaseClass):
 
         self.phiN = ca.vertcat(self.phiN)
 
-        self.phiNfcn = ca.SXFunction([self.Vars], [self.phiN])
+        self.phiNfcn = ca.MXFunction([self.Vars], [self.phiN])
         self.phiNfcn.setOption("name", "phiNfcn")
         self.phiNfcn.init()
 
@@ -305,6 +317,11 @@ class BSsetup(SetupsBaseClass):
         gfcn.init()
 
         self.g = gfcn.call([self.Vars["P"]])[0]
+
+        self.tend_setup = time.time()
+        self.duration_setup = self.tend_setup - self.tstart_setup
+
+        print('Initialization of BasicSystem system sucessful.')
 
 
 class CollocationBaseClass(SetupsBaseClass):
@@ -334,6 +351,8 @@ class CollocationBaseClass(SetupsBaseClass):
         x0min = None, x0max = None, \
         xNmin = None, xNmax = None, \
         systemclass = None):
+
+        SetupsBaseClass.__init__(self)
 
         if not type(system) is systemclass:
 
@@ -373,11 +392,12 @@ class CollocationBaseClass(SetupsBaseClass):
 
         # Define the struct holding the variables
 
-        self.Vars = cat.struct_symSX([
+        self.Vars = cat.struct_symMX([
                 (
-                    cat.entry("X", repeat = [self.nsteps+1, self.ntauroot+1], \
-                        shape = self.nx),
-                    cat.entry("P", shape = self.np),
+                    cat.entry("X", repeat = [self.nsteps, self.ntauroot+1], \
+                        shape = self.nx), \
+                    cat.entry("XF", shape = self.nx), \
+                    cat.entry("P", shape = self.np), \
                     cat.entry("V", repeat = [self.nsteps+1], \
                         shape = self.nv),
                     cat.entry("W", repeat = [self.nsteps, self.ntauroot], \
@@ -399,20 +419,23 @@ class CollocationBaseClass(SetupsBaseClass):
         self.phiN = []
 
         yfcn = ca.SXFunction([system.vars["t"], system.vars["x"], \
-            system.vars["p"]], [system.fcn["y"]])
+            system.vars["p"], system.vars["u"]], [system.fcn["y"]])
         yfcn.setOption("name", "yfcn")
         yfcn.init()
 
-        for k in range(self.nsteps+1):
+        for k in range(self.nsteps):
 
             # DEPENDECY ON U NOT POSSIBLE AT THIS POINT! len(U) = N, not N + 1!
             # self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["U", k, 0], \
             self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["X", k, 0], \
-                self.Vars["P"]])[0])
+                self.Vars["P"], self.u[:, k]])[0])
+
+        self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["XF"], \
+            self.Vars["P"], self.u[:, -1]])[0])
 
         self.phiN = ca.vertcat(self.phiN)
 
-        self.phiNfcn = ca.SXFunction([self.Vars], [self.phiN])
+        self.phiNfcn = ca.MXFunction([self.Vars], [self.phiN])
         self.phiNfcn.setOption("name", "phiNfcn")
         self.phiNfcn.init()
 
@@ -495,8 +518,8 @@ class ODEsetup(CollocationBaseClass):
         x0min = None, x0max = None, \
         xNmin = None, xNmax = None):
             
-        self.setupStart = time.time()
-            
+        self.tstart_setup = time.time()
+
         super(ODEsetup, self).__init__(system = system, \
             timegrid = timegrid, \
             u = u, \
@@ -549,10 +572,19 @@ class ODEsetup(CollocationBaseClass):
             
             # Add the continuity equation to NLP
             
-            self.g.append(self.Vars["X",k+1,0] - xf_k)
+            if k == (self.nsteps - 1):
+
+                self.g.append(self.Vars["XF"] - xf_k)
+
+            else:
+
+                self.g.append(self.Vars["X",k+1,0] - xf_k)
 
         # Concatenate constraints
 
         self.g = ca.vertcat(self.g)
         
-        self.setupDura = time.time() - self.setupStart
+        self.tend_setup = time.time()
+        self.duration_setup = self.tend_setup - self.tstart_setup
+
+        print('Initialization of ExplODE system sucessful.')
