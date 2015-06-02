@@ -200,9 +200,9 @@ obtain the optimal values.
         try:
 
             for i in range (self.pesetup.nx):
-
-                xhat.append(self.pesetup.Vars()(self.Varshat)["X",:,0,i])
-            
+                T = self.pesetup.Vars()(self.Varshat)["X",:,0,i]
+                T.append(self.pesetup.Vars()(self.Varshat)["XF",i])
+                xhat.append(T)
             return pl.array(xhat)
 
         except AttributeError:
