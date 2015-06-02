@@ -107,9 +107,12 @@ class ExplODE(object):
     :param p: CasADi symbolic variable for the unknow parameters :math:``p \in
     \mathbb{R}^{n_{p}}``.
     :type p: casadi.casadi.SX
-    :param w: CasADi symbolic variable for the equation errors :math:``w \in
-    \mathbb{R}^{n_{w}}``.
-    :type w: casadi.casadi.SX
+    :param we: CasADi symbolic variable for the equation errors :math:``we \in
+    \mathbb{R}^{n_{we}}``.
+    :type we: casadi.casadi.SX
+    :param wu: CasADi symbolic variable for the equation errors :math:``wu \in
+    \mathbb{R}^{n_{wu}}``.
+    :type wu: casadi.casadi.SX
     :param y: CasADi symbolic variable describing the output function
               :math:``y(t, p) \in \mathbb{R}^{n_{y}}``, i. e. the output of
               the system :math:``\phi = y(\dot)`` that can be measured, and
@@ -128,7 +131,7 @@ class ExplODE(object):
     .. math::
 
         \phi = y(t, u, x, p)
-        \dot{x} = f(t, u, x, p, w)
+        \dot{x} = f(t, u, x, p, we, wu)
         
     '''
 
@@ -137,7 +140,8 @@ class ExplODE(object):
                  u = ca.MX.sym("u", 0), \
                  x = None, \
                  p = None, \
-                 w = ca.MX.sym("w", 0), \
+                 we = ca.MX.sym("we", 0), \
+                 wu = ca.MX.sym("wu", 0), \
                  y = None, \
                  f = None):
 
@@ -158,7 +162,8 @@ input argument. Input arguments must be CasADi symbolic types.''')
                     cat.entry("t", expr = t),
                     cat.entry("u", expr = u),
                     cat.entry("x", expr = x),
-                    cat.entry("w", expr = w),
+                    cat.entry("we", expr = we),
+                    cat.entry("wu", expr = wu),
                     cat.entry("p", expr = p)
                 )
             ])
@@ -186,7 +191,8 @@ class ImplDAE(object):
              u = ca.MX.sym("u", 0), \
              x = None, \
              p = None, \
-             w = ca.MX.sym("w", 0), \
+             we = ca.MX.sym("we", 0), \
+             wu = ca.MX.sym("wu", 0), \
              y = None, \
              f = None, \
              g = ca.MX.sym("g", 0)):
