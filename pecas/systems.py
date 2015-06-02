@@ -57,18 +57,18 @@ class BasicSystem(object):
     '''
 
     def __init__(self, \
-                 t = ca.SX.sym("t", 1), \
-                 u = ca.SX.sym("u", 0), \
+                 t = ca.MX.sym("t", 1), \
+                 u = ca.MX.sym("u", 0), \
                  p = None, \
                  y = None, \
-                 g = ca.SX.sym("g", 0)):
+                 g = ca.MX.sym("g", 0)):
 
         intro.pecas_intro()
         print('\n' + 26 * '-' + \
             ' PECas system definition ' + 27 * '-')
         print('\nStarting definition of BasicSystem system ...')
 
-        if not all(isinstance(arg, ca.casadi.SX) for \
+        if not all(isinstance(arg, ca.casadi.MX) for \
             arg in [t, u, p, y, g]):
 
             raise TypeError('''
@@ -133,11 +133,11 @@ class ExplODE(object):
     '''
 
     def __init__(self, \
-                 t = ca.SX.sym("t", 1),
-                 u = ca.SX.sym("u", 0), \
+                 t = ca.MX.sym("t", 1),
+                 u = ca.MX.sym("u", 0), \
                  x = None, \
                  p = None, \
-                 w = ca.SX.sym("w", 0), \
+                 w = ca.MX.sym("w", 0), \
                  y = None, \
                  f = None):
 
@@ -146,7 +146,7 @@ class ExplODE(object):
             ' PECas system definition ' + 27 * '-')
         print('\nStarting definition of ExplODE system ...')
 
-        if not all(isinstance(arg, ca.casadi.SX) for \
+        if not all(isinstance(arg, ca.casadi.MX) for \
             arg in [t, u, x, p, y, f]):
 
             raise TypeError('''
@@ -182,14 +182,14 @@ class ImplDAE(object):
     '''
 
     def __init__(self, \
-             t = ca.SX.sym("t", 1),
-             u = ca.SX.sym("u", 0), \
+             t = ca.MX.sym("t", 1),
+             u = ca.MX.sym("u", 0), \
              x = None, \
              p = None, \
-             w = ca.SX.sym("w", 0), \
+             w = ca.MX.sym("w", 0), \
              y = None, \
              f = None, \
-             g = ca.SX.sym("g", 0)):
+             g = ca.MX.sym("g", 0)):
 
         raise NotImplementedError( \
             "Support of implicit DAEs is not implemented yet.")

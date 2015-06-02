@@ -2,16 +2,12 @@ import casadi as ca
 import pylab as pl
 import pecas
 
-import time
-
-# tstart = time.time()
-
 # System
 
-x = ca.SX.sym("x", 4)
-p = ca.SX.sym("p", 6)
-u = ca.SX.sym("u", 2)
-w = ca.SX.sym("w", 4)
+x = ca.MX.sym("x", 4)
+p = ca.MX.sym("p", 6)
+u = ca.MX.sym("u", 2)
+w = ca.MX.sym("w", 4)
 
 f = ca.vertcat( \
 
@@ -37,34 +33,29 @@ data = pl.array(pl.loadtxt( \
     "controlReadings_ACADO_MPC_Betterweights.dat", \
     delimiter = ", ", skiprows = 1))
 
-timegrid = data[150:400, 1]
+timegrid = data[300:400, 1]
 
-
-yN = data[150:400, [2, 4, 6, 8]]
+yN = data[300:400, [2, 4, 6, 8]]
 wv = 1 / (0.1**2) * pl.ones(yN.shape)
-uN = data[150:399, [9, 10]]
-ww = [1 / 1e-1] * 4
+uN = data[300:399, [9, 10]]
+ww = [1 / 1e-4] * 4
 
 porig = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
-# phat = [12.0, 0.1, 0.6]
 
 odesetup = pecas.setups.ODEsetup( \
     system = odesys, timegrid = timegrid,
     u = uN, \
-    pmin = [0.5, 17.06, 0.0, -10.0, -1000.0, -10.0], \
-    pmax = [0.5, 17.06, 13.2, 200, 500, 3], \
     pinit = [0.5, 17.06, 11.5, 5, 0.07, 0.70])
 
 # Run parameter estimation and assure that the results is correct
 
 lsqpe = pecas.LSq(pesetup =odesetup, yN =yN, wv = wv, ww = ww)
+lsqpe.show_system_information(showEquations = True)
 
 lsqpe.run_parameter_estimation()
-# phat = lsqpe.phat
-# print porig
-# print phat
+lsqpe.show_results()
 
-lsqpe.show_system_information(showEquations = True)
+lsqpe.compute_covariance_matrix()
 lsqpe.show_results()
 
 xhat = lsqpe.Xhat[0]
@@ -95,13 +86,4 @@ pl.figure()
 pl.plot(xhat, yhat)
 pl.plot(yN[:,0], yN[:, 1])
 
-# pl.figure()
-# pl.plot(sum(odesetup.V()(lsqpe.Vhat)["X",:,:,0], []))
-
 pl.show()
-
-# tend = time.time()
-# dur = tend - tstart
-# print "started: " + time.ctime(tstart)
-# print "ended: " + time.ctime(tend)
-# print "duration: " + str(dur) + "sec"

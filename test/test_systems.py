@@ -12,11 +12,11 @@ class TestSystemsInit(unittest.TestCase):
 
     def test_basic_system_init(self):
 
-        self.t = ca.SX.sym("t", 1)
-        self.u = ca.SX.sym("u", 1)
-        self.p = ca.SX.sym("p", 1)
-        self.y = ca.SX.sym("y", 1)
-        self.g = ca.SX.sym("g", 1)
+        self.t = ca.MX.sym("t", 1)
+        self.u = ca.MX.sym("u", 1)
+        self.p = ca.MX.sym("p", 1)
+        self.y = ca.MX.sym("y", 1)
+        self.g = ca.MX.sym("g", 1)
 
         pecas.systems.BasicSystem(p = self.p, y = self.y)
         pecas.systems.BasicSystem(t = self.t, p = self.p, y = self.y)
@@ -32,13 +32,13 @@ class TestSystemsInit(unittest.TestCase):
 
     def test_explode_system_init(self):
 
-        self.t = ca.SX.sym("t", 1)
-        self.u = ca.SX.sym("u", 1)
-        self.x = ca.SX.sym("x", 1)
-        self.p = ca.SX.sym("p", 1)
-        self.w = ca.SX.sym("w", 1)
-        self.y = ca.SX.sym("y", 1)
-        self.f = ca.SX.sym("f", 1)
+        self.t = ca.MX.sym("t", 1)
+        self.u = ca.MX.sym("u", 1)
+        self.x = ca.MX.sym("x", 1)
+        self.p = ca.MX.sym("p", 1)
+        self.w = ca.MX.sym("w", 1)
+        self.y = ca.MX.sym("y", 1)
+        self.f = ca.MX.sym("f", 1)
 
         pecas.systems.ExplODE(x = self.x, p = self.p, w = self.w, \
             y = self.y, f = self.f)

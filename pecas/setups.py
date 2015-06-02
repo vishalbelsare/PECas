@@ -292,7 +292,7 @@ class BSsetup(SetupsBaseClass):
 
         self.phiN = []
 
-        yfcn = ca.SXFunction([system.vars["t"], system.vars["u"], \
+        yfcn = ca.MXFunction([system.vars["t"], system.vars["u"], \
             system.vars["p"]], [system.fcn["y"]])
         yfcn.setOption("name", "yfcn")
         yfcn.init()
@@ -312,7 +312,7 @@ class BSsetup(SetupsBaseClass):
 
         # TODO! Can/should/must gfcn depend on u and/or t?
 
-        gfcn = ca.SXFunction([system.vars["p"]], [system.fcn["g"]])
+        gfcn = ca.MXFunction([system.vars["p"]], [system.fcn["g"]])
         gfcn.setOption("name", "gfcn")
         gfcn.init()
 
@@ -394,10 +394,10 @@ class CollocationBaseClass(SetupsBaseClass):
 
         self.Vars = cat.struct_symMX([
                 (
+                    cat.entry("P", shape = self.np), \
                     cat.entry("X", repeat = [self.nsteps, self.ntauroot+1], \
                         shape = self.nx), \
                     cat.entry("XF", shape = self.nx), \
-                    cat.entry("P", shape = self.np), \
                     cat.entry("V", repeat = [self.nsteps+1], \
                         shape = self.nv),
                     cat.entry("W", repeat = [self.nsteps, self.ntauroot], \
@@ -418,8 +418,8 @@ class CollocationBaseClass(SetupsBaseClass):
 
         self.phiN = []
 
-        yfcn = ca.SXFunction([system.vars["t"], system.vars["x"], \
-            system.vars["p"], system.vars["u"]], [system.fcn["y"]])
+        yfcn = ca.MXFunction([system.vars["t"], system.vars["x"], \
+            system.vars["p"], system.vars["u"],system.vars["w"]], [system.fcn["y"]])
         yfcn.setOption("name", "yfcn")
         yfcn.init()
 
@@ -428,10 +428,10 @@ class CollocationBaseClass(SetupsBaseClass):
             # DEPENDECY ON U NOT POSSIBLE AT THIS POINT! len(U) = N, not N + 1!
             # self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["U", k, 0], \
             self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["X", k, 0], \
-                self.Vars["P"], self.u[:, k]])[0])
+                self.Vars["P"], self.u[:, k], self.Vars["W", k, 0]])[0])
 
         self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["XF"], \
-            self.Vars["P"], self.u[:, -1]])[0])
+            self.Vars["P"], self.u[:, -1],self.Vars["W", -1, 0]])[0])
 
         self.phiN = ca.vertcat(self.phiN)
 
@@ -529,7 +529,7 @@ class ODEsetup(CollocationBaseClass):
             xNmin = xNmin, xNmax = xNmax, \
             systemclass = systems.ExplODE)
 
-        ffcn = ca.SXFunction([system.vars["t"], system.vars["x"], \
+        ffcn = ca.MXFunction([system.vars["t"], system.vars["x"], \
             system.vars["u"], system.vars["p"], system.vars["w"]], \
             [system.fcn["f"]])
         ffcn.setOption("name", "ffcn")

@@ -2,6 +2,9 @@ language: python
 python:
   - "2.7"
 
+notifications:
+  email: false
+
 before_install:
  - travis_retry sudo apt-get install -y -qq python-numpy python-scipy python-matplotlib #liblapack3gf liblapack-dev libblas-dev libblas3gf #coinor-libipopt-dev libmumps-seq-dev
  - travis_retry wget https://github.com/casadi/casadi/releases/download/2.2.0/python-casadi_2.2.0-2_amd64.deb

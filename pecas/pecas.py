@@ -287,8 +287,7 @@ this might take some time ...
         self.Rsquared = 1 - self.residual/(pl.norm(Ym))**2
 
         print('''
-Parameter estimation finished. Check IPOPT output for status information.
-''')
+Parameter estimation finished. Check IPOPT output for status information.''')
 
 
     def compute_covariance_matrix(self):
@@ -298,35 +297,63 @@ Parameter estimation finished. Check IPOPT output for status information.
         
         '''
 
-        raise NotImplementedError( \
-'''
-This feature of PECas is currently disabled, but will be available again in a
-future version of PECas.
+        intro.pecas_intro()
+        
+        print('\n' + 20 * '-' + \
+            ' PECas covariance matrix computation ' + 21 * '-')
+
+        print('''
+Computing the covariance matrix for the estimated parameters, 
+this might take some time ...
 ''')
 
-        # self.J1 = ca.mul(self.W, ca.jacobian(self.A, self.pesetup.Vars))
+        self.tstart_cov_computation = time.time()
 
-        # self.J2 = ca.jacobian(self.g, self.pesetup.Vars)
+        try:
 
-        # invW = ca.solve(self.W, ca.MX.eye(self.W.size1()), "csparse")
+            self.beta = self.rhat / (self.yN.size + self.g.size1() - \
+                self.pesetup.Vars.size)
 
-        # bl = ca.blockcat([[ca.mul([self.J1.T, invW, self.J1]), self.J2.T], \
-        #     [self.J2, ca.MX(self.g.size1(), self.g.size1())]])
+            self.J1 = ca.mul(self.W, ca.jacobian(self.A, self.pesetup.Vars))
 
-        # rhs = ca.vertcat((self.J1.T, ca.MX(self.g.size1(), \
-        #     self.A.size1())))
+            self.J2 = ca.jacobian(self.g, self.pesetup.Vars)
+
+            invW = ca.solve(self.W, ca.MX.eye(self.W.size1()), "csparse")
+
+            bl = ca.blockcat([[ca.mul([self.J1.T, invW, self.J1]), self.J2.T], \
+                [self.J2, ca.MX(self.g.size1(), self.g.size1())]])
+
+            rhs = ca.vertcat((self.J1.T, ca.MX(self.g.size1(), \
+                self.A.size1())))
 
 
-        # Jp = ca.solve(bl, rhs, "csparse")[:self.pesetup.Vars.size, :]
+            Jp = ca.solve(bl, rhs, "csparse")[:self.pesetup.Vars.size, :]
 
-        # fcov = ca.MXFunction([self.pesetup.Vars], [ca.mul(Jp, Jp.T)])
-        # fcov.init()
+            fcov = ca.MXFunction([self.pesetup.Vars], [self.beta * ca.mul(Jp, Jp.T)])
+            fcov.init()
 
-        # self.fcov = fcov
+            self.fcov = fcov
 
-        # [self.Covx] = fcov([self.Varshat])
+            [self.Covx] = fcov([self.Varshat])
 
- 
+            print( \
+'''Covariance matrix computation finished, run show_results() to visualize.''')
+
+
+        except AttributeError:
+
+            print( \
+'''You must execute run_parameter_estimation() first before the covariance
+matrix for the estimated parameters can be computed.''')
+
+
+        finally:
+
+            self.tend_cov_computation = time.time()
+            self.duration_cov_computation = self.tend_cov_computation - \
+                self.tstart_cov_computation
+
+
         # r'''
         # :raises: AttributeError
 
@@ -430,6 +457,11 @@ future version of PECas.
 
         intro.pecas_intro()
 
+        # pl.set_printoptions(linewidth = 200, \
+        #     formatter={'float': lambda x: format(x, ' 10.8e')})
+
+        pl.set_printoptions(linewidth = 200)
+
         try:
 
             print('\n' + 21 * '-' + \
@@ -438,31 +470,62 @@ future version of PECas.
             print("\nEstimated parameters p_i:")
             for i, xi in enumerate(self.phat):
             
-                print("    p_{0:<3} = {1:10}".format(\
+                print("    p_{0:<3} = {1: 10.8e}".format(\
                      i, xi[0]))
             
             try:
 
                 print("\nEstimated initial states value:  ")
-                print("    x(t_0) = " + str(self.Xhat[:,0]))
+                print("    x(t_0) = {0}".format(self.Xhat[:,0]))
                 
                 print("\nEstimated final states value:  ")
-                print("    x(t_N) = " + str(self.Xhat[:,-1]))
-                   
+                print("    x(t_N) = {0}".format(self.Xhat[:,-1]))
+            
             except AttributeError:
 
                 pass
 
-            print("\nGoodness of fit R^2..............: {0}".format(self.Rsquared))
+            print("\nCovariance matrix for the estimated parameters:")
 
-            print("Residual.........................: {0}".format(self.residual))
+            try:
 
-            print("\nDuration of the problem setup....: " + \
-                str(self.pesetup.duration_setup) + " s")
+                print(pl.atleast_2d(self.Covx[:self.phat.size, \
+                    :self.phat.size]))
+
+            except AttributeError:
+
+                print( \
+'''    Covariance matrix for the estimated parameters not yet computed.
+    Run class function compute_covariance_matrix() to do so.''')
+
+            # print( \
+            #     "\nGoodness of fit R^2" + 30 * "." + ": {0:10.8e}".format(\
+            #         self.Rsquared))
             
-            print("Duration of the estimation.......: " + \
-                str(self.duration_estimation) + " s")
+            print("\nGoodness of fit R-squared:  ")
+            for i in range(self.pesetup.ny):
+                print("R^2 - Y_{0} = {1: 10.8e}".format(i,self.Rsquared[i]))
 
+            # print("Residual" + 41 * "." + ": {0:10.8e}".format(self.residual))
+
+            print("\nResidual:  ")
+            for i in range(self.pesetup.ny):
+                print("R - Y_{0} = {1: 10.8e}".format(i,self.residual[i]))
+
+            print("\nDuration of the problem setup"+ 20 * "." + \
+                ": {0:10.8e} s".format(self.pesetup.duration_setup))
+            
+            print("Duration of the estimation" + 23 * "." + \
+                ": {0:10.8e} s".format(self.duration_estimation))
+
+            try:
+
+                print("Duration of the covariance matrix computation...." + \
+                    ": {0:10.8e} s".format(self.duration_cov_computation))
+
+            except AttributeError:
+
+                pass
 
         except AttributeError:
 
@@ -470,6 +533,10 @@ future version of PECas.
 You must execute at least run_parameter_estimation() to obtain results,
 and compute_covariance_matrix() before all results can be displayed.
 ''')   
+
+        finally:
+
+            pl.set_printoptions()
 
 
     def show_system_information(self, showEquations = False):
