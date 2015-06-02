@@ -21,7 +21,8 @@ class PECasBaseClass:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def __init__(self, pesetup = None, yN = None, wv = None, ww = None):
+    def __init__(self, pesetup = None, yN = None, wv = None, wwe = None,\
+    wwu = None):
 
         intro.pecas_intro()
         print('\n' + 22 * '-' + \
@@ -85,27 +86,27 @@ but you supported wv of dimension:
                 wv[k, :]
 
 
-        self.ww = []
+        self.wwe = []
 
         try:
 
-            if self.pesetup.nw != 0:
+            if self.pesetup.nwe != 0:
 
-                ww = pl.atleast_2d(ww)
+                wwe = pl.atleast_2d(wwe)
 
                 try:
 
-                    if ww.shape == (1, self.pesetup.nw):
+                    if wwe.shape == (1, self.pesetup.nwe):
 
-                        ww = ww.T
+                        wwe = wwe.T
 
-                    if not ww.shape == (self.pesetup.nw, 1):
+                    if not wwe.shape == (self.pesetup.nwe, 1):
 
                         raise ValueError('''
 The dimensions of the weights of the equation errors given in ww does not
 match the dimensions of the differential equations.''')
 
-                    self.ww = ww
+                    self.wwe = wwe
 
                 except AttributeError:
 
@@ -115,20 +116,63 @@ match the dimensions of the differential equations.''')
 
                     # if self.ww is not None:
 
-                        self.ww = pl.squeeze(ca.repmat(ww, self.pesetup.nsteps * \
+                        self.wwe = pl.squeeze(ca.repmat(wwe, self.pesetup.nsteps * \
                             (len(self.pesetup.tauroot)-1), 1))
 
                 except AttributeError:
 
-                    self.ww = []
+                    self.wwe = []
 
         except AttributeError:
 
             pass
 
+        self.wwu = []
+
+        try:
+
+            if self.pesetup.nwu != 0:
+
+                wwu = pl.atleast_2d(wwu)
+
+                try:
+
+                    if wwu.shape == (1, self.pesetup.nwu):
+
+                        wwu = wwu.T
+
+                    if not wwu.shape == (self.pesetup.nwu, 1):
+
+                        raise ValueError('''
+The dimensions of the weights of the equation errors given in ww does not
+match the dimensions of the differential equations.''')
+
+                    self.wwu = wwu
+
+                except AttributeError:
+
+                    pass
+
+                try:
+
+                    # if self.ww is not None:
+
+                        self.wwu = pl.squeeze(ca.repmat(wwu, self.pesetup.nsteps * \
+                            (len(self.pesetup.tauroot)-1), 1))
+
+                except AttributeError:
+
+                    self.wwu = []
+
+        except AttributeError:
+
+            pass
+
+
+
         # Set up the covariance matrix for the measurements
 
-        self.W = ca.diag(pl.concatenate((self.wv, self.ww)))
+        self.W = ca.diag(pl.concatenate((self.wv, self.wwe,self.wwu)))
 
         print('Setup of the parameter estimation problem sucessful.')        
 
@@ -175,9 +219,11 @@ class LSq(PECasBaseClass):
     estimation problems for previously defined systems using a given set
     of measurement data and weightings.'''
 
-    def __init__(self, pesetup = None, yN = None, wv = None, ww = None):
+    def __init__(self, pesetup = None, yN = None, wv = None, wwe = None,\
+    wwu = None):
 
-        super(LSq, self).__init__(pesetup = pesetup, yN = yN, wv = wv, ww = ww)
+        super(LSq, self).__init__(pesetup = pesetup, yN = yN, wv = wv, \
+        wwe = wwe, wwu = wwu)
 
 
     def run_parameter_estimation(self):
@@ -218,17 +264,27 @@ this might take some time ...
         g = ca.vertcat([self.pesetup.phiN - self.yN + ca.vertcat(A)])
 
 
-        if "W" in self.pesetup.Vars.keys():
+        if "WE" in self.pesetup.Vars.keys():
 
 
             W = []
 
-            for k, elem in enumerate(self.pesetup.Vars["W"]):
+            for k, elem in enumerate(self.pesetup.Vars["WE"]):
 
                 W.append(elem)
 
             A = A + sum(W, [])
 
+        if "WU" in self.pesetup.Vars.keys():
+
+
+            W = []
+
+            for k, elem in enumerate(self.pesetup.Vars["WU"]):
+
+                W.append(elem)
+
+            A = A + sum(W, [])
 
         A = ca.vertcat(A)
 
