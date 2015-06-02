@@ -208,15 +208,15 @@ class SetupsBaseClass(object):
 
             # Set the bounds on the equation errors
 
-            self.Varsinit["We",:] = ca.tools.repeated(0.0)
-            self.Varsmin["We",:] = ca.tools.repeated(-pl.inf)
-            self.Varsmax["We",:] = ca.tools.repeated(pl.inf)
+            self.Varsinit["WE",:] = ca.tools.repeated(0.0)
+            self.Varsmin["WE",:] = ca.tools.repeated(-pl.inf)
+            self.Varsmax["WE",:] = ca.tools.repeated(pl.inf)
             
             # Set the bounds on the input errors
             
-            self.Varsinit["Wu",:] = ca.tools.repeated(0.0)
-            self.Varsmin["Wu",:] = ca.tools.repeated(-pl.inf)
-            self.Varsmax["Wu",:] = ca.tools.repeated(pl.inf)
+            self.Varsinit["WU",:] = ca.tools.repeated(0.0)
+            self.Varsmin["WU",:] = ca.tools.repeated(-pl.inf)
+            self.Varsmax["WU",:] = ca.tools.repeated(pl.inf)
             
         # Set the bounds on the measurement errors
 
@@ -408,7 +408,7 @@ class CollocationBaseClass(SetupsBaseClass):
                     cat.entry("V", repeat = [self.nsteps+1], \
                         shape = self.nv),
                     cat.entry("WE", repeat = [self.nsteps, self.ntauroot], \
-                        shape = self.nwe)
+                        shape = self.nwe),
                     cat.entry("WU", repeat = [self.nsteps, self.ntauroot], \
                         shape = self.nwu)
                 )
