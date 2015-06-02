@@ -208,10 +208,16 @@ class SetupsBaseClass(object):
 
             # Set the bounds on the equation errors
 
-            self.Varsinit["W",:] = ca.tools.repeated(0.0)
-            self.Varsmin["W",:] = ca.tools.repeated(-pl.inf)
-            self.Varsmax["W",:] = ca.tools.repeated(pl.inf)
-
+            self.Varsinit["We",:] = ca.tools.repeated(0.0)
+            self.Varsmin["We",:] = ca.tools.repeated(-pl.inf)
+            self.Varsmax["We",:] = ca.tools.repeated(pl.inf)
+            
+            # Set the bounds on the input errors
+            
+            self.Varsinit["Wu",:] = ca.tools.repeated(0.0)
+            self.Varsmin["Wu",:] = ca.tools.repeated(-pl.inf)
+            self.Varsmax["Wu",:] = ca.tools.repeated(pl.inf)
+            
         # Set the bounds on the measurement errors
 
         self.Varsinit["V",:] = ca.tools.repeated(0.0)
@@ -367,7 +373,8 @@ class CollocationBaseClass(SetupsBaseClass):
         self.nu = system.vars["u"].shape[0]
         self.np = system.vars["p"].shape[0]
         self.nv = system.fcn["y"].shape[0]
-        self.nw = system.vars["w"].shape[0]
+        self.nwe = system.vars["we"].shape[0]
+        self.nwu = system.vars["wu"].shape[0]        
         self.ny = system.fcn["y"].shape[0]
 
         if pl.atleast_2d(timegrid).shape[0] == 1:
@@ -400,8 +407,10 @@ class CollocationBaseClass(SetupsBaseClass):
                     cat.entry("XF", shape = self.nx), \
                     cat.entry("V", repeat = [self.nsteps+1], \
                         shape = self.nv),
-                    cat.entry("W", repeat = [self.nsteps, self.ntauroot], \
-                        shape = self.nw)
+                    cat.entry("WE", repeat = [self.nsteps, self.ntauroot], \
+                        shape = self.nwe)
+                    cat.entry("WU", repeat = [self.nsteps, self.ntauroot], \
+                        shape = self.nwu)
                 )
             ])
 
@@ -419,7 +428,8 @@ class CollocationBaseClass(SetupsBaseClass):
         self.phiN = []
 
         yfcn = ca.MXFunction([system.vars["t"], system.vars["x"], \
-            system.vars["p"], system.vars["u"],system.vars["w"]], [system.fcn["y"]])
+            system.vars["p"], system.vars["u"],system.vars["we"], \
+            system.vars["wu"]], [system.fcn["y"]])
         yfcn.setOption("name", "yfcn")
         yfcn.init()
 
@@ -428,10 +438,12 @@ class CollocationBaseClass(SetupsBaseClass):
             # DEPENDECY ON U NOT POSSIBLE AT THIS POINT! len(U) = N, not N + 1!
             # self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["U", k, 0], \
             self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["X", k, 0], \
-                self.Vars["P"], self.u[:, k], self.Vars["W", k, 0]])[0])
+                self.Vars["P"], self.u[:, k], self.Vars["WE", k, 0],\
+                self.Vars["WU", k, 0]])[0])
 
         self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["XF"], \
-            self.Vars["P"], self.u[:, -1],self.Vars["W", -1, 0]])[0])
+            self.Vars["P"], self.u[:, -1],self.Vars["WE", -1, 0],\
+            self.Vars["WU", k, 0]])[0])
 
         self.phiN = ca.vertcat(self.phiN)
 
@@ -530,8 +542,8 @@ class ODEsetup(CollocationBaseClass):
             systemclass = systems.ExplODE)
 
         ffcn = ca.MXFunction([system.vars["t"], system.vars["x"], \
-            system.vars["u"], system.vars["p"], system.vars["w"]], \
-            [system.fcn["f"]])
+            system.vars["u"], system.vars["p"], system.vars["we"],\
+            system.vars["wu"]], [system.fcn["f"]])
         ffcn.setOption("name", "ffcn")
         ffcn.init()
 
@@ -556,7 +568,7 @@ class ODEsetup(CollocationBaseClass):
 
                 [fk] = ffcn.call([self.T[k][j], self.Vars["X",k,j], \
                     self.u[:, k], self.Vars["P"], \
-                    self.Vars["W", k, j-1]])
+                    self.Vars["WE", k, j-1],self.Vars["WU", k, j-1]])
 
                 self.g.append((self.timegrid[k+1] - \
                     self.timegrid[k]) * fk - xp_jk)
