@@ -6,7 +6,7 @@ import unittest
 import test_set_bounds_initials
 import test_lsq_init
 import test_lsq_run
-import test_covmat
+# import test_covmat
 
 class TestBasicSystemNoConstraints(unittest.TestCase, \
     test_set_bounds_initials.BSSetBoundsInitialsTest, \
@@ -247,6 +247,12 @@ class Test1DVehicle(unittest.TestCase, \
             xNmin = self.yN[-1:], xNmax = self.yN[-1:], \
             pmin = [10.0, 0.0, 0.4], pmax = [10.0, 2, 0.7], \
             pinit = [10.0, 0.08, 0.5])
+
+
+        # if unittest.TestCase.id() == \
+        #     "test.test_scenarios.PedulumBar.test_covmat":
+
+            
 
 
 class Test2DVehicle(unittest.TestCase, \
