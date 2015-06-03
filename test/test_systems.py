@@ -36,16 +36,19 @@ class TestSystemsInit(unittest.TestCase):
         self.u = ca.MX.sym("u", 1)
         self.x = ca.MX.sym("x", 1)
         self.p = ca.MX.sym("p", 1)
-        self.w = ca.MX.sym("w", 1)
+        self.we = ca.MX.sym("we", 1)
+        self.wu = ca.MX.sym("wu", 1)
         self.y = ca.MX.sym("y", 1)
         self.f = ca.MX.sym("f", 1)
 
-        pecas.systems.ExplODE(x = self.x, p = self.p, w = self.w, \
+        pecas.systems.ExplODE(x = self.x, p = self.p, we = self.we, \
             y = self.y, f = self.f)
         pecas.systems.ExplODE(t = self.t, x = self.x, p = self.p, \
-            w = self.w, y = self.y, f = self.f)
+            we = self.we, y = self.y, f = self.f)
         pecas.systems.ExplODE(t = self.t, u = self.u, x = self.x, p = self.p, \
-            w = self.w, y = self.y, f = self.f)
+            we = self.we, y = self.y, f = self.f)
+        pecas.systems.ExplODE(t = self.t, u = self.u, x = self.x, p = self.p, \
+            we = self.we, wu = self.wu, y = self.y, f = self.f)
 
         self.assertRaises(TypeError, pecas.systems.ExplODE)
         self.assertRaises(TypeError, pecas.systems.ExplODE, x = None)

@@ -34,18 +34,18 @@ class ODEPESetupTest(object):
         # Test valid setup cases
 
         pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv, \
-            ww = self.ww)
+            wwe = self.wwe)
         pecas.LSq(pesetup = self.odesetup, yN = self.yN.T, wv = self.wv, \
-            ww = self.ww)
+            wwe = self.wwe)
         pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv.T, \
-            ww = self.ww)
+            wwe = self.wwe)
         
         pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv, \
-            ww = self.ww)
+            wwe = self.wwe)
         pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv, \
-            ww = [self.ww])
+            wwe = [self.wwe])
         pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv, \
-            ww = pl.atleast_1d(self.ww))
+            wwe = pl.atleast_1d(self.wwe))
 
     def test_invalid_lsq_init(self):
 
@@ -54,4 +54,4 @@ class ODEPESetupTest(object):
         self.assertRaises(ValueError, pecas.LSq, pesetup = self.odesetup, \
             yN = self.yN, wv = pl.atleast_2d(self.wv)[:-1])
         # self.assertRaises(ValueError, pecas.LSq, pesetup = self.odesetup, \
-        #     yN = self.yN, wv = self.wv, ww = pl.asarray([1, 2, 3]))
+        #     yN = self.yN, wv = self.wv, wwe = pl.asarray([1, 2, 3]))

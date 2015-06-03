@@ -40,7 +40,7 @@ class ODEPERunTest(object):
         # Run parameter estimation and assure that the results is correct
 
         lsqpe = pecas.LSq(pesetup = self.odesetup, yN = self.yN, \
-            wv = self.wv, ww = self.ww)
+            wv = self.wv, wwe = self.wwe)
 
         self.assertRaises(AttributeError, getattr, lsqpe, "phat")
         self.assertRaises(AttributeError, getattr, lsqpe, "Xhat")
