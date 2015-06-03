@@ -5,7 +5,7 @@ import casadi as ca
 import casadi.tools as cat
 
 import numpy as np
-from scipy.misc import comb
+# from scipy.misc import comb
 
 import pdb
 import time
