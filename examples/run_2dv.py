@@ -7,25 +7,25 @@ import pecas
 x = ca.MX.sym("x", 4)
 p = ca.MX.sym("p", 6)
 u = ca.MX.sym("u", 2)
-w = ca.MX.sym("w", 4)
+we = ca.MX.sym("we", 4)
 
 f = ca.vertcat( \
 
-    [x[3] * pl.cos(x[2] + p[0] * u[0]) + w[0],
+    [x[3] * pl.cos(x[2] + p[0] * u[0]) + we[0],
 
-    x[3] * pl.sin(x[2] + p[0] * u[0]) + w[1],
+    x[3] * pl.sin(x[2] + p[0] * u[0]) + we[1],
 
-    x[3] * u[0] * p[1] + w[2],
+    x[3] * u[0] * p[1] + we[2],
 
     p[2] * u[1] \
         - p[3] * u[1] * x[3] \
         - p[4] * x[3]**2 \
         - p[5] \
-        - (x[3] * u[0])**2 * p[1] * p[0] + w[3]])
+        - (x[3] * u[0])**2 * p[1] * p[0] + we[3]])
 
 y = x
 
-odesys = pecas.systems.ExplODE(x = x, u = u, p = p, w = w, f = f, y = y)
+odesys = pecas.systems.ExplODE(x = x, u = u, p = p, we = we, f = f, y = y)
 
 # Inputs
 
@@ -38,7 +38,7 @@ timegrid = data[300:400, 1]
 yN = data[300:400, [2, 4, 6, 8]]
 wv = 1 / (0.1**2) * pl.ones(yN.shape)
 uN = data[300:399, [9, 10]]
-ww = [1 / 1e-4] * 4
+wwe = [1 / 1e-4] * 4
 
 porig = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
 
@@ -49,7 +49,7 @@ odesetup = pecas.setups.ODEsetup( \
 
 # Run parameter estimation and assure that the results is correct
 
-lsqpe = pecas.LSq(pesetup =odesetup, yN =yN, wv = wv, ww = ww)
+lsqpe = pecas.LSq(pesetup =odesetup, yN =yN, wv = wv, wwe = wwe)
 lsqpe.show_system_information(showEquations = True)
 
 lsqpe.run_parameter_estimation()
