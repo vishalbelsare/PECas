@@ -103,8 +103,8 @@ but you supported wv of dimension:
                     if not wwe.shape == (self.pesetup.nwe, 1):
 
                         raise ValueError('''
-The dimensions of the weights of the equation errors given in ww does not
-match the dimensions of the differential equations.''')
+The dimensions of the weights of the equation errors given in wwe does not
+match the dimensions of the equation errors given in we.''')
 
                     self.wwe = wwe
 
@@ -127,6 +127,7 @@ match the dimensions of the differential equations.''')
 
             pass
 
+
         self.wwu = []
 
         try:
@@ -144,8 +145,8 @@ match the dimensions of the differential equations.''')
                     if not wwu.shape == (self.pesetup.nwu, 1):
 
                         raise ValueError('''
-The dimensions of the weights of the equation errors given in ww does not
-match the dimensions of the differential equations.''')
+The dimensions of the weights of the input errors given in wwu does not
+match the dimensions of the input errors given in wu.''')
 
                     self.wwu = wwu
 
@@ -167,7 +168,6 @@ match the dimensions of the differential equations.''')
         except AttributeError:
 
             pass
-
 
 
         # Set up the covariance matrix for the measurements
