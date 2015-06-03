@@ -3,7 +3,7 @@
 
 import casadi as ca
 import casadi.tools as cat
-import pylab as pl
+import numpy as np
 from abc import ABCMeta, abstractmethod
 
 import pdb
@@ -65,9 +65,9 @@ class SetupsBaseClass(object):
         if not self.nu == 0:
 
             if u is None:
-                u = pl.zeros((self.nu, self.nsteps))
+                u = np.zeros((self.nu, self.nsteps))
 
-            u = pl.atleast_2d(u)
+            u = np.atleast_2d(u)
 
             if u.shape == (self.nsteps, self.nu):
                 u = u.T
@@ -81,20 +81,20 @@ class SetupsBaseClass(object):
 
         else:
 
-            self.u = pl.zeros((1, self.nsteps))
+            self.u = np.zeros((1, self.nsteps))
 
         # Set initials and bounds for the parameters
 
         if pinit is None:
-            pinit = pl.zeros(self.np)
+            pinit = np.zeros(self.np)
         if pmin is None:
-            pmin = -pl.inf * pl.ones(self.np)   
+            pmin = -np.inf * np.ones(self.np)   
         if pmax is None:
-            pmax = pl.inf * pl.ones(self.np)
+            pmax = np.inf * np.ones(self.np)
 
-        pinit = pl.atleast_1d(pl.squeeze(pinit))
-        pmin = pl.atleast_1d(pl.squeeze(pmin))
-        pmax = pl.atleast_1d(pl.squeeze(pmax))
+        pinit = np.atleast_1d(np.squeeze(pinit))
+        pmin = np.atleast_1d(np.squeeze(pmin))
+        pmax = np.atleast_1d(np.squeeze(pmax))
 
         if not all(arg.shape == (self.np,) for \
             arg in [pinit, pmin, pmax]):
@@ -111,15 +111,15 @@ class SetupsBaseClass(object):
         if "X" in self.Vars.keys():
 
             if xinit is None:
-                xinit = pl.zeros((self.nx, self.nsteps + 1))
+                xinit = np.zeros((self.nx, self.nsteps + 1))
             if xmin is None:
-                xmin = -pl.inf * pl.ones((self.nx, self.nsteps + 1))   
+                xmin = -np.inf * np.ones((self.nx, self.nsteps + 1))   
             if xmax is None:
-                xmax = pl.inf * pl.ones((self.nx, self.nsteps + 1))
+                xmax = np.inf * np.ones((self.nx, self.nsteps + 1))
 
-            xinit = pl.atleast_2d(xinit)
-            xmin = pl.atleast_2d(xmin)
-            xmax = pl.atleast_2d(xmax)
+            xinit = np.atleast_2d(xinit)
+            xmin = np.atleast_2d(xmin)
+            xmax = np.atleast_2d(xmax)
 
             if xinit.shape == (self.nsteps + 1, self.nx):
                 xinit = xinit.T
@@ -150,7 +150,7 @@ class SetupsBaseClass(object):
 
             if x0min is not None:
 
-                x0min = pl.atleast_2d(x0min)
+                x0min = np.atleast_2d(x0min)
 
                 if x0min.shape == (self.nx, 1):
 
@@ -164,7 +164,7 @@ class SetupsBaseClass(object):
 
             if x0max is not None:
 
-                x0max = pl.atleast_2d(x0max)
+                x0max = np.atleast_2d(x0max)
 
                 if x0max.shape == (self.nx, 1):
 
@@ -180,7 +180,7 @@ class SetupsBaseClass(object):
 
             if xNmin is not None:
 
-                xNmin = pl.atleast_2d(xNmin)
+                xNmin = np.atleast_2d(xNmin)
 
                 if xNmin.shape == (self.nx, 1):
 
@@ -194,7 +194,7 @@ class SetupsBaseClass(object):
 
             if xNmax is not None:
 
-                xNmax = pl.atleast_2d(xNmax)
+                xNmax = np.atleast_2d(xNmax)
 
                 if xNmax.shape == (self.nx, 1):
 
@@ -209,20 +209,20 @@ class SetupsBaseClass(object):
             # Set the bounds on the equation errors
 
             self.Varsinit["WE",:] = ca.tools.repeated(0.0)
-            self.Varsmin["WE",:] = ca.tools.repeated(-pl.inf)
-            self.Varsmax["WE",:] = ca.tools.repeated(pl.inf)
+            self.Varsmin["WE",:] = ca.tools.repeated(-np.inf)
+            self.Varsmax["WE",:] = ca.tools.repeated(np.inf)
             
             # Set the bounds on the input errors
             
             self.Varsinit["WU",:] = ca.tools.repeated(0.0)
-            self.Varsmin["WU",:] = ca.tools.repeated(-pl.inf)
-            self.Varsmax["WU",:] = ca.tools.repeated(pl.inf)
+            self.Varsmin["WU",:] = ca.tools.repeated(-np.inf)
+            self.Varsmax["WU",:] = ca.tools.repeated(np.inf)
             
         # Set the bounds on the measurement errors
 
         self.Varsinit["V",:] = ca.tools.repeated(0.0)
-        self.Varsmin["V",:] = ca.tools.repeated(-pl.inf)
-        self.Varsmax["V",:] = ca.tools.repeated(pl.inf)
+        self.Varsmin["V",:] = ca.tools.repeated(-np.inf)
+        self.Varsmax["V",:] = ca.tools.repeated(np.inf)
 
 
 class BSsetup(SetupsBaseClass):
@@ -264,13 +264,13 @@ class BSsetup(SetupsBaseClass):
         self.nv = system.fcn["y"].shape[0]
         self.ny = system.fcn["y"].shape[0]
 
-        if pl.atleast_2d(timegrid).shape[0] == 1:
+        if np.atleast_2d(timegrid).shape[0] == 1:
 
-            self.timegrid = pl.asarray(timegrid)
+            self.timegrid = np.asarray(timegrid)
 
-        elif pl.atleast_2d(timegrid).shape[1] == 1:
+        elif np.atleast_2d(timegrid).shape[1] == 1:
 
-                self.timegrid = pl.squeeze(pl.atleast_2d(timegrid).T)
+                self.timegrid = np.squeeze(np.atleast_2d(timegrid).T)
 
         else:
 
@@ -377,13 +377,13 @@ class CollocationBaseClass(SetupsBaseClass):
         self.nwu = system.vars["wu"].shape[0]        
         self.ny = system.fcn["y"].shape[0]
 
-        if pl.atleast_2d(timegrid).shape[0] == 1:
+        if np.atleast_2d(timegrid).shape[0] == 1:
 
-            self.timegrid = pl.asarray(timegrid)
+            self.timegrid = np.asarray(timegrid)
 
-        elif pl.atleast_2d(timegrid).shape[1] == 1:
+        elif np.atleast_2d(timegrid).shape[1] == 1:
 
-                self.timegrid = pl.squeeze(pl.atleast_2d(timegrid).T)
+                self.timegrid = np.squeeze(np.atleast_2d(timegrid).T)
 
         else:
 
@@ -456,11 +456,11 @@ class CollocationBaseClass(SetupsBaseClass):
 
         # Coefficients of the collocation equation
 
-        self.C = pl.zeros((self.ntauroot + 1, self.ntauroot + 1))
+        self.C = np.zeros((self.ntauroot + 1, self.ntauroot + 1))
 
         # Coefficients of the continuity equation
 
-        self.D = pl.zeros(self.ntauroot + 1)
+        self.D = np.zeros(self.ntauroot + 1)
 
         # Dimensionless time inside one control interval
 
@@ -468,7 +468,7 @@ class CollocationBaseClass(SetupsBaseClass):
 
         # Construct the matrix T that contains all collocation time points
 
-        self.T = pl.zeros((self.nsteps, self.ntauroot + 1))
+        self.T = np.zeros((self.nsteps, self.ntauroot + 1))
 
         for k in range(self.nsteps):
 

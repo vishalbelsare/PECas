@@ -4,7 +4,7 @@
 # Test the ODE's setup mehthod (collocation struct builder)
 
 import casadi as ca
-import pylab as pl
+import numpy as np
 import pecas
 
 import unittest
@@ -22,9 +22,9 @@ class BSPESetupTest(object):
     def test_invalid_lsq_init(self):
 
         self.assertRaises(ValueError, pecas.LSq, pesetup = self.bssetup, \
-            yN = pl.atleast_2d(self.yN)[:, :-1], wv = self.wv)
+            yN = np.atleast_2d(self.yN)[:, :-1], wv = self.wv)
         self.assertRaises(ValueError, pecas.LSq, pesetup = self.bssetup, \
-            yN = self.yN, wv = pl.atleast_2d(self.wv)[:-1])
+            yN = self.yN, wv = np.atleast_2d(self.wv)[:-1])
 
 
 class ODEPESetupTest(object):
@@ -45,20 +45,20 @@ class ODEPESetupTest(object):
         pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv, \
             wwe = [self.wwe])
         pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv, \
-            wwe = pl.atleast_1d(self.wwe))
+            wwe = np.atleast_1d(self.wwe))
 
         pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv, \
             wwe = self.wwe, wwu = self.wwu)
         pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv, \
             wwe = self.wwe, wwu = [self.wwu])
         pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv, \
-            wwe = self.wwe, wwu = pl.atleast_1d(self.wwu))
+            wwe = self.wwe, wwu = np.atleast_1d(self.wwu))
 
     def test_invalid_lsq_init(self):
 
         self.assertRaises(ValueError, pecas.LSq, pesetup = self.odesetup, \
-            yN = pl.atleast_2d(self.yN)[:, :-1], wv = self.wv)
+            yN = np.atleast_2d(self.yN)[:, :-1], wv = self.wv)
         self.assertRaises(ValueError, pecas.LSq, pesetup = self.odesetup, \
-            yN = self.yN, wv = pl.atleast_2d(self.wv)[:-1])
+            yN = self.yN, wv = np.atleast_2d(self.wv)[:-1])
         # self.assertRaises(ValueError, pecas.LSq, pesetup = self.odesetup, \
-        #     yN = self.yN, wv = self.wv, wwe = pl.asarray([1, 2, 3]))
+        #     yN = self.yN, wv = self.wv, wwe = np.asarray([1, 2, 3]))

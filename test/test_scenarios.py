@@ -1,11 +1,12 @@
 import casadi as ca
-import pylab as pl
+import numpy as np
 import pecas
 
 import unittest
 import test_set_bounds_initials
 import test_lsq_init
 import test_lsq_run
+import test_covmat
 
 class TestBasicSystemNoConstraints(unittest.TestCase, \
     test_set_bounds_initials.BSSetBoundsInitialsTest, \
@@ -28,23 +29,23 @@ class TestBasicSystemNoConstraints(unittest.TestCase, \
 
         # Inputs
 
-        self.timegrid = pl.linspace(0, 3, 4)
+        self.timegrid = np.linspace(0, 3, 4)
 
         self.invalidpargs = [[0, 1], [[2, 3], [2, 3]], \
-            pl.asarray([1, 2]), pl.asarray([[2, 3], [2, 3]])]
-        self.validpargs = [None, 1, [0], pl.asarray([1]), \
-            pl.asarray([1]).T, pl.asarray([[2]])]
+            np.asarray([1, 2]), np.asarray([[2, 3], [2, 3]])]
+        self.validpargs = [None, 1, [0], np.asarray([1]), \
+            np.asarray([1]).T, np.asarray([[2]])]
 
-        self.invaliduargs = [pl.ones((self.u.size(), \
+        self.invaliduargs = [np.ones((self.u.size(), \
             self.timegrid.size - 1)), \
-            pl.ones((self.timegrid.size - 1, self.u.size()))]
-        self.validuargs = [None, pl.ones((self.u.size(), self.timegrid.size)), \
-            pl.ones((self.timegrid.size, self.u.size()))]
+            np.ones((self.timegrid.size - 1, self.u.size()))]
+        self.validuargs = [None, np.ones((self.u.size(), self.timegrid.size)), \
+            np.ones((self.timegrid.size, self.u.size()))]
 
-        self.yN = pl.asarray([2.5, 4.1, 6.3, 8.2])
-        self.wv = pl.asarray([1.0 / 0.01] * 4)
+        self.yN = np.asarray([2.5, 4.1, 6.3, 8.2])
+        self.wv = np.asarray([1.0 / 0.01] * 4)
 
-        self.uN = (1. / 3.) * pl.linspace(1, 4, 4)
+        self.uN = (1. / 3.) * np.linspace(1, 4, 4)
 
         self.phat = [6.24]
 
@@ -74,23 +75,23 @@ class TestBasicSystemConstraints(unittest.TestCase, \
 
         # Inputs
 
-        self.timegrid = pl.linspace(0, 3, 4)
+        self.timegrid = np.linspace(0, 3, 4)
 
         self.invalidpargs = [[0, 1, 2], [[2, 2, 3], [2, 2, 3]], \
-            pl.asarray([1, 2, 2]), pl.asarray([[2, 3, 3], [2, 3, 3]])]
-        self.validpargs = [None, [0, 1], pl.asarray([1, 1]), \
-            pl.asarray([1, 2]).T, pl.asarray([[2], [2]])]
+            np.asarray([1, 2, 2]), np.asarray([[2, 3, 3], [2, 3, 3]])]
+        self.validpargs = [None, [0, 1], np.asarray([1, 1]), \
+            np.asarray([1, 2]).T, np.asarray([[2], [2]])]
 
-        self.invaliduargs = [pl.ones((self.u.size(), \
+        self.invaliduargs = [np.ones((self.u.size(), \
             self.timegrid.size - 1)), \
-            pl.ones((self.timegrid.size - 1, self.u.size()))]
-        self.validuargs = [None, pl.ones((self.u.size(), self.timegrid.size)), \
-            pl.ones((self.timegrid.size, self.u.size()))]
+            np.ones((self.timegrid.size - 1, self.u.size()))]
+        self.validuargs = [None, np.ones((self.u.size(), self.timegrid.size)), \
+            np.ones((self.timegrid.size, self.u.size()))]
 
-        self.yN = pl.asarray([2.23947, 2.84568, 4.55041, 5.08583])
-        self.wv = pl.asarray([1.0 / (0.5**2)] * 4)
+        self.yN = np.asarray([2.23947, 2.84568, 4.55041, 5.08583])
+        self.wv = np.asarray([1.0 / (0.5**2)] * 4)
 
-        self.uN = pl.vstack([pl.ones(4), pl.linspace(1, 4, 4)])
+        self.uN = np.vstack([np.ones(4), np.linspace(1, 4, 4)])
 
         self.phat = [0.961943, 1.03666]
 
@@ -131,24 +132,24 @@ class TestLotkaVolterra(unittest.TestCase, \
 
         # Inputs
 
-        data = pl.array(pl.loadtxt("test/data_lotka_volterra.txt"))
+        data = np.array(np.loadtxt("test/data_lotka_volterra.txt"))
 
         self.timegrid = data[:, 0]
 
         self.invalidpargs = [[0, 1, 2], [[2, 3], [2, 3]], \
-            pl.asarray([1, 2, 3]), pl.asarray([[2, 3], [2, 3]])]
-        self.validpargs = [None, [0, 1, 2, 3], pl.asarray([1, 2, 3, 4]), \
-            pl.asarray([1, 2, 3, 4]).T, pl.asarray([[2], [3], [2], [3]])]
+            np.asarray([1, 2, 3]), np.asarray([[2, 3], [2, 3]])]
+        self.validpargs = [None, [0, 1, 2, 3], np.asarray([1, 2, 3, 4]), \
+            np.asarray([1, 2, 3, 4]).T, np.asarray([[2], [3], [2], [3]])]
 
-        self.invalidxargs = [pl.ones((self.x.size() - 1, self.timegrid.size)), \
-            pl.ones((self.timegrid.size - 1, self.x.size()))]
-        self.validxargs = [None, pl.ones((self.x.size(), self.timegrid.size)), \
-            pl.ones((self.timegrid.size, self.x.size()))]
+        self.invalidxargs = [np.ones((self.x.size() - 1, self.timegrid.size)), \
+            np.ones((self.timegrid.size - 1, self.x.size()))]
+        self.validxargs = [None, np.ones((self.x.size(), self.timegrid.size)), \
+            np.ones((self.timegrid.size, self.x.size()))]
 
-        self.invalidxbvpargs = [[3, 2, 1], pl.ones(3), \
-            pl.ones((1, 3)), pl.ones((3, 1))]
-        self.validxbvpargs = [None, [1, 1], [[1], [1]], pl.ones((2,1)), \
-            pl.ones((1, 2)), pl.ones(2)]
+        self.invalidxbvpargs = [[3, 2, 1], np.ones(3), \
+            np.ones((1, 3)), np.ones((3, 1))]
+        self.validxbvpargs = [None, [1, 1], [[1], [1]], np.ones((2,1)), \
+            np.ones((1, 2)), np.ones(2)]
 
         # Since the supported values are never used, there is no case of
         # invalid u-arguments in this testcase
@@ -173,15 +174,17 @@ class TestLotkaVolterra(unittest.TestCase, \
             system = self.odesys, timegrid = self.timegrid, \
             x0min = [self.yN[0,0], self.yN[0,1]], \
             x0max = [self.yN[0,0], self.yN[0,1]], \
-            pmin = [1.0, -pl.inf, 1.0, -pl.inf], \
-            pmax = [1.0, pl.inf, 1.0, pl.inf], \
+            pmin = [1.0, -np.inf, 1.0, -np.inf], \
+            pmax = [1.0, np.inf, 1.0, np.inf], \
             pinit = [1.0, 0.5, 1.0, 1.0])
 
 
 class Test1DVehicle(unittest.TestCase, \
     test_set_bounds_initials.ODESetBoundsInitialsTest, \
     test_lsq_init.ODEPESetupTest, \
-    test_lsq_run.ODEPERunTest):
+    test_lsq_run.ODEPERunTest, \
+    # test_covmat.CovMatTest, \
+    ):
 
     # (model and data taken from Diehl, Moritz: Course on System Identification,
     # Exercises 5 and 6, SYSCOP, IMTEK, University of Freiburg, 2014/2015)
@@ -204,32 +207,32 @@ class Test1DVehicle(unittest.TestCase, \
 
         # Inputs
 
-        data = pl.array(pl.loadtxt("test/data_1d_vehicle.txt"))
+        data = np.array(np.loadtxt("test/data_1d_vehicle.txt"))
 
         self.timegrid = data[:, 0]
 
         self.invalidpargs = [[0, 1], [[2, 3], [2, 3]], \
-            pl.asarray([1, 2, 3, 4]), pl.asarray([[2, 3], [2, 3]])]
-        self.validpargs = [None, [0, 1, 2], pl.asarray([3, 4, 5]), \
-            pl.asarray([1, 2, 1]).T, pl.asarray([[2], [3], [4]])]
+            np.asarray([1, 2, 3, 4]), np.asarray([[2, 3], [2, 3]])]
+        self.validpargs = [None, [0, 1, 2], np.asarray([3, 4, 5]), \
+            np.asarray([1, 2, 1]).T, np.asarray([[2], [3], [4]])]
 
-        self.invalidxargs = [pl.ones((self.x.size() - 1, self.timegrid.size)), \
-            pl.ones((self.timegrid.size - 1, self.x.size()))]
-        self.validxargs = [None, pl.ones((self.x.size(), self.timegrid.size)), \
-            pl.ones((self.timegrid.size, self.x.size()))]
+        self.invalidxargs = [np.ones((self.x.size() - 1, self.timegrid.size)), \
+            np.ones((self.timegrid.size - 1, self.x.size()))]
+        self.validxargs = [None, np.ones((self.x.size(), self.timegrid.size)), \
+            np.ones((self.timegrid.size, self.x.size()))]
 
-        self.invalidxbvpargs = [[3, 2], pl.ones(3), \
-            pl.ones((1, 3)), pl.ones((3, 1))]
-        self.validxbvpargs = [None, [1], 1, pl.ones(1), pl.ones((1, 1))]
+        self.invalidxbvpargs = [[3, 2], np.ones(3), \
+            np.ones((1, 3)), np.ones((3, 1))]
+        self.validxbvpargs = [None, [1], 1, np.ones(1), np.ones((1, 1))]
 
-        self.invaliduargs = [pl.ones((self.u.size(), self.timegrid.size)), \
-            pl.ones((self.timegrid.size, self.u.size()))]
-        self.validuargs = [None, pl.ones((self.u.size(), \
+        self.invaliduargs = [np.ones((self.u.size(), self.timegrid.size)), \
+            np.ones((self.timegrid.size, self.u.size()))]
+        self.validuargs = [None, np.ones((self.u.size(), \
             self.timegrid.size - 1)), \
-            pl.ones((self.timegrid.size - 1, self.u.size()))]
+            np.ones((self.timegrid.size - 1, self.u.size()))]
 
         self.yN = data[:, 1]
-        self.wv = 1 / (0.01**2) * pl.ones(self.yN.shape)
+        self.wv = 1 / (0.01**2) * np.ones(self.yN.shape)
         self.uN = data[:-1, 2]
         self.wwe = 1 / 1e-4
         self.wwu = None
@@ -266,9 +269,9 @@ class Test2DVehicle(unittest.TestCase, \
 
         self.f = ca.vertcat( \
 
-            [self.x[3] * pl.cos(self.x[2] + self.p[0] * self.u[0] + self.we[0]),
+            [self.x[3] * np.cos(self.x[2] + self.p[0] * self.u[0] + self.we[0]),
 
-            self.x[3] * pl.sin(self.x[2] + self.p[0] * self.u[0] + self.we[1]),
+            self.x[3] * np.sin(self.x[2] + self.p[0] * self.u[0] + self.we[1]),
 
             self.x[3] * self.u[0] * self.p[1] + self.we[2],
 
@@ -286,37 +289,37 @@ class Test2DVehicle(unittest.TestCase, \
 
         # Inputs
 
-        data = pl.array(pl.loadtxt( \
+        data = np.array(np.loadtxt( \
             "test/controlReadings_ACADO_MPC_rates_Betterweights.dat", \
             delimiter = ", ", skiprows = 1))
 
         self.timegrid = data[200:250, 1]
 
         self.invalidpargs = [[0, 1], [[2, 3], [2, 3]], \
-            pl.asarray([1, 2, 3, 4, 5]), pl.asarray([[2, 3], [2, 3]])]
-        self.validpargs = [None, pl.asarray([3, 4, 5, 5, 6, 7]), \
-            pl.asarray([1, 2, 1, 5, 6, 7]).T, \
-            pl.asarray([[2], [3], [4], [5], [6], [7]]), \
+            np.asarray([1, 2, 3, 4, 5]), np.asarray([[2, 3], [2, 3]])]
+        self.validpargs = [None, np.asarray([3, 4, 5, 5, 6, 7]), \
+            np.asarray([1, 2, 1, 5, 6, 7]).T, \
+            np.asarray([[2], [3], [4], [5], [6], [7]]), \
             [1, 2, 3, 4, 5, 6]]
 
-        self.invalidxargs = [pl.ones((self.x.size() - 1, self.timegrid.size)), \
-            pl.ones((self.timegrid.size - 1, self.x.size()))]
-        self.validxargs = [None, pl.ones((self.x.size(), self.timegrid.size)), \
-            pl.ones((self.timegrid.size, self.x.size()))]
+        self.invalidxargs = [np.ones((self.x.size() - 1, self.timegrid.size)), \
+            np.ones((self.timegrid.size - 1, self.x.size()))]
+        self.validxargs = [None, np.ones((self.x.size(), self.timegrid.size)), \
+            np.ones((self.timegrid.size, self.x.size()))]
 
-        self.invalidxbvpargs = [[3, 2, 5], pl.ones(5), \
-            pl.ones((1, 5)), pl.ones((3, 1))]
-        self.validxbvpargs = [None, [1] * 4, pl.ones(4), pl.ones((1, 4)), \
-            pl.ones((4, 1))]
+        self.invalidxbvpargs = [[3, 2, 5], np.ones(5), \
+            np.ones((1, 5)), np.ones((3, 1))]
+        self.validxbvpargs = [None, [1] * 4, np.ones(4), np.ones((1, 4)), \
+            np.ones((4, 1))]
 
-        self.invaliduargs = [pl.ones((self.u.size(), self.timegrid.size)), \
-            pl.ones((self.timegrid.size, self.u.size()))]
-        self.validuargs = [None, pl.ones((self.u.size(), \
+        self.invaliduargs = [np.ones((self.u.size(), self.timegrid.size)), \
+            np.ones((self.timegrid.size, self.u.size()))]
+        self.validuargs = [None, np.ones((self.u.size(), \
             self.timegrid.size - 1)), \
-            pl.ones((self.timegrid.size - 1, self.u.size()))]
+            np.ones((self.timegrid.size - 1, self.u.size()))]
 
         self.yN = data[200:250, [2, 4, 6, 8]]
-        self.wv = 1 / (0.1**2) * pl.ones(self.yN.shape)
+        self.wv = 1 / (0.1**2) * np.ones(self.yN.shape)
         self.uN = data[200:249, [9, 10]]
         self.wwe = [1 / 1e-4] * 4
         self.wwu = None
@@ -345,7 +348,7 @@ class PedulumBar(unittest.TestCase, \
         m = 1
         L = 3
         g = 9.81
-        psi = pl.pi/2
+        psi = np.pi/2
 
         # System
 
@@ -356,7 +359,7 @@ class PedulumBar(unittest.TestCase, \
         self.f = ca.vertcat([ \
             
             self.x[1], \
-            self.p[0]/(m*(L**2))*(self.u-self.x[0]) - g/L * pl.sin(self.x[0]) \
+            self.p[0]/(m*(L**2))*(self.u-self.x[0]) - g/L * np.sin(self.x[0]) \
 
             ])
 
@@ -367,42 +370,42 @@ class PedulumBar(unittest.TestCase, \
 
         # Inputs
 
-        data = pl.loadtxt('test/ex6data.txt')
+        data = np.loadtxt('test/ex6data.txt')
 
         self.timegrid = data[:50, 0]
 
         self.invalidpargs = [[0, 1], [[2, 3], [2, 3]], \
-            pl.asarray([1, 2]), pl.asarray([[2, 3], [2, 3]])]
-        self.validpargs = [None, 1, [0], pl.asarray([1]), \
-            pl.asarray([1]).T, pl.asarray([[2]])]
+            np.asarray([1, 2]), np.asarray([[2, 3], [2, 3]])]
+        self.validpargs = [None, 1, [0], np.asarray([1]), \
+            np.asarray([1]).T, np.asarray([[2]])]
 
-        self.invalidxargs = [pl.ones((self.x.size() - 1, self.timegrid.size)), \
-            pl.ones((self.timegrid.size - 1, self.x.size()))]
-        self.validxargs = [None, pl.ones((self.x.size(), self.timegrid.size)), \
-            pl.ones((self.timegrid.size, self.x.size()))]
+        self.invalidxargs = [np.ones((self.x.size() - 1, self.timegrid.size)), \
+            np.ones((self.timegrid.size - 1, self.x.size()))]
+        self.validxargs = [None, np.ones((self.x.size(), self.timegrid.size)), \
+            np.ones((self.timegrid.size, self.x.size()))]
 
-        self.invalidxbvpargs = [[3, 2, 1], pl.ones(3), \
-            pl.ones((1, 3)), pl.ones((3, 1))]
-        self.validxbvpargs = [None, [1, 1], [[1], [1]], pl.ones((2,1)), \
-            pl.ones((1, 2)), pl.ones(2)]
+        self.invalidxbvpargs = [[3, 2, 1], np.ones(3), \
+            np.ones((1, 3)), np.ones((3, 1))]
+        self.validxbvpargs = [None, [1, 1], [[1], [1]], np.ones((2,1)), \
+            np.ones((1, 2)), np.ones(2)]
 
-        self.invaliduargs = [pl.ones((self.u.size(), self.timegrid.size)), \
-            pl.ones((self.timegrid.size, self.u.size()))]
-        self.validuargs = [None, pl.ones((self.u.size(), \
+        self.invaliduargs = [np.ones((self.u.size(), self.timegrid.size)), \
+            np.ones((self.timegrid.size, self.u.size()))]
+        self.validuargs = [None, np.ones((self.u.size(), \
             self.timegrid.size - 1)), \
-            pl.ones((self.timegrid.size - 1, self.u.size()))]
+            np.ones((self.timegrid.size - 1, self.u.size()))]
 
         N = self.timegrid.size
         phim = data[:50, 1]
         wm = data[:50, 2]
 
-        self.yN = pl.array([phim, wm])
+        self.yN = np.array([phim, wm])
         self.uN = [psi] * (N-1)
 
-        self.wv = pl.array([
+        self.wv = np.array([
 
-                1.0 / (pl.ones(N)*pl.std(phim, ddof=1)**2),
-                1.0 / (pl.ones(N)*pl.std(wm, ddof=1)**2)
+                1.0 / (np.ones(N)*np.std(phim, ddof=1)**2),
+                1.0 / (np.ones(N)*np.std(wm, ddof=1)**2)
 
             ])
 

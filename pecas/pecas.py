@@ -4,7 +4,7 @@
 import casadi as ca
 import casadi.tools as cat
 
-import pylab as pl
+import numpy as np
 from scipy.misc import comb
 
 import pdb
@@ -36,7 +36,7 @@ class PECasBaseClass:
         # Check if the supported measurement data fits to the dimensions of
         # the output function
 
-        yN = pl.atleast_2d(yN)
+        yN = np.atleast_2d(yN)
 
         if yN.shape == (pesetup.timegrid.size, pesetup.ny):
 
@@ -56,7 +56,7 @@ but you supported yN of dimension:
         # Check if the supported standard deviations fit to the dimensions of
         # the measurement data
 
-        wv = pl.atleast_2d(wv)
+        wv = np.atleast_2d(wv)
 
         if wv.shape == yN.T.shape:
 
@@ -75,8 +75,8 @@ but you supported wv of dimension:
         # Get the measurement values and standard deviations into the
         # necessary order of apperance and dimensions
 
-        self.yN = pl.zeros(pl.size(yN))
-        self.wv = pl.zeros(pl.size(yN))
+        self.yN = np.zeros(np.size(yN))
+        self.wv = np.zeros(np.size(yN))
 
         for k in range(yN.shape[0]):
 
@@ -92,7 +92,7 @@ but you supported wv of dimension:
 
             if self.pesetup.nwe != 0:
 
-                wwe = pl.atleast_2d(wwe)
+                wwe = np.atleast_2d(wwe)
 
                 try:
 
@@ -116,7 +116,7 @@ match the dimensions of the equation errors given in we.''')
 
                     # if self.ww is not None:
 
-                        self.wwe = pl.squeeze(ca.repmat(wwe, self.pesetup.nsteps * \
+                        self.wwe = np.squeeze(ca.repmat(wwe, self.pesetup.nsteps * \
                             (len(self.pesetup.tauroot)-1), 1))
 
                 except AttributeError:
@@ -134,7 +134,7 @@ match the dimensions of the equation errors given in we.''')
 
             if self.pesetup.nwu != 0:
 
-                wwu = pl.atleast_2d(wwu)
+                wwu = np.atleast_2d(wwu)
 
                 try:
 
@@ -158,7 +158,7 @@ match the dimensions of the input errors given in wu.''')
 
                     # if self.ww is not None:
 
-                        self.wwu = pl.squeeze(ca.repmat(wwu, self.pesetup.nsteps * \
+                        self.wwu = np.squeeze(ca.repmat(wwu, self.pesetup.nsteps * \
                             (len(self.pesetup.tauroot)-1), 1))
 
                 except AttributeError:
@@ -172,7 +172,7 @@ match the dimensions of the input errors given in wu.''')
 
         # Set up the covariance matrix for the measurements
 
-        self.W = ca.diag(pl.concatenate((self.wv, self.wwe,self.wwu)))
+        self.W = ca.diag(np.concatenate((self.wv, self.wwe,self.wwu)))
 
         print('Setup of the parameter estimation problem sucessful.')        
 
@@ -182,7 +182,7 @@ match the dimensions of the input errors given in wu.''')
 
         try:
             
-            return pl.array(self.pesetup.Vars()(self.Varshat)["P"])
+            return np.array(self.pesetup.Vars()(self.Varshat)["P"])
 
         except AttributeError:
 
@@ -203,7 +203,7 @@ obtain the optimal values.
                 T = self.pesetup.Vars()(self.Varshat)["X",:,0,i]
                 T.append(self.pesetup.Vars()(self.Varshat)["XF",i])
                 xhat.append(T)
-            return pl.array(xhat)
+            return np.array(xhat)
 
         except AttributeError:
 
@@ -313,8 +313,8 @@ this might take some time ...
 
         # Set equality constraints
 
-        solver.setInput(pl.zeros(g.size()), "lbg")
-        solver.setInput(pl.zeros(g.size()), "ubg")
+        solver.setInput(np.zeros(g.size()), "lbg")
+        solver.setInput(np.zeros(g.size()), "ubg")
 
         # Set the initial guess and bounds for the solver]
 
@@ -332,15 +332,15 @@ this might take some time ...
         self.rhat = solver.getOutput("f")
         
         Ysim = self.pesetup.phiNfcn([self.Varshat])[0]
-        Ym = pl.reshape(self.yN.T,(Ysim.shape))
+        Ym = np.reshape(self.yN.T,(Ysim.shape))
         res = Ym-Ysim
         self.residual = []
         self.Rsquared = []
 
         for i in range(self.pesetup.ny):   
 
-            self.residual.append((pl.norm(res[i:-1:self.pesetup.ny]))**2)
-            self.Rsquared.append(1 - self.residual[i]/(pl.norm(Ym[i:-1:self.pesetup.ny]))**2)
+            self.residual.append((np.linalg.norm(res[i:-1:self.pesetup.ny]))**2)
+            self.Rsquared.append(1 - self.residual[i]/(np.linalg.norm(Ym[i:-1:self.pesetup.ny]))**2)
         
         self.tend_estimation = time.time()
         self.duration_estimation = self.tend_estimation - \
@@ -517,10 +517,10 @@ matrix for the estimated parameters can be computed.''')
 
         intro.pecas_intro()
 
-        # pl.set_printoptions(linewidth = 200, \
+        # np.set_printoptions(linewidth = 200, \
         #     formatter={'float': lambda x: format(x, ' 10.8e')})
 
-        pl.set_printoptions(linewidth = 200)
+        np.set_printoptions(linewidth = 200)
 
         try:
 
@@ -549,7 +549,7 @@ matrix for the estimated parameters can be computed.''')
 
             try:
 
-                print(pl.atleast_2d(self.Covx[:self.phat.size, \
+                print(np.atleast_2d(self.Covx[:self.phat.size, \
                     :self.phat.size]))
 
             except AttributeError:
@@ -596,7 +596,7 @@ and compute_covariance_matrix() before all results can be displayed.
 
         finally:
 
-            pl.set_printoptions()
+            np.set_printoptions()
 
 
     def show_system_information(self, showEquations = False):
@@ -730,31 +730,31 @@ future version of PECas.
 # ''')
 
 #         nplots = int(round(comb(len(indices), 2)))
-#         plotfig = pl.figure()
+#         plotfig = np.figure()
 #         plcount = 1
 
-#         xy = pl.array([pl.cos(pl.linspace(0,2*pl.pi,100)), \
-#                     pl.sin(pl.linspace(0,2*pl.pi,100))])
+#         xy = np.array([np.cos(np.linspace(0,2*np.pi,100)), \
+#                     np.sin(np.linspace(0,2*np.pi,100))])
 
 #         for j, ind1 in enumerate(indices):
 
 #             for k, ind2 in enumerate(indices[j+1:]):
 
-#                 covs = pl.array([ \
+#                 covs = np.array([ \
 
 #                         [self.__Covx[ind1, ind1], self.__Covx[ind1, ind2]], \
 #                         [self.__Covx[ind2, ind1], self.__Covx[ind2, ind2]] \
 
 #                     ])
 
-#                 w, v = pl.linalg.eig(covs)
+#                 w, v = np.linalg.eig(covs)
 
-#                 ellipse = ca.mul(pl.array([self.__xhat[ind1], \
+#                 ellipse = ca.mul(np.array([self.__xhat[ind1], \
 #                     self.__xhat[ind2]]), \
-#                     pl.ones([1,100])) + ca.mul([v, pl.diag(w), xy])
+#                     np.ones([1,100])) + ca.mul([v, np.diag(w), xy])
 
 #                 ax = plotfig.add_subplot(nplots, 1, plcount)
-#                 ax.plot(pl.array(ellipse[0,:]).T, pl.array(ellipse[1,:]).T, \
+#                 ax.plot(np.array(ellipse[0,:]).T, np.array(ellipse[1,:]).T, \
 #                     label = str(self.__x[ind1].getName()) + ' - ' + \
 #                     str(self.__x[ind2].getName()))
 #                 ax.scatter(self.__xhat[ind1], self.__xhat[ind2])
@@ -762,4 +762,4 @@ future version of PECas.
 
 #                 plcount += 1
 
-#         pl.show()
+#         np.show()

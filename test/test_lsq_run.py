@@ -4,7 +4,6 @@
 # Test the ODE's setup mehthod (collocation struct builder)
 
 import casadi as ca
-import pylab as pl
 import pecas
 
 import unittest
@@ -32,6 +31,8 @@ class BSPERunTest(object):
         lsqpe.show_system_information(showEquations = True)
         lsqpe.show_results()
 
+        self.lsqpe = lsqpe
+
 
 class ODEPERunTest(object):
 
@@ -58,3 +59,5 @@ class ODEPERunTest(object):
 
         lsqpe.show_system_information(showEquations = True)
         lsqpe.show_results()
+
+        self.lsqpe = lsqpe

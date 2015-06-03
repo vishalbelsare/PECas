@@ -4,7 +4,6 @@
 # Test the function for setting bounds and initials
 
 import casadi as ca
-import pylab as pl
 import pecas
 
 import unittest
