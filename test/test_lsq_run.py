@@ -67,6 +67,8 @@ class ODEPERunTest(object):
 
         self.lsqpe.compute_covariance_matrix()
 
+        self.lsqpe.show_results()
+
 
     def test_pe(self):
 

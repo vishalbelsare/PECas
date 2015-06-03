@@ -517,10 +517,8 @@ matrix for the estimated parameters can be computed.''')
 
         intro.pecas_intro()
 
-        # np.set_printoptions(linewidth = 200, \
-        #     formatter={'float': lambda x: format(x, ' 10.8e')})
-
-        np.set_printoptions(linewidth = 200)
+        np.set_printoptions(linewidth = 200, \
+            formatter={'float': lambda x: format(x, ' 10.8e')})
 
         try:
 

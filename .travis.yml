@@ -31,8 +31,8 @@ install:
  - source activate test
  - conda install --yes numpy=$NUMPY scipy=$SCIPY matplotlib pip
  - pip install setuptools
- - travis_retry wget https://github.com/casadi/casadi/releases/download/2.2.0/python-casadi_2.2.0-2_amd64.deb
- - sudo dpkg -i python-casadi_2.2.0-2_amd64.deb
+ - travis_retry wget http://sourceforge.net/projects/casadi/files/CasADi/2.3.0-rc2/Ubuntu-12.04/python-casadi_2.3.0rc2-2_amd64.deb/download -O python-casadi_2.3.0rc2-2_amd64.deb
+ - sudo dpkg -i python-casadi_2.3.0rc2-2_amd64.deb
  - rm python-casadi_2.2.0-2_amd64.deb
  - python setup.py install
 
