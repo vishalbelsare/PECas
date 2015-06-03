@@ -5,7 +5,7 @@ language: python
 matrix:
   include:
     - python: 2.7
-      env: NUMPY=1.9 SCIPY=0.13
+      env: NUMPY=1.8 SCIPY=0.13
 
 notifications:
   email: false
