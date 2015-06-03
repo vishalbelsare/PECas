@@ -47,6 +47,13 @@ class ODEPESetupTest(object):
         pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv, \
             wwe = pl.atleast_1d(self.wwe))
 
+        pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv, \
+            wwe = self.wwe, wwu = self.wwu)
+        pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv, \
+            wwe = self.wwe, wwu = [self.wwu])
+        pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv, \
+            wwe = self.wwe, wwu = pl.atleast_1d(self.wwu))
+
     def test_invalid_lsq_init(self):
 
         self.assertRaises(ValueError, pecas.LSq, pesetup = self.odesetup, \

@@ -266,7 +266,6 @@ this might take some time ...
 
         if "WE" in self.pesetup.Vars.keys():
 
-
             W = []
 
             for k, elem in enumerate(self.pesetup.Vars["WE"]):
@@ -275,8 +274,8 @@ this might take some time ...
 
             A = A + sum(W, [])
 
-        if "WU" in self.pesetup.Vars.keys():
 
+        if "WU" in self.pesetup.Vars.keys():
 
             W = []
 
@@ -285,6 +284,7 @@ this might take some time ...
                 W.append(elem)
 
             A = A + sum(W, [])
+
 
         A = ca.vertcat(A)
 
@@ -336,7 +336,9 @@ this might take some time ...
         res = Ym-Ysim
         self.residual = []
         self.Rsquared = []
-        for i in range(self.pesetup.ny):            
+
+        for i in range(self.pesetup.ny):   
+
             self.residual.append((pl.norm(res[i:-1:self.pesetup.ny]))**2)
             self.Rsquared.append(1 - self.residual[i]/(pl.norm(Ym[i:-1:self.pesetup.ny]))**2)
         

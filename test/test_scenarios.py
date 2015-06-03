@@ -164,6 +164,7 @@ class TestLotkaVolterra(unittest.TestCase, \
         self.yN = data[:, 1::2]
         self.wv = 1.0 / data[:, 2::2]**2
         self.wwe = [1.0 / 1e-4, 1.0 / 1e-4]
+        self.wwu = None
 
         # self.phat = [1, 0.703278, 1, 0.342208]
         self.phat = [1, 0.703902, 1, 0.342233]
@@ -231,6 +232,7 @@ class Test1DVehicle(unittest.TestCase, \
         self.wv = 1 / (0.01**2) * pl.ones(self.yN.shape)
         self.uN = data[:-1, 2]
         self.wwe = 1 / 1e-4
+        self.wwu = None
 
         # self.phat = [10.0, 0.000236, 0.614818]
         self.phat = [10, 0.0299196, 0.604329]
@@ -317,6 +319,7 @@ class Test2DVehicle(unittest.TestCase, \
         self.wv = 1 / (0.1**2) * pl.ones(self.yN.shape)
         self.uN = data[200:249, [9, 10]]
         self.wwe = [1 / 1e-4] * 4
+        self.wwu = None
 
         # self.phat = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
         self.phat = [0.5, 17.06, 3.98281, -10, -7.57932, 3]
@@ -404,6 +407,7 @@ class PedulumBar(unittest.TestCase, \
             ])
 
         self.wwe = None
+        self.wwu = None
 
         self.phat = [2.98427]
 
