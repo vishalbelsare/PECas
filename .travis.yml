@@ -2,20 +2,16 @@ language: python
 python:
   - "2.7"
 
-before_script:
-  - wget http://repo.continuum.io/miniconda/Miniconda-3.8.3-Linux-x86_64.sh -O miniconda.sh
-  - chmod +x miniconda.sh
-  - export PATH=/home/travis/miniconda/bin:$PATH
-  - conda install --yes numpy=1.8
-  # - conda install --yes scipy
-  # - conda install --yes matplotlib
-
-script: python -c 'import numpy; print numpy.version.version'
-
 notifications:
   email: false
 
 before_install:
+ - wget http://repo.continuum.io/miniconda/Miniconda-3.8.3-Linux-x86_64.sh -O miniconda.sh
+ - chmod +x miniconda.sh
+ - export PATH=/home/travis/miniconda/bin:$PATH
+ - conda install --yes numpy=1.8
+ # - conda install --yes scipy
+ # - conda install --yes matplotlib
  # - travis_retry sudo apt-get install -y -qq python-numpy python-scipy python-matplotlib #liblapack3gf liblapack-dev libblas-dev libblas3gf #coinor-libipopt-dev libmumps-seq-dev
  - travis_retry sudo apt-get install -y -qq python-scipy python-matplotlib #liblapack3gf liblapack-dev libblas-dev libblas3gf #coinor-libipopt-dev libmumps-seq-dev
  - travis_retry wget https://github.com/casadi/casadi/releases/download/2.2.0/python-casadi_2.2.0-2_amd64.deb
@@ -30,4 +26,5 @@ before_script:
  - export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages:/usr/lib/pymodules/python2.7
 
 script:
-  - nosetests -v --exe
+ - python -c 'import numpy; print numpy.version.version'
+ - nosetests -v --exe
