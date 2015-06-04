@@ -356,7 +356,8 @@ class CollocationBaseClass(SetupsBaseClass):
         xmin = None, xmax = None, xinit = None, \
         x0min = None, x0max = None, \
         xNmin = None, xNmax = None, \
-        systemclass = None):
+        systemclass = None, \
+        colpoints = 3):
 
         SetupsBaseClass.__init__(self)
 
@@ -391,7 +392,7 @@ class CollocationBaseClass(SetupsBaseClass):
 
         self.nsteps = self.timegrid.shape[0] - 1
 
-        self.tauroot = ca.collocationPoints(3, "radau")
+        self.tauroot = ca.collocationPoints(colpoints, "radau")
 
         # Degree of interpolating polynomial
 
@@ -528,7 +529,7 @@ class ODEsetup(CollocationBaseClass):
         pmin = None, pmax = None, pinit = None, \
         xmin = None, xmax = None, xinit = None, \
         x0min = None, x0max = None, \
-        xNmin = None, xNmax = None):
+        xNmin = None, xNmax = None, colpoints = 3):
             
         self.tstart_setup = time.time()
 
@@ -539,7 +540,7 @@ class ODEsetup(CollocationBaseClass):
             xmin = xmin, xmax = xmax, xinit = xinit, \
             x0min = x0min, x0max = x0max, \
             xNmin = xNmin, xNmax = xNmax, \
-            systemclass = systems.ExplODE)
+            systemclass = systems.ExplODE,colpoints = 3)
 
         ffcn = ca.MXFunction([system.vars["t"], system.vars["x"], \
             system.vars["u"], system.vars["p"], system.vars["we"],\
