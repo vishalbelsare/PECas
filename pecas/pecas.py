@@ -27,7 +27,7 @@ class PECasBaseClass:
         xmin = None, xmax = None, xinit = None, \
         x0min = None, x0max = None, \
         xNmin = None, xNmax = None, \
-        yN = None, \
+        ty = None, yN = None, \
         wv = None, wwe = None, wwu = None):
 
         intro.pecas_intro()
@@ -46,6 +46,7 @@ class PECasBaseClass:
 
             self.pesetup = setups.ODEsetup(system = system, \
                 tu = tu, u = u, \
+                ty = ty, y = yN, \
                 pmin = pmin, pmax = pmax, pinit = pinit, \
                 xmin = xmin, xmax = xmax, xinit = xinit, \
                 x0min = x0max, x0max = x0max, \
@@ -252,7 +253,7 @@ class LSq(PECasBaseClass):
         xmin = None, xmax = None, xinit = None, \
         x0min = None, x0max = None, \
         xNmin = None, xNmax = None, \
-        yN = None, \
+        ty = None, yN = None, \
         wv = None, wwe = None, wwu = None):
 
         super(LSq, self).__init__(system = system, \
@@ -261,7 +262,7 @@ class LSq(PECasBaseClass):
             xmin = xmin, xmax = xmax, xinit = xinit, \
             x0min = x0min, x0max = x0max, \
             xNmin = xNmin, xNmax = xNmax, \
-            yN = yN, \
+            ty = ty, yN = yN, \
             wv = wv, wwe = wwe, wwu = wwu)
 
 

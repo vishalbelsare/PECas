@@ -244,8 +244,8 @@ class BSsetup(SetupsBaseClass):
             xNmin = xNmin, xNmax = xNmax)
 
 
-    def __init__(self, system = None, tu = None, \
-        u = None, \
+    def __init__(self, system = None, \
+        tu = None, u = None, \
         pmin = None, pmax = None, pinit = None):
 
         SetupsBaseClass.__init__(self)
@@ -347,8 +347,9 @@ class ODEsetup(SetupsBaseClass):
             xNmin = xNmin, xNmax = xNmax)
 
 
-    def __init__(self, system = None, tu = None, \
-        u = None, \
+    def __init__(self, system = None, \
+        tu = None, u = None, \
+        ty = None, y = None,
         pmin = None, pmax = None, pinit = None, \
         xmin = None, xmax = None, xinit = None, \
         x0min = None, x0max = None, \
@@ -387,6 +388,26 @@ class ODEsetup(SetupsBaseClass):
 
             raise ValueError("Invalid dimension for argument tu.")
 
+
+        # pdb.set_trace()
+
+        if ty == None:
+
+            self.ty = self.tu
+
+        elif np.atleast_2d(ty).shape[0] == 1:
+
+            self.ty = np.asarray(ty)
+
+        elif np.atleast_2d(ty).shape[1] == 1:
+
+            self.ty = np.squeeze(np.atleast_2d(ty).T)
+
+        else:
+
+            raise ValueError("Invalid dimension for argument ty.")
+
+
         self.nsteps = self.tu.shape[0] - 1
 
         self.tauroot = ca.collocationPoints(3, "radau")
@@ -421,34 +442,6 @@ class ODEsetup(SetupsBaseClass):
             x0min = x0min, x0max = x0max, \
             xNmin = xNmin, xNmax = xNmax)
 
-        # Set up phiN
-
-        self.phiN = []
-
-        yfcn = ca.MXFunction([system.vars["t"], system.vars["x"], \
-            system.vars["p"], system.vars["u"],system.vars["we"], \
-            system.vars["wu"]], [system.fcn["y"]])
-        yfcn.setOption("name", "yfcn")
-        yfcn.init()
-
-        for k in range(self.nsteps):
-
-            # DEPENDECY ON U NOT POSSIBLE AT THIS POINT! len(U) = N, not N + 1!
-            # self.phiN.append(yfcn.call([self.tu[k], self.Vars["U", k, 0], \
-            self.phiN.append(yfcn.call([self.tu[k], self.Vars["X", k, 0], \
-                self.Vars["P"], self.u[:, k], self.Vars["WE", k, 0],\
-                self.Vars["WU", k, 0]])[0])
-
-        self.phiN.append(yfcn.call([self.tu[k], self.Vars["XF"], \
-            self.Vars["P"], self.u[:, -1],self.Vars["WE", -1, 0],\
-            self.Vars["WU", k, 0]])[0])
-
-        self.phiN = ca.vertcat(self.phiN)
-
-        self.phiNfcn = ca.MXFunction([self.Vars], [self.phiN])
-        self.phiNfcn.setOption("name", "phiNfcn")
-        self.phiNfcn.init()
-
 
         # Set tp the collocation coefficients
 
@@ -477,6 +470,8 @@ class ODEsetup(SetupsBaseClass):
 
         # For all collocation points
 
+        self.lfcns = []
+
         for j in range(self.ntauroot + 1):
 
             # Construct Lagrange polynomials to get the polynomial basis
@@ -497,9 +492,7 @@ class ODEsetup(SetupsBaseClass):
             # Evaluate the polynomial at the final time to get the
             # coefficients of the continuity equation
             
-            lfcn.setInput(1.0)
-            lfcn.evaluate()
-            self.D[j] = lfcn.getOutput()
+            [self.D[j]] = lfcn([1])
 
             # Evaluate the time derivative of the polynomial at all 
             # collocation points to get the coefficients of the
@@ -514,10 +507,27 @@ class ODEsetup(SetupsBaseClass):
                 tfcn.evaluate()
                 self.C[j,r] = tfcn.getOutput()
 
-        # Start setting up g
+            self.lfcns.append(lfcn)
+
+
+        # Initialize phiN
+
+        self.phiN = []
+
+        # Initialize measurement function
+
+        yfcn = ca.MXFunction([system.vars["t"], system.vars["x"], \
+            system.vars["p"], system.vars["u"],system.vars["wu"]], \
+            [system.fcn["y"]])
+        yfcn.setOption("name", "yfcn")
+        yfcn.init()
+
+
+        # Initialzie setup of g
 
         self.g = []
 
+        # Initialize ODE right-hand-side
 
         ffcn = ca.MXFunction([system.vars["t"], system.vars["x"], \
             system.vars["u"], system.vars["p"], system.vars["we"],\
@@ -525,10 +535,41 @@ class ODEsetup(SetupsBaseClass):
         ffcn.setOption("name", "ffcn")
         ffcn.init()
 
+
         # For all finite elements
 
         for k in range(self.nsteps):
-          
+
+            # pdb.set_trace()
+
+            hk = self.tu[k + 1] - self.tu[k]
+            t_meas = self.ty[np.where(np.logical_and( \
+                self.ty >= self.tu[k], self.ty < self.tu[k + 1]))]
+
+            for j in range(t_meas.size):
+
+                if t_meas[j] == self.tu[k]:
+
+                    self.phiN.append(yfcn.call([self.tu[k], \
+                        self.Vars["X", k, 0], self.Vars["P"], self.u[:, k], \
+                        self.Vars["WU", k, 0]])[0])
+
+                else:
+
+                    # pdb.set_trace()
+
+                    tau = (t_meas[j] - self.tu[k]) / hk
+
+                    x_temp = 0
+
+                    for r in range(self.ntauroot + 1):
+
+                        x_temp += self.lfcns[r]([tau])[0] * self.Vars["X",k,r]
+
+                    self.phiN.append(yfcn.call([t_meas[j], \
+                        x_temp, self.Vars["P"], self.u[:, k], \
+                        self.Vars["WU", k, 0]])[0])
+
             # For all collocation points
 
             for j in range(1, self.ntauroot + 1):
@@ -548,8 +589,7 @@ class ODEsetup(SetupsBaseClass):
                     self.u[:, k], self.Vars["P"], \
                     self.Vars["WE", k, j-1],self.Vars["WU", k, j-1]])
 
-                self.g.append((self.tu[k+1] - \
-                    self.tu[k]) * fk - xp_jk)
+                self.g.append(hk * fk - xp_jk)
 
             # Get an expression for the state at the end of
             # the finite element
@@ -573,9 +613,29 @@ class ODEsetup(SetupsBaseClass):
         # Concatenate constraints
 
         self.g = ca.vertcat(self.g)
-        
+    
+
+        # for k in range(self.nsteps):
+
+            # DEPENDECY ON U NOT POSSIBLE AT THIS POINT! len(U) = N, not N + 1!
+            # self.phiN.append(yfcn.call([self.tu[k], self.Vars["U", k, 0], \
+            # self.phiN.append(yfcn.call([self.tu[k], self.Vars["X", k, 0], \
+            #     self.Vars["P"], self.u[:, k], self.Vars["WE", k, 0],\
+            #     self.Vars["WU", k, 0]])[0])
+
+        if self.tu[-1] in self.ty:
+
+            self.phiN.append(yfcn.call([self.tu[-1], self.Vars["XF"], \
+                self.Vars["P"], self.u[:, -1], self.Vars["WU", -1, 0]])[0])
+
+        self.phiN = ca.vertcat(self.phiN)
+
+        self.phiNfcn = ca.MXFunction([self.Vars], [self.phiN])
+        self.phiNfcn.setOption("name", "phiNfcn")
+        self.phiNfcn.init()
+
+
         self.tend_setup = time.time()
         self.duration_setup = self.tend_setup - self.tstart_setup
 
         print('Initialization of ExplODE system sucessful.')
-        

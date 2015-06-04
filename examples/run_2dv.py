@@ -2,6 +2,8 @@ import casadi as ca
 import pylab as pl
 import pecas
 
+import copy
+
 # System
 
 x = ca.MX.sym("x", 4)
@@ -34,6 +36,10 @@ data = pl.array(pl.loadtxt( \
     delimiter = ", ", skiprows = 1))
 
 tu = data[300:400, 1]
+ty = copy.deepcopy(tu)
+ty[5] = ty[5] - 0.01
+ty[30] = ty[30] - 0.01
+ty[30] = ty[75] - 0.005
 
 yN = data[300:400, [2, 4, 6, 8]]
 wv = 1 / (0.1**2) * pl.ones(yN.shape)
@@ -47,7 +53,8 @@ porig = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
 lsqpe = pecas.LSq(system = odesys, \
     tu = tu, u = uN, \
     pinit = [0.5, 17.06, 11.5, 5, 0.07, 0.70], \
-    yN =yN, wv = wv, wwe = wwe)
+    ty = ty, yN =yN, \
+    wv = wv, wwe = wwe)
 
 lsqpe.show_system_information(showEquations = True)
 
