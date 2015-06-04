@@ -244,7 +244,7 @@ class BSsetup(SetupsBaseClass):
             xNmin = xNmin, xNmax = xNmax)
 
 
-    def __init__(self, system = None, timegrid = None, \
+    def __init__(self, system = None, tu = None, \
         u = None, \
         pmin = None, pmax = None, pinit = None):
 
@@ -264,19 +264,19 @@ class BSsetup(SetupsBaseClass):
         self.nv = system.fcn["y"].shape[0]
         self.ny = system.fcn["y"].shape[0]
 
-        if np.atleast_2d(timegrid).shape[0] == 1:
+        if np.atleast_2d(tu).shape[0] == 1:
 
-            self.timegrid = np.asarray(timegrid)
+            self.tu = np.asarray(tu)
 
-        elif np.atleast_2d(timegrid).shape[1] == 1:
+        elif np.atleast_2d(tu).shape[1] == 1:
 
-                self.timegrid = np.squeeze(np.atleast_2d(timegrid).T)
+                self.tu = np.squeeze(np.atleast_2d(tu).T)
 
         else:
 
-            raise ValueError("Invalid dimension for argument timegrid.")
+            raise ValueError("Invalid dimension for argument tu.")
 
-        self.nsteps = timegrid.shape[0]
+        self.nsteps = tu.shape[0]
 
         # Define the struct holding the variables
 
@@ -305,7 +305,7 @@ class BSsetup(SetupsBaseClass):
 
         for k in range(self.nsteps):
 
-            self.phiN.append(yfcn.call([self.timegrid[k], \
+            self.phiN.append(yfcn.call([self.tu[k], \
                 self.u[:, k], self.Vars["P"]])[0])
 
         self.phiN = ca.vertcat(self.phiN)
@@ -347,7 +347,7 @@ class ODEsetup(SetupsBaseClass):
             xNmin = xNmin, xNmax = xNmax)
 
 
-    def __init__(self, system = None, timegrid = None, \
+    def __init__(self, system = None, tu = None, \
         u = None, \
         pmin = None, pmax = None, pinit = None, \
         xmin = None, xmax = None, xinit = None, \
@@ -375,19 +375,19 @@ class ODEsetup(SetupsBaseClass):
         self.nwu = system.vars["wu"].shape[0]        
         self.ny = system.fcn["y"].shape[0]
 
-        if np.atleast_2d(timegrid).shape[0] == 1:
+        if np.atleast_2d(tu).shape[0] == 1:
 
-            self.timegrid = np.asarray(timegrid)
+            self.tu = np.asarray(tu)
 
-        elif np.atleast_2d(timegrid).shape[1] == 1:
+        elif np.atleast_2d(tu).shape[1] == 1:
 
-                self.timegrid = np.squeeze(np.atleast_2d(timegrid).T)
+                self.tu = np.squeeze(np.atleast_2d(tu).T)
 
         else:
 
-            raise ValueError("Invalid dimension for argument timegrid.")
+            raise ValueError("Invalid dimension for argument tu.")
 
-        self.nsteps = self.timegrid.shape[0] - 1
+        self.nsteps = self.tu.shape[0] - 1
 
         self.tauroot = ca.collocationPoints(3, "radau")
 
@@ -434,12 +434,12 @@ class ODEsetup(SetupsBaseClass):
         for k in range(self.nsteps):
 
             # DEPENDECY ON U NOT POSSIBLE AT THIS POINT! len(U) = N, not N + 1!
-            # self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["U", k, 0], \
-            self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["X", k, 0], \
+            # self.phiN.append(yfcn.call([self.tu[k], self.Vars["U", k, 0], \
+            self.phiN.append(yfcn.call([self.tu[k], self.Vars["X", k, 0], \
                 self.Vars["P"], self.u[:, k], self.Vars["WE", k, 0],\
                 self.Vars["WU", k, 0]])[0])
 
-        self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["XF"], \
+        self.phiN.append(yfcn.call([self.tu[k], self.Vars["XF"], \
             self.Vars["P"], self.u[:, -1],self.Vars["WE", -1, 0],\
             self.Vars["WU", k, 0]])[0])
 
@@ -472,8 +472,8 @@ class ODEsetup(SetupsBaseClass):
 
             for j in range(self.ntauroot + 1):
 
-                self.T[k,j] = self.timegrid[k] + \
-                    (self.timegrid[k+1] - self.timegrid[k]) * self.tauroot[j]
+                self.T[k,j] = self.tu[k] + \
+                    (self.tu[k+1] - self.tu[k]) * self.tauroot[j]
 
         # For all collocation points
 
@@ -548,8 +548,8 @@ class ODEsetup(SetupsBaseClass):
                     self.u[:, k], self.Vars["P"], \
                     self.Vars["WE", k, j-1],self.Vars["WU", k, j-1]])
 
-                self.g.append((self.timegrid[k+1] - \
-                    self.timegrid[k]) * fk - xp_jk)
+                self.g.append((self.tu[k+1] - \
+                    self.tu[k]) * fk - xp_jk)
 
             # Get an expression for the state at the end of
             # the finite element

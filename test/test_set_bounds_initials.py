@@ -12,12 +12,12 @@ class BSSetBoundsInitialsTest(object):
 
     def test_valid_timegrid_inputs(self):
 
-        # Test valid input dimensions for timegrid
+        # Test valid input dimensions for tu
 
         pecas.setups.BSsetup(system = self.bsys, \
-            timegrid = self.timegrid)
-        pecas.setups.BSsetup(system = self.bsys, timegrid = \
-            self.timegrid.T)
+            tu = self.tu)
+        pecas.setups.BSsetup(system = self.bsys, tu = \
+            self.tu.T)
 
 
     def test_invalid_systems_input(self):
@@ -27,7 +27,7 @@ class BSSetBoundsInitialsTest(object):
         odesys = pecas.systems.ExplODE(p = self.p, y = self.p, x = self.p, \
             we = self.p, wu = self.p, f = self.p)
         self.assertRaises(TypeError, pecas.setups.BSsetup, \
-            system = odesys, timegrid = self.timegrid)
+            system = odesys, tu = self.tu)
 
 
     def test_invalid_parameter_bounds_and_initials(self):
@@ -37,11 +37,11 @@ class BSSetBoundsInitialsTest(object):
         for parg in self.invalidpargs:
 
             self.assertRaises(ValueError, pecas.setups.BSsetup, \
-                system = self.bsys, timegrid = self.timegrid, pinit = parg)
+                system = self.bsys, tu = self.tu, pinit = parg)
             self.assertRaises(ValueError, pecas.setups.BSsetup, \
-                system = self.bsys, timegrid = self.timegrid, pmin = parg)
+                system = self.bsys, tu = self.tu, pmin = parg)
             self.assertRaises(ValueError, pecas.setups.BSsetup, \
-                system = self.bsys, timegrid = self.timegrid, pmax = parg)
+                system = self.bsys, tu = self.tu, pmax = parg)
 
 
     def test_valid_parameter_bounds_and_initials(self):
@@ -51,11 +51,11 @@ class BSSetBoundsInitialsTest(object):
         for parg in self.validpargs:
 
             pecas.setups.BSsetup( \
-                system = self.bsys, timegrid = self.timegrid, pinit = parg)
+                system = self.bsys, tu = self.tu, pinit = parg)
             pecas.setups.BSsetup( \
-                system = self.bsys, timegrid = self.timegrid, pmin = parg)
+                system = self.bsys, tu = self.tu, pmin = parg)
             pecas.setups.BSsetup( \
-                system = self.bsys, timegrid = self.timegrid, pmax = parg)
+                system = self.bsys, tu = self.tu, pmax = parg)
 
 
     def test_invalid_control_bounds_and_initials_inputs(self):
@@ -65,7 +65,7 @@ class BSSetBoundsInitialsTest(object):
         for uarg in self.invaliduargs:
 
             self.assertRaises(ValueError, pecas.setups.BSsetup, \
-                system = self.bsys, timegrid = self.timegrid, u = uarg)
+                system = self.bsys, tu = self.tu, u = uarg)
     
 
     def test_valid_control_bounds_and_initials_inputs(self):
@@ -75,19 +75,19 @@ class BSSetBoundsInitialsTest(object):
         for uarg in self.validuargs:
 
             pecas.setups.BSsetup( \
-                system = self.bsys, timegrid = self.timegrid, u = uarg)
+                system = self.bsys, tu = self.tu, u = uarg)
 
 
 class ODESetBoundsInitialsTest(object):
 
     def test_valid_timegrid_inputs(self):
 
-        # Test valid input dimensions for timegrid
+        # Test valid input dimensions for tu
 
         pecas.setups.ODEsetup(system = self.odesys, \
-            timegrid = self.timegrid)
-        pecas.setups.ODEsetup(system = self.odesys, timegrid = \
-            self.timegrid.T)
+            tu = self.tu)
+        pecas.setups.ODEsetup(system = self.odesys, tu = \
+            self.tu.T)
 
 
     def test_invalid_systems_input(self):
@@ -96,7 +96,7 @@ class ODESetBoundsInitialsTest(object):
 
         bssys = pecas.systems.BasicSystem(p = self.p, y = self.p)
         self.assertRaises(TypeError, pecas.setups.ODEsetup, \
-            system = bssys, timegrid = self.timegrid)
+            system = bssys, tu = self.tu)
 
 
     def test_invalid_parameter_bounds_and_initials(self):
@@ -106,11 +106,11 @@ class ODESetBoundsInitialsTest(object):
         for parg in self.invalidpargs:
 
             self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, pinit = parg)
+                system = self.odesys, tu = self.tu, pinit = parg)
             self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, pmin = parg)
+                system = self.odesys, tu = self.tu, pmin = parg)
             self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, pmax = parg)
+                system = self.odesys, tu = self.tu, pmax = parg)
 
 
     def test_valid_parameter_bounds_and_initials(self):
@@ -120,11 +120,11 @@ class ODESetBoundsInitialsTest(object):
         for parg in self.validpargs:
 
             pecas.setups.ODEsetup( \
-                system = self.odesys, timegrid = self.timegrid, pinit = parg)
+                system = self.odesys, tu = self.tu, pinit = parg)
             pecas.setups.ODEsetup( \
-                system = self.odesys, timegrid = self.timegrid, pmin = parg)
+                system = self.odesys, tu = self.tu, pmin = parg)
             pecas.setups.ODEsetup( \
-                system = self.odesys, timegrid = self.timegrid, pmax = parg)
+                system = self.odesys, tu = self.tu, pmax = parg)
 
 
     def test_invalid_state_bounds_and_initials(self):
@@ -134,11 +134,11 @@ class ODESetBoundsInitialsTest(object):
         for xarg in self.invalidxargs:
 
             self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, xinit = xarg)
+                system = self.odesys, tu = self.tu, xinit = xarg)
             self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, xmin = xarg)
+                system = self.odesys, tu = self.tu, xmin = xarg)
             self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, xmax = xarg)
+                system = self.odesys, tu = self.tu, xmax = xarg)
 
 
     def test_valid_state_bounds_and_initials(self):
@@ -148,11 +148,11 @@ class ODESetBoundsInitialsTest(object):
         for xarg in self.validxargs:
 
             pecas.setups.ODEsetup( \
-                system = self.odesys, timegrid = self.timegrid, xinit = xarg)
+                system = self.odesys, tu = self.tu, xinit = xarg)
             pecas.setups.ODEsetup( \
-                system = self.odesys, timegrid = self.timegrid, xmin = xarg)
+                system = self.odesys, tu = self.tu, xmin = xarg)
             pecas.setups.ODEsetup( \
-                system = self.odesys, timegrid = self.timegrid, xmax = xarg)
+                system = self.odesys, tu = self.tu, xmax = xarg)
 
 
     def test_invalid_state_bvp_inputs(self):
@@ -162,13 +162,13 @@ class ODESetBoundsInitialsTest(object):
         for xbvparg in self.invalidxbvpargs:
 
             self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, x0min = xbvparg)
+                system = self.odesys, tu = self.tu, x0min = xbvparg)
             self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, x0max = xbvparg)
+                system = self.odesys, tu = self.tu, x0max = xbvparg)
             self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, xNmin = xbvparg)
+                system = self.odesys, tu = self.tu, xNmin = xbvparg)
             self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, xNmax = xbvparg)
+                system = self.odesys, tu = self.tu, xNmax = xbvparg)
     
 
     def test_valid_state_bvp_inputs(self):
@@ -178,13 +178,13 @@ class ODESetBoundsInitialsTest(object):
         for xbvparg in self.validxbvpargs:
 
             pecas.setups.ODEsetup( \
-                system = self.odesys, timegrid = self.timegrid, x0min = xbvparg)
+                system = self.odesys, tu = self.tu, x0min = xbvparg)
             pecas.setups.ODEsetup( \
-                system = self.odesys, timegrid = self.timegrid, x0max = xbvparg)
+                system = self.odesys, tu = self.tu, x0max = xbvparg)
             pecas.setups.ODEsetup( \
-                system = self.odesys, timegrid = self.timegrid, xNmin = xbvparg)
+                system = self.odesys, tu = self.tu, xNmin = xbvparg)
             pecas.setups.ODEsetup( \
-                system = self.odesys, timegrid = self.timegrid, xNmax = xbvparg)
+                system = self.odesys, tu = self.tu, xNmax = xbvparg)
 
 
     def test_invalid_control_bounds_and_initials_inputs(self):
@@ -194,7 +194,7 @@ class ODESetBoundsInitialsTest(object):
         for uarg in self.invaliduargs:
 
             self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, timegrid = self.timegrid, u = uarg)
+                system = self.odesys, tu = self.tu, u = uarg)
     
 
     def test_valid_control_bounds_and_initials_inputs(self):
@@ -204,4 +204,4 @@ class ODESetBoundsInitialsTest(object):
         for uarg in self.validuargs:
 
             pecas.setups.ODEsetup( \
-                system = self.odesys, timegrid = self.timegrid, u = uarg)
+                system = self.odesys, tu = self.tu, u = uarg)

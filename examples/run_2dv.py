@@ -33,7 +33,7 @@ data = pl.array(pl.loadtxt( \
     "controlReadings_ACADO_MPC_Betterweights.dat", \
     delimiter = ", ", skiprows = 1))
 
-timegrid = data[300:400, 1]
+tu = data[300:400, 1]
 
 yN = data[300:400, [2, 4, 6, 8]]
 wv = 1 / (0.1**2) * pl.ones(yN.shape)
@@ -43,7 +43,7 @@ wwe = [1 / 1e-4] * 4
 porig = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
 
 odesetup = pecas.setups.ODEsetup( \
-    system = odesys, timegrid = timegrid,
+    system = odesys, tu = tu,
     u = uN, \
     pinit = [0.5, 17.06, 11.5, 5, 0.07, 0.70])
 

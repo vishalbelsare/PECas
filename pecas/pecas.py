@@ -38,20 +38,20 @@ class PECasBaseClass:
 
         yN = np.atleast_2d(yN)
 
-        if yN.shape == (pesetup.timegrid.size, pesetup.ny):
+        if yN.shape == (pesetup.tu.size, pesetup.ny):
 
             yN = yN.T
 
-        if not yN.shape == (pesetup.ny, pesetup.timegrid.size):
+        if not yN.shape == (pesetup.ny, pesetup.tu.size):
 
             raise ValueError('''
 The dimension of the measurement data given in yN does not match the
-dimension of output function and/or timegrid.
+dimension of output function and/or tu.
 Valid dimensions for yN for the given data are:
     {0} or {1},
 but you supported yN of dimension:
-    {2}.'''.format(str((pesetup.timegrid.size, pesetup.ny)), \
-    str((pesetup.ny, pesetup.timegrid.size)), str(yN.shape)))
+    {2}.'''.format(str((pesetup.tu.size, pesetup.ny)), \
+    str((pesetup.ny, pesetup.tu.size)), str(yN.shape)))
 
         # Check if the supported standard deviations fit to the dimensions of
         # the measurement data
