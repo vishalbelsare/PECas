@@ -330,9 +330,7 @@ class BSsetup(SetupsBaseClass):
         print('Initialization of BasicSystem system sucessful.')
 
 
-class CollocationBaseClass(SetupsBaseClass):
-
-    __metaclass__ = ABCMeta
+class ODEsetup(SetupsBaseClass):
 
     def check_and_set_bounds_and_initials(self, \
         u = None, \
@@ -341,7 +339,7 @@ class CollocationBaseClass(SetupsBaseClass):
         x0min = None, x0max = None, \
         xNmin = None, xNmax = None):
 
-        super(CollocationBaseClass, self).check_and_set_bounds_and_initials( \
+        super(ODEsetup, self).check_and_set_bounds_and_initials( \
             u = u, \
             pmin = pmin, pmax = pmax, pinit = pinit, \
             xmin = xmin, xmax = xmax, xinit = xinit, \
@@ -349,18 +347,18 @@ class CollocationBaseClass(SetupsBaseClass):
             xNmin = xNmin, xNmax = xNmax)
 
 
-    @abstractmethod
     def __init__(self, system = None, timegrid = None, \
         u = None, \
         pmin = None, pmax = None, pinit = None, \
         xmin = None, xmax = None, xinit = None, \
         x0min = None, x0max = None, \
-        xNmin = None, xNmax = None, \
-        systemclass = None):
+        xNmin = None, xNmax = None):
+
+        self.tstart_setup = time.time()
 
         SetupsBaseClass.__init__(self)
 
-        if not type(system) is systemclass:
+        if not type(system) is systems.ExplODE:
 
             raise TypeError("Setup-method " + self.__class__.__name__ + \
                 " not allowed for system of type " + str(type(system)) + ".")
@@ -521,26 +519,6 @@ class CollocationBaseClass(SetupsBaseClass):
         self.g = []
 
 
-class ODEsetup(CollocationBaseClass):
-
-    def __init__(self, system = None, timegrid = None, \
-        u = None, \
-        pmin = None, pmax = None, pinit = None, \
-        xmin = None, xmax = None, xinit = None, \
-        x0min = None, x0max = None, \
-        xNmin = None, xNmax = None):
-            
-        self.tstart_setup = time.time()
-
-        super(ODEsetup, self).__init__(system = system, \
-            timegrid = timegrid, \
-            u = u, \
-            pmin = pmin, pmax = pmax, pinit = pinit, \
-            xmin = xmin, xmax = xmax, xinit = xinit, \
-            x0min = x0min, x0max = x0max, \
-            xNmin = xNmin, xNmax = xNmax, \
-            systemclass = systems.ExplODE)
-
         ffcn = ca.MXFunction([system.vars["t"], system.vars["x"], \
             system.vars["u"], system.vars["p"], system.vars["we"],\
             system.vars["wu"]], [system.fcn["f"]])
@@ -600,3 +578,4 @@ class ODEsetup(CollocationBaseClass):
         self.duration_setup = self.tend_setup - self.tstart_setup
 
         print('Initialization of ExplODE system sucessful.')
+        
