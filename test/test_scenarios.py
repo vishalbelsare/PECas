@@ -46,11 +46,11 @@ class TestBasicSystemNoConstraints(unittest.TestCase, \
 
         self.uN = (1. / 3.) * np.linspace(1, 4, 4)
 
-        self.phat = [6.24]
+        self.pmin = None
+        self.pmax = None
+        self.pinit = None
 
-        self.bssetup = pecas.setups.BSsetup( \
-            system = self.bsys, tu = self.tu, \
-            u = self.uN)
+        self.phat = [6.24]
 
 
 class TestBasicSystemConstraints(unittest.TestCase, \
@@ -67,7 +67,6 @@ class TestBasicSystemConstraints(unittest.TestCase, \
 
         self.y = self.u[0] * self.p[0] + self.u[1] * self.p[1]**2
         self.g = (2 - ca.mul(self.p.T, self.p))
-        self.pinit = [1, 1]
 
         self.bsys = pecas.systems.BasicSystem(u = self.u, p = self.p, \
             y = self.y, g = self.g)
@@ -92,12 +91,11 @@ class TestBasicSystemConstraints(unittest.TestCase, \
 
         self.uN = np.vstack([np.ones(4), np.linspace(1, 4, 4)])
 
-        self.phat = [0.961943, 1.03666]
+        self.pmin = None
+        self.pmax = None
+        self.pinit = [1, 1]
 
-        self.bssetup = pecas.setups.BSsetup( \
-            system = self.bsys, tu = self.tu, \
-            u = self.uN, \
-            pinit = self.pinit)
+        self.phat = [0.961943, 1.03666]
 
 
 class TestLotkaVolterra(unittest.TestCase, \
@@ -163,26 +161,32 @@ class TestLotkaVolterra(unittest.TestCase, \
 
         self.yN = data[:, 1::2]
         self.wv = 1.0 / data[:, 2::2]**2
+        self.uN = None
         self.wwe = [1.0 / 1e-4, 1.0 / 1e-4]
         self.wwu = None
 
+        self.pmin = [1.0, -np.inf, 1.0, -np.inf]
+        self.pmax = [1.0, np.inf, 1.0, np.inf]
+        self.pinit = [1.0, 0.5, 1.0, 1.0]
+
+        self.xmin = None
+        self.xmax = None
+        self.xinit = None
+
+        self.x0min = [self.yN[0,0], self.yN[0,1]]
+        self.x0max = [self.yN[0,0], self.yN[0,1]]
+
+        self.xNmin = None
+        self.xNmax = None
+
         # self.phat = [1, 0.703278, 1, 0.342208]
         self.phat = [1, 0.703902, 1, 0.342233]
-
-        self.odesetup = pecas.setups.ODEsetup( \
-            system = self.odesys, tu = self.tu, \
-            x0min = [self.yN[0,0], self.yN[0,1]], \
-            x0max = [self.yN[0,0], self.yN[0,1]], \
-            pmin = [1.0, -np.inf, 1.0, -np.inf], \
-            pmax = [1.0, np.inf, 1.0, np.inf], \
-            pinit = [1.0, 0.5, 1.0, 1.0])
 
 
 class Test1DVehicle(unittest.TestCase, \
     test_set_bounds_initials.ODESetBoundsInitialsTest, \
     test_lsq_init.ODEPESetupTest, \
     test_lsq_run.ODEPERunTest, \
-    # test_covmat.CovMatTest, \
     ):
 
     # (model and data taken from Diehl, Moritz: Course on System Identification,
@@ -236,16 +240,22 @@ class Test1DVehicle(unittest.TestCase, \
         self.wwe = 1 / 1e-4
         self.wwu = None
 
+        self.pmin = [10.0, 0.0, 0.4]
+        self.pmax = [10.0, 2, 0.7]
+        self.pinit = [10.0, 0.08, 0.5]
+
+        self.xmin = None
+        self.xmax = None
+        self.xinit = None
+
+        self.x0min = self.yN[0]
+        self.x0max = self.yN[0]
+
+        self.xNmin = self.yN[-1:]
+        self.xNmax = self.yN[-1:]
+
         # self.phat = [10.0, 0.000236, 0.614818]
         self.phat = [10, 0.0299196, 0.604329]
-
-        self.odesetup = pecas.setups.ODEsetup( \
-            system = self.odesys, tu = self.tu,
-            u = self.uN, \
-            x0min = self.yN[0], x0max = self.yN[0], \
-            xNmin = self.yN[-1:], xNmax = self.yN[-1:], \
-            pmin = [10.0, 0.0, 0.4], pmax = [10.0, 2, 0.7], \
-            pinit = [10.0, 0.08, 0.5])
 
 
 class Test2DVehicle(unittest.TestCase, \
@@ -323,15 +333,22 @@ class Test2DVehicle(unittest.TestCase, \
         self.wwe = [1 / 1e-4] * 4
         self.wwu = None
 
+        self.pmin = [0.5, 17.06, 0.0, -10.0, -1000.0, -10.0]
+        self.pmax = [0.5, 17.06, 13.2, 200, 500, 3]
+        self.pinit = [0.5, 17.06, 11.5, 5, 0.07, 0.70]
+
+        self.xmin = None
+        self.xmax = None
+        self.xinit = None
+
+        self.x0min = None
+        self.x0max = None
+
+        self.xNmin = None
+        self.xNmax = None
+
         # self.phat = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
         self.phat = [0.5, 17.06, 3.98281, -10, -7.57932, 3]
-
-        self.odesetup = pecas.setups.ODEsetup( \
-            system = self.odesys, tu = self.tu,
-            u = self.uN, \
-            pmin = [0.5, 17.06, 0.0, -10.0, -1000.0, -10.0], \
-            pmax = [0.5, 17.06, 13.2, 200, 500, 3], \
-            pinit = [0.5, 17.06, 11.5, 5, 0.07, 0.70])
 
 
 class PedulumBar(unittest.TestCase, \
@@ -411,9 +428,18 @@ class PedulumBar(unittest.TestCase, \
         self.wwe = None
         self.wwu = None
 
-        self.phat = [2.98427]
+        self.pmin = 0
+        self.pmax = 50
+        self.pinit = 1
 
-        self.odesetup = pecas.setups.ODEsetup( \
-            system = self.odesys, tu = self.tu,
-            u = self.uN, \
-            pinit = 1, pmax = 50, pmin = 0 )
+        self.xmin = None
+        self.xmax = None
+        self.xinit = None
+
+        self.x0min = None
+        self.x0max = None
+
+        self.xNmin = None
+        self.xNmax = None
+
+        self.phat = [2.98427]

@@ -10,26 +10,46 @@ import unittest
 
 class BSPERunTest(object):
 
-    def test_lsq_run(self):
+    def lsq_run(self):
 
         # Run parameter estimation and assure that the results is correct
 
-        lsqpe = pecas.LSq(pesetup = self.bssetup, yN = self.yN, \
-            wv = self.wv)
+        self.lsqpe = pecas.LSq(system = self.bsys, \
+            tu = self.tu, u = self.uN, \
+            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+            yN = self.yN, wv = self.wv)
 
-        self.assertRaises(AttributeError, getattr, lsqpe, "phat")
-        self.assertRaises(AttributeError, getattr, lsqpe, "Xhat")
+        self.assertRaises(AttributeError, getattr, self.lsqpe, "phat")
+        self.assertRaises(AttributeError, getattr, self.lsqpe, "Xhat")
 
-        lsqpe.run_parameter_estimation()
+        self.lsqpe.run_parameter_estimation()
 
-        phat = lsqpe.phat
+        phat = self.lsqpe.phat
         print(phat)
 
         for k, pk in enumerate(phat):
             self.assertAlmostEqual(pk, self.phat[k], places = 5)
 
-        lsqpe.show_system_information(showEquations = True)
-        lsqpe.show_results()
+        self.lsqpe.show_system_information(showEquations = True)
+        self.lsqpe.show_results()
+
+
+    def comp_covmat(self):
+
+        # Run computation of the covariance matrix for the estimated parameters
+
+        self.assertRaises(AttributeError, getattr, self.lsqpe, "Cvox")
+
+        self.lsqpe.compute_covariance_matrix()
+
+        self.lsqpe.show_results()
+
+
+    def test_pe(self):
+
+        self.lsq_run()
+
+        self.comp_covmat()
 
 
 class ODEPERunTest(object):
@@ -38,7 +58,13 @@ class ODEPERunTest(object):
 
         # Run parameter estimation and assure that the results is correct
 
-        self.lsqpe = pecas.LSq(pesetup = self.odesetup, yN = self.yN, \
+        self.lsqpe = pecas.LSq(system = self.odesys, \
+            tu = self.tu, u = self.uN, \
+            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+            xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
+            x0min = self.x0max, x0max = self.x0max, \
+            xNmin = self.xNmin, xNmax = self.xNmax, \
+            yN = self.yN, \
             wv = self.wv, wwe = self.wwe, wwu = self.wwu)
 
         self.assertRaises(AttributeError, getattr, self.lsqpe, "phat")

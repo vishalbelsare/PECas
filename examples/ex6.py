@@ -54,14 +54,18 @@ sigmaw = 1.0 / (pl.ones(tu.size)*pl.std(wm, ddof=1)**2)
 
 wv = pl.array([sigmaphi, sigmaw])
 
-odesetup = pecas.setups.ODEsetup( \
-    system = odesys, tu = tu,
-    u = uN, \
-    pinit = 1, pmax = 50, pmin = 0 )
+# odesetup = pecas.setups.ODEsetup( \
+#     system = odesys, tu = tu,
+#     u = uN, \
+#     pinit = 1, pmax = 50, pmin = 0 )
 
 # Run parameter estimation and assure that the results is correct
 
-lsqpe = pecas.LSq(pesetup =odesetup, yN =yN, wv = wv)
+lsqpe = pecas.LSq( \
+    system = odesys, tu = tu, \
+    u = uN, \
+    pinit = 1, pmax = 50, pmin = 0, \
+    yN =yN, wv = wv)
 
 lsqpe.show_system_information(showEquations = True)
 

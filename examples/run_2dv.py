@@ -42,14 +42,13 @@ wwe = [1 / 1e-4] * 4
 
 porig = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
 
-odesetup = pecas.setups.ODEsetup( \
-    system = odesys, tu = tu,
-    u = uN, \
-    pinit = [0.5, 17.06, 11.5, 5, 0.07, 0.70])
-
 # Run parameter estimation and assure that the results is correct
 
-lsqpe = pecas.LSq(pesetup =odesetup, yN =yN, wv = wv, wwe = wwe)
+lsqpe = pecas.LSq(system = odesys, \
+    tu = tu, u = uN, \
+    pinit = [0.5, 17.06, 11.5, 5, 0.07, 0.70], \
+    yN =yN, wv = wv, wwe = wwe)
+
 lsqpe.show_system_information(showEquations = True)
 
 lsqpe.run_parameter_estimation()
