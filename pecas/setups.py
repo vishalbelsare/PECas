@@ -546,9 +546,9 @@ class ODEsetup(SetupsBaseClass):
             t_meas = self.ty[np.where(np.logical_and( \
                 self.ty >= self.tu[k], self.ty < self.tu[k + 1]))]
 
-            for j in range(t_meas.size):
+            for t_meas_j in t_meas:
 
-                if t_meas[j] == self.tu[k]:
+                if t_meas_j == self.tu[k]:
 
                     self.phiN.append(yfcn.call([self.tu[k], \
                         self.Vars["X", k, 0], self.Vars["P"], self.u[:, k], \
@@ -558,7 +558,7 @@ class ODEsetup(SetupsBaseClass):
 
                     # pdb.set_trace()
 
-                    tau = (t_meas[j] - self.tu[k]) / hk
+                    tau = (t_meas_j - self.tu[k]) / hk
 
                     x_temp = 0
 
@@ -566,7 +566,7 @@ class ODEsetup(SetupsBaseClass):
 
                         x_temp += self.lfcns[r]([tau])[0] * self.Vars["X",k,r]
 
-                    self.phiN.append(yfcn.call([t_meas[j], \
+                    self.phiN.append(yfcn.call([t_meas_j, \
                         x_temp, self.Vars["P"], self.u[:, k], \
                         self.Vars["WU", k, 0]])[0])
 
