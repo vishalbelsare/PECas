@@ -28,12 +28,16 @@ class PECasBaseClass:
         x0min = None, x0max = None, \
         xNmin = None, xNmax = None, \
         ty = None, yN = None, \
-        wv = None, wwe = None, wwu = None):
+        wv = None, wwe = None, wwu = None, \
+        linear_solver = None):
 
         intro.pecas_intro()
         print('\n' + 22 * '-' + \
             ' PECas parameter estimation setup ' + 22 * '-')
         print('\nStarting parameter estimation problem setup ...') 
+
+
+        self.linear_solver = linear_solver
 
 
         if type(system) is systems.BasicSystem:
@@ -254,7 +258,8 @@ class LSq(PECasBaseClass):
         x0min = None, x0max = None, \
         xNmin = None, xNmax = None, \
         ty = None, yN = None, \
-        wv = None, wwe = None, wwu = None):
+        wv = None, wwe = None, wwu = None, \
+        linear_solver = "mumps"):
 
         super(LSq, self).__init__(system = system, \
             tu = tu, u = u, \
@@ -263,7 +268,8 @@ class LSq(PECasBaseClass):
             x0min = x0min, x0max = x0max, \
             xNmin = xNmin, xNmax = xNmax, \
             ty = ty, yN = yN, \
-            wv = wv, wwe = wwe, wwu = wwu)
+            wv = wv, wwe = wwe, wwu = wwu, \
+            linear_solver = linear_solver)
 
 
     def run_parameter_estimation(self):
@@ -352,7 +358,7 @@ this might take some time ...
 
         solver = ca.NlpSolver("ipopt", reslsqfcn)
         solver.setOption("tol", 1e-10)
-        solver.setOption("linear_solver", "ma97")
+        solver.setOption("linear_solver", self.linear_solver)
         # solver.setOption("expand", True)
         solver.init()
 
