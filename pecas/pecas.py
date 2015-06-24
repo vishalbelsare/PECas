@@ -544,10 +544,18 @@ matrix for the estimated parameters can be computed.''')
                 ' PECas Parameter estimation results ' + 21 * '-')
              
             print("\nEstimated parameters p_i:")
+
             for i, xi in enumerate(self.phat):
             
-                print("    p_{0:<3} = {1: 10.8e} +/- {2: 10.8e}".format(\
-                     i, xi[0], ca.sqrt(abs(self.Covp[i, i]))))
+                try:
+
+                    print("    p_{0:<3} = {1: 10.8e} +/- {2: 10.8e}".format(\
+                         i, xi[0], ca.sqrt(abs(self.Covp[i, i]))))
+
+                except AttributeError:
+
+                    print("    p_{0:<3} = {1: 10.8e}".format(\
+                        i, xi[0]))
             
             try:
 
