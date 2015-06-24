@@ -232,12 +232,15 @@ class LSq(PECasBaseClass):
         This functions will run a least squares parameter estimation for the
         given problem and data set.
         For this, the least squares parameter estimation problem
+
         .. math::
             ~ & \hat{x} = \text{arg}\, & \underset{x}{\text{min}}\|M(x)-Y\|_{\Sigma_{\epsilon}^{-1}}^{2}\\
             \text{s. t.}&~&~\\
             ~ & ~ & G = 0\\
             ~ & ~ & x_{0} = x_{init}
+
         will be set up, and solved using IPOPT. Afterwards,
+
         - the value of :math:`\hat{x}`
           can be returned using the function :func:`get_xhat()`, and
         - the value of the residual :math:`\hat{R}`
@@ -288,7 +291,7 @@ this might take some time ...
 
         A = ca.vertcat(A)
 
-        reslsq = ca.mul([A.T, self.W, A])
+        self.reslsq = ca.mul([A.T, self.W, A])
 
         self.A = A
 
@@ -301,7 +304,7 @@ this might take some time ...
 
 
         reslsqfcn = ca.MXFunction(ca.nlpIn(x=self.pesetup.Vars), \
-            ca.nlpOut(f=reslsq, g=g))
+            ca.nlpOut(f=self.reslsq, g=g))
 
         reslsqfcn.init()
 
@@ -309,6 +312,8 @@ this might take some time ...
 
         solver = ca.NlpSolver("ipopt", reslsqfcn)
         solver.setOption("tol", 1e-10)
+        solver.setOption("linear_solver", "ma97")
+        # solver.setOption("expand", True)
         solver.init()
 
         # Set equality constraints
@@ -330,6 +335,7 @@ this might take some time ...
 
         self.Varshat = solver.getOutput("x")
         self.rhat = solver.getOutput("f")
+        self.dv_lambdahat = solver.getOutput("lam_g")
         
         Ysim = self.pesetup.phiNfcn([self.Varshat])[0]
         Ym = np.reshape(self.yN.T,(Ysim.shape))
@@ -372,29 +378,39 @@ this might take some time ...
         try:
 
             self.beta = self.rhat / (self.yN.size + self.g.size1() - \
-                self.pesetup.Vars.size)
+                    self.pesetup.Vars.size)
 
-            self.J1 = ca.mul(self.W, ca.jacobian(self.A, self.pesetup.Vars))
+            dv_lambda = ca.MX.sym("dv_lambda", self.g.size1())
 
-            self.J2 = ca.jacobian(self.g, self.pesetup.Vars)
+            L = self.reslsq + ca.mul((dv_lambda.T, self.g))
 
-            invW = ca.solve(self.W, ca.MX.eye(self.W.size1()), "csparse")
+            kkt = ca.blockcat( \
 
-            bl = ca.blockcat([[ca.mul([self.J1.T, invW, self.J1]), self.J2.T], \
-                [self.J2, ca.MX(self.g.size1(), self.g.size1())]])
+                [[ca.hessian(L, self.pesetup.Vars), \
+                    ca.jacobian(self.g, self.pesetup.Vars).T], \
 
-            rhs = ca.vertcat((self.J1.T, ca.MX(self.g.size1(), \
-                self.A.size1())))
+                [ca.jacobian(self.g, self.pesetup.Vars), \
+                    ca.MX(self.g.size1(), self.g.size1())]] \
 
+                    )
 
-            Jp = ca.solve(bl, rhs, "csparse")[:self.pesetup.Vars.size, :]
+            B1 = kkt[:self.pesetup.np, :self.pesetup.np]
+            E = kkt[self.pesetup.np:, :self.pesetup.np]
+            # ET = kkt[:self.pesetup.np, self.pesetup.np:]
+            D = kkt[self.pesetup.np:, self.pesetup.np:]
 
-            fcov = ca.MXFunction([self.pesetup.Vars], [self.beta * ca.mul(Jp, Jp.T)])
-            fcov.init()
+            # Dinv = ca.solve(D, ca.MX.eye(D.size1()), "csparse")
+            # F11 = B1 - ca.mul([E.T, Dinv, E])
 
-            self.fcov = fcov
+            Dinv = ca.solve(D, E, "csparse")
 
-            [self.Covx] = fcov([self.Varshat])
+            F11 = B1 - ca.mul([E.T, Dinv])
+
+            self.fcovp = ca.MXFunction([self.pesetup.Vars, dv_lambda], \
+                [self.beta * ca.solve(F11, ca.MX.eye(F11.size1()))])
+
+            self.fcovp.init()
+            [self.Covp] = self.fcovp([self.Varshat, self.dv_lambdahat])
 
             print( \
 '''Covariance matrix computation finished, run show_results() to visualize.''')
@@ -495,10 +511,12 @@ matrix for the estimated parameters can be computed.''')
 
         r'''
         :raises: AttributeError
+
         This function displays the results of the parameter estimation
         computations. It can not be used before function
         :func:`run_parameter_estimation()` has been used. The results
         displayed by the function contain:
+        
           - the value of :math:`R^2` measuring the goodness of fit
             of the estimated parameters,
           - the values of the estimated parameters :math:`\hat{p}`
@@ -528,8 +546,8 @@ matrix for the estimated parameters can be computed.''')
             print("\nEstimated parameters p_i:")
             for i, xi in enumerate(self.phat):
             
-                print("    p_{0:<3} = {1: 10.8e}".format(\
-                     i, xi[0]))
+                print("    p_{0:<3} = {1: 10.8e} +/- {2: 10.8e}".format(\
+                     i, xi[0], ca.sqrt(abs(self.Covp[i, i]))))
             
             try:
 
@@ -547,8 +565,7 @@ matrix for the estimated parameters can be computed.''')
 
             try:
 
-                print(np.atleast_2d(self.Covx[:self.phat.size, \
-                    :self.phat.size]))
+                print(np.atleast_2d(self.Covp))
 
             except AttributeError:
 

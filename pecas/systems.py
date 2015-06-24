@@ -2,18 +2,18 @@
 # -*- coding: utf-8 -*-
 
 '''
-This modules contains the classes that are used for defining a system for
+This module contains the classes that are used for defining a system for
 which a parameter estimation problem can be solved using PECas. According to a
 system\'s properties, different classes need to be used:
 
-* :class:``BasicSystem``: non-dynamic, contains an output function and possibly
+* :class:`BasicSystem`: non-dynamic, contains an output function and possibly
   equality constraints, possibly dependent on time and/or controls.
 
-* :class:``ExplODE``: dynamic system of explicit ODEs, contains an output
+* :class:`ExplODE`: dynamic system of explicit ODEs, contains an output
   function but no algebraic equations, possibly dependent on time and/or
   controls.
 
-* :class:``ImplDAE``: dynamic system of implicit DAEs (not yet implemented),
+* :class:`ImplDAE`: dynamic system of implicit DAEs (not yet implemented),
   possibly dependent on time and/or controls.
 
 All systems need also to depend on unknown parameters that will be estimated.
@@ -28,30 +28,32 @@ import intro
 class BasicSystem(object):
 
     '''
-    :param t: CasADi symbolic variable for the time :math:``t \in \mathbb{R}``.
-    :type t: casadi.casadi.SX
-    :param u: CasADi symbolic variable for the controls :math:``u \in
-    \mathbb{R}^{n_{u}}``.
-    :type u: casadi.casadi.SX
-    :param p: CasADi symbolic variable for the unknow parameters :math:``p \in
-    \mathbb{R}^{n_{p}}``.
-    :type p: casadi.casadi.SX
-    :param y: CasADi symbolic variable describing the output function
-              :math:``y(t, u, p) \in \mathbb{R}^{n_{y}}``, i. e. the output of
-              the system :math:``\phi = y(\dot)`` that can be measured, and
-              for which in later process measurement data can be provided.
-    :type y: casadi.casadi.SX
-    :param g: CasADi symbolic variable describing the equality constraints
-              :math:``g(t, u, p) \in \mathbb{R}^{n_{g}}``,
-              while .:math:``0 = g(\dot)``.
-    :type g: casadi.casadi.SX
+    :param t: time :math:`t \in \mathbb{R}` (optional),
+    :type t: casadi.casadi.MX
 
-    The class :class:``BasicSystem`` is used to define non-dynamic
+    :param u: controls :math:`u \in \mathbb{R}^{n_{u}}` (optional),
+    :type u: casadi.casadi.MX
+
+    :param p: unknown parameters :math:`p \in \mathbb{R}^{n_{p}}`,
+    :type p: casadi.casadi.MX
+
+    :param y: output function :math:`y(t, u, p) \in \mathbb{R}^{n_{y}}`, i. e. the measured output of
+              the system :math:`\phi = y(\cdot)`,
+    :type y: casadi.casadi.MX
+
+    :param g: equality constraints (optional)
+              :math:`g(t, u, p) \in \mathbb{R}^{n_{g}}`,
+              while :math:`g(\cdot) = 0`.
+    :type g: casadi.casadi.MX
+
+
+    The class :class:`BasicSystem` is used to define non-dynamic
     systems for parameter estimation of the following structure:
 
     .. math::
 
         \phi = y(t, u, p)
+
         0 = g(t, u, p).
         
     '''
@@ -96,42 +98,41 @@ input argument. Input arguments must be CasADi symbolic types.''')
 class ExplODE(object):
 
     '''
-    :param t: CasADi symbolic variable for the time :math:``t \in \mathbb{R}``.
-    :type t: casadi.casadi.SX
-    :param u: CasADi symbolic variable for the controls :math:``u \in
-    \mathbb{R}^{n_{u}}``.
-    :type u: casadi.casadi.SX
-    :param x: CasADi symbolic variable for the states :math:``x \in
-    \mathbb{R}^{n_{x}}``.
-    :type x: casadi.casadi.SX
-    :param p: CasADi symbolic variable for the unknow parameters :math:``p \in
-    \mathbb{R}^{n_{p}}``.
-    :type p: casadi.casadi.SX
-    :param we: CasADi symbolic variable for the equation errors :math:``we \in
-    \mathbb{R}^{n_{we}}``.
-    :type we: casadi.casadi.SX
-    :param wu: CasADi symbolic variable for the equation errors :math:``wu \in
-    \mathbb{R}^{n_{wu}}``.
-    :type wu: casadi.casadi.SX
-    :param y: CasADi symbolic variable describing the output function
-              :math:``y(t, p) \in \mathbb{R}^{n_{y}}``, i. e. the output of
-              the system :math:``\phi = y(\dot)`` that can be measured, and
-              for which in later process measurement data can be provided
-              (note that in this case, :math:``y`` does *not* depend on
-              :math:``u``).
-    :type y: casadi.casadi.SX
-    :param g: CasADi symbolic variable describing the explicit system of ODEs
-              :math:``f(t, u, x, p) \in \mathbb{R}^{n_{x}}``,
-              so that .:math:``\dot{x} = f(\dot)``.
-    :type g: casadi.casadi.SX
+    :param t: time :math:`t \in \mathbb{R}` (optional),
+    :type t: casadi.casadi.MX
 
-    The class :class:``ExplODE`` is used to define dynamic systems of explicit
+    :param u: controls :math:`u \in \mathbb{R}^{n_{u}}` (optional),
+    :type u: casadi.casadi.MX
+
+    :param x: states :math:`x \in \mathbb{R}^{n_{x}}`,
+    :type x: casadi.casadi.MX
+
+    :param p: unknown parameters :math:`p \in \mathbb{R}^{n_{p}}`,
+    :type p: casadi.casadi.MX
+
+    :param we: equation errors :math:`we \in \mathbb{R}^{n_{we}}` (optional),
+    :type we: casadi.casadi.MX
+
+    :param wu: input errors :math:`wu \in \mathbb{R}^{n_{wu}}` (optional),
+    :type wu: casadi.casadi.MX
+
+    :param y: output function :math:`y(t, u, x, p) \in \mathbb{R}^{n_{y}}`, i. e. the measured output of
+              the system :math:`\phi = y(\cdot)`,
+    :type y: casadi.casadi.MX
+
+    :param g: explicit system of ODEs :math:`f(t, u, x, p) \in \mathbb{R}^{n_{x}}`,
+              so that :math:`\dot{x} = f(\cdot)`.
+    :type g: casadi.casadi.MX
+
+
+    The class :class:`ExplODE` is used to define dynamic systems of explicit
     ODEs for parameter estimation of the following structure:
 
     .. math::
 
         \phi = y(t, u, x, p)
-        \dot{x} = f(t, u, x, p, we, wu)
+
+        \dot{x} = f(t, u, x, p, we, wu).
         
     '''
 
@@ -181,7 +182,7 @@ input argument. Input arguments must be CasADi symbolic types.''')
 class ImplDAE(object):
 
     '''
-    The class :class:``ImplDAE`` will be used to define dynamic systems of 
+    The class :class:`ImplDAE` will be used to define dynamic systems of 
     implicit DAEs for parameter estimation, but is not supported yet.
 
     '''

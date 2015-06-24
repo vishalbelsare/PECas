@@ -33,11 +33,11 @@ data = pl.array(pl.loadtxt( \
     "controlReadings_ACADO_MPC_Betterweights.dat", \
     delimiter = ", ", skiprows = 1))
 
-timegrid = data[300:400, 1]
+timegrid = data[500:680, 1]
 
-yN = data[300:400, [2, 4, 6, 8]]
+yN = data[500:680, [2, 4, 6, 8]]
 wv = 1 / (0.1**2) * pl.ones(yN.shape)
-uN = data[300:399, [9, 10]]
+uN = data[500:679, [9, 10]]
 wwe = [1 / 1e-4] * 4
 
 porig = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
@@ -45,7 +45,8 @@ porig = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
 odesetup = pecas.setups.ODEsetup( \
     system = odesys, timegrid = timegrid,
     u = uN, \
-    pinit = [0.5, 17.06, 11.5, 5, 0.07, 0.70])
+    pinit = [1.0e-3, 1.0e1, 1.0e2, 3.0e2, -7.0e1, 1.0e1], \
+    xinit = yN)
 
 # Run parameter estimation and assure that the results is correct
 
@@ -53,9 +54,8 @@ lsqpe = pecas.LSq(pesetup =odesetup, yN =yN, wv = wv, wwe = wwe)
 lsqpe.show_system_information(showEquations = True)
 
 lsqpe.run_parameter_estimation()
-lsqpe.show_results()
-
 lsqpe.compute_covariance_matrix()
+
 lsqpe.show_results()
 
 xhat = lsqpe.Xhat[0]
