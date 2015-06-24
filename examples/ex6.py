@@ -32,10 +32,10 @@ odesys = pecas.systems.ExplODE(x = x, u = u, p = p, f = f, y = y)
 # Loading data
 #==============================================================================
 data = pl.loadtxt('ex6data.txt')
-timegrid = data[:500, 0]
+tu = data[:500, 0]
 phim = data[:500, 1]
 wm = data[:500, 2]
-N = timegrid.size
+N = tu.size
 yN = pl.array([phim,wm])
 uN = [psi] * (N-1)
 
@@ -49,19 +49,23 @@ uN = [psi] * (N-1)
 # [phi,w,K] = [1,1,1], and the vector with all the measurement is created.
 #==============================================================================
 
-sigmaphi = 1.0 / (pl.ones(timegrid.size)*pl.std(phim, ddof=1)**2)
-sigmaw = 1.0 / (pl.ones(timegrid.size)*pl.std(wm, ddof=1)**2)
+sigmaphi = 1.0 / (pl.ones(tu.size)*pl.std(phim, ddof=1)**2)
+sigmaw = 1.0 / (pl.ones(tu.size)*pl.std(wm, ddof=1)**2)
 
 wv = pl.array([sigmaphi, sigmaw])
 
-odesetup = pecas.setups.ODEsetup( \
-    system = odesys, timegrid = timegrid,
-    u = uN, \
-    pinit = 1, pmax = 50, pmin = 0 )
+# odesetup = pecas.setups.ODEsetup( \
+#     system = odesys, tu = tu,
+#     u = uN, \
+#     pinit = 1, pmax = 50, pmin = 0 )
 
 # Run parameter estimation and assure that the results is correct
 
-lsqpe = pecas.LSq(pesetup =odesetup, yN =yN, wv = wv)
+lsqpe = pecas.LSq( \
+    system = odesys, tu = tu, \
+    u = uN, \
+    pinit = 1, pmax = 50, pmin = 0, \
+    yN =yN, wv = wv)
 
 lsqpe.show_system_information(showEquations = True)
 

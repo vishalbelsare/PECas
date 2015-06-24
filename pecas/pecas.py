@@ -21,37 +21,65 @@ class PECasBaseClass:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def __init__(self, pesetup = None, yN = None, wv = None, wwe = None,\
-    wwu = None):
+    def __init__(self, system = None, \
+        tu = None, u = None, \
+        pmin = None, pmax = None, pinit = None, \
+        xmin = None, xmax = None, xinit = None, \
+        x0min = None, x0max = None, \
+        xNmin = None, xNmax = None, \
+        ty = None, yN = None, \
+        wv = None, wwe = None, wwu = None):
 
         intro.pecas_intro()
         print('\n' + 22 * '-' + \
             ' PECas parameter estimation setup ' + 22 * '-')
         print('\nStarting parameter estimation problem setup ...') 
 
+
+        if type(system) is systems.BasicSystem:
+
+            self.pesetup = setups.BSsetup(system = system, \
+                tu = tu, u = u, \
+                pmin = pmin, pmax = pmax, pinit = pinit)
+
+        elif type(system) is systems.ExplODE:
+
+            self.pesetup = setups.ODEsetup(system = system, \
+                tu = tu, u = u, \
+                ty = ty, y = yN, \
+                pmin = pmin, pmax = pmax, pinit = pinit, \
+                xmin = xmin, xmax = xmax, xinit = xinit, \
+                x0min = x0max, x0max = x0max, \
+                xNmin = xNmin, xNmax = xNmax)
+
+        else:
+
+            raise NotImplementedError( \
+                "The system type provided by the user is not supported.")
+
         # Store the parameter estimation problem setup
 
-        self.pesetup = pesetup
+        # self.pesetup = pesetup
 
         # Check if the supported measurement data fits to the dimensions of
         # the output function
 
         yN = np.atleast_2d(yN)
 
-        if yN.shape == (pesetup.timegrid.size, pesetup.ny):
+        if yN.shape == (self.pesetup.tu.size, self.pesetup.ny):
 
             yN = yN.T
 
-        if not yN.shape == (pesetup.ny, pesetup.timegrid.size):
+        if not yN.shape == (self.pesetup.ny, self.pesetup.tu.size):
 
             raise ValueError('''
 The dimension of the measurement data given in yN does not match the
-dimension of output function and/or timegrid.
+dimension of output function and/or tu.
 Valid dimensions for yN for the given data are:
     {0} or {1},
 but you supported yN of dimension:
-    {2}.'''.format(str((pesetup.timegrid.size, pesetup.ny)), \
-    str((pesetup.ny, pesetup.timegrid.size)), str(yN.shape)))
+    {2}.'''.format(str((self.pesetup.tu.size, self.pesetup.ny)), \
+    str((self.pesetup.ny, self.pesetup.tu.size)), str(yN.shape)))
 
         # Check if the supported standard deviations fit to the dimensions of
         # the measurement data
@@ -219,11 +247,23 @@ class LSq(PECasBaseClass):
     estimation problems for previously defined systems using a given set
     of measurement data and weightings.'''
 
-    def __init__(self, pesetup = None, yN = None, wv = None, wwe = None,\
-    wwu = None):
+    def __init__(self, system = None, \
+        tu = None, u = None, \
+        pmin = None, pmax = None, pinit = None, \
+        xmin = None, xmax = None, xinit = None, \
+        x0min = None, x0max = None, \
+        xNmin = None, xNmax = None, \
+        ty = None, yN = None, \
+        wv = None, wwe = None, wwu = None):
 
-        super(LSq, self).__init__(pesetup = pesetup, yN = yN, wv = wv, \
-        wwe = wwe, wwu = wwu)
+        super(LSq, self).__init__(system = system, \
+            tu = tu, u = u, \
+            pmin = pmin, pmax = pmax, pinit = pinit, \
+            xmin = xmin, xmax = xmax, xinit = xinit, \
+            x0min = x0min, x0max = x0max, \
+            xNmin = xNmin, xNmax = xNmax, \
+            ty = ty, yN = yN, \
+            wv = wv, wwe = wwe, wwu = wwu)
 
 
     def run_parameter_estimation(self):

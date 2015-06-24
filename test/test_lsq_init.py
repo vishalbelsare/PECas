@@ -15,15 +15,32 @@ class BSPESetupTest(object):
 
         # Test valid setup cases
 
-        pecas.LSq(pesetup = self.bssetup, yN = self.yN, wv = self.wv)
-        pecas.LSq(pesetup = self.bssetup, yN = self.yN.T, wv = self.wv)
-        pecas.LSq(pesetup = self.bssetup, yN = self.yN, wv = self.wv.T)
+        pecas.LSq(system = self.bsys, \
+            tu = self.tu, u = self.uN, \
+            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+            yN = self.yN, wv = self.wv)
+
+        pecas.LSq(system = self.bsys, \
+            tu = self.tu, u = self.uN, \
+            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+            yN = self.yN.T, wv = self.wv)
+
+        pecas.LSq(system = self.bsys, \
+            tu = self.tu, u = self.uN, \
+            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+            yN = self.yN, wv = self.wv.T)
+
 
     def test_invalid_lsq_init(self):
 
-        self.assertRaises(ValueError, pecas.LSq, pesetup = self.bssetup, \
+        self.assertRaises(ValueError, pecas.LSq, system = self.bsys, \
+            tu = self.tu, u = self.uN, \
+            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
             yN = np.atleast_2d(self.yN)[:, :-1], wv = self.wv)
-        self.assertRaises(ValueError, pecas.LSq, pesetup = self.bssetup, \
+
+        self.assertRaises(ValueError, pecas.LSq, system = self.bsys, \
+            tu = self.tu, u = self.uN, \
+            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
             yN = self.yN, wv = np.atleast_2d(self.wv)[:-1])
 
 
@@ -33,32 +50,105 @@ class ODEPESetupTest(object):
 
         # Test valid setup cases
 
-        pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv, \
-            wwe = self.wwe)
-        pecas.LSq(pesetup = self.odesetup, yN = self.yN.T, wv = self.wv, \
-            wwe = self.wwe)
-        pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv.T, \
-            wwe = self.wwe)
-        
-        pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv, \
-            wwe = self.wwe)
-        pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv, \
-            wwe = [self.wwe])
-        pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv, \
-            wwe = np.atleast_1d(self.wwe))
+        pecas.LSq(system = self.odesys, \
+            tu = self.tu, u = self.uN, \
+            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+            xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
+            x0min = self.x0max, x0max = self.x0max, \
+            xNmin = self.xNmin, xNmax = self.xNmax, \
+            yN = self.yN, \
+            wv = self.wv, wwe = self.wwe, wwu = self.wwu)
 
-        pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv, \
-            wwe = self.wwe, wwu = self.wwu)
-        pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv, \
-            wwe = self.wwe, wwu = [self.wwu])
-        pecas.LSq(pesetup = self.odesetup, yN = self.yN, wv = self.wv, \
-            wwe = self.wwe, wwu = np.atleast_1d(self.wwu))
+        pecas.LSq(system = self.odesys, \
+            tu = self.tu, u = self.uN, \
+            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+            xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
+            x0min = self.x0max, x0max = self.x0max, \
+            xNmin = self.xNmin, xNmax = self.xNmax, \
+            yN = self.yN.T, \
+            wv = self.wv, wwe = self.wwe, wwu = self.wwu)
+
+        pecas.LSq(system = self.odesys, \
+            tu = self.tu, u = self.uN, \
+            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+            xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
+            x0min = self.x0max, x0max = self.x0max, \
+            xNmin = self.xNmin, xNmax = self.xNmax, \
+            yN = self.yN, \
+            wv = self.wv.T, wwe = self.wwe, wwu = self.wwu)
+
+        pecas.LSq(system = self.odesys, \
+            tu = self.tu, u = self.uN, \
+            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+            xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
+            x0min = self.x0max, x0max = self.x0max, \
+            xNmin = self.xNmin, xNmax = self.xNmax, \
+            yN = self.yN, \
+            wv = self.wv, wwe = [self.wwe], wwu = self.wwu)
+
+        pecas.LSq(system = self.odesys, \
+            tu = self.tu, u = self.uN, \
+            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+            xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
+            x0min = self.x0max, x0max = self.x0max, \
+            xNmin = self.xNmin, xNmax = self.xNmax, \
+            yN = self.yN, \
+            wv = self.wv, wwe = np.atleast_1d(self.wwe), wwu = self.wwu)
+
+        pecas.LSq(system = self.odesys, \
+            tu = self.tu, u = self.uN, \
+            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+            xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
+            x0min = self.x0max, x0max = self.x0max, \
+            xNmin = self.xNmin, xNmax = self.xNmax, \
+            yN = self.yN, \
+            wv = self.wv, wwe = self.wwe, wwu = [self.wwu])
+
+        pecas.LSq(system = self.odesys, \
+            tu = self.tu, u = self.uN, \
+            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+            xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
+            x0min = self.x0max, x0max = self.x0max, \
+            xNmin = self.xNmin, xNmax = self.xNmax, \
+            yN = self.yN, \
+            wv = self.wv, wwe = self.wwe, wwu = np.atleast_1d(self.wwu))
+
 
     def test_invalid_lsq_init(self):
 
-        self.assertRaises(ValueError, pecas.LSq, pesetup = self.odesetup, \
-            yN = np.atleast_2d(self.yN)[:, :-1], wv = self.wv)
-        self.assertRaises(ValueError, pecas.LSq, pesetup = self.odesetup, \
-            yN = self.yN, wv = np.atleast_2d(self.wv)[:-1])
-        # self.assertRaises(ValueError, pecas.LSq, pesetup = self.odesetup, \
-        #     yN = self.yN, wv = self.wv, wwe = np.asarray([1, 2, 3]))
+        self.assertRaises(ValueError, pecas.LSq, system = self.odesys, \
+            tu = self.tu, u = self.uN, \
+            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+            xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
+            x0min = self.x0max, x0max = self.x0max, \
+            xNmin = self.xNmin, xNmax = self.xNmax, \
+            yN = np.atleast_2d(self.yN)[:, :-1], \
+            wv = self.wv, wwe = self.wwe, wwu = self.wwu)
+
+        self.assertRaises(ValueError, pecas.LSq, system = self.odesys, \
+            tu = self.tu, u = self.uN, \
+            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+            xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
+            x0min = self.x0max, x0max = self.x0max, \
+            xNmin = self.xNmin, xNmax = self.xNmax, \
+            yN = self.yN, \
+            wv = np.atleast_2d(self.wv)[:-1], wwe = self.wwe, wwu = self.wwu)
+
+        # self.assertRaises(ValueError, pecas.LSq, system = self.odesys, \
+        #     tu = self.tu, u = self.uN, \
+        #     pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+        #     xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
+        #     x0min = self.x0max, x0max = self.x0max, \
+        #     xNmin = self.xNmin, xNmax = self.xNmax, \
+        #     yN = self.yN, \
+        #     wv = self.wv, wwe = np.atleast_2d(self.wwe)[:-1], wwu = self.wwu)
+
+        # self.assertRaises(ValueError, pecas.LSq, system = self.odesys, \
+        #     tu = self.tu, u = self.uN, \
+        #     pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+        #     xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
+        #     x0min = self.x0max, x0max = self.x0max, \
+        #     xNmin = self.xNmin, xNmax = self.xNmax, \
+        #     yN = self.yN, \
+        #     wv = self.wv, wwe = self.wwe, wwu = np.atleast_2d(self.wwu)[:-1])
+

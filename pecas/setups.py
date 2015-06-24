@@ -244,8 +244,8 @@ class BSsetup(SetupsBaseClass):
             xNmin = xNmin, xNmax = xNmax)
 
 
-    def __init__(self, system = None, timegrid = None, \
-        u = None, \
+    def __init__(self, system = None, \
+        tu = None, u = None, \
         pmin = None, pmax = None, pinit = None):
 
         SetupsBaseClass.__init__(self)
@@ -264,19 +264,19 @@ class BSsetup(SetupsBaseClass):
         self.nv = system.fcn["y"].shape[0]
         self.ny = system.fcn["y"].shape[0]
 
-        if np.atleast_2d(timegrid).shape[0] == 1:
+        if np.atleast_2d(tu).shape[0] == 1:
 
-            self.timegrid = np.asarray(timegrid)
+            self.tu = np.asarray(tu)
 
-        elif np.atleast_2d(timegrid).shape[1] == 1:
+        elif np.atleast_2d(tu).shape[1] == 1:
 
-                self.timegrid = np.squeeze(np.atleast_2d(timegrid).T)
+                self.tu = np.squeeze(np.atleast_2d(tu).T)
 
         else:
 
-            raise ValueError("Invalid dimension for argument timegrid.")
+            raise ValueError("Invalid dimension for argument tu.")
 
-        self.nsteps = timegrid.shape[0]
+        self.nsteps = tu.shape[0]
 
         # Define the struct holding the variables
 
@@ -305,7 +305,7 @@ class BSsetup(SetupsBaseClass):
 
         for k in range(self.nsteps):
 
-            self.phiN.append(yfcn.call([self.timegrid[k], \
+            self.phiN.append(yfcn.call([self.tu[k], \
                 self.u[:, k], self.Vars["P"]])[0])
 
         self.phiN = ca.vertcat(self.phiN)
@@ -330,9 +330,7 @@ class BSsetup(SetupsBaseClass):
         print('Initialization of BasicSystem system sucessful.')
 
 
-class CollocationBaseClass(SetupsBaseClass):
-
-    __metaclass__ = ABCMeta
+class ODEsetup(SetupsBaseClass):
 
     def check_and_set_bounds_and_initials(self, \
         u = None, \
@@ -341,7 +339,7 @@ class CollocationBaseClass(SetupsBaseClass):
         x0min = None, x0max = None, \
         xNmin = None, xNmax = None):
 
-        super(CollocationBaseClass, self).check_and_set_bounds_and_initials( \
+        super(ODEsetup, self).check_and_set_bounds_and_initials( \
             u = u, \
             pmin = pmin, pmax = pmax, pinit = pinit, \
             xmin = xmin, xmax = xmax, xinit = xinit, \
@@ -349,18 +347,19 @@ class CollocationBaseClass(SetupsBaseClass):
             xNmin = xNmin, xNmax = xNmax)
 
 
-    @abstractmethod
-    def __init__(self, system = None, timegrid = None, \
-        u = None, \
+    def __init__(self, system = None, \
+        tu = None, u = None, \
+        ty = None, y = None,
         pmin = None, pmax = None, pinit = None, \
         xmin = None, xmax = None, xinit = None, \
         x0min = None, x0max = None, \
-        xNmin = None, xNmax = None, \
-        systemclass = None):
+        xNmin = None, xNmax = None):
+
+        self.tstart_setup = time.time()
 
         SetupsBaseClass.__init__(self)
 
-        if not type(system) is systemclass:
+        if not type(system) is systems.ExplODE:
 
             raise TypeError("Setup-method " + self.__class__.__name__ + \
                 " not allowed for system of type " + str(type(system)) + ".")
@@ -377,19 +376,39 @@ class CollocationBaseClass(SetupsBaseClass):
         self.nwu = system.vars["wu"].shape[0]        
         self.ny = system.fcn["y"].shape[0]
 
-        if np.atleast_2d(timegrid).shape[0] == 1:
+        if np.atleast_2d(tu).shape[0] == 1:
 
-            self.timegrid = np.asarray(timegrid)
+            self.tu = np.asarray(tu)
 
-        elif np.atleast_2d(timegrid).shape[1] == 1:
+        elif np.atleast_2d(tu).shape[1] == 1:
 
-                self.timegrid = np.squeeze(np.atleast_2d(timegrid).T)
+                self.tu = np.squeeze(np.atleast_2d(tu).T)
 
         else:
 
-            raise ValueError("Invalid dimension for argument timegrid.")
+            raise ValueError("Invalid dimension for argument tu.")
 
-        self.nsteps = self.timegrid.shape[0] - 1
+
+        # pdb.set_trace()
+
+        if ty == None:
+
+            self.ty = self.tu
+
+        elif np.atleast_2d(ty).shape[0] == 1:
+
+            self.ty = np.asarray(ty)
+
+        elif np.atleast_2d(ty).shape[1] == 1:
+
+            self.ty = np.squeeze(np.atleast_2d(ty).T)
+
+        else:
+
+            raise ValueError("Invalid dimension for argument ty.")
+
+
+        self.nsteps = self.tu.shape[0] - 1
 
         self.tauroot = ca.collocationPoints(3, "radau")
 
@@ -423,34 +442,6 @@ class CollocationBaseClass(SetupsBaseClass):
             x0min = x0min, x0max = x0max, \
             xNmin = xNmin, xNmax = xNmax)
 
-        # Set up phiN
-
-        self.phiN = []
-
-        yfcn = ca.MXFunction([system.vars["t"], system.vars["x"], \
-            system.vars["p"], system.vars["u"],system.vars["we"], \
-            system.vars["wu"]], [system.fcn["y"]])
-        yfcn.setOption("name", "yfcn")
-        yfcn.init()
-
-        for k in range(self.nsteps):
-
-            # DEPENDECY ON U NOT POSSIBLE AT THIS POINT! len(U) = N, not N + 1!
-            # self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["U", k, 0], \
-            self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["X", k, 0], \
-                self.Vars["P"], self.u[:, k], self.Vars["WE", k, 0],\
-                self.Vars["WU", k, 0]])[0])
-
-        self.phiN.append(yfcn.call([self.timegrid[k], self.Vars["XF"], \
-            self.Vars["P"], self.u[:, -1],self.Vars["WE", -1, 0],\
-            self.Vars["WU", k, 0]])[0])
-
-        self.phiN = ca.vertcat(self.phiN)
-
-        self.phiNfcn = ca.MXFunction([self.Vars], [self.phiN])
-        self.phiNfcn.setOption("name", "phiNfcn")
-        self.phiNfcn.init()
-
 
         # Set tp the collocation coefficients
 
@@ -474,10 +465,12 @@ class CollocationBaseClass(SetupsBaseClass):
 
             for j in range(self.ntauroot + 1):
 
-                self.T[k,j] = self.timegrid[k] + \
-                    (self.timegrid[k+1] - self.timegrid[k]) * self.tauroot[j]
+                self.T[k,j] = self.tu[k] + \
+                    (self.tu[k+1] - self.tu[k]) * self.tauroot[j]
 
         # For all collocation points
+
+        self.lfcns = []
 
         for j in range(self.ntauroot + 1):
 
@@ -499,9 +492,7 @@ class CollocationBaseClass(SetupsBaseClass):
             # Evaluate the polynomial at the final time to get the
             # coefficients of the continuity equation
             
-            lfcn.setInput(1.0)
-            lfcn.evaluate()
-            self.D[j] = lfcn.getOutput()
+            [self.D[j]] = lfcn([1])
 
             # Evaluate the time derivative of the polynomial at all 
             # collocation points to get the coefficients of the
@@ -516,30 +507,27 @@ class CollocationBaseClass(SetupsBaseClass):
                 tfcn.evaluate()
                 self.C[j,r] = tfcn.getOutput()
 
-        # Start setting up g
+            self.lfcns.append(lfcn)
+
+
+        # Initialize phiN
+
+        self.phiN = []
+
+        # Initialize measurement function
+
+        yfcn = ca.MXFunction([system.vars["t"], system.vars["x"], \
+            system.vars["p"], system.vars["u"],system.vars["wu"]], \
+            [system.fcn["y"]])
+        yfcn.setOption("name", "yfcn")
+        yfcn.init()
+
+
+        # Initialzie setup of g
 
         self.g = []
 
-
-class ODEsetup(CollocationBaseClass):
-
-    def __init__(self, system = None, timegrid = None, \
-        u = None, \
-        pmin = None, pmax = None, pinit = None, \
-        xmin = None, xmax = None, xinit = None, \
-        x0min = None, x0max = None, \
-        xNmin = None, xNmax = None):
-            
-        self.tstart_setup = time.time()
-
-        super(ODEsetup, self).__init__(system = system, \
-            timegrid = timegrid, \
-            u = u, \
-            pmin = pmin, pmax = pmax, pinit = pinit, \
-            xmin = xmin, xmax = xmax, xinit = xinit, \
-            x0min = x0min, x0max = x0max, \
-            xNmin = xNmin, xNmax = xNmax, \
-            systemclass = systems.ExplODE)
+        # Initialize ODE right-hand-side
 
         ffcn = ca.MXFunction([system.vars["t"], system.vars["x"], \
             system.vars["u"], system.vars["p"], system.vars["we"],\
@@ -547,10 +535,41 @@ class ODEsetup(CollocationBaseClass):
         ffcn.setOption("name", "ffcn")
         ffcn.init()
 
+
         # For all finite elements
 
         for k in range(self.nsteps):
-          
+
+            # pdb.set_trace()
+
+            hk = self.tu[k + 1] - self.tu[k]
+            t_meas = self.ty[np.where(np.logical_and( \
+                self.ty >= self.tu[k], self.ty < self.tu[k + 1]))]
+
+            for t_meas_j in t_meas:
+
+                if t_meas_j == self.tu[k]:
+
+                    self.phiN.append(yfcn.call([self.tu[k], \
+                        self.Vars["X", k, 0], self.Vars["P"], self.u[:, k], \
+                        self.Vars["WU", k, 0]])[0])
+
+                else:
+
+                    # pdb.set_trace()
+
+                    tau = (t_meas_j - self.tu[k]) / hk
+
+                    x_temp = 0
+
+                    for r in range(self.ntauroot + 1):
+
+                        x_temp += self.lfcns[r]([tau])[0] * self.Vars["X",k,r]
+
+                    self.phiN.append(yfcn.call([t_meas_j, \
+                        x_temp, self.Vars["P"], self.u[:, k], \
+                        self.Vars["WU", k, 0]])[0])
+
             # For all collocation points
 
             for j in range(1, self.ntauroot + 1):
@@ -570,8 +589,7 @@ class ODEsetup(CollocationBaseClass):
                     self.u[:, k], self.Vars["P"], \
                     self.Vars["WE", k, j-1],self.Vars["WU", k, j-1]])
 
-                self.g.append((self.timegrid[k+1] - \
-                    self.timegrid[k]) * fk - xp_jk)
+                self.g.append(hk * fk - xp_jk)
 
             # Get an expression for the state at the end of
             # the finite element
@@ -595,7 +613,28 @@ class ODEsetup(CollocationBaseClass):
         # Concatenate constraints
 
         self.g = ca.vertcat(self.g)
-        
+    
+
+        # for k in range(self.nsteps):
+
+            # DEPENDECY ON U NOT POSSIBLE AT THIS POINT! len(U) = N, not N + 1!
+            # self.phiN.append(yfcn.call([self.tu[k], self.Vars["U", k, 0], \
+            # self.phiN.append(yfcn.call([self.tu[k], self.Vars["X", k, 0], \
+            #     self.Vars["P"], self.u[:, k], self.Vars["WE", k, 0],\
+            #     self.Vars["WU", k, 0]])[0])
+
+        if self.tu[-1] in self.ty:
+
+            self.phiN.append(yfcn.call([self.tu[-1], self.Vars["XF"], \
+                self.Vars["P"], self.u[:, -1], self.Vars["WU", -1, 0]])[0])
+
+        self.phiN = ca.vertcat(self.phiN)
+
+        self.phiNfcn = ca.MXFunction([self.Vars], [self.phiN])
+        self.phiNfcn.setOption("name", "phiNfcn")
+        self.phiNfcn.init()
+
+
         self.tend_setup = time.time()
         self.duration_setup = self.tend_setup - self.tstart_setup
 
