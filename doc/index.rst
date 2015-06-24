@@ -26,7 +26,7 @@ Contents
 
    install
    tutorial
-   tool
+   examples
 
 
 

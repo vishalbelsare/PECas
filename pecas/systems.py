@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 '''
-This module contains the classes that are used for defining a system for
-which a parameter estimation problem can be solved using PECas. According to a
-system\'s properties, different classes need to be used:
+PECas provides different classes for defining systems for parameter estimation
+problems that can be solved within PECas. According to a
+system\'s properties, a suitable class needs to be used:
 
 * :class:`BasicSystem`: non-dynamic, contains an output function and possibly
   equality constraints, possibly dependent on time and/or controls.
@@ -13,7 +13,7 @@ system\'s properties, different classes need to be used:
   function but no algebraic equations, possibly dependent on time and/or
   controls.
 
-* :class:`ImplDAE`: dynamic system of implicit DAEs (not yet implemented),
+* :class:`ImplDAE` (not yet implemented!): dynamic system of implicit DAEs,
   possibly dependent on time and/or controls.
 
 All systems need also to depend on unknown parameters that will be estimated.
@@ -45,6 +45,8 @@ class BasicSystem(object):
               :math:`g(t, u, p) \in \mathbb{R}^{n_{g}}`,
               while :math:`g(\cdot) = 0`.
     :type g: casadi.casadi.MX
+
+    :raises: TypeError
 
 
     The class :class:`BasicSystem` is used to define non-dynamic
@@ -124,6 +126,8 @@ class ExplODE(object):
               so that :math:`\dot{x} = f(\cdot)`.
     :type g: casadi.casadi.MX
 
+    :raises: TypeError
+
 
     The class :class:`ExplODE` is used to define dynamic systems of explicit
     ODEs for parameter estimation of the following structure:
@@ -182,6 +186,9 @@ input argument. Input arguments must be CasADi symbolic types.''')
 class ImplDAE(object):
 
     '''
+    :raises: NotImplementedError
+
+
     The class :class:`ImplDAE` will be used to define dynamic systems of 
     implicit DAEs for parameter estimation, but is not supported yet.
 
