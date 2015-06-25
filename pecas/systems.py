@@ -11,13 +11,13 @@ system\'s properties, a suitable class needs to be used:
 
 * :class:`ExplODE`: dynamic system of explicit ODEs, contains an output
   function but no algebraic equations, possibly dependent on time and/or
-  controls.
+  controls, equation errors, input errors.
 
 * :class:`ImplDAE` (not yet implemented!): dynamic system of implicit DAEs,
   possibly dependent on time and/or controls.
 
-All systems need also to depend on unknown parameters that will be estimated.
-For more information on the several class, see their documentations.
+All systems also need to depend on unknown parameters that will be estimated.
+For more information on the several classes, see their descriptions below.
 '''
 
 import casadi as ca
@@ -28,22 +28,20 @@ import intro
 class BasicSystem(object):
 
     '''
-    :param t: time :math:`t \in \mathbb{R}` (optional),
+    :param t: time :math:`t \in \mathbb{R}` (optional)
     :type t: casadi.casadi.MX
 
-    :param u: controls :math:`u \in \mathbb{R}^{n_{u}}` (optional),
+    :param u: controls :math:`u \in \mathbb{R}^{n_{u}}` (optional)
     :type u: casadi.casadi.MX
 
-    :param p: unknown parameters :math:`p \in \mathbb{R}^{n_{p}}`,
+    :param p: unknown parameters :math:`p \in \mathbb{R}^{n_{p}}`
     :type p: casadi.casadi.MX
 
-    :param y: output function :math:`y(t, u, p) \in \mathbb{R}^{n_{y}}`, i. e. the measured output of
-              the system :math:`\phi = y(\cdot)`,
-    :type y: casadi.casadi.MX
+    :param phi: output function :math:`\phi(t, u, p) = y \in \mathbb{R}^{n_{y}}`
+    :type phi: casadi.casadi.MX
 
-    :param g: equality constraints (optional)
-              :math:`g(t, u, p) \in \mathbb{R}^{n_{g}}`,
-              while :math:`g(\cdot) = 0`.
+    :param g: equality constraints :math:`g(t, u, p) = 0 \in \mathbb{R}^{n_{g}}`
+              (optional)
     :type g: casadi.casadi.MX
 
     :raises: TypeError
@@ -54,7 +52,7 @@ class BasicSystem(object):
 
     .. math::
 
-        \phi = y(t, u, p)
+        y = \phi(t, u, p)
 
         0 = g(t, u, p).
         
@@ -99,32 +97,30 @@ input argument. Input arguments must be CasADi symbolic types.''')
 
 class ExplODE(object):
 
-    '''
-    :param t: time :math:`t \in \mathbb{R}` (optional),
+    r'''
+    :param t: time :math:`t \in \mathbb{R}` (optional)
     :type t: casadi.casadi.MX
 
-    :param u: controls :math:`u \in \mathbb{R}^{n_{u}}` (optional),
+    :param u: controls :math:`u \in \mathbb{R}^{n_{u}}` (optional)
     :type u: casadi.casadi.MX
 
-    :param x: states :math:`x \in \mathbb{R}^{n_{x}}`,
+    :param x: states :math:`x \in \mathbb{R}^{n_{x}}`
     :type x: casadi.casadi.MX
 
-    :param p: unknown parameters :math:`p \in \mathbb{R}^{n_{p}}`,
+    :param p: unknown parameters :math:`p \in \mathbb{R}^{n_{p}}`
     :type p: casadi.casadi.MX
 
-    :param we: equation errors :math:`we \in \mathbb{R}^{n_{we}}` (optional),
+    :param we: equation errors :math:`w_{e} \in \mathbb{R}^{n_{w_{e}}}` (optional)
     :type we: casadi.casadi.MX
 
-    :param wu: input errors :math:`wu \in \mathbb{R}^{n_{wu}}` (optional),
+    :param wu: input errors :math:`w_{u} \in \mathbb{R}^{n_{w_{u}}}` (optional)
     :type wu: casadi.casadi.MX
 
-    :param y: output function :math:`y(t, u, x, p) \in \mathbb{R}^{n_{y}}`, i. e. the measured output of
-              the system :math:`\phi = y(\cdot)`,
-    :type y: casadi.casadi.MX
+    :param phi: output function :math:`\phi(t, u, x, p) = y \in \mathbb{R}^{n_{y}}`
+    :type phi: casadi.casadi.MX
 
-    :param g: explicit system of ODEs :math:`f(t, u, x, p) \in \mathbb{R}^{n_{x}}`,
-              so that :math:`\dot{x} = f(\cdot)`.
-    :type g: casadi.casadi.MX
+    :param f: explicit system of ODEs :math:`f(t, u, x, p, w_{e}, w_{u}) = \dot{x} \in \mathbb{R}^{n_{x}}`
+    :type f: casadi.casadi.MX
 
     :raises: TypeError
 
@@ -134,10 +130,10 @@ class ExplODE(object):
 
     .. math::
 
-        \phi = y(t, u, x, p)
+        y & = & \phi(t, u, x, p) \\
 
-        \dot{x} = f(t, u, x, p, we, wu).
-        
+        \dot{x}  & = & f(t, u, x, p, w_{e}, w_{u}).
+
     '''
 
     def __init__(self, \

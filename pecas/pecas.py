@@ -261,6 +261,10 @@ class LSq(PECasBaseClass):
         wv = None, wwe = None, wwu = None, \
         linear_solver = "mumps"):
 
+        '''
+        -- docstring tbd --
+        '''
+
         super(LSq, self).__init__(system = system, \
             tu = tu, u = u, \
             pmin = pmin, pmax = pmax, pinit = pinit, \
@@ -272,6 +276,8 @@ class LSq(PECasBaseClass):
             linear_solver = linear_solver)
 
 
+
+
     def run_parameter_estimation(self):
 
         r'''
@@ -280,10 +286,14 @@ class LSq(PECasBaseClass):
         For this, the least squares parameter estimation problem
 
         .. math::
-            ~ & \hat{x} = \text{arg}\, & \underset{x}{\text{min}}\|M(x)-Y\|_{\Sigma_{\epsilon}^{-1}}^{2}\\
-            \text{s. t.}&~&~\\
-            ~ & ~ & G = 0\\
-            ~ & ~ & x_{0} = x_{init}
+
+            \begin{aligned}
+                & \text{arg}\,\underset{x, p, v, w}{\text{min}} & & \| v \|_{W_{v}}^{2} + \| w_{e} \|_{W_{w_{e}}}^{2} + \| w_{u} \|_{W_{w_{u}}}^{2}\\
+                & \text{subject to:} & & \phi_{k} - y(t_{k}, u_{k}, x_{k}, p) + v_{k} = 0 \\
+                & & & x_{j+1} - c_{j}\bigg[ (f(t_{j}, u_{j}, x_{j}, p, w_{e,j}, w_{u,j}) \bigg] = 0 \\
+                & \text{while:} & & k = 1, \dots, N;\, j = 1, \dots, N - 1; \\
+                & & & c_{j}: \text{Lagrange polynomial of}\, j\text{-th interval}
+            \end{aligned}
 
         will be set up, and solved using IPOPT. Afterwards,
 
@@ -291,6 +301,7 @@ class LSq(PECasBaseClass):
           can be returned using the function :func:`get_xhat()`, and
         - the value of the residual :math:`\hat{R}`
           can be returned using the function :func:`get_Rhat()`.
+          
         '''          
 
         intro.pecas_intro()
