@@ -413,6 +413,126 @@ this might take some time ...
 Parameter estimation finished. Check IPOPT output for status information.''')
 
 
+    def covmat_schur(self):
+
+        r'''
+        --- docstring tbd ---
+        
+        '''       
+
+
+        N1 = ca.MX(self.pesetup.Vars.shape[0] - self.W.shape[0], \
+            self.W.shape[0])
+
+        # N2 = 10e-10 * ca.MX.eye(self.pesetup.Vars.shape[0] - self.W.shape[0]) #, \
+        N2 = ca.MX(self.pesetup.Vars.shape[0] - self.W.shape[0], \
+            self.pesetup.Vars.shape[0] - self.W.shape[0])
+
+        # hess = ca.blockcat([[self.W, N1.T], [N1, N2]])
+        hess = ca.blockcat([[N2, N1], [N1.T, self.W],])
+
+        hess = hess + 1e-10 * ca.diag(self.pesetup.Vars)
+        
+        J2 = ca.jacobian(self.g, self.pesetup.Vars)
+
+        kkt = ca.blockcat( \
+
+            [[hess, \
+                J2.T], \
+
+            [J2, \
+                ca.MX(self.g.size1(), self.g.size1())]] \
+
+                )
+
+        # Minv = ca.solve(M, ca.MX.eye(M.shape[0]), "csparse")
+
+        B1 = kkt[:self.pesetup.np, :self.pesetup.np]
+        E = kkt[self.pesetup.np:, :self.pesetup.np]
+        # ET = kkt[:self.pesetup.np, self.pesetup.np:]
+        D = kkt[self.pesetup.np:, self.pesetup.np:]
+
+        # Dinv = ca.solve(D, ca.MX.eye(D.size1()), "csparse")
+        # F11 = B1 - ca.mul([E.T, Dinv, E])
+
+        Dinv = ca.solve(D, E, "csparse")
+
+        F11 = B1 - ca.mul([E.T, Dinv])
+
+        self.beta = self.rhat / (self.yN.size + self.g.size1() - \
+                self.pesetup.Vars.size)
+
+        self.fcovp = ca.MXFunction([self.pesetup.Vars], \
+            [self.beta * ca.solve(F11, ca.MX.eye(F11.size1()))])
+
+        self.fcovp.init()
+        [self.Covp] = self.fcovp([self.Varshat])
+
+
+    def covmat_backsolve(self):
+
+        r'''
+        --- docstring tbd ---
+        
+        '''       
+
+
+        N1 = ca.MX(self.pesetup.Vars.shape[0] - self.W.shape[0], \
+            self.W.shape[0])
+
+        # N2 = 10e-10 * ca.MX.eye(self.pesetup.Vars.shape[0] - self.W.shape[0]) #, \
+        N2 = ca.MX(self.pesetup.Vars.shape[0] - self.W.shape[0], \
+            self.pesetup.Vars.shape[0] - self.W.shape[0])
+
+        # hess = ca.blockcat([[self.W, N1.T], [N1, N2]])
+        hess = ca.blockcat([[N2, N1], [N1.T, self.W],])
+
+        hess = hess + 1e-10 * ca.diag(self.pesetup.Vars)
+        
+        J2 = ca.jacobian(self.g, self.pesetup.Vars)
+
+        kkt = ca.blockcat( \
+
+            [[hess, \
+                J2.T], \
+
+            [J2, \
+                ca.MX(self.g.size1(), self.g.size1())]] \
+
+                )        
+
+        # # Minv = ca.solve(M, ca.MX.eye(M.shape[0]), "csparse")
+
+        # B1 = kkt[:self.pesetup.np, :self.pesetup.np]
+        # E = kkt[self.pesetup.np:, :self.pesetup.np]
+        # # ET = kkt[:self.pesetup.np, self.pesetup.np:]
+        # D = kkt[self.pesetup.np:, self.pesetup.np:]
+
+        # # Dinv = ca.solve(D, ca.MX.eye(D.size1()), "csparse")
+        # # F11 = B1 - ca.mul([E.T, Dinv, E])
+
+        # Dinv = ca.solve(D, E, "csparse")
+
+        # F11 = B1 - ca.mul([E.T, Dinv])
+
+        I0 = ca.MX(kkt.shape[0], 1)
+        I0[:self.pesetup.np] = 1
+        I0 = ca.diag(I0)
+        I0 = I0[:, :self.pesetup.np]
+
+        # pdb.set_trace()
+
+
+        self.beta = self.rhat / (self.yN.size + self.g.size1() - \
+                self.pesetup.Vars.size)
+
+        self.fcovp = ca.MXFunction([self.pesetup.Vars], \
+            [self.beta * ca.mul([I0.T, ca.solve(kkt, I0, "csparse")])])
+
+        self.fcovp.init()
+        [self.Covp] = self.fcovp([self.Varshat])
+
+
     def compute_covariance_matrix(self):
 
         r'''

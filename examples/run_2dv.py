@@ -47,42 +47,57 @@ lsqpe = pecas.LSq(system = odesys, \
     pinit = [0.5, 17.06, 11.5, 5, 0.07, 0.70], \
     ty = ty, yN =yN, \
     wv = wv, wwe = wwe, \
-    xinit = yN)
+    xinit = yN, \
+    linear_solver = "ma97")
 
 lsqpe.show_system_information(showEquations = True)
 
 lsqpe.run_parameter_estimation()
-lsqpe.show_results()
+
+lsqpe.covmat_schur()
+var1 = lsqpe.Covp 
+
+lsqpe.covmat_backsolve()
+var2 = lsqpe.Covp[:6, :6]
 
 lsqpe.compute_covariance_matrix()
-lsqpe.show_results()
+var3 = lsqpe.Covp 
 
-xhat = lsqpe.Xhat[0]
-yhat = lsqpe.Xhat[1]
-psihat = lsqpe.Xhat[2]
-vhat = lsqpe.Xhat[3]
+reldev13 = var1 / var3
+reldev23 = var2 / var3
+reldev12 = var1 / var2
 
-pl.close("all")
+# lsqpe.show_results()
 
-pl.figure()
-pl.subplot(4, 1, 1)
-pl.plot(xhat)
-pl.plot(yN[:,0])
+# lsqpe.compute_covariance_matrix()
+# lsqpe.show_results()
 
-pl.subplot(4, 1, 2)
-pl.plot(yhat)
-pl.plot(yN[:,1])
+# xhat = lsqpe.Xhat[0]
+# yhat = lsqpe.Xhat[1]
+# psihat = lsqpe.Xhat[2]
+# vhat = lsqpe.Xhat[3]
 
-pl.subplot(4, 1, 3)
-pl.plot(psihat)
-pl.plot(yN[:, 2])
+# pl.close("all")
 
-pl.subplot(4, 1, 4)
-pl.plot(vhat)
-pl.plot(yN[:, 3])
+# pl.figure()
+# pl.subplot(4, 1, 1)
+# pl.plot(xhat)
+# pl.plot(yN[:,0])
 
-pl.figure()
-pl.plot(xhat, yhat)
-pl.plot(yN[:,0], yN[:, 1])
+# pl.subplot(4, 1, 2)
+# pl.plot(yhat)
+# pl.plot(yN[:,1])
 
-pl.show()
+# pl.subplot(4, 1, 3)
+# pl.plot(psihat)
+# pl.plot(yN[:, 2])
+
+# pl.subplot(4, 1, 4)
+# pl.plot(vhat)
+# pl.plot(yN[:, 3])
+
+# pl.figure()
+# pl.plot(xhat, yhat)
+# pl.plot(yN[:,0], yN[:, 1])
+
+# pl.show()
