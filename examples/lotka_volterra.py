@@ -49,7 +49,9 @@ lsqpe = pecas.LSq(system = odesys, \
     pinit = [0.5, 1.0], \
     xinit = yN, \
     yN = yN, \
-    wv = sigma_Y)
+    wv = sigma_Y, \
+    # linear_solver = "mumps", \
+    linear_solver = "ma97")
 
 lsqpe.show_system_information(showEquations = True)
 

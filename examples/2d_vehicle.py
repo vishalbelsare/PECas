@@ -5,23 +5,23 @@ import pecas
 # System
 
 x = ca.MX.sym("x", 4)
-p = ca.MX.sym("p", 6)
+p = ca.MX.sym("p", 4)
 u = ca.MX.sym("u", 2)
 we = ca.MX.sym("we", 4)
 
 f = ca.vertcat( \
 
-    [x[3] * pl.cos(x[2] + p[0] * u[0]) + we[0],
+    [x[3] * pl.cos(x[2] + 0.5 * u[0]) + we[0],
 
-    x[3] * pl.sin(x[2] + p[0] * u[0]) + we[1],
+    x[3] * pl.sin(x[2] + 0.5 * u[0]) + we[1],
 
-    x[3] * u[0] * p[1] + we[2],
+    x[3] * u[0] * 17.06 + we[2],
 
-    p[2] * u[1] \
-        - p[3] * u[1] * x[3] \
-        - p[4] * x[3]**2 \
-        - p[5] \
-        - (x[3] * u[0])**2 * p[1] * p[0] + we[3]])
+    p[0] * u[1] \
+        - p[1] * u[1] * x[3] \
+        - p[2] * x[3]**2 \
+        - p[3] \
+        - (x[3] * u[0])**2 * 17.06 * 0.5 + we[3]])
 
 y = x
 
@@ -39,14 +39,15 @@ wv = 1 / (0.1**2) * pl.ones(yN.shape)
 uN = data[300:399, [9, 10]]
 wwe = [1 / 1e-4] * 4
 
-porig = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
+porig = [12.0, 2.17, 0.1, 0.6]
 
 lsqpe = pecas.LSq(system = odesys, \
     tu = ty, u = uN, \
-    pinit = [0.5, 17.06, 11.5, 5, 0.07, 0.70], \
+    pinit = [11.5, 5, 0.07, 0.70], \
     ty = ty, yN =yN, \
     wv = wv, wwe = wwe, \
     xinit = yN, \
+    # linear_solver = "mumps", \
     linear_solver = "ma97")
 
 lsqpe.show_system_information(showEquations = True)
@@ -57,7 +58,7 @@ lsqpe.covmat_schur()
 var1 = lsqpe.Covp 
 
 lsqpe.covmat_backsolve()
-var2 = lsqpe.Covp[:6, :6]
+var2 = lsqpe.Covp[:4, :4]
 
 lsqpe.compute_covariance_matrix()
 var3 = lsqpe.Covp 

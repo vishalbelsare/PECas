@@ -292,14 +292,16 @@ class Test2DVehicle(unittest.TestCase, \
         self.wwe = [1 / 1e-4] * 4
         self.wwu = None
 
-        self.pinit = [1.5, 5, 0.07, 0.70]
+        # self.pinit = [1.5, 5, 0.07, 0.70]
+        self.pinit = [11.5, 5, 0.07, 0.70], \
 
-        # self.xinit = self.yN
-        self.xinit = None
+
+        self.xinit = self.yN
+        # self.xinit = None
 
         # self.phat = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
         # self.phat = [0.5, 17.06, 3.98281, -10, -7.57932, 3]
-        self.phat = [-31.70535471, -87.23846038, 21.78045118, -2.8152465]
+        self.phat = [-5.69732401, -20.4278332, 5.43210821, -0.4871933]
 
 
 class PedulumBar(unittest.TestCase, \

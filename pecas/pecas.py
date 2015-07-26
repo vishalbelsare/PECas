@@ -253,7 +253,7 @@ class LSq(PECasBaseClass):
         xinit = None, \
         ty = None, yN = None, \
         wv = None, wwe = None, wwu = None, \
-        linear_solver = "ma97"):
+        linear_solver = "mumps"):
 
         '''
         -- docstring tbd --

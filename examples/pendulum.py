@@ -66,7 +66,9 @@ lsqpe = pecas.LSq( \
     u = uN, \
     pinit = 1, \
     xinit = yN, 
-    yN = yN, wv = wv)
+    yN = yN, wv = wv, \
+    # linear_solver = "mumps", \
+    linear_solver = "ma97")
 
 lsqpe.show_system_information(showEquations = True)
 
