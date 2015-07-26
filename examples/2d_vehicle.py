@@ -29,8 +29,7 @@ odesys = pecas.systems.ExplODE(x = x, u = u, p = p, we = we, f = f, y = y)
 
 # Inputs
 
-data = pl.array(pl.loadtxt( \
-    "controlReadings_ACADO_MPC_Betterweights.dat", \
+data = pl.array(pl.loadtxt("data_2d_vehicle.dat", \
     delimiter = ", ", skiprows = 1))
 
 ty = data[300:400, 1]

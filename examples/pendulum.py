@@ -31,7 +31,7 @@ odesys = pecas.systems.ExplODE(x = x, u = u, p = p, f = f, y = y)
 #==============================================================================
 # Loading data
 #==============================================================================
-data = pl.loadtxt('ex6data.txt')
+data = pl.loadtxt('data_pendulum.txt')
 tu = data[:500, 0]
 phim = data[:500, 1]
 wm = data[:500, 2]

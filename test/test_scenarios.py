@@ -263,8 +263,7 @@ class Test2DVehicle(unittest.TestCase, \
 
         # Inputs
 
-        data = np.array(np.loadtxt( \
-            "test/controlReadings_ACADO_MPC_rates_Betterweights.dat", \
+        data = np.array(np.loadtxt("test/data_2d_vehicle.dat", \
             delimiter = ", ", skiprows = 1))
 
         self.tu = data[300:400, 1]
@@ -338,7 +337,7 @@ class PedulumBar(unittest.TestCase, \
 
         # Inputs
 
-        data = np.loadtxt('test/ex6data.txt')
+        data = np.loadtxt('test/data_pendulum.txt')
 
         self.tu = data[:50, 0]
 
