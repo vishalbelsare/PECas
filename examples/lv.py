@@ -44,14 +44,13 @@ sigma_Y = pl.zeros((2, yN.shape[1]))
 sigma_Y[0,:] = (1.0 / sigma_x1**2)
 sigma_Y[1,:] = (1.0 / sigma_x2**2)
 
-
-odesetup = pecas.setups.ODEsetup( \
-    system = odesys, timegrid = T,
+lsqpe = pecas.LSq(system = odesys, \
+    tu = T, \
     pinit = [0.5, 1.0], \
-    xinit = yN)
-    # xinit = Y[])
+    xinit = yN, \
+    yN = yN, \
+    wv = sigma_Y)
 
-lsqpe = pecas.LSq(pesetup =odesetup, yN =yN, wv = sigma_Y)
 lsqpe.show_system_information(showEquations = True)
 
 lsqpe.run_parameter_estimation()

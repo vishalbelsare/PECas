@@ -36,10 +36,8 @@ class SetupsBaseClass(object):
 
     def check_and_set_bounds_and_initials(self, \
         u = None, \
-        pmin = None, pmax = None, pinit = None, \
-        xmin = None, xmax = None, xinit = None, \
-        x0min = None, x0max = None, \
-        xNmin = None, xNmax = None):
+        pinit = None, \
+        xinit = None):
 
         '''
         :param tbd: tbd
@@ -52,11 +50,9 @@ class SetupsBaseClass(object):
         ``Varsmin``, ``Varsmax`` and ``Varsinit``, respectively.
         '''
 
-        # Define structures from bounds and initial values from the original
+        # Define structures for initial values from the original
         # variable struct of the problem
 
-        self.Varsmin = self.Vars()
-        self.Varsmax = self.Vars()
         self.Varsinit = self.Vars()
 
         # Set controls values
@@ -83,28 +79,20 @@ class SetupsBaseClass(object):
 
             self.u = np.zeros((1, self.nsteps))
 
-        # Set initials and bounds for the parameters
+        # Set initials for the parameters
 
         if pinit is None:
             pinit = np.zeros(self.np)
-        if pmin is None:
-            pmin = -np.inf * np.ones(self.np)   
-        if pmax is None:
-            pmax = np.inf * np.ones(self.np)
 
         pinit = np.atleast_1d(np.squeeze(pinit))
-        pmin = np.atleast_1d(np.squeeze(pmin))
-        pmax = np.atleast_1d(np.squeeze(pmax))
 
-        if not all(arg.shape == (self.np,) for \
-            arg in [pinit, pmin, pmax]):
+        if not pinit.shape == (self.np,):
 
             raise ValueError( \
-                "Wrong dimension for argument pinit, pmin or pmax.")
+                "Wrong dimension for argument pinit.")
 
         self.Varsinit["P",:] = pinit
-        self.Varsmin["P",:] = pmin
-        self.Varsmax["P",:] = pmax
+
 
         # If it's a dynamic problem, set initials and bounds for the states
 
@@ -112,141 +100,55 @@ class SetupsBaseClass(object):
 
             if xinit is None:
                 xinit = np.zeros((self.nx, self.nsteps + 1))
-            if xmin is None:
-                xmin = -np.inf * np.ones((self.nx, self.nsteps + 1))   
-            if xmax is None:
-                xmax = np.inf * np.ones((self.nx, self.nsteps + 1))
 
             xinit = np.atleast_2d(xinit)
-            xmin = np.atleast_2d(xmin)
-            xmax = np.atleast_2d(xmax)
 
             if xinit.shape == (self.nsteps + 1, self.nx):
                 xinit = xinit.T
-            
-            if xmin.shape == (self.nsteps + 1, self.nx):
-                xmin = xmin.T
-            
-            if xmax.shape == (self.nsteps + 1, self.nx):
-                xmax = xmax.T
 
-            if not all(arg.shape == (self.nx, self.nsteps + 1) for \
-                arg in [xinit, xmin, xmax]):
+            if not xinit.shape == (self.nx, self.nsteps + 1):
 
                 raise ValueError( \
-                    "Wrong dimension for argument xinit, xmin or xmax.")
+                    "Wrong dimension for argument xinit.")
 
             for k in range(self.nsteps):
 
                 self.Varsinit["X",k,:] = ca.tools.repeated(xinit[:,k])
-                self.Varsmin["X",k,:] = ca.tools.repeated(xmin[:,k])
-                self.Varsmax["X",k,:] = ca.tools.repeated(xmax[:,k])
 
             self.Varsinit["XF"] = xinit[:,-1]
-            self.Varsmin["XF"] = xmin[:,-1]
-            self.Varsmax["XF"] = xmax[:,-1]
 
-            # Set the state bounds at the initial time, if explicitly given
-
-            if x0min is not None:
-
-                x0min = np.atleast_2d(x0min)
-
-                if x0min.shape == (self.nx, 1):
-
-                    x0min = x0min.T
-
-                if not x0min.shape == (1, self.nx):
-
-                    raise ValueError("Wrong dimension for argument x0min.")
-
-                self.Varsmin["X",0,0] = x0min
-
-            if x0max is not None:
-
-                x0max = np.atleast_2d(x0max)
-
-                if x0max.shape == (self.nx, 1):
-
-                    x0max = x0max.T
-
-                if not x0max.shape == (1, self.nx):
-
-                    raise ValueError("Wrong dimension for argument x0max.")
-
-                self.Varsmax["X",0,0] = x0max
-
-            # Set state bounds at the final time, if explicitly given
-
-            if xNmin is not None:
-
-                xNmin = np.atleast_2d(xNmin)
-
-                if xNmin.shape == (self.nx, 1):
-
-                    xNmin = xNmin.T
-
-                if not xNmin.shape == (1, self.nx):
-
-                    raise ValueError("Wrong dimension for argument xNmin.")
-
-                self.Varsmin["XF"] = xNmin
-
-            if xNmax is not None:
-
-                xNmax = np.atleast_2d(xNmax)
-
-                if xNmax.shape == (self.nx, 1):
-
-                    xNmax = xNmax.T
-
-                if not xNmax.shape == (1, self.nx):
-
-                    raise ValueError("Wrong dimension for argument xNmax.")
-
-                self.Varsmax["XF"] = xNmax
 
             # Set the bounds on the equation errors
 
             self.Varsinit["WE",:] = ca.tools.repeated(0.0)
-            self.Varsmin["WE",:] = ca.tools.repeated(-np.inf)
-            self.Varsmax["WE",:] = ca.tools.repeated(np.inf)
             
             # Set the bounds on the input errors
             
             self.Varsinit["WU",:] = ca.tools.repeated(0.0)
-            self.Varsmin["WU",:] = ca.tools.repeated(-np.inf)
-            self.Varsmax["WU",:] = ca.tools.repeated(np.inf)
             
         # Set the bounds on the measurement errors
 
         self.Varsinit["V",:] = ca.tools.repeated(0.0)
-        self.Varsmin["V",:] = ca.tools.repeated(-np.inf)
-        self.Varsmax["V",:] = ca.tools.repeated(np.inf)
 
 
 class BSsetup(SetupsBaseClass):
 
     def check_and_set_bounds_and_initials(self, \
         u = None,
-        pmin = None, pmax = None, pinit = None, \
-        xmin = None, xmax = None, xinit = None, \
-        x0min = None, x0max = None, \
-        xNmin = None, xNmax = None):
+        pinit = None, \
+        xinit = None):
 
         self.tstart_setup = time.time()
 
         super(BSsetup, self).check_and_set_bounds_and_initials( \
             u = u,
-            pmin = pmin, pmax = pmax, pinit = pinit, \
-            xmin = xmin, xmax = xmax, xinit = xinit, \
-            x0min = x0min, x0max = x0max, \
-            xNmin = xNmin, xNmax = xNmax)
+            pinit = pinit, \
+            xinit = xinit)
 
 
     def __init__(self, system = None, \
         tu = None, u = None, \
-        pmin = None, pmax = None, pinit = None):
+        pinit = None):
 
         SetupsBaseClass.__init__(self)
 
@@ -292,7 +194,7 @@ class BSsetup(SetupsBaseClass):
 
         self.check_and_set_bounds_and_initials( \
             u = u,
-            pmin = pmin, pmax = pmax, pinit = pinit)
+            pinit = pinit)
 
         # Set up phiN
 
@@ -334,26 +236,20 @@ class ODEsetup(SetupsBaseClass):
 
     def check_and_set_bounds_and_initials(self, \
         u = None, \
-        pmin = None, pmax = None, pinit = None, \
-        xmin = None, xmax = None, xinit = None, \
-        x0min = None, x0max = None, \
-        xNmin = None, xNmax = None):
+        pinit = None, \
+        xinit = None):
 
         super(ODEsetup, self).check_and_set_bounds_and_initials( \
             u = u, \
-            pmin = pmin, pmax = pmax, pinit = pinit, \
-            xmin = xmin, xmax = xmax, xinit = xinit, \
-            x0min = x0min, x0max = x0max, \
-            xNmin = xNmin, xNmax = xNmax)
+            pinit = pinit, \
+            xinit = xinit)
 
 
     def __init__(self, system = None, \
         tu = None, u = None, \
         ty = None, y = None,
-        pmin = None, pmax = None, pinit = None, \
-        xmin = None, xmax = None, xinit = None, \
-        x0min = None, x0max = None, \
-        xNmin = None, xNmax = None):
+        pinit = None, \
+        xinit = None):
 
         self.tstart_setup = time.time()
 
@@ -437,10 +333,8 @@ class ODEsetup(SetupsBaseClass):
 
         self.check_and_set_bounds_and_initials( \
             u = u, \
-            pmin = pmin, pmax = pmax, pinit = pinit, \
-            xmin = xmin, xmax = xmax, xinit = xinit, \
-            x0min = x0min, x0max = x0max, \
-            xNmin = xNmin, xNmax = xNmax)
+            pinit = pinit, \
+            xinit = xinit)
 
 
         # Set tp the collocation coefficients

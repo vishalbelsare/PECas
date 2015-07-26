@@ -64,8 +64,9 @@ wv = pl.array([sigmaphi, sigmaw])
 lsqpe = pecas.LSq( \
     system = odesys, tu = tu, \
     u = uN, \
-    pinit = 1, pmax = 50, pmin = 0, \
-    yN =yN, wv = wv)
+    pinit = 1, \
+    xinit = yN, 
+    yN = yN, wv = wv)
 
 lsqpe.show_system_information(showEquations = True)
 
@@ -73,6 +74,7 @@ lsqpe.run_parameter_estimation()
 lsqpe.show_results()
 
 lsqpe.compute_covariance_matrix()
+# lsqpe.covmat_schur()
 lsqpe.show_results()
 
 phihat = lsqpe.Xhat[0]

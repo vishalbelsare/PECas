@@ -16,7 +16,7 @@ class BSPERunTest(object):
 
         self.lsqpe = pecas.LSq(system = self.bsys, \
             tu = self.tu, u = self.uN, \
-            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+            pinit = self.pinit, \
             yN = self.yN, wv = self.wv)
 
         self.assertRaises(AttributeError, getattr, self.lsqpe, "phat")
@@ -60,10 +60,8 @@ class ODEPERunTest(object):
 
         self.lsqpe = pecas.LSq(system = self.odesys, \
             tu = self.tu, u = self.uN, \
-            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
-            xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
-            x0min = self.x0max, x0max = self.x0max, \
-            xNmin = self.xNmin, xNmax = self.xNmax, \
+            pinit = self.pinit, \
+            xinit = self.xinit, \
             yN = self.yN, \
             wv = self.wv, wwe = self.wwe, wwu = self.wwu)
 

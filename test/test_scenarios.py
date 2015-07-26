@@ -46,8 +46,6 @@ class TestBasicSystemNoConstraints(unittest.TestCase, \
 
         self.uN = (1. / 3.) * np.linspace(1, 4, 4)
 
-        self.pmin = None
-        self.pmax = None
         self.pinit = None
 
         self.phat = [6.24]
@@ -91,8 +89,6 @@ class TestBasicSystemConstraints(unittest.TestCase, \
 
         self.uN = np.vstack([np.ones(4), np.linspace(1, 4, 4)])
 
-        self.pmin = None
-        self.pmax = None
         self.pinit = [1, 1]
 
         self.phat = [0.961943, 1.03666]
@@ -111,15 +107,15 @@ class TestLotkaVolterra(unittest.TestCase, \
         # System
 
         self.x = ca.MX.sym("x", 2)
-        self.p = ca.MX.sym("p", 4)
+        self.p = ca.MX.sym("p", 2)
         self.u = ca.MX.sym("u", 0)
 
         # self.v = ca.MX.sym("v", 2)
         self.we = ca.MX.sym("we", 2)
 
         self.f = ca.vertcat( \
-            [-self.p[0] * self.x[0] + self.p[1] * self.x[0] * self.x[1], 
-            self.p[2] * self.x[1] - self.p[3] * self.x[0] * self.x[1]]) + \
+            [-1.0 * self.x[0] + self.p[0] * self.x[0] * self.x[1], 
+            1.0 * self.x[1] - self.p[1] * self.x[0] * self.x[1]]) + \
             self.we
 
         self.y = self.x
@@ -135,18 +131,13 @@ class TestLotkaVolterra(unittest.TestCase, \
 
         self.invalidpargs = [[0, 1, 2], [[2, 3], [2, 3]], \
             np.asarray([1, 2, 3]), np.asarray([[2, 3], [2, 3]])]
-        self.validpargs = [None, [0, 1, 2, 3], np.asarray([1, 2, 3, 4]), \
-            np.asarray([1, 2, 3, 4]).T, np.asarray([[2], [3], [2], [3]])]
+        self.validpargs = [None, [2, 3], np.asarray([3, 4]), \
+            np.asarray([1, 2]).T, np.asarray([[2], [3]])]
 
         self.invalidxargs = [np.ones((self.x.size() - 1, self.tu.size)), \
             np.ones((self.tu.size - 1, self.x.size()))]
         self.validxargs = [None, np.ones((self.x.size(), self.tu.size)), \
             np.ones((self.tu.size, self.x.size()))]
-
-        self.invalidxbvpargs = [[3, 2, 1], np.ones(3), \
-            np.ones((1, 3)), np.ones((3, 1))]
-        self.validxbvpargs = [None, [1, 1], [[1], [1]], np.ones((2,1)), \
-            np.ones((1, 2)), np.ones(2)]
 
         # Since the supported values are never used, there is no case of
         # invalid u-arguments in this testcase
@@ -165,22 +156,11 @@ class TestLotkaVolterra(unittest.TestCase, \
         self.wwe = [1.0 / 1e-4, 1.0 / 1e-4]
         self.wwu = None
 
-        self.pmin = [1.0, -np.inf, 1.0, -np.inf]
-        self.pmax = [1.0, np.inf, 1.0, np.inf]
-        self.pinit = [1.0, 0.5, 1.0, 1.0]
+        self.pinit = [0.5, 1.0]
 
-        self.xmin = None
-        self.xmax = None
-        self.xinit = None
+        self.xinit = self.yN
 
-        self.x0min = [self.yN[0,0], self.yN[0,1]]
-        self.x0max = [self.yN[0,0], self.yN[0,1]]
-
-        self.xNmin = None
-        self.xNmax = None
-
-        # self.phat = [1, 0.703278, 1, 0.342208]
-        self.phat = [1, 0.703902, 1, 0.342233]
+        self.phat = [0.69348187, 0.34116928]
 
 
 class Test1DVehicle(unittest.TestCase, \
@@ -197,11 +177,11 @@ class Test1DVehicle(unittest.TestCase, \
         # System
 
         self.x = ca.MX.sym("x", 1)
-        self.p = ca.MX.sym("p", 3)
+        self.p = ca.MX.sym("p", 2)
         self.u = ca.MX.sym("u", 1)
         self.we = ca.MX.sym("we", 1)
 
-        self.f = self.p[0] * self.u - self.p[1] - self.p[2] * self.x + self.we
+        self.f = 10.0 * self.u - self.p[0] - self.p[1] * self.x + self.we
 
         self.y = self.x
 
@@ -214,19 +194,15 @@ class Test1DVehicle(unittest.TestCase, \
 
         self.tu = data[:, 0]
 
-        self.invalidpargs = [[0, 1], [[2, 3], [2, 3]], \
+        self.invalidpargs = [[0, 1, 2], [[2, 3], [2, 3]], \
             np.asarray([1, 2, 3, 4]), np.asarray([[2, 3], [2, 3]])]
-        self.validpargs = [None, [0, 1, 2], np.asarray([3, 4, 5]), \
-            np.asarray([1, 2, 1]).T, np.asarray([[2], [3], [4]])]
+        self.validpargs = [None, [0, 1], np.asarray([4, 5]), \
+            np.asarray([1, 2]).T, np.asarray([[3], [4]])]
 
         self.invalidxargs = [np.ones((self.x.size() - 1, self.tu.size)), \
             np.ones((self.tu.size - 1, self.x.size()))]
         self.validxargs = [None, np.ones((self.x.size(), self.tu.size)), \
             np.ones((self.tu.size, self.x.size()))]
-
-        self.invalidxbvpargs = [[3, 2], np.ones(3), \
-            np.ones((1, 3)), np.ones((3, 1))]
-        self.validxbvpargs = [None, [1], 1, np.ones(1), np.ones((1, 1))]
 
         self.invaliduargs = [np.ones((self.u.size(), self.tu.size)), \
             np.ones((self.tu.size, self.u.size()))]
@@ -240,22 +216,11 @@ class Test1DVehicle(unittest.TestCase, \
         self.wwe = 1 / 1e-4
         self.wwu = None
 
-        self.pmin = [10.0, 0.0, 0.4]
-        self.pmax = [10.0, 2, 0.7]
-        self.pinit = [10.0, 0.08, 0.5]
+        self.pinit = [0.08, 0.5]
 
-        self.xmin = None
-        self.xmax = None
-        self.xinit = None
+        self.xinit = self.yN
 
-        self.x0min = self.yN[0]
-        self.x0max = self.yN[0]
-
-        self.xNmin = self.yN[-1:]
-        self.xNmax = self.yN[-1:]
-
-        # self.phat = [10.0, 0.000236, 0.614818]
-        self.phat = [10, 0.0299196, 0.604329]
+        self.phat = [0.05381561, 0.6090617]
 
 
 class Test2DVehicle(unittest.TestCase, \
@@ -272,23 +237,23 @@ class Test2DVehicle(unittest.TestCase, \
         # System
 
         self.x = ca.MX.sym("x", 4)
-        self.p = ca.MX.sym("p", 6)
+        self.p = ca.MX.sym("p", 4)
         self.u = ca.MX.sym("u", 2)
         self.we = ca.MX.sym("we", 4)
 
         self.f = ca.vertcat( \
 
-            [self.x[3] * np.cos(self.x[2] + self.p[0] * self.u[0] + self.we[0]),
+            [self.x[3] * np.cos(self.x[2] + 0.5 * self.u[0] + self.we[0]),
 
-            self.x[3] * np.sin(self.x[2] + self.p[0] * self.u[0] + self.we[1]),
+            self.x[3] * np.sin(self.x[2] + 0.5 * self.u[0] + self.we[1]),
 
-            self.x[3] * self.u[0] * self.p[1] + self.we[2],
+            self.x[3] * self.u[0] * 17.06 + self.we[2],
 
-            self.p[2] * self.u[1] \
-                - self.p[3] * self.u[1] * self.x[3] \
-                - self.p[4] * self.x[3]**2 \
-                - self.p[5] \
-                - (self.x[3] * self.u[0])**2 * self.p[1] * self.p[0] \
+            self.p[0] * self.u[1] \
+                - self.p[1] * self.u[1] * self.x[3] \
+                - self.p[2] * self.x[3]**2 \
+                - self.p[3] \
+                - (self.x[3] * self.u[0])**2 * 17.06 * 0.5 \
                 + self.we[3]])
 
         self.y = self.x
@@ -302,24 +267,19 @@ class Test2DVehicle(unittest.TestCase, \
             "test/controlReadings_ACADO_MPC_rates_Betterweights.dat", \
             delimiter = ", ", skiprows = 1))
 
-        self.tu = data[200:250, 1]
+        self.tu = data[300:400, 1]
 
         self.invalidpargs = [[0, 1], [[2, 3], [2, 3]], \
             np.asarray([1, 2, 3, 4, 5]), np.asarray([[2, 3], [2, 3]])]
-        self.validpargs = [None, np.asarray([3, 4, 5, 5, 6, 7]), \
-            np.asarray([1, 2, 1, 5, 6, 7]).T, \
-            np.asarray([[2], [3], [4], [5], [6], [7]]), \
-            [1, 2, 3, 4, 5, 6]]
+        self.validpargs = [None, np.asarray([5, 5, 6, 7]), \
+            np.asarray([1, 5, 6, 7]).T, \
+            np.asarray([[4], [5], [6], [7]]), \
+            [3, 4, 5, 6]]
 
         self.invalidxargs = [np.ones((self.x.size() - 1, self.tu.size)), \
             np.ones((self.tu.size - 1, self.x.size()))]
         self.validxargs = [None, np.ones((self.x.size(), self.tu.size)), \
             np.ones((self.tu.size, self.x.size()))]
-
-        self.invalidxbvpargs = [[3, 2, 5], np.ones(5), \
-            np.ones((1, 5)), np.ones((3, 1))]
-        self.validxbvpargs = [None, [1] * 4, np.ones(4), np.ones((1, 4)), \
-            np.ones((4, 1))]
 
         self.invaliduargs = [np.ones((self.u.size(), self.tu.size)), \
             np.ones((self.tu.size, self.u.size()))]
@@ -327,28 +287,20 @@ class Test2DVehicle(unittest.TestCase, \
             self.tu.size - 1)), \
             np.ones((self.tu.size - 1, self.u.size()))]
 
-        self.yN = data[200:250, [2, 4, 6, 8]]
+        self.yN = data[300:400, [2, 4, 6, 8]]
         self.wv = 1 / (0.1**2) * np.ones(self.yN.shape)
-        self.uN = data[200:249, [9, 10]]
+        self.uN = data[300:399, [9, 10]]
         self.wwe = [1 / 1e-4] * 4
         self.wwu = None
 
-        self.pmin = [0.5, 17.06, 0.0, -10.0, -1000.0, -10.0]
-        self.pmax = [0.5, 17.06, 13.2, 200, 500, 3]
-        self.pinit = [0.5, 17.06, 11.5, 5, 0.07, 0.70]
+        self.pinit = [1.5, 5, 0.07, 0.70]
 
-        self.xmin = None
-        self.xmax = None
+        # self.xinit = self.yN
         self.xinit = None
 
-        self.x0min = None
-        self.x0max = None
-
-        self.xNmin = None
-        self.xNmax = None
-
         # self.phat = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
-        self.phat = [0.5, 17.06, 3.98281, -10, -7.57932, 3]
+        # self.phat = [0.5, 17.06, 3.98281, -10, -7.57932, 3]
+        self.phat = [-31.70535471, -87.23846038, 21.78045118, -2.8152465]
 
 
 class PedulumBar(unittest.TestCase, \
@@ -400,11 +352,6 @@ class PedulumBar(unittest.TestCase, \
         self.validxargs = [None, np.ones((self.x.size(), self.tu.size)), \
             np.ones((self.tu.size, self.x.size()))]
 
-        self.invalidxbvpargs = [[3, 2, 1], np.ones(3), \
-            np.ones((1, 3)), np.ones((3, 1))]
-        self.validxbvpargs = [None, [1, 1], [[1], [1]], np.ones((2,1)), \
-            np.ones((1, 2)), np.ones(2)]
-
         self.invaliduargs = [np.ones((self.u.size(), self.tu.size)), \
             np.ones((self.tu.size, self.u.size()))]
         self.validuargs = [None, np.ones((self.u.size(), \
@@ -428,18 +375,8 @@ class PedulumBar(unittest.TestCase, \
         self.wwe = None
         self.wwu = None
 
-        self.pmin = 0
-        self.pmax = 50
         self.pinit = 1
 
-        self.xmin = None
-        self.xmax = None
         self.xinit = None
-
-        self.x0min = None
-        self.x0max = None
-
-        self.xNmin = None
-        self.xNmax = None
 
         self.phat = [2.98427]

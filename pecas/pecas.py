@@ -23,10 +23,8 @@ class PECasBaseClass:
     @abstractmethod
     def __init__(self, system = None, \
         tu = None, u = None, \
-        pmin = None, pmax = None, pinit = None, \
-        xmin = None, xmax = None, xinit = None, \
-        x0min = None, x0max = None, \
-        xNmin = None, xNmax = None, \
+        pinit = None, \
+        xinit = None, \
         ty = None, yN = None, \
         wv = None, wwe = None, wwu = None, \
         linear_solver = None):
@@ -44,17 +42,15 @@ class PECasBaseClass:
 
             self.pesetup = setups.BSsetup(system = system, \
                 tu = tu, u = u, \
-                pmin = pmin, pmax = pmax, pinit = pinit)
+                pinit = pinit)
 
         elif type(system) is systems.ExplODE:
 
             self.pesetup = setups.ODEsetup(system = system, \
                 tu = tu, u = u, \
                 ty = ty, y = yN, \
-                pmin = pmin, pmax = pmax, pinit = pinit, \
-                xmin = xmin, xmax = xmax, xinit = xinit, \
-                x0min = x0max, x0max = x0max, \
-                xNmin = xNmin, xNmax = xNmax)
+                pinit = pinit, \
+                xinit = xinit)
 
         else:
 
@@ -253,13 +249,11 @@ class LSq(PECasBaseClass):
 
     def __init__(self, system = None, \
         tu = None, u = None, \
-        pmin = None, pmax = None, pinit = None, \
-        xmin = None, xmax = None, xinit = None, \
-        x0min = None, x0max = None, \
-        xNmin = None, xNmax = None, \
+        pinit = None, \
+        xinit = None, \
         ty = None, yN = None, \
         wv = None, wwe = None, wwu = None, \
-        linear_solver = "mumps"):
+        linear_solver = "ma97"):
 
         '''
         -- docstring tbd --
@@ -267,14 +261,11 @@ class LSq(PECasBaseClass):
 
         super(LSq, self).__init__(system = system, \
             tu = tu, u = u, \
-            pmin = pmin, pmax = pmax, pinit = pinit, \
-            xmin = xmin, xmax = xmax, xinit = xinit, \
-            x0min = x0min, x0max = x0max, \
-            xNmin = xNmin, xNmax = xNmax, \
+            pinit = pinit, \
+            xinit = xinit, \
             ty = ty, yN = yN, \
             wv = wv, wwe = wwe, wwu = wwu, \
             linear_solver = linear_solver)
-
 
 
 
@@ -381,8 +372,6 @@ this might take some time ...
         # Set the initial guess and bounds for the solver]
 
         solver.setInput(self.pesetup.Varsinit, "x0")
-        solver.setInput(self.pesetup.Varsmin, "lbx")
-        solver.setInput(self.pesetup.Varsmax, "ubx")
 
         # Solve the optimization problem
 

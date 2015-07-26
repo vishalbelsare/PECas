@@ -17,17 +17,17 @@ class BSPESetupTest(object):
 
         pecas.LSq(system = self.bsys, \
             tu = self.tu, u = self.uN, \
-            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+            pinit = self.pinit, \
             yN = self.yN, wv = self.wv)
 
         pecas.LSq(system = self.bsys, \
             tu = self.tu, u = self.uN, \
-            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+            pinit = self.pinit, \
             yN = self.yN.T, wv = self.wv)
 
         pecas.LSq(system = self.bsys, \
             tu = self.tu, u = self.uN, \
-            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+            pinit = self.pinit, \
             yN = self.yN, wv = self.wv.T)
 
 
@@ -35,12 +35,12 @@ class BSPESetupTest(object):
 
         self.assertRaises(ValueError, pecas.LSq, system = self.bsys, \
             tu = self.tu, u = self.uN, \
-            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+            pinit = self.pinit, \
             yN = np.atleast_2d(self.yN)[:, :-1], wv = self.wv)
 
         self.assertRaises(ValueError, pecas.LSq, system = self.bsys, \
             tu = self.tu, u = self.uN, \
-            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
+            pinit = self.pinit, \
             yN = self.yN, wv = np.atleast_2d(self.wv)[:-1])
 
 
@@ -52,64 +52,50 @@ class ODEPESetupTest(object):
 
         pecas.LSq(system = self.odesys, \
             tu = self.tu, u = self.uN, \
-            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
-            xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
-            x0min = self.x0max, x0max = self.x0max, \
-            xNmin = self.xNmin, xNmax = self.xNmax, \
+            pinit = self.pinit, \
+            xinit = self.xinit, \
             yN = self.yN, \
             wv = self.wv, wwe = self.wwe, wwu = self.wwu)
 
         pecas.LSq(system = self.odesys, \
             tu = self.tu, u = self.uN, \
-            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
-            xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
-            x0min = self.x0max, x0max = self.x0max, \
-            xNmin = self.xNmin, xNmax = self.xNmax, \
+            pinit = self.pinit, \
+            xinit = self.xinit, \
             yN = self.yN.T, \
             wv = self.wv, wwe = self.wwe, wwu = self.wwu)
 
         pecas.LSq(system = self.odesys, \
             tu = self.tu, u = self.uN, \
-            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
-            xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
-            x0min = self.x0max, x0max = self.x0max, \
-            xNmin = self.xNmin, xNmax = self.xNmax, \
+            pinit = self.pinit, \
+            xinit = self.xinit, \
             yN = self.yN, \
             wv = self.wv.T, wwe = self.wwe, wwu = self.wwu)
 
         pecas.LSq(system = self.odesys, \
             tu = self.tu, u = self.uN, \
-            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
-            xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
-            x0min = self.x0max, x0max = self.x0max, \
-            xNmin = self.xNmin, xNmax = self.xNmax, \
+            pinit = self.pinit, \
+            xinit = self.xinit, \
             yN = self.yN, \
             wv = self.wv, wwe = [self.wwe], wwu = self.wwu)
 
         pecas.LSq(system = self.odesys, \
             tu = self.tu, u = self.uN, \
-            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
-            xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
-            x0min = self.x0max, x0max = self.x0max, \
-            xNmin = self.xNmin, xNmax = self.xNmax, \
+            pinit = self.pinit, \
+            xinit = self.xinit, \
             yN = self.yN, \
             wv = self.wv, wwe = np.atleast_1d(self.wwe), wwu = self.wwu)
 
         pecas.LSq(system = self.odesys, \
             tu = self.tu, u = self.uN, \
-            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
-            xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
-            x0min = self.x0max, x0max = self.x0max, \
-            xNmin = self.xNmin, xNmax = self.xNmax, \
+            pinit = self.pinit, \
+            xinit = self.xinit, \
             yN = self.yN, \
             wv = self.wv, wwe = self.wwe, wwu = [self.wwu])
 
         pecas.LSq(system = self.odesys, \
             tu = self.tu, u = self.uN, \
-            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
-            xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
-            x0min = self.x0max, x0max = self.x0max, \
-            xNmin = self.xNmin, xNmax = self.xNmax, \
+            pinit = self.pinit, \
+            xinit = self.xinit, \
             yN = self.yN, \
             wv = self.wv, wwe = self.wwe, wwu = np.atleast_1d(self.wwu))
 
@@ -118,19 +104,15 @@ class ODEPESetupTest(object):
 
         self.assertRaises(ValueError, pecas.LSq, system = self.odesys, \
             tu = self.tu, u = self.uN, \
-            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
-            xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
-            x0min = self.x0max, x0max = self.x0max, \
-            xNmin = self.xNmin, xNmax = self.xNmax, \
+            pinit = self.pinit, \
+            xinit = self.xinit, \
             yN = np.atleast_2d(self.yN)[:, :-1], \
             wv = self.wv, wwe = self.wwe, wwu = self.wwu)
 
         self.assertRaises(ValueError, pecas.LSq, system = self.odesys, \
             tu = self.tu, u = self.uN, \
-            pmin = self.pmin, pmax = self.pmax, pinit = self.pinit, \
-            xmin = self.xmin, xmax = self.xmax, xinit = self.xinit, \
-            x0min = self.x0max, x0max = self.x0max, \
-            xNmin = self.xNmin, xNmax = self.xNmax, \
+            pinit = self.pinit, \
+            xinit = self.xinit, \
             yN = self.yN, \
             wv = np.atleast_2d(self.wv)[:-1], wwe = self.wwe, wwu = self.wwu)
 

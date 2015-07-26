@@ -16,6 +16,7 @@ class BSSetBoundsInitialsTest(object):
 
         pecas.setups.BSsetup(system = self.bsys, \
             tu = self.tu)
+
         pecas.setups.BSsetup(system = self.bsys, tu = \
             self.tu.T)
 
@@ -26,11 +27,12 @@ class BSSetBoundsInitialsTest(object):
 
         odesys = pecas.systems.ExplODE(p = self.p, y = self.p, x = self.p, \
             we = self.p, wu = self.p, f = self.p)
+
         self.assertRaises(TypeError, pecas.setups.BSsetup, \
             system = odesys, tu = self.tu)
 
 
-    def test_invalid_parameter_bounds_and_initials(self):
+    def test_invalid_parameter_initials(self):
 
         # Test some invalid values for p-arguments
 
@@ -38,13 +40,9 @@ class BSSetBoundsInitialsTest(object):
 
             self.assertRaises(ValueError, pecas.setups.BSsetup, \
                 system = self.bsys, tu = self.tu, pinit = parg)
-            self.assertRaises(ValueError, pecas.setups.BSsetup, \
-                system = self.bsys, tu = self.tu, pmin = parg)
-            self.assertRaises(ValueError, pecas.setups.BSsetup, \
-                system = self.bsys, tu = self.tu, pmax = parg)
 
 
-    def test_valid_parameter_bounds_and_initials(self):
+    def test_valid_parameter_initials(self):
 
         # Test some valid values for p-arguments
 
@@ -52,13 +50,9 @@ class BSSetBoundsInitialsTest(object):
 
             pecas.setups.BSsetup( \
                 system = self.bsys, tu = self.tu, pinit = parg)
-            pecas.setups.BSsetup( \
-                system = self.bsys, tu = self.tu, pmin = parg)
-            pecas.setups.BSsetup( \
-                system = self.bsys, tu = self.tu, pmax = parg)
 
 
-    def test_invalid_control_bounds_and_initials_inputs(self):
+    def test_invalid_control_inputs(self):
 
         # Test some invalid values for u-arguments       
 
@@ -68,7 +62,7 @@ class BSSetBoundsInitialsTest(object):
                 system = self.bsys, tu = self.tu, u = uarg)
     
 
-    def test_valid_control_bounds_and_initials_inputs(self):
+    def test_valid_control_inputs(self):
 
         # Test some valid values for u-arguments
 
@@ -86,6 +80,7 @@ class ODESetBoundsInitialsTest(object):
 
         pecas.setups.ODEsetup(system = self.odesys, \
             tu = self.tu)
+
         pecas.setups.ODEsetup(system = self.odesys, tu = \
             self.tu.T)
 
@@ -95,11 +90,12 @@ class ODESetBoundsInitialsTest(object):
         # Support an invalid systems-type
 
         bssys = pecas.systems.BasicSystem(p = self.p, y = self.p)
+        
         self.assertRaises(TypeError, pecas.setups.ODEsetup, \
             system = bssys, tu = self.tu)
 
 
-    def test_invalid_parameter_bounds_and_initials(self):
+    def test_invalid_parameter_initials(self):
 
         # Test some invalid values for p-arguments
 
@@ -107,13 +103,9 @@ class ODESetBoundsInitialsTest(object):
 
             self.assertRaises(ValueError, pecas.setups.ODEsetup, \
                 system = self.odesys, tu = self.tu, pinit = parg)
-            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, tu = self.tu, pmin = parg)
-            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, tu = self.tu, pmax = parg)
 
 
-    def test_valid_parameter_bounds_and_initials(self):
+    def test_valid_parameter_initials(self):
 
         # Test some valid values for p-arguments
 
@@ -121,13 +113,9 @@ class ODESetBoundsInitialsTest(object):
 
             pecas.setups.ODEsetup( \
                 system = self.odesys, tu = self.tu, pinit = parg)
-            pecas.setups.ODEsetup( \
-                system = self.odesys, tu = self.tu, pmin = parg)
-            pecas.setups.ODEsetup( \
-                system = self.odesys, tu = self.tu, pmax = parg)
 
 
-    def test_invalid_state_bounds_and_initials(self):
+    def test_invalid_state_initials(self):
 
         # Test some invalid values for x-arguments
 
@@ -135,13 +123,9 @@ class ODESetBoundsInitialsTest(object):
 
             self.assertRaises(ValueError, pecas.setups.ODEsetup, \
                 system = self.odesys, tu = self.tu, xinit = xarg)
-            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, tu = self.tu, xmin = xarg)
-            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, tu = self.tu, xmax = xarg)
 
 
-    def test_valid_state_bounds_and_initials(self):
+    def test_valid_state_initials(self):
 
         # Test some valid values for x-arguments
 
@@ -149,45 +133,9 @@ class ODESetBoundsInitialsTest(object):
 
             pecas.setups.ODEsetup( \
                 system = self.odesys, tu = self.tu, xinit = xarg)
-            pecas.setups.ODEsetup( \
-                system = self.odesys, tu = self.tu, xmin = xarg)
-            pecas.setups.ODEsetup( \
-                system = self.odesys, tu = self.tu, xmax = xarg)
 
 
-    def test_invalid_state_bvp_inputs(self):
-
-        # Test some invalid values for xbvp-arguments
-
-        for xbvparg in self.invalidxbvpargs:
-
-            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, tu = self.tu, x0min = xbvparg)
-            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, tu = self.tu, x0max = xbvparg)
-            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, tu = self.tu, xNmin = xbvparg)
-            self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, tu = self.tu, xNmax = xbvparg)
-    
-
-    def test_valid_state_bvp_inputs(self):
-
-        # Test some valid values for xbvp-arguments
-
-        for xbvparg in self.validxbvpargs:
-
-            pecas.setups.ODEsetup( \
-                system = self.odesys, tu = self.tu, x0min = xbvparg)
-            pecas.setups.ODEsetup( \
-                system = self.odesys, tu = self.tu, x0max = xbvparg)
-            pecas.setups.ODEsetup( \
-                system = self.odesys, tu = self.tu, xNmin = xbvparg)
-            pecas.setups.ODEsetup( \
-                system = self.odesys, tu = self.tu, xNmax = xbvparg)
-
-
-    def test_invalid_control_bounds_and_initials_inputs(self):
+    def test_invalid_control_inputs(self):
 
         # Test some invalid values for u-arguments       
 
@@ -197,7 +145,7 @@ class ODESetBoundsInitialsTest(object):
                 system = self.odesys, tu = self.tu, u = uarg)
     
 
-    def test_valid_control_bounds_and_initials_inputs(self):
+    def test_valid_control_inputs(self):
 
         # Test some valid values for u-arguments
 
