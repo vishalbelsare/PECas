@@ -1,4 +1,4 @@
-##!/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import casadi as ca
@@ -27,7 +27,9 @@ class PECasBaseClass:
         xinit = None, \
         ty = None, yN = None, \
         wv = None, wwe = None, wwu = None, \
-        linear_solver = None):
+        linear_solver = None, \
+        scheme = None, \
+        order = None):
 
         intro.pecas_intro()
         print('\n' + 22 * '-' + \
@@ -50,7 +52,9 @@ class PECasBaseClass:
                 tu = tu, u = u, \
                 ty = ty, y = yN, \
                 pinit = pinit, \
-                xinit = xinit)
+                xinit = xinit, \
+                scheme = scheme, \
+                order = order)
 
         else:
 
@@ -253,7 +257,9 @@ class LSq(PECasBaseClass):
         xinit = None, \
         ty = None, yN = None, \
         wv = None, wwe = None, wwu = None, \
-        linear_solver = "mumps"):
+        linear_solver = "mumps", \
+        scheme = "radau", \
+        order = 3):
 
         '''
         -- docstring tbd --
@@ -265,7 +271,9 @@ class LSq(PECasBaseClass):
             xinit = xinit, \
             ty = ty, yN = yN, \
             wv = wv, wwe = wwe, wwu = wwu, \
-            linear_solver = linear_solver)
+            linear_solver = linear_solver, \
+            scheme = scheme, \
+            order = order)
 
 
 
@@ -857,18 +865,18 @@ available when the DAE systems are implemented.
 ''')
 
 
-    def plot_confidence_ellipsoids(self, indices = []):
+#     def plot_confidence_ellipsoids(self, indices = []):
 
-        r'''
-        --- docstring tbd ---
+#         r'''
+#         --- docstring tbd ---
         
-        '''
+#         '''
 
-        raise NotImplementedError( \
-'''
-This feature of PECas is currently disabled, but will be available again in a
-future version of PECas.
-''')
+#         raise NotImplementedError( \
+# '''
+# This feature of PECas is currently disabled, but will be available again in a
+# future version of PECas.
+# ''')
 
 #         '''
 #         This function plots the confidence ellipsoids pairwise for all

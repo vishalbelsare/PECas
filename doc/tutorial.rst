@@ -1,27 +1,31 @@
-PECas Tutorial
-==============
+How to use PECas
+================
 
-The next sections will show you step by step how PECas can be used.
+The next sections will show you the central concepts and functions of PECas. Application examples can be found in later sections.
 
 General concept
 ---------------
 
-[System definition, then problem setup]
+Since PECas uses CasADi for performing parameter estimations, the user first has to define the considered system using CasADi symbolic variables (of type MX). Afterwards, the symbolic variables (which define states, controls, parameters, etc. of the system) can be brought into connection by creating a PECas system object.
 
-Defining a parameter estimation problem
----------------------------------------
+This system object can then be used within a PECas parameter estimation problem to estimate the unknown parameters of the previously defined system for user-provided measurement data, while different weightings can applied.
+
+In a further step, the covariance-matrix for the estimated parameters can be computed to support results interpretation.
+
+Defining a PECas system object
+------------------------------
 
 .. automodule:: pecas.systems
     :members:
 
-Running the parameter estimation
---------------------------------
+Defining and solving a parameter estimation problem
+---------------------------------------------------
 
 [continuout output]
 
 .. automodule:: pecas.pecas
     :members:
 
-Utilities for results interpretation
-------------------------------------
+.. Utilities for results interpretation
+.. ------------------------------------
 

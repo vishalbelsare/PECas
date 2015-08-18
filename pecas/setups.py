@@ -249,7 +249,9 @@ class ODEsetup(SetupsBaseClass):
         tu = None, u = None, \
         ty = None, y = None,
         pinit = None, \
-        xinit = None):
+        xinit = None, \
+        scheme = "radau", \
+        order = 3):
 
         self.tstart_setup = time.time()
 
@@ -306,7 +308,9 @@ class ODEsetup(SetupsBaseClass):
 
         self.nsteps = self.tu.shape[0] - 1
 
-        self.tauroot = ca.collocationPoints(3, "radau")
+        self.scheme = scheme
+        self.order = order
+        self.tauroot = ca.collocationPoints(order, scheme)
 
         # Degree of interpolating polynomial
 
