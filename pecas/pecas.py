@@ -796,73 +796,73 @@ and compute_covariance_matrix() before all results can be displayed.
             np.set_printoptions()
 
 
-    def show_system_information(self, showEquations = False):
+#     def show_system_information(self, showEquations = False):
 
-        r'''
-        --- docstring tbd ---
-        '''
+#         r'''
+#         --- docstring tbd ---
+#         '''
         
-        intro.pecas_intro()
+#         intro.pecas_intro()
 
-        print('\n' + 26 * '-' + \
-            ' PECas system information ' + 26 * '-')
+#         print('\n' + 26 * '-' + \
+#             ' PECas system information ' + 26 * '-')
 
-        if isinstance(self.pesetup.system, systems.BasicSystem):
+#         if isinstance(self.pesetup.system, systems.BasicSystem):
             
-            print("""\The system is a non-dynamic systems with the general 
-input-output structure and contrain equations: """)
+#             print("""\The system is a non-dynamic systems with the general 
+# input-output structure and contrain equations: """)
             
-            print("phi = y(t, u, p), g(t, u, p) = 0 ")
+#             print("phi = y(t, u, p), g(t, u, p) = 0 ")
             
-            print("""\nWith {0} inputs u, {1} parameters p and {2} outputs y
-            """.format(self.pesetup.nu,self.pesetup.np,self.pesetup.ny))
+#             print("""\nWith {0} inputs u, {1} parameters p and {2} outputs y
+#             """.format(self.pesetup.nu,self.pesetup.np,self.pesetup.ny))
 
 
-            if showEquations:
+#             if showEquations:
                 
-                print("\nAnd where Phi is defined by: ")
-                for i, yi in enumerate(self.pesetup.system.fcn['y']):         
-                    print("y[{0}] = {1}".format(\
-                         i, yi))
+#                 print("\nAnd where Phi is defined by: ")
+#                 for i, yi in enumerate(self.pesetup.system.fcn['y']):         
+#                     print("y[{0}] = {1}".format(\
+#                          i, yi))
                          
-                print("\nAnd where g is defined by: ")
-                for i, gi in enumerate(self.pesetup.system.fcn['g']):              
-                    print("g[{0}] = {1}".format(\
-                         i, gi))
+#                 print("\nAnd where g is defined by: ")
+#                 for i, gi in enumerate(self.pesetup.system.fcn['g']):              
+#                     print("g[{0}] = {1}".format(\
+#                          i, gi))
 
-        elif isinstance(self.pesetup.system, systems.ExplODE):
+#         elif isinstance(self.pesetup.system, systems.ExplODE):
 
-            print("""\nThe system is a dynamic system defined by a set of
-explicit ODEs xdot which establish the system state x:
-    xdot = f(t, u, x, p, w)
-and by an output function y which sets the system measurements:
-    phi = y(t, x, p).
-""")
+#             print("""\nThe system is a dynamic system defined by a set of
+# explicit ODEs xdot which establish the system state x:
+#     xdot = f(t, u, x, p, w)
+# and by an output function y which sets the system measurements:
+#     phi = y(t, x, p).
+# """)
             
             
-            print("""Particularly, the system has:
-    {0} inputs u
-    {1} parameters p
-    {2} states x
-    {3} outputs y""".format(self.pesetup.nu,self.pesetup.np,\
-                                self.pesetup.nx, self.pesetup.ny))
+#             print("""Particularly, the system has:
+#     {0} inputs u
+#     {1} parameters p
+#     {2} states x
+#     {3} outputs y""".format(self.pesetup.nu,self.pesetup.np,\
+#                                 self.pesetup.nx, self.pesetup.ny))
 
-            if showEquations:
+#             if showEquations:
                 
-                print("\nWhere xdot is defined by: ")
-                for i, xi in enumerate(self.pesetup.system.fcn['f']):         
-                    print("xdot[{0}] = {1}".format(\
-                         i, xi))
+#                 print("\nWhere xdot is defined by: ")
+#                 for i, xi in enumerate(self.pesetup.system.fcn['f']):         
+#                     print("xdot[{0}] = {1}".format(\
+#                          i, xi))
                          
-                print("\nAnd where y is defined by: ")
-                for i, yi in enumerate(self.pesetup.system.fcn['y']):              
-                    print("y[{0}] = {1}".format(\
-                         i, yi))   
-        else:
-            raise NotImplementedError('''
-This feature of PECas is currently disabled, but will be 
-available when the DAE systems are implemented.
-''')
+#                 print("\nAnd where y is defined by: ")
+#                 for i, yi in enumerate(self.pesetup.system.fcn['y']):              
+#                     print("y[{0}] = {1}".format(\
+#                          i, yi))   
+#         else:
+#             raise NotImplementedError('''
+# This feature of PECas is currently disabled, but will be 
+# available when the DAE systems are implemented.
+# ''')
 
 
 #     def plot_confidence_ellipsoids(self, indices = []):

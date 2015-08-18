@@ -25,7 +25,83 @@ import casadi.tools as cat
 
 import intro
 
-class BasicSystem(object):
+from abc import ABCMeta, abstractmethod
+
+class PECasSystem:
+
+    __metaclass__ = ABCMeta
+
+    def show_system_information(self, showEquations = False):
+
+        r'''
+        --- docstring tbd ---
+        '''
+        
+        intro.pecas_intro()
+
+#         print('\n' + 26 * '-' + \
+#             ' PECas system information ' + 26 * '-')
+
+#         if isinstance(self, BasicSystem):
+            
+#             print("""\The system is a non-dynamic systems with the general 
+# input-output structure and contrain equations: """)
+            
+#             print("y = phi(t, u, p), g(t, u, p) = 0 ")
+            
+#             print("""\nWith {0} inputs u, {1} parameters p and {2} outputs y
+#             """.format(self.vars["u"].size(),self.vars["p"].size(), \
+#                 self.fcn["y"].size()))
+
+
+#             if showEquations:
+                
+#                 print("\nAnd where Phi is defined by: ")
+#                 for i, yi in enumerate(self.pesetup.system.fcn['y']):         
+#                     print("y[{0}] = {1}".format(\
+#                          i, yi))
+                         
+#                 print("\nAnd where g is defined by: ")
+#                 for i, gi in enumerate(self.pesetup.system.fcn['g']):              
+#                     print("g[{0}] = {1}".format(\
+#                          i, gi))
+
+#         elif isinstance(self, ExplODE):
+
+#             print("""\nThe system is a dynamic system defined by a set of
+# explicit ODEs xdot which establish the system state x:
+#     xdot = f(t, u, x, p, w)
+# and by an output function y which sets the system measurements:
+#     phi = y(t, x, p).
+# """)
+            
+            
+#             print("""Particularly, the system has:
+#     {0} inputs u
+#     {1} parameters p
+#     {2} states x
+#     {3} outputs y""".format(self.pesetup.nu,self.pesetup.np,\
+#                                 self.pesetup.nx, self.pesetup.ny))
+
+#             if showEquations:
+                
+#                 print("\nWhere xdot is defined by: ")
+#                 for i, xi in enumerate(self.pesetup.system.fcn['f']):         
+#                     print("xdot[{0}] = {1}".format(\
+#                          i, xi))
+                         
+#                 print("\nAnd where y is defined by: ")
+#                 for i, yi in enumerate(self.pesetup.system.fcn['y']):              
+#                     print("y[{0}] = {1}".format(\
+#                          i, yi))   
+#         else:
+#             raise NotImplementedError('''
+# This feature of PECas is currently disabled, but will be 
+# available when the DAE systems are implemented.
+# ''')
+
+
+class BasicSystem(PECasSystem):
 
     '''
     :param t: time :math:`t \in \mathbb{R}` (optional)
@@ -95,7 +171,7 @@ input argument. Input arguments must be CasADi symbolic types.''')
         print('\nDefinition of BasicSystem system sucessful.')
 
 
-class ExplODE(object):
+class ExplODE(PECasSystem):
 
     r'''
     :param t: time :math:`t \in \mathbb{R}` (optional)
@@ -179,7 +255,7 @@ input argument. Input arguments must be CasADi symbolic types.''')
         print('Definition of ExplODE system sucessful.')
 
 
-class ImplDAE(object):
+class ImplDAE(PECasSystem):
 
     '''
     :raises: NotImplementedError

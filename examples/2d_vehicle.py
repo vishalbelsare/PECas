@@ -27,6 +27,8 @@ y = x
 
 odesys = pecas.systems.ExplODE(x = x, u = u, p = p, we = we, f = f, y = y)
 
+odesys.show_system_information()
+
 # Inputs
 
 data = pl.array(pl.loadtxt("data_2d_vehicle.dat", \
@@ -56,7 +58,7 @@ lsqpe = pecas.LSq(system = odesys, \
     scheme = "radau", \
     order = 1)
 
-lsqpe.show_system_information(showEquations = True)
+# lsqpe.show_system_information(showEquations = True)
 
 lsqpe.run_parameter_estimation()
 
