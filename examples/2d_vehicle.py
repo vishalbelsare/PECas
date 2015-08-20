@@ -26,8 +26,7 @@ f = ca.vertcat( \
 y = x
 
 odesys = pecas.systems.ExplODE(x = x, u = u, p = p, we = we, f = f, y = y)
-
-odesys.show_system_information()
+odesys.show_system_information(showEquations = True)
 
 # Inputs
 
@@ -57,8 +56,6 @@ lsqpe = pecas.LSq(system = odesys, \
     linear_solver = "ma97", \
     scheme = "radau", \
     order = 1)
-
-# lsqpe.show_system_information(showEquations = True)
 
 lsqpe.run_parameter_estimation()
 

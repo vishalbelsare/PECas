@@ -30,7 +30,7 @@ class BSPERunTest(object):
         for k, pk in enumerate(phat):
             self.assertAlmostEqual(pk, self.phat[k], places = 5)
 
-        self.lsqpe.show_system_information(showEquations = True)
+        # self.lsqpe.show_system_information(showEquations = True)
         self.lsqpe.show_results()
 
 
@@ -79,7 +79,7 @@ class ODEPERunTest(object):
         for k, pk in enumerate(phat):
             self.assertAlmostEqual(pk, self.phat[k], places = 5)
 
-        self.lsqpe.show_system_information(showEquations = True)
+        # self.lsqpe.show_system_information(showEquations = True)
         self.lsqpe.show_results()
 
 

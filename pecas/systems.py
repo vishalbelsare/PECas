@@ -34,71 +34,78 @@ class PECasSystem:
     def show_system_information(self, showEquations = False):
 
         r'''
-        --- docstring tbd ---
+        :param showEquations: show model equations and measurement functions
+        :type showEquations: bool
+
+        This function shows the system type and the dimension of the system
+        components. If `showEquations` is set to `True`, also the model
+        equations and measurement functions are shown.
         '''
         
         intro.pecas_intro()
 
-#         print('\n' + 26 * '-' + \
-#             ' PECas system information ' + 26 * '-')
+        print('\n' + 26 * '-' + \
+            ' PECas system information ' + 26 * '-')
 
-#         if isinstance(self, BasicSystem):
+        if isinstance(self, BasicSystem):
             
-#             print("""\The system is a non-dynamic systems with the general 
-# input-output structure and contrain equations: """)
+            print('''\The system is a non-dynamic systems with the general 
+input-output structure and contrain equations: ''')
             
-#             print("y = phi(t, u, p), g(t, u, p) = 0 ")
+            print("y = phi(t, u, p), g(t, u, p) = 0 ")
             
-#             print("""\nWith {0} inputs u, {1} parameters p and {2} outputs y
-#             """.format(self.vars["u"].size(),self.vars["p"].size(), \
-#                 self.fcn["y"].size()))
+            print('''\nWith {0} inputs u, {1} parameters p and {2} outputs phi
+            '''.format(self.vars["u"].size(),self.vars["p"].size(), \
+                self.fcn["y"].size()))
 
 
-#             if showEquations:
+            if showEquations:
                 
-#                 print("\nAnd where Phi is defined by: ")
-#                 for i, yi in enumerate(self.pesetup.system.fcn['y']):         
-#                     print("y[{0}] = {1}".format(\
-#                          i, yi))
+                print("\nAnd where phi is defined by: ")
+                for i, yi in enumerate(self.fcn['y']):         
+                    print("y[{0}] = {1}".format(\
+                         i, yi))
                          
-#                 print("\nAnd where g is defined by: ")
-#                 for i, gi in enumerate(self.pesetup.system.fcn['g']):              
-#                     print("g[{0}] = {1}".format(\
-#                          i, gi))
+                print("\nAnd where g is defined by: ")
+                for i, gi in enumerate(self.fcn['g']):              
+                    print("g[{0}] = {1}".format(\
+                         i, gi))
 
-#         elif isinstance(self, ExplODE):
+        elif isinstance(self, ExplODE):
 
-#             print("""\nThe system is a dynamic system defined by a set of
-# explicit ODEs xdot which establish the system state x:
-#     xdot = f(t, u, x, p, w)
-# and by an output function y which sets the system measurements:
-#     phi = y(t, x, p).
-# """)
+            print('''\nThe system is a dynamic system defined by a set of
+explicit ODEs xdot which establish the system state x:
+    xdot = f(t, u, x, p, we, wu)
+and by an output function phi which sets the system measurements:
+    y = phi(t, x, p).
+''')
             
             
-#             print("""Particularly, the system has:
-#     {0} inputs u
-#     {1} parameters p
-#     {2} states x
-#     {3} outputs y""".format(self.pesetup.nu,self.pesetup.np,\
-#                                 self.pesetup.nx, self.pesetup.ny))
+            print('''Particularly, the system has:
+    {0} inputs u
+    {1} parameters p
+    {2} states x
+    {3} outputs phi'''.format(self.vars["u"].size(),self.vars["p"].size(),\
+                                self.vars["x"].size(), \
+                                self.fcn["y"].size()))
 
-#             if showEquations:
+            if showEquations:
                 
-#                 print("\nWhere xdot is defined by: ")
-#                 for i, xi in enumerate(self.pesetup.system.fcn['f']):         
-#                     print("xdot[{0}] = {1}".format(\
-#                          i, xi))
+                print("\nWhere xdot is defined by: ")
+                for i, xi in enumerate(self.fcn['f']):         
+                    print("xdot[{0}] = {1}".format(\
+                         i, xi))
                          
-#                 print("\nAnd where y is defined by: ")
-#                 for i, yi in enumerate(self.pesetup.system.fcn['y']):              
-#                     print("y[{0}] = {1}".format(\
-#                          i, yi))   
-#         else:
-#             raise NotImplementedError('''
-# This feature of PECas is currently disabled, but will be 
-# available when the DAE systems are implemented.
-# ''')
+                print("\nAnd where phi is defined by: ")
+                for i, yi in enumerate(self.fcn['y']):              
+                    print("y[{0}] = {1}".format(\
+                         i, yi))
+
+        else:
+            raise NotImplementedError('''
+This feature of PECas is currently disabled, but will be 
+available when the DAE systems are implemented.
+''')
 
 
 class BasicSystem(PECasSystem):

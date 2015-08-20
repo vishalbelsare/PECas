@@ -27,6 +27,7 @@ f = ca.vertcat([x[1], p[0]/(m*(L**2))*(u-x[0]) - g/L * pl.sin(x[0])])
 y = x
 
 odesys = pecas.systems.ExplODE(x = x, u = u, p = p, f = f, y = y)
+odesys.show_system_information(showEquations = True)
 
 #==============================================================================
 # Loading data
@@ -69,8 +70,6 @@ lsqpe = pecas.LSq( \
     yN = yN, wv = wv, \
     # linear_solver = "mumps", \
     linear_solver = "ma97")
-
-lsqpe.show_system_information(showEquations = True)
 
 lsqpe.run_parameter_estimation()
 lsqpe.show_results()

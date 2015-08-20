@@ -39,6 +39,7 @@ f = ca.vertcat( \
 y = x
 
 odesys = pecas.systems.ExplODE(x = x, u = u, p = p, f = f, y = y)
+odesys.show_system_information(showEquations = True)
 
 sigma_Y = pl.zeros((2, yN.shape[1]))
 sigma_Y[0,:] = (1.0 / sigma_x1**2)
@@ -52,8 +53,6 @@ lsqpe = pecas.LSq(system = odesys, \
     wv = sigma_Y, \
     # linear_solver = "mumps", \
     linear_solver = "ma97")
-
-lsqpe.show_system_information(showEquations = True)
 
 lsqpe.run_parameter_estimation()
 lsqpe.compute_covariance_matrix()
