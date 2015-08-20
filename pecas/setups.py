@@ -35,7 +35,7 @@ class SetupsBaseClass(object):
 
 
     def check_and_set_bounds_and_initials(self, \
-        u = None, \
+        uN = None, \
         pinit = None, \
         xinit = None):
 
@@ -60,24 +60,24 @@ class SetupsBaseClass(object):
 
         if not self.nu == 0:
 
-            if u is None:
-                u = np.zeros((self.nu, self.nsteps))
+            if uN is None:
+                uN = np.zeros((self.nu, self.nsteps))
 
-            u = np.atleast_2d(u)
+            uN = np.atleast_2d(uN)
 
-            if u.shape == (self.nsteps, self.nu):
-                u = u.T
+            if uN.shape == (self.nsteps, self.nu):
+                uN = uN.T
 
-            if not u.shape == (self.nu, self.nsteps):
+            if not uN.shape == (self.nu, self.nsteps):
 
                 raise ValueError( \
-                    "Wrong dimension for control values u.")
+                    "Wrong dimension for control values uN.")
 
-            self.u = u
+            self.uN = uN
 
         else:
 
-            self.u = np.zeros((1, self.nsteps))
+            self.uN = np.zeros((1, self.nsteps))
 
         # Set initials for the parameters
 
@@ -134,20 +134,20 @@ class SetupsBaseClass(object):
 class BSsetup(SetupsBaseClass):
 
     def check_and_set_bounds_and_initials(self, \
-        u = None,
+        uN = None,
         pinit = None, \
         xinit = None):
 
         self.tstart_setup = time.time()
 
         super(BSsetup, self).check_and_set_bounds_and_initials( \
-            u = u,
+            uN = uN,
             pinit = pinit, \
             xinit = xinit)
 
 
     def __init__(self, system = None, \
-        tu = None, u = None, \
+        tu = None, uN = None, \
         pinit = None):
 
         SetupsBaseClass.__init__(self)
@@ -193,7 +193,7 @@ class BSsetup(SetupsBaseClass):
         # Set bounds and initial values
 
         self.check_and_set_bounds_and_initials( \
-            u = u,
+            uN = uN,
             pinit = pinit)
 
         # Set up phiN
@@ -208,7 +208,7 @@ class BSsetup(SetupsBaseClass):
         for k in range(self.nsteps):
 
             self.phiN.append(yfcn.call([self.tu[k], \
-                self.u[:, k], self.Vars["P"]])[0])
+                self.uN[:, k], self.Vars["P"]])[0])
 
         self.phiN = ca.vertcat(self.phiN)
 
@@ -218,7 +218,7 @@ class BSsetup(SetupsBaseClass):
 
         # Set up g
 
-        # TODO! Can/should/must gfcn depend on u and/or t?
+        # TODO! Can/should/must gfcn depend on uN and/or t?
 
         gfcn = ca.MXFunction([system.vars["p"]], [system.fcn["g"]])
         gfcn.setOption("name", "gfcn")
@@ -235,18 +235,18 @@ class BSsetup(SetupsBaseClass):
 class ODEsetup(SetupsBaseClass):
 
     def check_and_set_bounds_and_initials(self, \
-        u = None, \
+        uN = None, \
         pinit = None, \
         xinit = None):
 
         super(ODEsetup, self).check_and_set_bounds_and_initials( \
-            u = u, \
+            uN = uN, \
             pinit = pinit, \
             xinit = xinit)
 
 
     def __init__(self, system = None, \
-        tu = None, u = None, \
+        tu = None, uN = None, \
         ty = None, y = None,
         pinit = None, \
         xinit = None, \
@@ -336,7 +336,7 @@ class ODEsetup(SetupsBaseClass):
         # Define bounds and initial values
 
         self.check_and_set_bounds_and_initials( \
-            u = u, \
+            uN = uN, \
             pinit = pinit, \
             xinit = xinit)
 
@@ -449,7 +449,7 @@ class ODEsetup(SetupsBaseClass):
                 if t_meas_j == self.tu[k]:
 
                     self.phiN.append(yfcn.call([self.tu[k], \
-                        self.Vars["X", k, 0], self.Vars["P"], self.u[:, k], \
+                        self.Vars["X", k, 0], self.Vars["P"], self.uN[:, k], \
                         self.Vars["WU", k, 0]])[0])
 
                 else:
@@ -465,7 +465,7 @@ class ODEsetup(SetupsBaseClass):
                         x_temp += self.lfcns[r]([tau])[0] * self.Vars["X",k,r]
 
                     self.phiN.append(yfcn.call([t_meas_j, \
-                        x_temp, self.Vars["P"], self.u[:, k], \
+                        x_temp, self.Vars["P"], self.uN[:, k], \
                         self.Vars["WU", k, 0]])[0])
 
             # For all collocation points
@@ -484,7 +484,7 @@ class ODEsetup(SetupsBaseClass):
                 # Add collocation equations to the NLP
 
                 [fk] = ffcn.call([self.T[k][j], self.Vars["X",k,j], \
-                    self.u[:, k], self.Vars["P"], \
+                    self.uN[:, k], self.Vars["P"], \
                     self.Vars["WE", k, j-1],self.Vars["WU", k, j-1]])
 
                 self.g.append(hk * fk - xp_jk)
@@ -518,13 +518,13 @@ class ODEsetup(SetupsBaseClass):
             # DEPENDECY ON U NOT POSSIBLE AT THIS POINT! len(U) = N, not N + 1!
             # self.phiN.append(yfcn.call([self.tu[k], self.Vars["U", k, 0], \
             # self.phiN.append(yfcn.call([self.tu[k], self.Vars["X", k, 0], \
-            #     self.Vars["P"], self.u[:, k], self.Vars["WE", k, 0],\
+            #     self.Vars["P"], self.uN[:, k], self.Vars["WE", k, 0],\
             #     self.Vars["WU", k, 0]])[0])
 
         if self.tu[-1] in self.ty:
 
             self.phiN.append(yfcn.call([self.tu[-1], self.Vars["XF"], \
-                self.Vars["P"], self.u[:, -1], self.Vars["WU", -1, 0]])[0])
+                self.Vars["P"], self.uN[:, -1], self.Vars["WU", -1, 0]])[0])
 
         self.phiN = ca.vertcat(self.phiN)
 

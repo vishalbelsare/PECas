@@ -54,22 +54,22 @@ class BSSetBoundsInitialsTest(object):
 
     def test_invalid_control_inputs(self):
 
-        # Test some invalid values for u-arguments       
+        # Test some invalid values for uN-arguments       
 
         for uarg in self.invaliduargs:
 
             self.assertRaises(ValueError, pecas.setups.BSsetup, \
-                system = self.bsys, tu = self.tu, u = uarg)
+                system = self.bsys, tu = self.tu, uN = uarg)
     
 
     def test_valid_control_inputs(self):
 
-        # Test some valid values for u-arguments
+        # Test some valid values for uN-arguments
 
         for uarg in self.validuargs:
 
             pecas.setups.BSsetup( \
-                system = self.bsys, tu = self.tu, u = uarg)
+                system = self.bsys, tu = self.tu, uN = uarg)
 
 
 class ODESetBoundsInitialsTest(object):
@@ -137,19 +137,19 @@ class ODESetBoundsInitialsTest(object):
 
     def test_invalid_control_inputs(self):
 
-        # Test some invalid values for u-arguments       
+        # Test some invalid values for uN-arguments       
 
         for uarg in self.invaliduargs:
 
             self.assertRaises(ValueError, pecas.setups.ODEsetup, \
-                system = self.odesys, tu = self.tu, u = uarg)
+                system = self.odesys, tu = self.tu, uN = uarg)
     
 
     def test_valid_control_inputs(self):
 
-        # Test some valid values for u-arguments
+        # Test some valid values for uN-arguments
 
         for uarg in self.validuargs:
 
             pecas.setups.ODEsetup( \
-                system = self.odesys, tu = self.tu, u = uarg)
+                system = self.odesys, tu = self.tu, uN = uarg)

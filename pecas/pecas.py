@@ -22,11 +22,11 @@ class PECasBaseClass:
 
     @abstractmethod
     def __init__(self, system = None, \
-        tu = None, u = None, \
-        pinit = None, \
-        xinit = None, \
+        tu = None, uN = None, \
         ty = None, yN = None, \
         wv = None, wwe = None, wwu = None, \
+        pinit = None, \
+        xinit = None, \
         linear_solver = None, \
         scheme = None, \
         order = None):
@@ -43,13 +43,13 @@ class PECasBaseClass:
         if type(system) is systems.BasicSystem:
 
             self.pesetup = setups.BSsetup(system = system, \
-                tu = tu, u = u, \
+                tu = tu, uN = uN, \
                 pinit = pinit)
 
         elif type(system) is systems.ExplODE:
 
             self.pesetup = setups.ODEsetup(system = system, \
-                tu = tu, u = u, \
+                tu = tu, uN = uN, \
                 ty = ty, y = yN, \
                 pinit = pinit, \
                 xinit = xinit, \
@@ -248,29 +248,56 @@ obtain the optimal values.
 class LSq(PECasBaseClass):
 
     '''The class :class:`LSq` is used to solve least squares parameter
-    estimation problems for previously defined systems using a given set
-    of measurement data and weightings.'''
+    estimation problems for systems defined with one of the PECas systems
+    classes, using a given set of user provided control 
+    data, measurement data and different kinds of weightings.'''
 
     def __init__(self, system = None, \
-        tu = None, u = None, \
-        pinit = None, \
-        xinit = None, \
+        tu = None, uN = None, \
         ty = None, yN = None, \
         wv = None, wwe = None, wwu = None, \
+        pinit = None, \
+        xinit = None, \
         linear_solver = "ma97", \
         scheme = "radau", \
         order = 3):
 
-        '''
-        -- docstring tbd --
+        r'''
+        :param system: system considered for parameter estimation, specified
+                       using a PECas systems class
+        :type system: pecas.systems
+
+        :param tu: time points :math:`t_y \in \mathbb{R}^{N}`
+                   for the controls (also used for
+                   defining the collocation nodes); the number of time points
+                   must match to the second dimension of control values
+                   vector or matrix :math:`u_N`
+        :type tu: numpy.ndarray, casadi.DMatrix, list
+
+        :param uN: values for the controls at the switching time points 
+                   :math:`u_N \in \mathbb{R}^{n_u \times N}`
+        :type uN: numpy.ndarray, casadi.DMatrix
+
+        :param ty: optional, time points :math:`t_y \in \mathbb{R}^{N}`
+                   for the measurements; if no values are given, the time
+                   points for the controls :math:`t_u` are used; if the values
+                   in :math:`t_y` do not match to :math:`t_u`, a continuous
+                   output approach is used for setting up the
+                   parameter estimation problem
+        :type ty: numpy.ndarray, casadi.DMatrix, list
+
+        :param yN: values for the measurements at the defined time points 
+                   :math:`u_y \in \mathbb{R}^{n_u \times N}`
+        :type yN: numpy.ndarray, casadi.DMatrix    
+        
         '''
 
         super(LSq, self).__init__(system = system, \
-            tu = tu, u = u, \
-            pinit = pinit, \
-            xinit = xinit, \
+            tu = tu, uN = uN, \
             ty = ty, yN = yN, \
             wv = wv, wwe = wwe, wwu = wwu, \
+            pinit = pinit, \
+            xinit = xinit, \
             linear_solver = linear_solver, \
             scheme = scheme, \
             order = order)
@@ -287,9 +314,9 @@ class LSq(PECasBaseClass):
         .. math::
 
             \begin{aligned}
-                & \text{arg}\,\underset{x, p, v, w}{\text{min}} & & \| v \|_{W_{v}}^{2} + \| w_{e} \|_{W_{w_{e}}}^{2} + \| w_{u} \|_{W_{w_{u}}}^{2}\\
+                & \text{arg}\,\underset{x, p, v, w}{\text{min}} & & \| v \|_{W_{v}}^{2} + \| w_{e} \|_{W_{w_{e}}}^{2} + \| w_{uN} \|_{W_{w_{uN}}}^{2}\\
                 & \text{subject to:} & & \phi_{k} - y(t_{k}, u_{k}, x_{k}, p) + v_{k} = 0 \\
-                & & & x_{j+1} - c_{j}\bigg[ (f(t_{j}, u_{j}, x_{j}, p, w_{e,j}, w_{u,j}) \bigg] = 0 \\
+                & & & x_{j+1} - c_{j}\bigg[ (f(t_{j}, u_{j}, x_{j}, p, w_{e,j}, w_{uN,j}) \bigg] = 0 \\
                 & \text{while:} & & k = 1, \dots, N;\, j = 1, \dots, N - 1; \\
                 & & & c_{j}: \text{Lagrange polynomial of}\, j\text{-th interval}
             \end{aligned}

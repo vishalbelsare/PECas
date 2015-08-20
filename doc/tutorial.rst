@@ -21,7 +21,7 @@ Defining a PECas system object
 Defining and solving a parameter estimation problem
 ---------------------------------------------------
 
-[continuout output]
+For now, PECas provides one class for defining and solving parameter estimation problems.
 
 .. automodule:: pecas.pecas
     :members:

@@ -21,6 +21,12 @@ Note that you need root privileges to do this. Also, a recent version of `CasADi
 
 PECas has only been run on Ubuntu Linux systems so far, and has not been tested for Windows. However, if the prerequisites are met, usage on Windows should also be possible.
 
+Recommendations
+---------------
+
+To speed up computations in PECas, it is recommended to install `HSL for IPOPT <http://www.hsl.rl.ac.uk/ipopt/>`_. On how to install the solvers and further information, see the page `Obtaining HSL <https://github.com/casadi/casadi/wiki/Obtaining-HSL>`_ in the CasADi wiki.
+
+
 Get PECas
 ---------
 
