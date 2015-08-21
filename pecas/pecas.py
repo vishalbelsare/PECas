@@ -247,7 +247,7 @@ obtain the optimal values.
 
 class LSq(PECasBaseClass):
 
-    '''The class :class:`LSq` is used to solve least squares parameter
+    '''The class :class:`LSq` is used to set up least squares parameter
     estimation problems for systems defined with one of the PECas systems
     classes, using a given set of user provided control 
     data, measurement data and different kinds of weightings.'''
@@ -270,7 +270,7 @@ class LSq(PECasBaseClass):
         :param tu: time points :math:`t_y \in \mathbb{R}^{N}`
                    for the controls (also used for
                    defining the collocation nodes); the number of time points
-                   must match to the second dimension of control values
+                   must match with the second dimension of control values
                    vector or matrix :math:`u_N`
         :type tu: numpy.ndarray, casadi.DMatrix, list
 
@@ -279,17 +279,57 @@ class LSq(PECasBaseClass):
         :type uN: numpy.ndarray, casadi.DMatrix
 
         :param ty: optional, time points :math:`t_y \in \mathbb{R}^{N}`
-                   for the measurements; if no values are given, the time
+                   for the measurements; if no value is given, the time
                    points for the controls :math:`t_u` are used; if the values
-                   in :math:`t_y` do not match to :math:`t_u`, a continuous
-                   output approach is used for setting up the
+                   in :math:`t_y` do not match with the values in :math:`t_u`,
+                   a continuous
+                   output approach will be used for setting up the
                    parameter estimation problem
         :type ty: numpy.ndarray, casadi.DMatrix, list
 
         :param yN: values for the measurements at the defined time points 
-                   :math:`u_y \in \mathbb{R}^{n_u \times N}`
+                   :math:`u_y \in \mathbb{R}^{n_y \times N}`
         :type yN: numpy.ndarray, casadi.DMatrix    
-        
+
+        :param wv: weightings for the measurements
+                   :math:`w_v \in \mathbb{R}^{n_y \times N}`
+        :type wv: numpy.ndarray, casadi.DMatrix    
+
+        :param wwe: weightings for equation errors
+                   :math:`w_{w_e} \in \mathbb{R}^{n_{w_e}}` (only necessary 
+                   if equation errors are used within `system`)
+        :type wwe: numpy.ndarray, casadi.DMatrix    
+
+        :param wwu: weightings for the input errors
+                   :math:`w_{w_u} \in \mathbb{R}^{n_{w_u}}` (only necessary
+                   if input errors are used within `system`)
+        :type wwu: numpy.ndarray, casadi.DMatrix    
+
+        :param pinit: optional, initial guess for the values of the
+                      parameters to be
+                      estimated :math:`p_{init} \in \mathbb{R}^{n_p}`; if no
+                      value is given, 0 will be used; a poorly or wrongly
+                      chosen initial guess might cause the estimation to fail
+        :type pinit: numpy.ndarray, casadi.DMatrix
+
+        :param xinit: optional, initial guess for the values of the
+                      states to be
+                      estimated :math:`x_{init} \in \mathbb{R}^{n_x \times N}`;
+                      if no value is given, 0 will be used; a poorly or wrongly
+                      chosen initial guess might cause the estimation to fail
+        :type xinit: numpy.ndarray, casadi.DMatrix
+
+        :param linear_solver: set the linear solver for IPOPT; this option is
+                              only interesting if HSL is installed
+        :type linear_solver: str
+
+        :param scheme: collocation scheme, possible values are `legendre` and
+                       `radau`
+        :type scheme: str
+
+        :param order: order of collocation polynominals
+        :type order: int
+
         '''
 
         super(LSq, self).__init__(system = system, \
@@ -314,7 +354,7 @@ class LSq(PECasBaseClass):
         .. math::
 
             \begin{aligned}
-                & \text{arg}\,\underset{x, p, v, w}{\text{min}} & & \| v \|_{W_{v}}^{2} + \| w_{e} \|_{W_{w_{e}}}^{2} + \| w_{uN} \|_{W_{w_{uN}}}^{2}\\
+                & \text{arg}\,\underset{x, p, v, w}{\text{min}} & & \| v \|_{W_{v}}^{2} + \| w_{e} \|_{W_{w_{e}}}^{2} + \| w_{u} \|_{W_{w_{u}}}^{2}\\
                 & \text{subject to:} & & \phi_{k} - y(t_{k}, u_{k}, x_{k}, p) + v_{k} = 0 \\
                 & & & x_{j+1} - c_{j}\bigg[ (f(t_{j}, u_{j}, x_{j}, p, w_{e,j}, w_{uN,j}) \bigg] = 0 \\
                 & \text{while:} & & k = 1, \dots, N;\, j = 1, \dots, N - 1; \\
@@ -439,12 +479,6 @@ Parameter estimation finished. Check IPOPT output for status information.''')
 
     def covmat_schur(self):
 
-        r'''
-        --- docstring tbd ---
-        
-        '''       
-
-
         N1 = ca.MX(self.pesetup.Vars.shape[0] - self.W.shape[0], \
             self.W.shape[0])
 
@@ -493,13 +527,7 @@ Parameter estimation finished. Check IPOPT output for status information.''')
         [self.Covp] = self.fcovp([self.Varshat])
 
 
-    def covmat_backsolve(self):
-
-        r'''
-        --- docstring tbd ---
-        
-        '''       
-
+    def covmat_backsolve(self):      
 
         N1 = ca.MX(self.pesetup.Vars.shape[0] - self.W.shape[0], \
             self.W.shape[0])
@@ -558,11 +586,6 @@ Parameter estimation finished. Check IPOPT output for status information.''')
 
 
     def compute_covariance_matrix(self):
-
-        r'''
-        --- docstring tbd ---
-        
-        '''
 
         intro.pecas_intro()
         

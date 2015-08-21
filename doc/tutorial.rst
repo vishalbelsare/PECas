@@ -12,6 +12,8 @@ This system object can then be used within a PECas parameter estimation problem 
 
 In a further step, the covariance-matrix for the estimated parameters can be computed to support results interpretation.
 
+Following, the general concept and the several classes and functions are described in more detail. Introductory examples for PECas can be found :ref:`in the next section <examples>`. 
+
 Defining a PECas system object
 ------------------------------
 
