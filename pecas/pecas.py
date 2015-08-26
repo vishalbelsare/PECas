@@ -267,18 +267,19 @@ class LSq(PECasBaseClass):
                        using a PECas systems class
         :type system: pecas.systems
 
-        :param tu: time points :math:`t_y \in \mathbb{R}^{N}`
+        :param tu: time points :math:`t_u \in \mathbb{R}^{N}`
                    for the controls (also used for
-                   defining the collocation nodes); the number of time points
-                   must match with the second dimension of control values
-                   vector or matrix :math:`u_N`
+                   defining the collocation nodes)
         :type tu: numpy.ndarray, casadi.DMatrix, list
 
         :param uN: values for the controls at the switching time points 
-                   :math:`u_N \in \mathbb{R}^{n_u \times N}`
+                   :math:`u_N \in \mathbb{R}^{n_u \times N-1}`; note that the
+                   the second dimension of :math:`u_N` is :math:`N-1` istead of
+                   :math:`N`, since the control value at the last switching
+                   point is never applied
         :type uN: numpy.ndarray, casadi.DMatrix
 
-        :param ty: optional, time points :math:`t_y \in \mathbb{R}^{N}`
+        :param ty: optional, time points :math:`t_y \in \mathbb{R}^{M}`
                    for the measurements; if no value is given, the time
                    points for the controls :math:`t_u` are used; if the values
                    in :math:`t_y` do not match with the values in :math:`t_u`,
@@ -288,11 +289,11 @@ class LSq(PECasBaseClass):
         :type ty: numpy.ndarray, casadi.DMatrix, list
 
         :param yN: values for the measurements at the defined time points 
-                   :math:`u_y \in \mathbb{R}^{n_y \times N}`
+                   :math:`u_y \in \mathbb{R}^{n_y \times M}`
         :type yN: numpy.ndarray, casadi.DMatrix    
 
         :param wv: weightings for the measurements
-                   :math:`w_v \in \mathbb{R}^{n_y \times N}`
+                   :math:`w_v \in \mathbb{R}^{n_y \times M}`
         :type wv: numpy.ndarray, casadi.DMatrix    
 
         :param wwe: weightings for equation errors
@@ -328,6 +329,7 @@ class LSq(PECasBaseClass):
         :type scheme: str
 
         :param order: order of collocation polynominals
+                      :math:`d \in \mathbb{Z}`
         :type order: int
 
         '''
@@ -349,24 +351,22 @@ class LSq(PECasBaseClass):
         r'''
         This functions will run a least squares parameter estimation for the
         given problem and data set.
-        For this, the least squares parameter estimation problem
+        For this, an NLP of the following
+        structure is set up with a direct collocation approach and solved
+        using IPOPT:
 
         .. math::
 
             \begin{aligned}
-                & \text{arg}\,\underset{x, p, v, w}{\text{min}} & & \| v \|_{W_{v}}^{2} + \| w_{e} \|_{W_{w_{e}}}^{2} + \| w_{u} \|_{W_{w_{u}}}^{2}\\
-                & \text{subject to:} & & \phi_{k} - y(t_{k}, u_{k}, x_{k}, p) + v_{k} = 0 \\
-                & & & x_{j+1} - c_{j}\bigg[ (f(t_{j}, u_{j}, x_{j}, p, w_{e,j}, w_{uN,j}) \bigg] = 0 \\
-                & \text{while:} & & k = 1, \dots, N;\, j = 1, \dots, N - 1; \\
-                & & & c_{j}: \text{Lagrange polynomial of}\, j\text{-th interval}
+                & \text{arg}\,\underset{x, p, v, w_e, w_u}{\text{min}} & & \| v \|_{W_{v}}^{2} + \| w_{e} \|_{W_{w_{e}}}^{2} + \| w_{u} \|_{W_{w_{u}}}^{2}\\
+                & \text{subject to:} & & y_{l} - \phi(t_{l}, u_{l}, x_{l}, p) + v_{l} = 0 \\
+                & & & (t_{k+1} - t_{k}) f(t_{k,j}, u_{k,j}, x_{k,j}, p, w_{e,k,j}, w_{u,k,j}) - \sum_{r=0}^{d} \dot{L}_r(\tau_j) x_{k,r} = 0 \\
+                & & & x_{k+1,0} - \sum_{r=0}^{d} L_r(1) x_{k,r} = 0 \\
+                & & & t_{k,j} = t_k + (t_{k+1} - t_{k}) \tau_j \\
+                & & & L_r(\tau) = \prod_{r=0,r\neq j}^{d} \frac{\tau - \tau_r}{\tau_j - \tau_r}\\
+                & \text{for:} & & k = 1, \dots, N, ~~~ l = 1, \dots, M, ~~~ j = 1, \dots, d, ~~~ r = 1, \dots, d \\
+                & & & \tau_j = \text{time points w. r. t. scheme and order}
             \end{aligned}
-
-        will be set up, and solved using IPOPT. Afterwards,
-
-        - the value of :math:`\hat{x}`
-          can be returned using the function :func:`get_xhat()`, and
-        - the value of the residual :math:`\hat{R}`
-          can be returned using the function :func:`get_Rhat()`.
           
         '''          
 
@@ -668,11 +668,11 @@ matrix for the estimated parameters can be computed.''')
             of the estimated parameters,
           - the values of the estimated parameters :math:`\hat{p}`
             and their corresponding standard deviations
-            (the value of the standar deviation is represented
-            only if the covariance matrix is computed),
+            (the values of the standard deviations is represented
+            only if the covariance matrix had already been computed),
           - the values of the covariance matrix
             :math:`\Sigma_{\hat{x}}` for the
-            estimated parameters (if is computed),
+            estimated parameters (if it had already been computed),
           - in the case of the estimation of a dynamic
             system, the optimal value of the first state 
             :math:`\hat{x}(t_{0})` and the optimal value 
