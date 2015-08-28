@@ -29,7 +29,7 @@ and we can measure the full state, i. e.
 
 .. math::
 
-    y = x.
+    \phi = x.
 
 The values resulting from the parameter estimation are 
 
@@ -56,21 +56,21 @@ The aim of the application ``pendulum.py`` is to estimate the spring constant :m
 .. math::
 
     \begin{aligned}
-        \dot{\phi} &= \omega \\
-        \dot{\omega} &= \frac{k}{m L^2} (\psi - \phi) - \frac{g}{L} * \sin(\phi)  \\
+        \dot{\nu} &= \omega \\
+        \dot{\omega} &= \frac{k}{m L^2} (\psi - \nu) - \frac{g}{L} * \sin(\nu)  \\
     \end{aligned}
 
 where :math:`m = 1.0`, :math:`L = 3.0` and :math:`g = 9.81`, the states :math:`x`, controls :math:`u` and parameters :math:`p` are defined as
 
 .. math::
 
-    x = \begin{pmatrix} {\phi} \\ {\omega} \end{pmatrix}, ~ u = \begin{pmatrix} {\psi} \end{pmatrix}, ~ p = \begin{pmatrix} {k} \end{pmatrix},
+    x = \begin{pmatrix} {\nu} \\ {\omega} \end{pmatrix}, ~ u = \begin{pmatrix} {\psi} \end{pmatrix}, ~ p = \begin{pmatrix} {k} \end{pmatrix},
 
 while the only control :math:`\psi` is the initial actuation angle of the pendulum, and therefor stays constant over time. Also, we can measure the full state, i. e. 
 
 .. math::
 
-    y = x.
+    \phi = x.
 
 The value resulting from the parameter estimation is
 
@@ -122,7 +122,7 @@ where the states :math:`x`, controls :math:`u` and parameters :math:`p` are defi
 
 .. math::
 
-    y = x.
+    \phi = x.
 
 *(Results will follow soon)*
 

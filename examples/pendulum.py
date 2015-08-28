@@ -35,10 +35,10 @@ odesys.show_system_information(showEquations = True)
 
 data = pl.loadtxt('data_pendulum.txt')
 tu = data[:500, 0]
-phimeas = data[:500, 1]
+numeas = data[:500, 1]
 wmeas = data[:500, 2]
 N = tu.size
-yN = pl.array([phimeas,wmeas])
+yN = pl.array([numeas,wmeas])
 uN = [psi] * (N-1)
 
 # Definition of the weightings for each of the measurements.
@@ -47,17 +47,17 @@ uN = [psi] * (N-1)
 # speed and rotational angle have i.i.d. noise, thus the measurement have
 # identic standard deviations that can be calculated.
 
-sigmaphi = pl.std(phimeas, ddof=1)
+sigmanu = pl.std(numeas, ddof=1)
 sigmaw = pl.std(wmeas, ddof=1)
 
 # The weightings for the measurements errors given to PECas are calculated
 # from the standard deviations of the measurements, so that the least squares
 # estimator ist the maximum likelihood estimator for the estimation problem.
 
-wphi = 1.0 / (pl.ones(tu.size)*sigmaphi**2)
+wnu = 1.0 / (pl.ones(tu.size)*sigmanu**2)
 ww = 1.0 / (pl.ones(tu.size)*sigmaw**2)
 
-wv = pl.array([wphi, ww])
+wv = pl.array([wnu, ww])
 
 # Run parameter estimation and assure that the results is correct
 
@@ -75,20 +75,20 @@ lsqpe.show_results()
 lsqpe.compute_covariance_matrix()
 lsqpe.show_results()
 
-lsqpe.run_simulation([phimeas[0], wmeas[0]])
-phisim = lsqpe.Xsim[0,:].T
+lsqpe.run_simulation([numeas[0], wmeas[0]])
+nusim = lsqpe.Xsim[0,:].T
 wsim = lsqpe.Xhat[1,:].T
 
 pl.close("all")
 
 pl.figure()
 pl.subplot2grid((2, 2), (0, 0))
-pl.scatter(tu[::2], phimeas[::2], \
-    s = 10.0, color = 'k', marker = "x", label = "$\phi_{meas}$")
-pl.plot(tu, phisim, label = "$\phi_{sim}$")
+pl.scatter(tu[::2], numeas[::2], \
+    s = 10.0, color = 'k', marker = "x", label = r"$\nu_{meas}$")
+pl.plot(tu, nusim, label = r"$\nu_{sim}$")
 
 pl.xlabel("$t$")
-pl.ylabel("$\phi$", rotation = 0)
+pl.ylabel(r"$\nu$", rotation = 0)
 pl.xlim(0.0, 4.2)
 
 pl.legend(loc = "lower left")
@@ -105,12 +105,12 @@ pl.xlim(0.0, 4.2)
 pl.legend(loc = "lower right")
 
 pl.subplot2grid((2, 2), (0, 1), rowspan = 2)
-pl.scatter(phimeas[::2], wmeas[::2], \
+pl.scatter(numeas[::2], wmeas[::2], \
     s = 10.0, color = 'k', marker = "x", \
-    label = "$(\phi_{meas},\,\omega_{meas})$")
-pl.plot(phisim, wsim, label = "$(\phi_{sim},\,\omega_{sim})$")
+    label = r"$(\nu_{meas},\,\omega_{meas})$")
+pl.plot(nusim, wsim, label = r"$(\nu_{sim},\,\omega_{sim})$")
 
-pl.xlabel("$\phi$")
+pl.xlabel(r"$\nu$")
 pl.ylabel("$\omega$", rotation = 0)
 pl.xlim(-2.5, 3.0)
 pl.ylim(-5.0, 5.0)
