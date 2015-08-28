@@ -11,10 +11,10 @@ import pecas
 #     constant for this problem
 #==============================================================================
 
-m = 1
-L = 3
+m = 1.0
+L = 3.0
 g = 9.81
-psi = pl.pi/2
+psi = pl.pi / 2.0
 
 
 # System
@@ -71,7 +71,7 @@ lsqpe = pecas.LSq( \
 lsqpe.run_parameter_estimation()
 lsqpe.show_results()
 
-lsqpe.compute_covariance_matrix()
+# lsqpe.compute_covariance_matrix()
 lsqpe.show_results()
 
 lsqpe.run_simulation([phimeas[0], wmeas[0]])
@@ -81,30 +81,39 @@ wsim = lsqpe.Xhat[1,:].T
 pl.close("all")
 
 pl.figure()
-pl.subplot(2, 1, 1)
+pl.subplot2grid((2, 2), (0, 0))
 pl.scatter(tu[::2], phimeas[::2], \
     s = 10.0, color = 'k', marker = "x", label = "$\phi_{meas}$")
 pl.plot(tu, phisim, label = "$\phi_{sim}$")
+
 pl.xlabel("$t$")
 pl.ylabel("$\phi$", rotation = 0)
-pl.legend(loc = "lower right")
+pl.xlim(0.0, 4.2)
 
-pl.subplot(2, 1, 2)
+pl.legend(loc = "lower left")
+
+pl.subplot2grid((2, 2), (1, 0))
 pl.scatter(tu[::2], wmeas[::2], \
     s = 10.0, color = 'k', marker = "x", label = "$\omega_{meas}$")
 pl.plot(tu, wsim, label = "$\omega_{sim}$")
+
 pl.xlabel("$t$")
 pl.ylabel("$\omega$", rotation = 0)
+pl.xlim(0.0, 4.2)
+
 pl.legend(loc = "lower right")
 
-
-pl.figure()
+pl.subplot2grid((2, 2), (0, 1), rowspan = 2)
 pl.scatter(phimeas[::2], wmeas[::2], \
     s = 10.0, color = 'k', marker = "x", \
-    label = "$(\phi_{meas}, \omega_{meas})$")
-pl.plot(phisim, wsim, label = "$(\phi_{sim}, \omega_{sim})$")
+    label = "$(\phi_{meas},\,\omega_{meas})$")
+pl.plot(phisim, wsim, label = "$(\phi_{sim},\,\omega_{sim})$")
+
 pl.xlabel("$\phi$")
-pl.ylabel("$\omega$")
+pl.ylabel("$\omega$", rotation = 0)
+pl.xlim(-2.5, 3.0)
+pl.ylim(-5.0, 5.0)
+
 pl.legend()
 
 pl.show()
