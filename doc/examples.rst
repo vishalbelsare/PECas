@@ -8,9 +8,9 @@ The following example applications give hands-on impressions on how to use PEcas
 Parameter estimation for a Lotka-Volterra predator-prey-model
 -------------------------------------------------------------
 
-Model and data for this examples application was taken from: *Bock, Sager et al.: Übungen zur Numerischen Mathematik II, sheet 9, IWR, Heidelberg university, 2006* (in German). The original resource can be found `here <http://www.iwr.uni-heidelberg.de/~agbock/TEACHING/2006ws/NUM2/UEBUNGSBLAETTER/THEORIE/t09.pdf>`_.
+Model and data for this example application was taken from: *Bock, Sager et al.: Übungen zur Numerischen Mathematik II, sheet 9, IWR, Heidelberg university, 2006* (in German). The original resource can be found `here <http://www.iwr.uni-heidelberg.de/~agbock/TEACHING/2006ws/NUM2/UEBUNGSBLAETTER/THEORIE/t09.pdf>`_.
 
-The aim of the application is to estimate the unknown parameters of a Lotka-Volterra predator-prey-model for experimentally received measurement data and given standard deviations for the measurements. The predator-prey-model is an ODE of the form :math:`\dot{x} = f(x,p)`, given by
+The aim of the application ``lotka_volterra.py`` is to estimate the unknown parameters of a Lotka-Volterra predator-prey-model for experimentally received measurement data and given standard deviations for the measurements. The predator-prey-model is an ODE of the form :math:`\dot{x} = f(x,p)`, given by
 
 .. math::
 
@@ -49,9 +49,9 @@ The results for the system simulation using the estimated parameters in comparis
 Parameter estimation for a pendulum model
 -----------------------------------------
 
-Model and data for this examples application was taken from: *Diehl, Moritz: Course on System Identification, exercise 7, SYSCOP, IMTEK, University of Freiburg, 2014/2015*. The original resource can be found `here <https://www.imtek.de/professuren/systemtheorie/events/dateien/exercise7.pdf>`_.
+Model and data for this example application was taken from: *Diehl, Moritz: Course on System Identification, exercise 7, SYSCOP, IMTEK, University of Freiburg, 2014/2015*. The original resource can be found `here <https://www.imtek.de/professuren/systemtheorie/events/dateien/exercise7.pdf>`_.
 
-The aim of the application is to estimate the spring constant :math:`k` of a pendulum model for experimentally received measurement data. The pendulum model is an ODE of the form :math:`\dot{x} = f(x,u,p)`, given by
+The aim of the application ``pendulum.py`` is to estimate the spring constant :math:`k` of a pendulum model for experimentally received measurement data. The pendulum model is an ODE of the form :math:`\dot{x} = f(x,u,p)`, given by
 
 .. math::
 
@@ -90,9 +90,9 @@ The results for the system simulation using the estimated parameter in compariso
 Parameter estimation for a model race car
 -----------------------------------------
 
-Model, images and data for this examples application was taken upon approval by the author from: *Verschueren, Robin: Design and implementation of a time-optimal controller for model race cars, Master's thesis, KU Leuven, 2014*.
+Model, images and data for this example application was taken from: *Verschueren, Robin: Design and implementation of a time-optimal controller for model race cars, Master's thesis, KU Leuven, 2014*.
 
-The aim of the application is to estimate the unknown parameters of a 2D race car model for experimentally received measurement data. The race car and the interpretation of the model states are shown in the figure below.
+The aim of the application ``2d_vehicle.py`` is to estimate the unknown parameters of a 2D race car model for experimentally received measurement data. The race car and the interpretation of the model states are shown in the figure below.
 
 .. figure:: rc.png
     :scale: 60%
