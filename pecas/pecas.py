@@ -217,6 +217,7 @@ match the dimensions of the input errors given in wu.''')
             return np.array(self.pesetup.Vars()(self.Varshat)["P"])
 
         except AttributeError:
+            
 
             raise AttributeError('''
 The method run_parameter_estimation() must be run first, before trying to
@@ -367,7 +368,21 @@ class LSq(PECasBaseClass):
                 & \text{for:} & & k = 1, \dots, N, ~~~ l = 1, \dots, M, ~~~ j = 1, \dots, d, ~~~ r = 1, \dots, d \\
                 & & & \tau_j = \text{time points w. r. t. scheme and order}
             \end{aligned}
-          
+
+
+        The status of IPOPT provides information whether the computation could
+        be finished sucessfully. The optimal values for all optimization
+        variables :math:`\hat{x}` can be accessed
+        via the class variable ``LSq.Xhat``, while the estimated parameters
+        :math:`\hat{p}` can also be accessed separately via the class attribute
+        ``LSq.phat``.
+
+        **Please be aware:** IPOPT finishing sucessfully does not necessarly
+        mean that the estimation results for the unknown parameters are useful
+        for your purposes, it just means that IPOPT was able to solve the given
+        optimization problem.
+        You have in any case to verify your results, e. g. by simulation using
+        the class function :func:`run_simulation`.
         '''          
 
         intro.pecas_intro()
@@ -475,6 +490,166 @@ this might take some time ...
 
         print('''
 Parameter estimation finished. Check IPOPT output for status information.''')
+
+
+    def run_simulation(self, \
+        x0 = None, tsim = None, usim = None, psim = None, method = "rk"):
+
+        r'''
+        :param x0: initial value for the states
+                   :math:`x_0 \in \mathbb{R}^{n_x}`
+        :type x0: list, numpy,ndarray, casadi.DMatrix
+
+        :param tsim: optional, switching time points for the controls
+                    :math:`t_{sim} \in \mathbb{R}^{L}` to be used for the
+                    simulation
+        :type tsim: list, numpy,ndarray, casadi.DMatrix        
+
+        :param usim: optional, control values 
+                     :math:`u_{sim} \in \mathbb{R}^{n_u \times L}`
+                     to be used for the simulation
+        :type usim: list, numpy,ndarray, casadi.DMatrix   
+
+        :param psim: optional, parameter set 
+                     :math:`p_{sim} \in \mathbb{R}^{n_p}`
+                     to be used for the simulation
+        :type psim: list, numpy,ndarray, casadi.DMatrix 
+
+        :param method: optional, CasADi integrator to be used for the
+                       simulation
+        :type method: str
+
+        This function performs a simulation of the system for a given
+        parameter set :math:`p_{sim}`, starting from a user-provided initial
+        value for the states :math:`x_0`. If the argument ``psim`` is not
+        specified, the estimated parameter set :math:`\hat{p}` is used.
+        For this, a parameter
+        estimation using :func:`run_parameter_estimation()` has to be
+        done beforehand, of course.
+
+        By default, the switching time points for
+        the controls :math:`t_u` and the corresponding controls 
+        :math:`u_N` will be used for simulation. If desired, other time points
+        :math:`t_{sim}` and corresponding controls :math:`u_{sim}`
+        can be passed to the function.
+
+        For the moment, the function can only be used for systems of type
+        :class:`pecas.systems.ExplODE`.
+
+        '''
+
+        if not type(self.pesetup.system) is systems.ExplODE:
+
+            raise NotImplementedError("Until now, this function can only " + \
+                "be used for systems of type ExplODE.")
+
+
+        if x0 == None:
+
+            raise ValueError("You have to provide an initial value x0 " + \
+                "to run the simulation.")
+
+
+        x0 = np.squeeze(np.asarray(x0))
+
+        if x0.shape[0] != self.pesetup.nx:
+
+            raise ValueError("Wrong dimension for initial value x0.")
+
+
+        if tsim == None:
+
+            tsim = self.pesetup.tu
+
+
+        if usim == None:
+
+            usim = self.pesetup.uN
+
+
+        if psim == None:
+
+            try:
+
+                psim = self.phat
+
+            except AttributeError:
+
+                errmsg = '''
+You have to either perform a parameter estimation beforehand to obtain a
+parameter set that can be used for simulation, or you have to provide a
+parameter set in the argument psim.
+'''
+                raise AttributeError(errmsg)
+
+        else:
+
+            if not np.squeeze(psim).shape[0] == self.pesetup.np:
+
+                raise ValueError("Wrong dimension for parameter set psim.")
+
+
+        fp = ca.MXFunction([self.pesetup.system.vars["x"], \
+                            self.pesetup.system.vars["t"], \
+                            self.pesetup.system.vars["u"], \
+                            self.pesetup.system.vars["wu"], \
+                            self.pesetup.system.vars["we"], \
+                            self.pesetup.system.vars["p"]], \
+                            [self.pesetup.system.fcn["f"]])
+        fp.init()
+
+        fpeval = fp.call([self.pesetup.system.vars["x"], \
+                          np.zeros(1), \
+                          self.pesetup.system.vars["u"], \
+                          np.zeros(self.pesetup.nwu), \
+                          np.zeros(self.pesetup.nwe), \
+                          psim])[0]
+
+        fsim = ca.MXFunction(ca.daeIn(x = self.pesetup.system.vars["x"], \
+            p = self.pesetup.system.vars["u"]), \
+            ca.daeOut(ode = fpeval))
+
+
+        Xsim = []
+        Xsim.append(x0)
+
+        u0 = ca.DMatrix()
+
+        for k,e in enumerate(tsim[:-1]):
+
+            try:
+
+                integrator = ca.Integrator(method, fsim)
+
+            except RuntimeError as err:
+
+                errmsg = '''
+It seems like you want to use an integration method that is not currently
+supported by CasADi. Please refer to the CasADi documentation for a list
+of supported integrators, or use the default RK4-method by not setting the
+method-argument of the function.
+'''
+                raise RuntimeError(errmsg)
+
+
+            integrator.setOption("t0", e)
+            integrator.setOption("tf", tsim[k+1])
+            integrator.init()
+
+            if not self.pesetup.nu == 0:
+
+                u0 = usim[:,k]
+
+            Xk_end, = ca.integratorOut( \
+                integrator( \
+                    ca.integratorIn( \
+                        x0 = x0, p = u0)), "xf")
+
+            Xsim.append(Xk_end)
+            x0 = Xk_end
+
+
+        self.Xsim = ca.horzcat(Xsim)
 
 
     def covmat_schur(self):
