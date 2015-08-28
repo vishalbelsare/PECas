@@ -473,16 +473,18 @@ this might take some time ...
         self.rhat = solver.getOutput("f")
         self.dv_lambdahat = solver.getOutput("lam_g")
         
-        Ysim = self.pesetup.phiNfcn([self.Varshat])[0]
-        Ym = np.reshape(self.yN.T,(Ysim.shape))
-        res = Ym-Ysim
-        self.residual = []
-        self.Rsquared = []
+        # Ysim = self.pesetup.phiNfcn([self.Varshat])[0]
+        # Ym = np.reshape(self.yN.T,(Ysim.shape))
+        # res = Ym-Ysim
+        # self.residual = []
+        # self.Rsquared = []
 
-        for i in range(self.pesetup.ny):   
+        # for i in range(self.pesetup.ny):   
 
-            self.residual.append((np.linalg.norm(res[i:-1:self.pesetup.ny]))**2)
-            self.Rsquared.append(1 - self.residual[i]/(np.linalg.norm(Ym[i:-1:self.pesetup.ny]))**2)
+        #     self.residual.append(\
+        #         (np.linalg.norm(res[i:-1:self.pesetup.ny]))**2)
+        #     self.Rsquared.append(1 - self.residual[i] / \
+        #         (np.linalg.norm(Ym[i:-1:self.pesetup.ny]))**2)
         
         self.tend_estimation = time.time()
         self.duration_estimation = self.tend_estimation - \
@@ -655,8 +657,8 @@ method-argument of the function.
     def compute_covariance_matrix(self):
 
         r'''
-        This function is yet experimental, and will be presented in a
-        future version of PECas.
+        This function is yet experimental, and will be presented in detail in
+        a future version of PECas.
         '''
 
         intro.pecas_intro()
@@ -738,21 +740,22 @@ matrix for the estimated parameters can be computed.''')
         :func:`run_parameter_estimation()` has been used. The results
         displayed by the function contain:
         
-          - the value of :math:`R^2` measuring the goodness of fit
-            of the estimated parameters,
           - the values of the estimated parameters :math:`\hat{p}`
             and their corresponding standard deviations
-            (the values of the standard deviations is represented
+            (the values of the standard deviations are presented
             only if the covariance matrix had already been computed),
           - the values of the covariance matrix
-            :math:`\Sigma_{\hat{x}}` for the
+            :math:`\Sigma_{\hat{p}}` for the
             estimated parameters (if it had already been computed),
           - in the case of the estimation of a dynamic
-            system, the optimal value of the first state 
-            :math:`\hat{x}(t_{0})` and the optimal value 
+            system, the estimated value of the first state 
+            :math:`\hat{x}(t_{0})` and the estimated value 
             of the last state :math:`\hat{x}(t_{N})`, and
           - the durations of the setup and the estimation.
         '''
+
+        # - the value of :math:`R^2` measuring the goodness of fit
+        #   of the estimated parameters,
 
         intro.pecas_intro()
 
@@ -780,10 +783,10 @@ matrix for the estimated parameters can be computed.''')
             
             try:
 
-                print("\nEstimated initial states value:  ")
+                print("\nInitial states value estimated from collocation:  ")
                 print("    x(t_0) = {0}".format(self.Xhat[:,0]))
                 
-                print("\nEstimated final states value:  ")
+                print("\nFinal states value estimated from collocation:  ")
                 print("    x(t_N) = {0}".format(self.Xhat[:,-1]))
             
             except AttributeError:
@@ -806,15 +809,15 @@ matrix for the estimated parameters can be computed.''')
             #     "\nGoodness of fit R^2" + 30 * "." + ": {0:10.8e}".format(\
             #         self.Rsquared))
             
-            print("\nGoodness of fit R-squared:  ")
-            for i in range(self.pesetup.ny):
-                print("R^2 - Y_{0} = {1: 10.8e}".format(i,self.Rsquared[i]))
+            # print("\nGoodness of fit R-squared:  ")
+            # for i in range(self.pesetup.ny):
+            #     print("R^2 - Y_{0} = {1: 10.8e}".format(i,self.Rsquared[i]))
 
             # print("Residual" + 41 * "." + ": {0:10.8e}".format(self.residual))
 
-            print("\nResidual:  ")
-            for i in range(self.pesetup.ny):
-                print("R - Y_{0} = {1: 10.8e}".format(i,self.residual[i]))
+            # print("\nResidual:  ")
+            # for i in range(self.pesetup.ny):
+            #     print("R - Y_{0} = {1: 10.8e}".format(i,self.residual[i]))
 
             print("\nDuration of the problem setup"+ 20 * "." + \
                 ": {0:10.8e} s".format(self.pesetup.duration_setup))
