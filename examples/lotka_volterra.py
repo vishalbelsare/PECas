@@ -62,21 +62,10 @@ lsqpe.show_results()
 pl.scatter(T, yN[0,:], color = 'b')
 pl.scatter(T, yN[1,:], color = 'r')
 
-# pl.plot(lsqpe.Xhat[0], color = 'b')
-# pl.plot(lsqpe.Xhat[1], color = 'r')
-
 t = pl.linspace(0,10,1000)
-ode = ca.MXFunction(ca.daeIn(x=x, p=p), ca.daeOut(ode=f))
-integrator = ca.Integrator("cvodes", ode)
+lsqpe.run_simulation(x0 = yN[:,0], tsim = t)
 
-simulator = ca.Simulator(integrator, t)
-simulator.init()
-
-simulator.setInput([1, 1], "x0")
-simulator.setInput(lsqpe.phat, "p")
-simulator.evaluate()
-
-pl.plot(t, pl.squeeze(simulator.getOutput("xf")[0,:]), color='b')
-pl.plot(t, pl.squeeze(simulator.getOutput("xf")[1,:]), color='r')
+pl.plot(t, pl.squeeze(lsqpe.Xsim[0,:]), color='b')
+pl.plot(t, pl.squeeze(lsqpe.Xsim[1,:]), color='r')
 pl.grid()
 pl.show()
