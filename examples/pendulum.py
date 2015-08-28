@@ -2,20 +2,21 @@ import casadi as ca
 import pylab as pl
 import pecas
 
-#==============================================================================
+# (Model and data taken from: Diehl, Moritz: Course on System Identification, 
+# exercise 7, SYSCOP, IMTEK, University of Freiburg, 2014/2015)
+
 # Defining constant problem parameters: 
-#     - m: representing the ball of the mass in Kg
+#
+#     - m: representing the ball of the mass in kg
 #     - L: the length of the pendulum bar in meters
 #     - g: the gravity constant in m/s^2
 #     - psi: the actuation angle of the manuver in radians, which stays
-#     constant for this problem
-#==============================================================================
+#            constant for this problem
 
 m = 1.0
 L = 3.0
 g = 9.81
 psi = pl.pi / 2.0
-
 
 # System
 
@@ -30,9 +31,7 @@ y = x
 odesys = pecas.systems.ExplODE(x = x, u = u, p = p, f = f, y = y)
 odesys.show_system_information(showEquations = True)
 
-#==============================================================================
 # Loading data
-#==============================================================================
 
 data = pl.loadtxt('data_pendulum.txt')
 tu = data[:500, 0]
@@ -42,20 +41,23 @@ N = tu.size
 yN = pl.array([phimeas,wmeas])
 uN = [psi] * (N-1)
 
-#==============================================================================
-# Definition of the standar deviations each of the measurements. Since no data
-# is provided before hand, it is assumed that both, angular speed and rotational
-# angle have i.i.d. noise, thus the measurement have identic standar deviation
-# and they can be calculated. The vector that is provided to PECas must have
-# the standar deviation of each measurement, and thus it is of size 2*N.
-# Finally, the optimization problem is initialized using some random vector
-# [phi,w,K] = [1,1,1], and the vector with all the measurement is created.
-#==============================================================================
+# Definition of the weightings for each of the measurements.
 
-sigmaphi = 1.0 / (pl.ones(tu.size)*pl.std(phimeas, ddof=1)**2)
-sigmaw = 1.0 / (pl.ones(tu.size)*pl.std(wmeas, ddof=1)**2)
+# Since no data is provided beforehand, it is assumed that both, angular
+# speed and rotational angle have i.i.d. noise, thus the measurement have
+# identic standard deviations that can be calculated.
 
-wv = pl.array([sigmaphi, sigmaw])
+sigmaphi = pl.std(phimeas, ddof=1)
+sigmaw = pl.std(wmeas, ddof=1)
+
+# The weightings for the measurements errors given to PECas are calculated
+# from the standard deviations of the measurements, so that the least squares
+# estimator ist the maximum likelihood estimator for the estimation problem.
+
+wphi = 1.0 / (pl.ones(tu.size)*sigmaphi**2)
+ww = 1.0 / (pl.ones(tu.size)*sigmaw**2)
+
+wv = pl.array([wphi, ww])
 
 # Run parameter estimation and assure that the results is correct
 

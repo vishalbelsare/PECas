@@ -5,7 +5,7 @@ import casadi as ca
 
 import pecas
 
-# (model and data taken from Bock, Sager et al.: Uebungen zur Numerischen
+# (Model and data taken from: Bock, Sager et al.: Uebungen zur Numerischen
 # Mathematik II, sheet 9, IWR, Heidelberg university, 2006)
 
 T = pl.linspace(0, 10, 11)
@@ -35,9 +35,13 @@ y = x
 odesys = pecas.systems.ExplODE(x = x, p = p, f = f, y = y)
 odesys.show_system_information(showEquations = True)
 
-sigma_Y = pl.zeros((2, yN.shape[1]))
-sigma_Y[0,:] = (1.0 / sigma_x1**2)
-sigma_Y[1,:] = (1.0 / sigma_x2**2)
+# The weightings for the measurements errors given to PECas are calculated
+# from the standard deviations of the measurements, so that the least squares
+# estimator ist the maximum likelihood estimator for the estimation problem.
+
+wv = pl.zeros((2, yN.shape[1]))
+wv[0,:] = (1.0 / sigma_x1**2)
+wv[1,:] = (1.0 / sigma_x2**2)
 
 lsqpe = pecas.LSq(system = odesys, \
     tu = T, \
@@ -45,7 +49,7 @@ lsqpe = pecas.LSq(system = odesys, \
     xinit = yN, \
     yN = yN, \
     # linear_solver = "ma97", \
-    wv = sigma_Y)
+    wv = wv)
 
 lsqpe.run_parameter_estimation()
 lsqpe.show_results()
