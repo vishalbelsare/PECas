@@ -70,7 +70,7 @@ lsqpe = pecas.LSq( \
 lsqpe.run_parameter_estimation()
 lsqpe.show_results()
 
-# lsqpe.compute_covariance_matrix()
+lsqpe.compute_covariance_matrix()
 lsqpe.show_results()
 
 lsqpe.run_simulation([phimeas[0], wmeas[0]])
