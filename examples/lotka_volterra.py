@@ -5,7 +5,6 @@ import casadi as ca
 import casadi.tools as cat
 
 import pecas
-# import colcas as co
 
 # ex2.py: Usage of multiple states.
 
