@@ -9,7 +9,7 @@ from setuptools import setup
 
 setup(
     name='pecas',
-    version='0.2',
+    version='0.3',
     author='Adrian Buerger',
     author_email='adrian.buerger@hs-karlsruhe.de',
     packages=['pecas'],
@@ -17,7 +17,7 @@ setup(
         url='http://github.com/adbuerger/PECas/',
     license='LGPL',
     zip_safe=False,
-    description='Parameter estimation using CasADi in Python',
+    description='Parameter estimation using CasADi',
     install_requires=[],
     use_2to3=True,
 )
