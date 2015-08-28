@@ -25,7 +25,7 @@ Contents
    :numbered:
 
    install
-   tutorial
+   howto
    examples
 
 
