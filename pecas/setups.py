@@ -163,8 +163,8 @@ class BSsetup(SetupsBaseClass):
 
         self.nu = system.vars["u"].shape[0]
         self.np = system.vars["p"].shape[0]
-        self.nv = system.fcn["y"].shape[0]
-        self.ny = system.fcn["y"].shape[0]
+        self.nv = system.fcn["phi"].shape[0]
+        self.nphi = system.fcn["phi"].shape[0]
 
         if np.atleast_2d(tu).shape[0] == 1:
 
@@ -200,14 +200,14 @@ class BSsetup(SetupsBaseClass):
 
         self.phiN = []
 
-        yfcn = ca.MXFunction([system.vars["t"], system.vars["u"], \
-            system.vars["p"]], [system.fcn["y"]])
-        yfcn.setOption("name", "yfcn")
-        yfcn.init()
+        phifcn = ca.MXFunction([system.vars["t"], system.vars["u"], \
+            system.vars["p"]], [system.fcn["phi"]])
+        phifcn.setOption("name", "yfcn")
+        phifcn.init()
 
         for k in range(self.nsteps):
 
-            self.phiN.append(yfcn.call([self.tu[k], \
+            self.phiN.append(phifcn.call([self.tu[k], \
                 self.uN[:, k], self.Vars["P"]])[0])
 
         self.phiN = ca.vertcat(self.phiN)
@@ -247,7 +247,7 @@ class ODEsetup(SetupsBaseClass):
 
     def __init__(self, system = None, \
         tu = None, uN = None, \
-        ty = None, y = None,
+        ty = None, yN = None,
         pinit = None, \
         xinit = None, \
         scheme = "radau", \
@@ -269,10 +269,10 @@ class ODEsetup(SetupsBaseClass):
         self.nx = system.vars["x"].shape[0]
         self.nu = system.vars["u"].shape[0]
         self.np = system.vars["p"].shape[0]
-        self.nv = system.fcn["y"].shape[0]
+        self.nv = system.fcn["phi"].shape[0]
         self.nwe = system.vars["we"].shape[0]
         self.nwu = system.vars["wu"].shape[0]        
-        self.ny = system.fcn["y"].shape[0]
+        self.nphi = system.fcn["phi"].shape[0]
 
         if np.atleast_2d(tu).shape[0] == 1:
 
@@ -414,11 +414,11 @@ class ODEsetup(SetupsBaseClass):
 
         # Initialize measurement function
 
-        yfcn = ca.MXFunction([system.vars["t"], system.vars["x"], \
+        phifcn = ca.MXFunction([system.vars["t"], system.vars["x"], \
             system.vars["p"], system.vars["u"],system.vars["wu"]], \
-            [system.fcn["y"]])
-        yfcn.setOption("name", "yfcn")
-        yfcn.init()
+            [system.fcn["phi"]])
+        phifcn.setOption("name", "yfcn")
+        phifcn.init()
 
 
         # Initialzie setup of g
@@ -448,7 +448,7 @@ class ODEsetup(SetupsBaseClass):
 
                 if t_meas_j == self.tu[k]:
 
-                    self.phiN.append(yfcn.call([self.tu[k], \
+                    self.phiN.append(phifcn.call([self.tu[k], \
                         self.Vars["X", k, 0], self.Vars["P"], self.uN[:, k], \
                         self.Vars["WU", k, 0]])[0])
 
@@ -464,7 +464,7 @@ class ODEsetup(SetupsBaseClass):
 
                         x_temp += self.lfcns[r]([tau])[0] * self.Vars["X",k,r]
 
-                    self.phiN.append(yfcn.call([t_meas_j, \
+                    self.phiN.append(phifcn.call([t_meas_j, \
                         x_temp, self.Vars["P"], self.uN[:, k], \
                         self.Vars["WU", k, 0]])[0])
 
@@ -523,7 +523,7 @@ class ODEsetup(SetupsBaseClass):
 
         if self.tu[-1] in self.ty:
 
-            self.phiN.append(yfcn.call([self.tu[-1], self.Vars["XF"], \
+            self.phiN.append(phifcn.call([self.tu[-1], self.Vars["XF"], \
                 self.Vars["P"], self.uN[:, -1], self.Vars["WU", -1, 0]])[0])
 
         self.phiN = ca.vertcat(self.phiN)

@@ -56,13 +56,13 @@ input-output structure and contrain equations: ''')
             
             print('''\nWith {0} inputs u, {1} parameters p and {2} outputs phi
             '''.format(self.vars["u"].size(),self.vars["p"].size(), \
-                self.fcn["y"].size()))
+                self.fcn["phi"].size()))
 
 
             if showEquations:
                 
                 print("\nAnd where phi is defined by: ")
-                for i, yi in enumerate(self.fcn['y']):         
+                for i, yi in enumerate(self.fcn['phi']):         
                     print("y[{0}] = {1}".format(\
                          i, yi))
                          
@@ -87,7 +87,7 @@ and by an output function phi which sets the system measurements:
     {2} states x
     {3} outputs phi'''.format(self.vars["u"].size(),self.vars["p"].size(),\
                                 self.vars["x"].size(), \
-                                self.fcn["y"].size()))
+                                self.fcn["phi"].size()))
 
             if showEquations:
                 
@@ -97,7 +97,7 @@ and by an output function phi which sets the system measurements:
                          i, xi))
                          
                 print("\nAnd where phi is defined by: ")
-                for i, yi in enumerate(self.fcn['y']):              
+                for i, yi in enumerate(self.fcn['phi']):              
                     print("y[{0}] = {1}".format(\
                          i, yi))
 
@@ -145,7 +145,7 @@ class BasicSystem(PECasSystem):
                  t = ca.MX.sym("t", 1), \
                  u = ca.MX.sym("u", 0), \
                  p = None, \
-                 y = None, \
+                 phi = None, \
                  g = ca.MX.sym("g", 0)):
 
         intro.pecas_intro()
@@ -154,7 +154,7 @@ class BasicSystem(PECasSystem):
         print('\nStarting definition of BasicSystem system ...')
 
         if not all(isinstance(arg, ca.casadi.MX) for \
-            arg in [t, u, p, y, g]):
+            arg in [t, u, p, phi, g]):
 
             raise TypeError('''
 Missing input argument for system definition or wrong variable type for an
@@ -170,7 +170,7 @@ input argument. Input arguments must be CasADi symbolic types.''')
 
         self.fcn = cat.struct_MX([
                 (
-                    cat.entry("y", expr = y),
+                    cat.entry("phi", expr = phi),
                     cat.entry("g", expr = g)
                 )
             ])
@@ -226,7 +226,7 @@ class ExplODE(PECasSystem):
                  p = None, \
                  we = ca.MX.sym("we", 0), \
                  wu = ca.MX.sym("wu", 0), \
-                 y = None, \
+                 phi = None, \
                  f = None):
 
         intro.pecas_intro()
@@ -235,7 +235,7 @@ class ExplODE(PECasSystem):
         print('\nStarting definition of ExplODE system ...')
 
         if not all(isinstance(arg, ca.casadi.MX) for \
-            arg in [t, u, x, p, y, f]):
+            arg in [t, u, x, p, phi, f]):
 
             raise TypeError('''
 Missing input argument for system definition or wrong variable type for an
@@ -254,7 +254,7 @@ input argument. Input arguments must be CasADi symbolic types.''')
 
         self.fcn = cat.struct_MX([
                 (
-                    cat.entry("y", expr = y),
+                    cat.entry("phi", expr = phi),
                     cat.entry("f", expr = f)
                 )
             ])
@@ -280,7 +280,7 @@ class ImplDAE(PECasSystem):
              p = None, \
              we = ca.MX.sym("we", 0), \
              wu = ca.MX.sym("wu", 0), \
-             y = None, \
+             phi = None, \
              f = None, \
              g = ca.MX.sym("g", 0)):
 

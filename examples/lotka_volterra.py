@@ -30,9 +30,9 @@ f = ca.vertcat( \
     [-alpha * x[0] + p[0] * x[0] * x[1], 
     gamma * x[1] - p[1] * x[0] * x[1]])
 
-y = x
+phi = x
 
-odesys = pecas.systems.ExplODE(x = x, p = p, f = f, y = y)
+odesys = pecas.systems.ExplODE(x = x, p = p, f = f, phi = phi)
 odesys.show_system_information(showEquations = True)
 
 # The weightings for the measurements errors given to PECas are calculated

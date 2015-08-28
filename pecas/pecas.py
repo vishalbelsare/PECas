@@ -50,7 +50,7 @@ class PECasBaseClass:
 
             self.pesetup = setups.ODEsetup(system = system, \
                 tu = tu, uN = uN, \
-                ty = ty, y = yN, \
+                ty = ty, yN = yN, \
                 pinit = pinit, \
                 xinit = xinit, \
                 scheme = scheme, \
@@ -70,11 +70,11 @@ class PECasBaseClass:
 
         yN = np.atleast_2d(yN)
 
-        if yN.shape == (self.pesetup.tu.size, self.pesetup.ny):
+        if yN.shape == (self.pesetup.tu.size, self.pesetup.nphi):
 
             yN = yN.T
 
-        if not yN.shape == (self.pesetup.ny, self.pesetup.tu.size):
+        if not yN.shape == (self.pesetup.nphi, self.pesetup.tu.size):
 
             raise ValueError('''
 The dimension of the measurement data given in yN does not match the
@@ -82,8 +82,8 @@ dimension of output function and/or tu.
 Valid dimensions for yN for the given data are:
     {0} or {1},
 but you supported yN of dimension:
-    {2}.'''.format(str((self.pesetup.tu.size, self.pesetup.ny)), \
-    str((self.pesetup.ny, self.pesetup.tu.size)), str(yN.shape)))
+    {2}.'''.format(str((self.pesetup.tu.size, self.pesetup.nphi)), \
+    str((self.pesetup.nphi, self.pesetup.tu.size)), str(yN.shape)))
 
         # Check if the supported standard deviations fit to the dimensions of
         # the measurement data

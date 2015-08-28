@@ -21,10 +21,10 @@ class TestBasicSystemNoConstraints(unittest.TestCase, \
         self.u = ca.MX.sym("u", 1)
         self.p = ca.MX.sym("p", 1)
 
-        self.y = self.u * self.p
+        self.phi = self.u * self.p
 
         self.bsys = pecas.systems.BasicSystem(u = self.u, p = self.p, \
-            y = self.y)
+            phi = self.phi)
 
         # Inputs
 
@@ -63,11 +63,11 @@ class TestBasicSystemConstraints(unittest.TestCase, \
         self.u = ca.MX.sym("u", 2)
         self.p = ca.MX.sym("p", 2)
 
-        self.y = self.u[0] * self.p[0] + self.u[1] * self.p[1]**2
+        self.phi = self.u[0] * self.p[0] + self.u[1] * self.p[1]**2
         self.g = (2 - ca.mul(self.p.T, self.p))
 
         self.bsys = pecas.systems.BasicSystem(u = self.u, p = self.p, \
-            y = self.y, g = self.g)
+            phi = self.phi, g = self.g)
 
         # Inputs
 
@@ -118,10 +118,10 @@ class TestLotkaVolterra(unittest.TestCase, \
             1.0 * self.x[1] - self.p[1] * self.x[0] * self.x[1]]) + \
             self.we
 
-        self.y = self.x
+        self.phi = self.x
 
         self.odesys = pecas.systems.ExplODE(x = self.x, u = self.u, \
-            p = self.p, we = self.we, f = self.f, y = self.y)
+            p = self.p, we = self.we, f = self.f, phi = self.phi)
 
         # Inputs
 
@@ -183,10 +183,10 @@ class Test1DVehicle(unittest.TestCase, \
 
         self.f = 10.0 * self.u - self.p[0] - self.p[1] * self.x + self.we
 
-        self.y = self.x
+        self.phi = self.x
 
         self.odesys = pecas.systems.ExplODE(x = self.x, u = self.u, \
-            p = self.p, we = self.we, f = self.f, y = self.y)
+            p = self.p, we = self.we, f = self.f, phi = self.phi)
 
         # Inputs
 
@@ -256,10 +256,10 @@ class Test2DVehicle(unittest.TestCase, \
                 - (self.x[3] * self.u[0])**2 * 17.06 * 0.5 \
                 + self.we[3]])
 
-        self.y = self.x
+        self.phi = self.x
 
         self.odesys = pecas.systems.ExplODE(x = self.x, u = self.u, \
-            p = self.p, we = self.we, f = self.f, y = self.y)
+            p = self.p, we = self.we, f = self.f, phi = self.phi)
 
         # Inputs
 
@@ -332,10 +332,10 @@ class PedulumBar(unittest.TestCase, \
 
             ])
 
-        self.y = self.x
+        self.phi = self.x
 
         self.odesys = pecas.systems.ExplODE(x = self.x, u = self.u, p = self.p, \
-            f = self.f, y = self.y)
+            f = self.f, phi = self.phi)
 
         # Inputs
 

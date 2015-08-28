@@ -23,9 +23,9 @@ f = ca.vertcat( \
         - 0.6 * p[3] \
         - (x[3] * u[0])**2 * 17.06 * 0.5 + we[3]])
 
-y = x
+phi = x
 
-odesys = pecas.systems.ExplODE(x = x, u = u, p = p, we = we, f = f, y = y)
+odesys = pecas.systems.ExplODE(x = x, u = u, p = p, we = we, f = f, phi = phi)
 odesys.show_system_information(showEquations = True)
 
 # Inputs
@@ -88,7 +88,7 @@ lsqpe.run_parameter_estimation()
 # psihat = lsqpe.Xhat[2]
 # vhat = lsqpe.Xhat[3]
 
-lsqpe.run_simulation()
+lsqpe.run_simulation(yN[0,:])
 
 xhat = lsqpe.Xsim[0,:].T
 yhat = lsqpe.Xsim[1,:].T
