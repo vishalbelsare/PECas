@@ -2,11 +2,8 @@
 
 import pylab as pl
 import casadi as ca
-import casadi.tools as cat
 
 import pecas
-
-# ex2.py: Usage of multiple states.
 
 # (model and data taken from Bock, Sager et al.: Uebungen Numerische
 # Mathematik II, Blatt 9, IWR, Universitaet Heidelberg, 2006)
@@ -24,12 +21,10 @@ sigma_x2 = 0.2
 
 x = ca.MX.sym("x", 2)
 
-alpha = 1
-gamma = 1
+alpha = 1.0
+gamma = 1.0
 
 p = ca.MX.sym("p", 2)
-
-u = ca.MX.sym("u", 0)
 
 f = ca.vertcat( \
     [-alpha * x[0] + p[0] * x[0] * x[1], 
@@ -37,7 +32,7 @@ f = ca.vertcat( \
 
 y = x
 
-odesys = pecas.systems.ExplODE(x = x, u = u, p = p, f = f, y = y)
+odesys = pecas.systems.ExplODE(x = x, p = p, f = f, y = y)
 odesys.show_system_information(showEquations = True)
 
 sigma_Y = pl.zeros((2, yN.shape[1]))
@@ -54,17 +49,26 @@ lsqpe = pecas.LSq(system = odesys, \
     linear_solver = "ma97")
 
 lsqpe.run_parameter_estimation()
-lsqpe.compute_covariance_matrix()
-
 lsqpe.show_results()
 
-pl.scatter(T, yN[0,:], color = 'b')
-pl.scatter(T, yN[1,:], color = 'r')
+lsqpe.compute_covariance_matrix()
+lsqpe.show_results()
 
 t = pl.linspace(0,10,1000)
 lsqpe.run_simulation(x0 = yN[:,0], tsim = t)
 
-pl.plot(t, pl.squeeze(lsqpe.Xsim[0,:]), color='b')
-pl.plot(t, pl.squeeze(lsqpe.Xsim[1,:]), color='r')
+pl.figure()
+
+pl.scatter(T, yN[0,:], color = "b", label = "$x_{1,meas}$")
+pl.scatter(T, yN[1,:], color = "r", label = "$x_{2,meas}$")
+
+pl.plot(t, pl.squeeze(lsqpe.Xsim[0,:]), color="b", label = "$x_{1,sim}$")
+pl.plot(t, pl.squeeze(lsqpe.Xsim[1,:]), color="r", label = "$x_{2,sim}$")
+
+pl.xlabel("$t$")
+pl.ylabel("$x_1, x_2$", rotation = 0)
+
+pl.legend(loc = "upper left")
 pl.grid()
+
 pl.show()
