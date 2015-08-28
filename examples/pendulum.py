@@ -10,6 +10,7 @@ import pecas
 #     - psi: the actuation angle of the manuver in radians, which stays
 #     constant for this problem
 #==============================================================================
+
 m = 1
 L = 3
 g = 9.81
@@ -32,12 +33,13 @@ odesys.show_system_information(showEquations = True)
 #==============================================================================
 # Loading data
 #==============================================================================
+
 data = pl.loadtxt('data_pendulum.txt')
 tu = data[:500, 0]
-phim = data[:500, 1]
-wm = data[:500, 2]
+phimeas = data[:500, 1]
+wmeas = data[:500, 2]
 N = tu.size
-yN = pl.array([phim,wm])
+yN = pl.array([phimeas,wmeas])
 uN = [psi] * (N-1)
 
 #==============================================================================
@@ -50,21 +52,16 @@ uN = [psi] * (N-1)
 # [phi,w,K] = [1,1,1], and the vector with all the measurement is created.
 #==============================================================================
 
-sigmaphi = 1.0 / (pl.ones(tu.size)*pl.std(phim, ddof=1)**2)
-sigmaw = 1.0 / (pl.ones(tu.size)*pl.std(wm, ddof=1)**2)
+sigmaphi = 1.0 / (pl.ones(tu.size)*pl.std(phimeas, ddof=1)**2)
+sigmaw = 1.0 / (pl.ones(tu.size)*pl.std(wmeas, ddof=1)**2)
 
 wv = pl.array([sigmaphi, sigmaw])
-
-# odesetup = pecas.setups.ODEsetup( \
-#     system = odesys, tu = tu,
-#     u = uN, \
-#     pinit = 1, pmax = 50, pmin = 0 )
 
 # Run parameter estimation and assure that the results is correct
 
 lsqpe = pecas.LSq( \
     system = odesys, tu = tu, \
-    u = uN, \
+    uN = uN, \
     pinit = 1, \
     xinit = yN, 
     yN = yN, wv = wv, \
@@ -75,25 +72,39 @@ lsqpe.run_parameter_estimation()
 lsqpe.show_results()
 
 lsqpe.compute_covariance_matrix()
-# lsqpe.covmat_schur()
 lsqpe.show_results()
 
-phihat = lsqpe.Xhat[0]
-what = lsqpe.Xhat[1]
+lsqpe.run_simulation([phimeas[0], wmeas[0]])
+phisim = lsqpe.Xsim[0,:].T
+wsim = lsqpe.Xhat[1,:].T
 
 pl.close("all")
 
 pl.figure()
 pl.subplot(2, 1, 1)
-pl.plot(phihat)
-pl.plot(phim)
+pl.scatter(tu[::2], phimeas[::2], \
+    s = 10.0, color = 'k', marker = "x", label = "$\phi_{meas}$")
+pl.plot(tu, phisim, label = "$\phi_{sim}$")
+pl.xlabel("$t$")
+pl.ylabel("$\phi$", rotation = 0)
+pl.legend(loc = "lower right")
 
 pl.subplot(2, 1, 2)
-pl.plot(what)
-pl.plot(wm)
+pl.scatter(tu[::2], wmeas[::2], \
+    s = 10.0, color = 'k', marker = "x", label = "$\omega_{meas}$")
+pl.plot(tu, wsim, label = "$\omega_{sim}$")
+pl.xlabel("$t$")
+pl.ylabel("$\omega$", rotation = 0)
+pl.legend(loc = "lower right")
+
 
 pl.figure()
-pl.plot(phihat, what)
-pl.plot(phim, wm)
+pl.scatter(phimeas[::2], wmeas[::2], \
+    s = 10.0, color = 'k', marker = "x", \
+    label = "$(\phi_{meas}, \omega_{meas})$")
+pl.plot(phisim, wsim, label = "$(\phi_{sim}, \omega_{sim})$")
+pl.xlabel("$\phi$")
+pl.ylabel("$\omega$")
+pl.legend()
 
 pl.show()
