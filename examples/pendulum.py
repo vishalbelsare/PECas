@@ -64,9 +64,8 @@ lsqpe = pecas.LSq( \
     uN = uN, \
     pinit = 1, \
     xinit = yN, 
-    yN = yN, wv = wv, \
-    # linear_solver = "mumps", \
-    linear_solver = "ma97")
+    linear_solver = "ma97", \
+    yN = yN, wv = wv)
 
 lsqpe.run_parameter_estimation()
 lsqpe.show_results()
