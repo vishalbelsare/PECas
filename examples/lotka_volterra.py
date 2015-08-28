@@ -5,8 +5,8 @@ import casadi as ca
 
 import pecas
 
-# (model and data taken from Bock, Sager et al.: Uebungen Numerische
-# Mathematik II, Blatt 9, IWR, Universitaet Heidelberg, 2006)
+# (model and data taken from Bock, Sager et al.: Uebungen zur Numerischen
+# Mathematik II, sheet 9, IWR, Heidelberg university, 2006)
 
 T = pl.linspace(0, 10, 11)
 
@@ -67,6 +67,7 @@ pl.plot(t, pl.squeeze(lsqpe.Xsim[1,:]), color="r", label = "$x_{2,sim}$")
 
 pl.xlabel("$t$")
 pl.ylabel("$x_1, x_2$", rotation = 0)
+pl.xlim(0.0, 10.0)
 
 pl.legend(loc = "upper left")
 pl.grid()
