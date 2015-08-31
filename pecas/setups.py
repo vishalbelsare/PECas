@@ -6,7 +6,7 @@ import casadi.tools as cat
 import numpy as np
 from abc import ABCMeta, abstractmethod
 
-import ipdb
+# import ipdb
 import time
 
 import systems
@@ -416,7 +416,7 @@ class ODEsetup(SetupsBaseClass):
 
         # Initialize measurement function
 
-        ipdb.set_trace()
+        # ipdb.set_trace()
 
         phifcn = ca.MXFunction("phifcn", [system.vars["t"], system.vars["x"], \
             system.vars["p"], system.vars["u"],system.vars["wu"]], \
