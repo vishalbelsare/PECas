@@ -33,7 +33,7 @@ install:
 
 before_script:
  - export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages:/usr/lib/pymodules/python2.7
-  -export PYTHONPATH=$PYTHONPATH:$HOME/casadi-py27-np1.9.1-v2.4.0-rc1
+ - export PYTHONPATH=$PYTHONPATH:$HOME/casadi-py27-np1.9.1-v2.4.0-rc1
 
 script:
  - python -c 'import numpy; print numpy.version.version'
