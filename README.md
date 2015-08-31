@@ -4,7 +4,7 @@ PECas 0.3
 Parameter estimation using CasADi
 ---------------------------------
 
-[![Build Status](https://travis-ci.org/adbuerger/PECas.svg?branch=master)](https://travis-ci.org/adbuerger/PECas)
+[![Build Status](https://travis-ci.org/adbuerger/PECas.svg?branch=for2.4)](https://travis-ci.org/adbuerger/PECas)
 
 PECas holds a user-friendly environment for solving parameter estimation
 problems and for interpretation of the results recieved. It does so by providing Python classes that can be initialized with the problem specifications, while the computations can then easily be performed by using the available class functions.

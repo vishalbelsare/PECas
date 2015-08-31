@@ -3,7 +3,7 @@ import pylab as pl
 import casadi as ca
 import pecas
 
-N = 1000
+N = 8000
 fs = 610.1
 
 p_true = ca.DMatrix([5.625e-6,2.3e-4,1,4.69])
