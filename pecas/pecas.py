@@ -7,7 +7,7 @@ import casadi.tools as cat
 import numpy as np
 # from scipy.misc import comb
 
-import pdb
+import ipdb
 import time
 
 import systems
@@ -259,7 +259,7 @@ class LSq(PECasBaseClass):
         wv = None, wwe = None, wwu = None, \
         pinit = None, \
         xinit = None, \
-        linear_solver = "mumps", \
+        linear_solver = "ma97", \
         scheme = "radau", \
         order = 3):
 
@@ -441,37 +441,48 @@ this might take some time ...
         self.g = g
 
 
-        reslsqfcn = ca.MXFunction(ca.nlpIn(x=self.pesetup.Vars), \
+        reslsqfcn = ca.MXFunction("reslsqfcn", ca.nlpIn(x=self.pesetup.Vars), \
             ca.nlpOut(f=self.reslsq, g=g))
 
         reslsqfcn.init()
 
         # Initialize the solver
 
-        solver = ca.NlpSolver("ipopt", reslsqfcn)
-        solver.setOption("tol", 1e-10)
-        solver.setOption("linear_solver", self.linear_solver)
-        # solver.setOption("expand", True)
-        solver.init()
+        # ipdb.set_trace()
+
+        solver = ca.NlpSolver("solver", "ipopt", reslsqfcn, \
+            {"tol":1e-1, "linear_solver":self.linear_solver})
+        # solver = ca.NlpSolver("solver", "ipopt", reslsqfcn)
+        # solver.setOption("tol", 1e-10)
+        # solver.setOption("linear_solver", self.linear_solver)
+        # # solver.setOption("expand", True)
+        # solver.init()
 
         # Set equality constraints
 
-        solver.setInput(np.zeros(g.size()), "lbg")
-        solver.setInput(np.zeros(g.size()), "ubg")
+        # solver.setInput(np.zeros(g.size()), "lbg")
+        # solver.setInput(np.zeros(g.size()), "ubg")
 
         # Set the initial guess and bounds for the solver]
 
-        solver.setInput(self.pesetup.Varsinit, "x0")
+        # solver.setInput(self.pesetup.Varsinit, "x0")
 
         # Solve the optimization problem
 
-        solver.evaluate()
+        # solver.evaluate()
 
         # Store the results of the computation
 
-        self.Varshat = solver.getOutput("x")
-        self.rhat = solver.getOutput("f")
-        self.dv_lambdahat = solver.getOutput("lam_g")
+        sol = solver(x0 = self.pesetup.Varsinit, \
+            lbg = 0, ubg = 0)
+
+        # self.Varshat = solver.getOutput("x")
+        # self.rhat = solver.getOutput("f")
+        # self.dv_lambdahat = solver.getOutput("lam_g")
+
+        self.Varshat = sol["x"]
+        self.rhat = sol["f"]
+        self.dv_lambdahat = sol["lam_g"]
         
         # Ysim = self.pesetup.phiNfcn([self.Varshat])[0]
         # Ym = np.reshape(self.yN.T,(Ysim.shape))
@@ -591,23 +602,20 @@ parameter set in the argument psim.
                 raise ValueError("Wrong dimension for parameter set psim.")
 
 
-        fp = ca.MXFunction([self.pesetup.system.vars["x"], \
-                            self.pesetup.system.vars["t"], \
-                            self.pesetup.system.vars["u"], \
-                            self.pesetup.system.vars["wu"], \
-                            self.pesetup.system.vars["we"], \
-                            self.pesetup.system.vars["p"]], \
+        fp = ca.MXFunction("fp", [self.pesetup.system.vars], \
                             [self.pesetup.system.fcn["f"]])
-        fp.init()
+        # fp.init()
 
-        fpeval = fp.call([self.pesetup.system.vars["x"], \
+        fpeval = fp([ca.vertcat([self.pesetup.system.vars["x"], \
                           np.zeros(1), \
                           self.pesetup.system.vars["u"], \
                           np.zeros(self.pesetup.nwu), \
                           np.zeros(self.pesetup.nwe), \
-                          psim])[0]
+                          psim])])[0]
 
-        fsim = ca.MXFunction(ca.daeIn(x = self.pesetup.system.vars["x"], \
+        ipdb.set_trace()
+
+        fsim = ca.MXFunction("fsim", ca.daeIn(x = self.pesetup.system.vars["x"], \
             p = self.pesetup.system.vars["u"]), \
             ca.daeOut(ode = fpeval))
 

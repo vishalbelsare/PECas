@@ -6,7 +6,7 @@ import casadi.tools as cat
 import numpy as np
 from abc import ABCMeta, abstractmethod
 
-# import ipdb
+import ipdb
 import time
 
 import systems
@@ -77,7 +77,8 @@ class SetupsBaseClass(object):
 
         else:
 
-            self.uN = np.zeros((1, self.nsteps))
+            # self.uN = np.zeros((1, self.nsteps))
+            self.uN = ca.DMatrix(0, self.nsteps)
 
         # Set initials for the parameters
 
@@ -200,10 +201,7 @@ class BSsetup(SetupsBaseClass):
 
         self.phiN = []
 
-        phifcn = ca.MXFunction("yfcn", [system.vars["t"], system.vars["u"], \
-            system.vars["p"]], [system.fcn["phi"]])
-        # phifcn.setOption("name", "yfcn")
-        # phifcn.init()
+        phifcn = ca.MXFunction("yfcn", [system.vars], [system.fcn["phi"]])
 
         for k in range(self.nsteps):
 
@@ -213,8 +211,6 @@ class BSsetup(SetupsBaseClass):
         self.phiN = ca.vertcat(self.phiN)
 
         self.phiNfcn = ca.MXFunction("phiNfcn", [self.Vars], [self.phiN])
-        # self.phiNfcn.setOption("name", "phiNfcn")
-        # self.phiNfcn.init()
 
         # Set up g
 
@@ -385,7 +381,6 @@ class ODEsetup(SetupsBaseClass):
                         (self.tauroot[j] - self.tauroot[r])
             
             lfcn = ca.SXFunction("lfcn", [tau],[L])
-            # lfcn.init()
           
             # Evaluate the polynomial at the final time to get the
             # coefficients of the continuity equation
@@ -401,10 +396,6 @@ class ODEsetup(SetupsBaseClass):
 
             for r in range(self.ntauroot + 1):
 
-                # tfcn.setInput(self.tauroot[r])
-                # tfcn.evaluate()
-                # self.C[j,r] = tfcn.getOutput()
-
                 self.C[j,r] = tfcn([self.tauroot[r]])[0]
 
             self.lfcns.append(lfcn)
@@ -416,14 +407,10 @@ class ODEsetup(SetupsBaseClass):
 
         # Initialize measurement function
 
-        # ipdb.set_trace()
+        ipdb.set_trace()
 
-        phifcn = ca.MXFunction("phifcn", [system.vars["t"], system.vars["x"], \
-            system.vars["p"], system.vars["u"],system.vars["wu"]], \
+        phifcn = ca.MXFunction("phifcn", [system.vars], \
             [system.fcn["phi"]])
-        # phifcn.setOption("name", "yfcn")
-        # phifcn.init()
-
 
         # Initialzie setup of g
 
@@ -431,14 +418,7 @@ class ODEsetup(SetupsBaseClass):
 
         # Initialize ODE right-hand-side
 
-        # ipdb.set_trace()
-
-        ffcn = ca.MXFunction("ffcn", [system.vars["t"], system.vars["x"], \
-            system.vars["u"], system.vars["p"], system.vars["we"],\
-            system.vars["wu"]], [system.fcn["f"]])
-        # ffcn.setOption("name", "ffcn")
-        # ffcn.init()
-
+        ffcn = ca.MXFunction("ffcn", [system.vars], [system.fcn["f"]])
 
         # For all finite elements
 
@@ -454,14 +434,19 @@ class ODEsetup(SetupsBaseClass):
 
                 if t_meas_j == self.tu[k]:
 
-                    # self.phiN.append(phifcn.call([self.tu[k], \
-                    self.phiN.append(phifcn([self.tu[k], \
-                        self.Vars["X", k, 0], self.Vars["P"], self.uN[:, k], \
-                        self.Vars["WU", k, 0]])[0])
+                    varsinp = ca.vertcat([
+                            self.tu[k], \
+                            self.uN[:, k], \
+                            self.Vars["X", k, 0], \
+                            [], \
+                            self.Vars["WU", k, 0], \
+                            self.Vars["P"], \
+                        ])
+
+                    self.phiN.append(phifcn([varsinp])[0])
 
                 else:
 
-                    # pdb.set_trace()
 
                     tau = (t_meas_j - self.tu[k]) / hk
 
@@ -471,10 +456,16 @@ class ODEsetup(SetupsBaseClass):
 
                         x_temp += self.lfcns[r]([tau])[0] * self.Vars["X",k,r]
 
-                    # self.phiN.append(phifcn.call([t_meas_j, \
-                    self.phiN.append(phifcn([t_meas_j, \
-                        x_temp, self.Vars["P"], self.uN[:, k], \
-                        self.Vars["WU", k, 0]])[0])
+                    varsinp = ca.vertcat([
+                            t_meas_j, \
+                            self.uN[:, k], \
+                            x_temp, \
+                            [], \
+                            self.Vars["WU", k, 0], \
+                            self.Vars["P"], \
+                        ])
+
+                    self.phiN.append(phifcn([varsinp])[0])
 
             # For all collocation points
 
@@ -491,10 +482,16 @@ class ODEsetup(SetupsBaseClass):
           
                 # Add collocation equations to the NLP
 
-                # [fk] = ffcn.call([self.T[k][j], self.Vars["X",k,j], \
-                [fk] = ffcn([self.T[k][j], self.Vars["X",k,j], \
-                    self.uN[:, k], self.Vars["P"], \
-                    self.Vars["WE", k, j-1],self.Vars["WU", k, j-1]])
+                varsinp = ca.vertcat([
+                        self.T[k][j], \
+                        self.uN[:, k], \
+                        self.Vars["X",k,j], \
+                        self.Vars["WE", k, j-1], \
+                        self.Vars["WU", k, j-1], \
+                        self.Vars["P"], \
+                    ])
+
+                [fk] = ffcn([varsinp])
 
                 self.g.append(hk * fk - xp_jk)
 
@@ -532,16 +529,21 @@ class ODEsetup(SetupsBaseClass):
 
         if self.tu[-1] in self.ty:
 
-            # self.phiN.append(phifcn.call([self.tu[-1], self.Vars["XF"], \
-            self.phiN.append(phifcn([self.tu[-1], self.Vars["XF"], \
-                self.Vars["P"], self.uN[:, -1], self.Vars["WU", -1, 0]])[0])
+            varsinp = ca.vertcat([
+                    self.tu[-1], \
+                    self.uN[:, -1], \
+                    self.Vars["XF"], \
+                    [], \
+                    self.Vars["WU", -1, 0], \
+                    self.Vars["P"], \
+                ])
+
+            self.phiN.append(phifcn([ca.vertcat([self.tu[-1], self.Vars["XF"], \
+                self.Vars["P"], self.uN[:, -1], self.Vars["WU", -1, 0]])])[0])
 
         self.phiN = ca.vertcat(self.phiN)
 
         self.phiNfcn = ca.MXFunction("phiNfcn", [self.Vars], [self.phiN])
-        # self.phiNfcn.setOption("name", "phiNfcn")
-        # self.phiNfcn.init()
-
 
         self.tend_setup = time.time()
         self.duration_setup = self.tend_setup - self.tstart_setup
