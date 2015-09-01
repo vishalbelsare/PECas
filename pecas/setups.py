@@ -417,6 +417,7 @@ class ODEsetup(SetupsBaseClass):
         ffcn = ca.MXFunction("ffcn", \
             [system.t, system.u, system.x, system.we, system.wu, system.p], \
             [system.f])
+        # ffcn = ffcn.expand()
 
         # Structs to hold variables for late mapped evaluation
 
@@ -424,7 +425,18 @@ class ODEsetup(SetupsBaseClass):
         Uphi = []
         Xphi = []
         WUphi = []
-        Pphi = []
+        # Pphi = []
+
+        Tx = []
+        Ux = []
+        XCx = []
+        XDx = []
+        WEx = []
+        WUx = []
+
+        HKx = []
+        XP_JKx = []
+        XF_Kx = []
 
         # For all finite elements
 
@@ -438,7 +450,7 @@ class ODEsetup(SetupsBaseClass):
 
                 Uphi.append(self.uN[:, k])
                 WUphi.append(self.Vars["WU", k, 0])
-                Pphi.append(self.Vars["P"])
+                # Pphi.append(self.Vars["P"])
 
 
                 if t_meas_j == self.tu[k]:
@@ -482,12 +494,21 @@ class ODEsetup(SetupsBaseClass):
           
                 # Add collocation equations to the NLP
 
-                [fk] = ffcn([ \
-                    self.T[k][j], self.uN[:, k], self.Vars["X",k,j], \
-                    self.Vars["WE", k, j-1], self.Vars["WU", k, j-1], \
-                    self.Vars["P"]])
+                Tx.append(self.T[k][j])
+                Ux.append(self.uN[:, k])
+                XCx.append(self.Vars["X",k,j])
+                WEx.append(self.Vars["WE", k, j-1])
+                WUx.append(self.Vars["WU", k, j-1])
 
-                self.g.append(hk * fk - xp_jk)
+                HKx.append(hk)
+                XP_JKx.append(xp_jk)
+
+                # [fk] = ffcn([ \
+                #     self.T[k][j], self.uN[:, k], self.Vars["X",k,j], \
+                #     self.Vars["WE", k, j-1], self.Vars["WU", k, j-1], \
+                #     self.Vars["P"]])
+
+                # self.g.append(hk * fk - xp_jk)
 
             # Get an expression for the state at the end of
             # the finite element
@@ -500,17 +521,23 @@ class ODEsetup(SetupsBaseClass):
             
             # Add the continuity equation to NLP
             
+            XF_Kx.append(xf_k)
+
             if k == (self.nsteps - 1):
 
-                self.g.append(self.Vars["XF"] - xf_k)
+                XDx.append(self.Vars["XF"])
+
+                # self.g.append(self.Vars["XF"] - xf_k)
 
             else:
 
-                self.g.append(self.Vars["X",k+1,0] - xf_k)
+                # self.g.append(self.Vars["X",k+1,0] - xf_k)
+
+                XDx.append(self.Vars["X",k+1,0])
 
         # Concatenate constraints
 
-        self.g = ca.vertcat(self.g)
+        # self.g = ca.vertcat(self.g)
     
 
         # for k in range(self.nsteps):
@@ -527,7 +554,7 @@ class ODEsetup(SetupsBaseClass):
             Uphi.append(self.uN[:, -1])
             Xphi.append(self.Vars["XF"])
             WUphi.append(self.Vars["WU", -1, 0])
-            Pphi.append(self.Vars["P"])
+            # Pphi.append(self.Vars["P"])
 
             # self.phiN.append(phifcn([self.tu[-1], self.uN[:, -1], \
                 # self.Vars["XF"], self.Vars["WU", -1, 0], self.Vars["P"]])[0])
@@ -540,13 +567,49 @@ class ODEsetup(SetupsBaseClass):
         Uphi  = ca.horzcat(Uphi)
         Xphi  = ca.horzcat(Xphi)
         WUphi  = ca.horzcat(WUphi)
-        Pphi = ca.horzcat(Pphi)
+        # Pphi = ca.horzcat(Pphi)
+
+        Tx = ca.horzcat(Tx)
+        Ux = ca.horzcat(Ux)
+        XCx = ca.horzcat(XCx)
+        XDx = ca.horzcat(XDx)
+        WEx = ca.horzcat(WEx)
+        WUx = ca.horzcat(WUx)
+
+        HKx = ca.horzcat(HKx)
+        XP_JKx = ca.horzcat(XP_JKx)
+        XF_Kx = ca.horzcat(XF_Kx)
+
+
+        # expphifcn = phifcn.expand()
+        # [self.phiN] = expphifcn.map([Tphi, Uphi, Xphi, WUphi, \
+
+        [self.phiN] = phifcn.map([Tphi, Uphi, Xphi, WUphi, \
+            ca.repmat(self.Vars["P"], 1, Tphi.size())])
+        self.phiN = self.phiN[:]
+
+        [FK] = ffcn.map([Tx, Ux, XCx, WEx, WUx, \
+            ca.repmat(self.Vars["P"], 1, Tx.size())])
+        # FK = FK[:]
 
         # ipdb.set_trace()
 
-        expphifcn = phifcn.expand()
-        [self.phiN] = expphifcn.map([Tphi, Uphi, Xphi, WUphi, Pphi])
-        self.phiN = self.phiN[:]
+        # a = ca.MX.sym("a", 1)
+        # b = ca.MX.sym("b", self.nx)
+        # c = ca.MX.sym("c", self.nx)
+
+        # nodefcn = ca.MXFunction("nodefcn", [a, b, c], [a * b - c])
+        # nodefcn = nodefcn.expand()
+        # [g_app] = nodefcn.map([HKx, FK, XP_JKx], "openmp")
+
+        self.g.append((ca.repmat(HKx, self.nx, 1) * FK - XP_JKx)[:])
+        # self.g.append(g_app[:])
+
+        self.g.append((XDx - XF_Kx)[:])
+
+        # ipdb.set_trace()
+
+        self.g = ca.vertcat(self.g)
 
         self.phiNfcn = ca.MXFunction("phiNfcn", [self.Vars], [self.phiN])
 

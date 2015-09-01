@@ -14,6 +14,8 @@ import systems
 import setups
 import intro
 
+import ipdb
+
 from abc import ABCMeta, abstractmethod
 
 class PECasBaseClass:
@@ -402,6 +404,14 @@ this might take some time ...
         
             A.append(elem)
 
+        # a = ca.MX.sym("a", 1)
+        # b = ca.MX.sym("b", 1)
+        # c = ca.MX.sym("c", 1)
+
+        # dfcn = ca.MXFunction("dfcn", [a, b, c], [a-b+c])
+        # [g_app] = dfcn.map([self.pesetup.phiN.T, np.atleast_2d(self.yN), ca.vertcat(A).T])
+
+        # g = ca.vertcat([g_app[:]])
         g = ca.vertcat([self.pesetup.phiN - self.yN + ca.vertcat(A)])
 
 
@@ -431,6 +441,9 @@ this might take some time ...
 
         self.reslsq = ca.mul([A.T, self.W, A])
 
+        # ipdb.set_trace()
+        # self.reslsq = ca.inner_prod(ca.mul(self.W, A), A)
+
         self.A = A
 
 
@@ -444,7 +457,7 @@ this might take some time ...
         reslsqfcn = ca.MXFunction("reslsqfcn", ca.nlpIn(x=self.pesetup.Vars), \
             ca.nlpOut(f=self.reslsq, g=g))
 
-        reslsqfcn.init()
+        reslsqfcn = reslsqfcn.expand()
 
         # Initialize the solver, solve the optimization problem
 
