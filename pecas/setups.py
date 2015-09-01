@@ -6,8 +6,8 @@ import casadi.tools as cat
 import numpy as np
 from abc import ABCMeta, abstractmethod
 
-import ipdb
 import time
+import ipdb
 
 import systems
 import intro
@@ -402,6 +402,8 @@ class ODEsetup(SetupsBaseClass):
 
         # Initialize measurement function
 
+        # ipdb.set_trace()
+
         phifcn = ca.MXFunction("phifcn", \
             [system.t, system.u, system.x, system.wu, system.p], \
             [system.phi])
@@ -416,6 +418,14 @@ class ODEsetup(SetupsBaseClass):
             [system.t, system.u, system.x, system.we, system.wu, system.p], \
             [system.f])
 
+        # Structs to hold variables for late mapped evaluation
+
+        Tphi = []
+        Uphi = []
+        Xphi = []
+        WUphi = []
+        Pphi = []
+
         # For all finite elements
 
         for k in range(self.nsteps):
@@ -426,14 +436,21 @@ class ODEsetup(SetupsBaseClass):
 
             for t_meas_j in t_meas:
 
+                Uphi.append(self.uN[:, k])
+                WUphi.append(self.Vars["WU", k, 0])
+                Pphi.append(self.Vars["P"])
+
+
                 if t_meas_j == self.tu[k]:
 
-                    self.phiN.append(phifcn([ \
-                        self.tu[k], self.uN[:, k], self.Vars["X", k, 0], \
-                        self.Vars["WU", k, 0], self.Vars["P"]])[0])
+                    Tphi.append(self.tu[k])
+                    Xphi.append(self.Vars["X", k, 0])
+
+                    # self.phiN.append(phifcn([ \
+                    #     self.tu[k], self.uN[:, k], self.Vars["X", k, 0], \
+                    #     self.Vars["WU", k, 0], self.Vars["P"]])[0])
 
                 else:
-
 
                     tau = (t_meas_j - self.tu[k]) / hk
 
@@ -443,9 +460,12 @@ class ODEsetup(SetupsBaseClass):
 
                         x_temp += self.lfcns[r]([tau])[0] * self.Vars["X",k,r]
 
-                    self.phiN.append(phifcn([\
-                        t_meas_j, self.uN[:, k], x_temp, \
-                        self.Vars["WU", k, 0],self.Vars["P"]])[0])
+                    Tphi.appaned(self.t_meas_j)
+                    Xphi.append(x_temp)
+
+                    # self.phiN.append(phifcn([\
+                    #     t_meas_j, self.uN[:, k], x_temp, \
+                    #     self.Vars["WU", k, 0],self.Vars["P"]])[0])
 
             # For all collocation points
 
@@ -503,11 +523,30 @@ class ODEsetup(SetupsBaseClass):
 
         if self.tu[-1] in self.ty:
 
+            Tphi.append(self.tu[-1])
+            Uphi.append(self.uN[:, -1])
+            Xphi.append(self.Vars["XF"])
+            WUphi.append(self.Vars["WU", -1, 0])
+            Pphi.append(self.Vars["P"])
 
-            self.phiN.append(phifcn([self.tu[-1], self.uN[:, -1], \
-                self.Vars["XF"], self.Vars["WU", -1, 0], self.Vars["P"]])[0])
+            # self.phiN.append(phifcn([self.tu[-1], self.uN[:, -1], \
+                # self.Vars["XF"], self.Vars["WU", -1, 0], self.Vars["P"]])[0])
 
-        self.phiN = ca.vertcat(self.phiN)
+        # self.phiN = ca.vertcat(self.phiN)
+
+        # ipdb.set_trace()
+
+        Tphi  = ca.horzcat(Tphi)
+        Uphi  = ca.horzcat(Uphi)
+        Xphi  = ca.horzcat(Xphi)
+        WUphi  = ca.horzcat(WUphi)
+        Pphi = ca.horzcat(Pphi)
+
+        # ipdb.set_trace()
+
+        expphifcn = phifcn.expand()
+        [self.phiN] = expphifcn.map([Tphi, Uphi, Xphi, WUphi, Pphi])
+        self.phiN = self.phiN[:]
 
         self.phiNfcn = ca.MXFunction("phiNfcn", [self.Vars], [self.phiN])
 

@@ -35,7 +35,7 @@ The values resulting from the parameter estimation are
 
 .. math::
 
-    \hat{p} = \begin{pmatrix} {\hat{\beta}} \\ {\hat{\delta}} \end{pmatrix} = \begin{pmatrix} {0.69337903} \\ {0.69337903} \end{pmatrix}.
+    \hat{p} = \begin{pmatrix} {\hat{\beta}} \\ {\hat{\delta}} \end{pmatrix} = \begin{pmatrix} {0.693375497} \\ {0.341128505} \end{pmatrix}.
 
 The results for the system simulation using the estimated parameters in comparison the measurement data are shown in the figure below.
 
@@ -76,7 +76,7 @@ The value resulting from the parameter estimation is
 
 .. math::
 
-    \hat{p} = \begin{pmatrix} {\hat{k}}\end{pmatrix} = \begin{pmatrix} {2.99763513} \end{pmatrix}.
+    \hat{p} = \begin{pmatrix} {\hat{k}}\end{pmatrix} = \begin{pmatrix} {3.00670083} \end{pmatrix}.
 
 The results for the system simulation using the estimated parameter in comparison the measurement data are shown in the figures below.
 
