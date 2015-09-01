@@ -160,20 +160,12 @@ class BasicSystem(PECasSystem):
 Missing input argument for system definition or wrong variable type for an
 input argument. Input arguments must be CasADi symbolic types.''')
 
-        self.vars = cat.struct_symMX([
-                (
-                    cat.entry("t", shape = t.shape),
-                    cat.entry("u", shape = u.shape),
-                    cat.entry("p", shape = p.shape),
-                )
-            ])
+        self.t = t
+        self.u = u
+        self.p = p
 
-        self.fcn = cat.struct_MX([
-                (
-                    cat.entry("phi", expr = phi),
-                    cat.entry("g", expr = g)
-                )
-            ])
+        self.phi = phi
+        self.g = g
 
         print('\nDefinition of BasicSystem system sucessful.')
 
@@ -241,31 +233,12 @@ class ExplODE(PECasSystem):
 Missing input argument for system definition or wrong variable type for an
 input argument. Input arguments must be CasADi symbolic types.''')
 
-        # self.vars = cat.struct_symMX([
-        #         (
-        #             cat.entry("t", shape = t.shape),
-        #             cat.entry("u", shape = u.shape),
-        #             cat.entry("x", shape = x.shape),
-        #             cat.entry("we", shape = we.shape),
-        #             cat.entry("wu", shape = wu.shape),
-        #             cat.entry("p", shape = p.shape)
-        #         )
-        #     ])
-
         self.t = t
         self.u = u
         self.x = x
         self.we = we
         self.wu = wu
         self.p = p
-
-        # self.fcn = cat.struct_MX([
-        #         (
-        #             cat.entry("phi", expr = phi),
-        #             cat.entry("f", expr = f)
-        #         )
-        #     ])
-
 
         self.phi = phi
         self.f = f

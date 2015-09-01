@@ -77,7 +77,6 @@ class SetupsBaseClass(object):
 
         else:
 
-            # self.uN = np.zeros((1, self.nsteps))
             self.uN = ca.DMatrix(0, self.nsteps)
 
         # Set initials for the parameters
@@ -164,7 +163,6 @@ class BSsetup(SetupsBaseClass):
 
         self.nu = system.u.shape[0]
         self.np = system.p.shape[0]
-        # self.nv = system.phi.shape[0]
         self.nphi = system.phi.shape[0]
 
         if np.atleast_2d(tu).shape[0] == 1:
@@ -218,8 +216,6 @@ class BSsetup(SetupsBaseClass):
         # TODO! Can/should/must gfcn depend on uN and/or t?
 
         gfcn = ca.MXFunction("gfcn", [system.p], [system.g])
-        # gfcn.setOption("name", "gfcn")
-        # gfcn.init()
 
         self.g = gfcn.call([self.Vars["P"]])[0]
 
@@ -266,7 +262,6 @@ class ODEsetup(SetupsBaseClass):
         self.nx = system.x.shape[0]
         self.nu = system.u.shape[0]
         self.np = system.p.shape[0]
-        # self.nv = system.phi.shape[0]
         self.nwe = system.we.shape[0]
         self.nwu = system.wu.shape[0]        
         self.nphi = system.phi.shape[0]
@@ -393,7 +388,6 @@ class ODEsetup(SetupsBaseClass):
             # collocation equation
             
             tfcn = lfcn.tangent()
-            # tfcn.init()
 
             for r in range(self.ntauroot + 1):
 
@@ -407,8 +401,6 @@ class ODEsetup(SetupsBaseClass):
         self.phiN = []
 
         # Initialize measurement function
-
-        # ipdb.set_trace()
 
         phifcn = ca.MXFunction("phifcn", \
             [system.t, system.u, system.x, system.wu, system.p], \
@@ -427,8 +419,6 @@ class ODEsetup(SetupsBaseClass):
         # For all finite elements
 
         for k in range(self.nsteps):
-
-            # pdb.set_trace()
 
             hk = self.tu[k + 1] - self.tu[k]
             t_meas = self.ty[np.where(np.logical_and( \

@@ -447,39 +447,15 @@ this might take some time ...
 
         reslsqfcn.init()
 
-        # Initialize the solver
-
-        # ipdb.set_trace()
+        # Initialize the solver, solve the optimization problem
 
         solver = ca.NlpSolver("solver", "ipopt", reslsqfcn, \
             {"tol":1e-1, "linear_solver":self.linear_solver})
-        # solver = ca.NlpSolver("solver", "ipopt", reslsqfcn)
-        # solver.setOption("tol", 1e-10)
-        # solver.setOption("linear_solver", self.linear_solver)
-        # # solver.setOption("expand", True)
-        # solver.init()
-
-        # Set equality constraints
-
-        # solver.setInput(np.zeros(g.size()), "lbg")
-        # solver.setInput(np.zeros(g.size()), "ubg")
-
-        # Set the initial guess and bounds for the solver]
-
-        # solver.setInput(self.pesetup.Varsinit, "x0")
-
-        # Solve the optimization problem
-
-        # solver.evaluate()
 
         # Store the results of the computation
 
         sol = solver(x0 = self.pesetup.Varsinit, \
             lbg = 0, ubg = 0)
-
-        # self.Varshat = solver.getOutput("x")
-        # self.rhat = solver.getOutput("f")
-        # self.dv_lambdahat = solver.getOutput("lam_g")
 
         self.Varshat = sol["x"]
         self.rhat = sol["f"]
@@ -633,8 +609,6 @@ parameter set in the argument psim.
                 integrator = ca.Integrator("integrator", method, \
                     fsim, {"t0": e, "tf": tsim[k+1]})
 
-                # integrator = ca.Integrator(method, fsim)
-
             except RuntimeError as err:
 
                 errmsg = '''
@@ -646,20 +620,12 @@ method-argument of the function.
                 raise RuntimeError(errmsg)
 
 
-            # integrator.setOption("t0", e)
-            # integrator.setOption("tf", tsim[k+1])
-            # integrator.init()
-
             if not self.pesetup.nu == 0:
 
                 u0 = usim[:,k]
 
-            Xk_end = itemgetter('xf')(integrator({'x0':x0,'p':u0}))
 
-            # Xk_end, = ca.integratorOut( \
-            #     integrator( \
-            #         ca.integratorIn( \
-            #             x0 = x0, p = u0)), "xf")
+            Xk_end = itemgetter('xf')(integrator({'x0':x0,'p':u0}))
 
             Xsim.append(Xk_end)
             x0 = Xk_end
