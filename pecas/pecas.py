@@ -5,6 +5,7 @@ import casadi as ca
 import casadi.tools as cat
 
 import numpy as np
+from operator import itemgetter
 # from scipy.misc import comb
 
 import ipdb
@@ -602,21 +603,21 @@ parameter set in the argument psim.
                 raise ValueError("Wrong dimension for parameter set psim.")
 
 
-        fp = ca.MXFunction("fp", [self.pesetup.system.vars], \
-                            [self.pesetup.system.fcn["f"]])
-        # fp.init()
+        fp = ca.MXFunction("fp", \
+            [self.pesetup.system.t, self.pesetup.system.u, \
+            self.pesetup.system.x, self.pesetup.system.we, \
+            self.pesetup.system.wu, self.pesetup.system.p], \
+            [self.pesetup.system.f])
 
-        fpeval = fp([ca.vertcat([self.pesetup.system.vars["x"], \
-                          np.zeros(1), \
-                          self.pesetup.system.vars["u"], \
-                          np.zeros(self.pesetup.nwu), \
-                          np.zeros(self.pesetup.nwe), \
-                          psim])])[0]
+        fpeval = fp([\
+            self.pesetup.system.t, self.pesetup.system.u, \
+            self.pesetup.system.x, np.zeros(self.pesetup.nwe), \
+            np.zeros(self.pesetup.nwu), psim])[0]
 
-        ipdb.set_trace()
-
-        fsim = ca.MXFunction("fsim", ca.daeIn(x = self.pesetup.system.vars["x"], \
-            p = self.pesetup.system.vars["u"]), \
+        fsim = ca.MXFunction("fsim", \
+            ca.daeIn(t = self.pesetup.system.t, \
+                x = self.pesetup.system.x, \
+                p = self.pesetup.system.u), \
             ca.daeOut(ode = fpeval))
 
 
@@ -629,7 +630,10 @@ parameter set in the argument psim.
 
             try:
 
-                integrator = ca.Integrator(method, fsim)
+                integrator = ca.Integrator("integrator", method, \
+                    fsim, {"t0": e, "tf": tsim[k+1]})
+
+                # integrator = ca.Integrator(method, fsim)
 
             except RuntimeError as err:
 
@@ -642,18 +646,20 @@ method-argument of the function.
                 raise RuntimeError(errmsg)
 
 
-            integrator.setOption("t0", e)
-            integrator.setOption("tf", tsim[k+1])
-            integrator.init()
+            # integrator.setOption("t0", e)
+            # integrator.setOption("tf", tsim[k+1])
+            # integrator.init()
 
             if not self.pesetup.nu == 0:
 
                 u0 = usim[:,k]
 
-            Xk_end, = ca.integratorOut( \
-                integrator( \
-                    ca.integratorIn( \
-                        x0 = x0, p = u0)), "xf")
+            Xk_end = itemgetter('xf')(integrator({'x0':x0,'p':u0}))
+
+            # Xk_end, = ca.integratorOut( \
+            #     integrator( \
+            #         ca.integratorIn( \
+            #             x0 = x0, p = u0)), "xf")
 
             Xsim.append(Xk_end)
             x0 = Xk_end

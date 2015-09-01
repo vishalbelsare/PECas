@@ -162,10 +162,10 @@ class BSsetup(SetupsBaseClass):
 
         # Dimensions
 
-        self.nu = system.vars["u"].shape[0]
-        self.np = system.vars["p"].shape[0]
-        self.nv = system.fcn["phi"].shape[0]
-        self.nphi = system.fcn["phi"].shape[0]
+        self.nu = system.u.shape[0]
+        self.np = system.p.shape[0]
+        # self.nv = system.phi.shape[0]
+        self.nphi = system.phi.shape[0]
 
         if np.atleast_2d(tu).shape[0] == 1:
 
@@ -187,7 +187,7 @@ class BSsetup(SetupsBaseClass):
                 (
                     cat.entry("P", shape = self.np),
                     cat.entry("V", repeat = [self.nsteps], \
-                        shape = self.nv),
+                        shape = self.nphi),
                 )
             ])
 
@@ -201,11 +201,12 @@ class BSsetup(SetupsBaseClass):
 
         self.phiN = []
 
-        phifcn = ca.MXFunction("yfcn", [system.vars], [system.fcn["phi"]])
+        phifcn = ca.MXFunction("phifcn", \
+            [system.t, system.u, system.p], [system.phi])
 
         for k in range(self.nsteps):
 
-            self.phiN.append(phifcn.call([self.tu[k], \
+            self.phiN.append(phifcn([self.tu[k], \
                 self.uN[:, k], self.Vars["P"]])[0])
 
         self.phiN = ca.vertcat(self.phiN)
@@ -216,7 +217,7 @@ class BSsetup(SetupsBaseClass):
 
         # TODO! Can/should/must gfcn depend on uN and/or t?
 
-        gfcn = ca.MXFunction("gfcn", [system.vars["p"]], [system.fcn["g"]])
+        gfcn = ca.MXFunction("gfcn", [system.p], [system.g])
         # gfcn.setOption("name", "gfcn")
         # gfcn.init()
 
@@ -262,13 +263,13 @@ class ODEsetup(SetupsBaseClass):
 
         # Dimensions
 
-        self.nx = system.vars["x"].shape[0]
-        self.nu = system.vars["u"].shape[0]
-        self.np = system.vars["p"].shape[0]
-        self.nv = system.fcn["phi"].shape[0]
-        self.nwe = system.vars["we"].shape[0]
-        self.nwu = system.vars["wu"].shape[0]        
-        self.nphi = system.fcn["phi"].shape[0]
+        self.nx = system.x.shape[0]
+        self.nu = system.u.shape[0]
+        self.np = system.p.shape[0]
+        # self.nv = system.phi.shape[0]
+        self.nwe = system.we.shape[0]
+        self.nwu = system.wu.shape[0]        
+        self.nphi = system.phi.shape[0]
 
         if np.atleast_2d(tu).shape[0] == 1:
 
@@ -321,7 +322,7 @@ class ODEsetup(SetupsBaseClass):
                         shape = self.nx), \
                     cat.entry("XF", shape = self.nx), \
                     cat.entry("V", repeat = [self.nsteps+1], \
-                        shape = self.nv),
+                        shape = self.nphi),
                     cat.entry("WE", repeat = [self.nsteps, self.ntauroot], \
                         shape = self.nwe),
                     cat.entry("WU", repeat = [self.nsteps, self.ntauroot], \
@@ -407,10 +408,11 @@ class ODEsetup(SetupsBaseClass):
 
         # Initialize measurement function
 
-        ipdb.set_trace()
+        # ipdb.set_trace()
 
-        phifcn = ca.MXFunction("phifcn", [system.vars], \
-            [system.fcn["phi"]])
+        phifcn = ca.MXFunction("phifcn", \
+            [system.t, system.u, system.x, system.wu, system.p], \
+            [system.phi])
 
         # Initialzie setup of g
 
@@ -418,7 +420,9 @@ class ODEsetup(SetupsBaseClass):
 
         # Initialize ODE right-hand-side
 
-        ffcn = ca.MXFunction("ffcn", [system.vars], [system.fcn["f"]])
+        ffcn = ca.MXFunction("ffcn", \
+            [system.t, system.u, system.x, system.we, system.wu, system.p], \
+            [system.f])
 
         # For all finite elements
 
@@ -434,16 +438,9 @@ class ODEsetup(SetupsBaseClass):
 
                 if t_meas_j == self.tu[k]:
 
-                    varsinp = ca.vertcat([
-                            self.tu[k], \
-                            self.uN[:, k], \
-                            self.Vars["X", k, 0], \
-                            [], \
-                            self.Vars["WU", k, 0], \
-                            self.Vars["P"], \
-                        ])
-
-                    self.phiN.append(phifcn([varsinp])[0])
+                    self.phiN.append(phifcn([ \
+                        self.tu[k], self.uN[:, k], self.Vars["X", k, 0], \
+                        self.Vars["WU", k, 0], self.Vars["P"]])[0])
 
                 else:
 
@@ -456,16 +453,9 @@ class ODEsetup(SetupsBaseClass):
 
                         x_temp += self.lfcns[r]([tau])[0] * self.Vars["X",k,r]
 
-                    varsinp = ca.vertcat([
-                            t_meas_j, \
-                            self.uN[:, k], \
-                            x_temp, \
-                            [], \
-                            self.Vars["WU", k, 0], \
-                            self.Vars["P"], \
-                        ])
-
-                    self.phiN.append(phifcn([varsinp])[0])
+                    self.phiN.append(phifcn([\
+                        t_meas_j, self.uN[:, k], x_temp, \
+                        self.Vars["WU", k, 0],self.Vars["P"]])[0])
 
             # For all collocation points
 
@@ -482,16 +472,10 @@ class ODEsetup(SetupsBaseClass):
           
                 # Add collocation equations to the NLP
 
-                varsinp = ca.vertcat([
-                        self.T[k][j], \
-                        self.uN[:, k], \
-                        self.Vars["X",k,j], \
-                        self.Vars["WE", k, j-1], \
-                        self.Vars["WU", k, j-1], \
-                        self.Vars["P"], \
-                    ])
-
-                [fk] = ffcn([varsinp])
+                [fk] = ffcn([ \
+                    self.T[k][j], self.uN[:, k], self.Vars["X",k,j], \
+                    self.Vars["WE", k, j-1], self.Vars["WU", k, j-1], \
+                    self.Vars["P"]])
 
                 self.g.append(hk * fk - xp_jk)
 
@@ -529,17 +513,9 @@ class ODEsetup(SetupsBaseClass):
 
         if self.tu[-1] in self.ty:
 
-            varsinp = ca.vertcat([
-                    self.tu[-1], \
-                    self.uN[:, -1], \
-                    self.Vars["XF"], \
-                    [], \
-                    self.Vars["WU", -1, 0], \
-                    self.Vars["P"], \
-                ])
 
-            self.phiN.append(phifcn([ca.vertcat([self.tu[-1], self.Vars["XF"], \
-                self.Vars["P"], self.uN[:, -1], self.Vars["WU", -1, 0]])])[0])
+            self.phiN.append(phifcn([self.tu[-1], self.uN[:, -1], \
+                self.Vars["XF"], self.Vars["WU", -1, 0], self.Vars["P"]])[0])
 
         self.phiN = ca.vertcat(self.phiN)
 

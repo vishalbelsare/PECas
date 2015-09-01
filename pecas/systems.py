@@ -55,19 +55,19 @@ input-output structure and contrain equations: ''')
             print("y = phi(t, u, p), g(t, u, p) = 0 ")
             
             print('''\nWith {0} inputs u, {1} parameters p and {2} outputs phi
-            '''.format(self.vars["u"].size(),self.vars["p"].size(), \
-                self.fcn["phi"].size()))
+            '''.format(self.u.size(),self.p.size(), \
+                self.phi.size()))
 
 
             if showEquations:
                 
                 print("\nAnd where phi is defined by: ")
-                for i, yi in enumerate(self.fcn['phi']):         
+                for i, yi in enumerate(self.phi):         
                     print("y[{0}] = {1}".format(\
                          i, yi))
                          
                 print("\nAnd where g is defined by: ")
-                for i, gi in enumerate(self.fcn['g']):              
+                for i, gi in enumerate(self.g):              
                     print("g[{0}] = {1}".format(\
                          i, gi))
 
@@ -85,19 +85,19 @@ and by an output function phi which sets the system measurements:
     {0} inputs u
     {1} parameters p
     {2} states x
-    {3} outputs phi'''.format(self.vars["u"].size(),self.vars["p"].size(),\
-                                self.vars["x"].size(), \
-                                self.fcn["phi"].size()))
+    {3} outputs phi'''.format(self.u.size(),self.p.size(),\
+                                self.x.size(), \
+                                self.phi.size()))
 
             if showEquations:
                 
                 print("\nWhere xdot is defined by: ")
-                for i, xi in enumerate(self.fcn['f']):         
+                for i, xi in enumerate(self.f):         
                     print("xdot[{0}] = {1}".format(\
                          i, xi))
                          
                 print("\nAnd where phi is defined by: ")
-                for i, yi in enumerate(self.fcn['phi']):              
+                for i, yi in enumerate(self.phi):              
                     print("y[{0}] = {1}".format(\
                          i, yi))
 
@@ -160,11 +160,11 @@ class BasicSystem(PECasSystem):
 Missing input argument for system definition or wrong variable type for an
 input argument. Input arguments must be CasADi symbolic types.''')
 
-        self.vars = cat.struct_MX([
+        self.vars = cat.struct_symMX([
                 (
-                    cat.entry("t", expr = t),
-                    cat.entry("u", expr = u),
-                    cat.entry("p", expr = p),
+                    cat.entry("t", shape = t.shape),
+                    cat.entry("u", shape = u.shape),
+                    cat.entry("p", shape = p.shape),
                 )
             ])
 
@@ -241,23 +241,34 @@ class ExplODE(PECasSystem):
 Missing input argument for system definition or wrong variable type for an
 input argument. Input arguments must be CasADi symbolic types.''')
 
-        self.vars = cat.struct_MX([
-                (
-                    cat.entry("t", expr = t),
-                    cat.entry("u", expr = u),
-                    cat.entry("x", expr = x),
-                    cat.entry("we", expr = we),
-                    cat.entry("wu", expr = wu),
-                    cat.entry("p", expr = p)
-                )
-            ])
+        # self.vars = cat.struct_symMX([
+        #         (
+        #             cat.entry("t", shape = t.shape),
+        #             cat.entry("u", shape = u.shape),
+        #             cat.entry("x", shape = x.shape),
+        #             cat.entry("we", shape = we.shape),
+        #             cat.entry("wu", shape = wu.shape),
+        #             cat.entry("p", shape = p.shape)
+        #         )
+        #     ])
 
-        self.fcn = cat.struct_MX([
-                (
-                    cat.entry("phi", expr = phi),
-                    cat.entry("f", expr = f)
-                )
-            ])
+        self.t = t
+        self.u = u
+        self.x = x
+        self.we = we
+        self.wu = wu
+        self.p = p
+
+        # self.fcn = cat.struct_MX([
+        #         (
+        #             cat.entry("phi", expr = phi),
+        #             cat.entry("f", expr = f)
+        #         )
+        #     ])
+
+
+        self.phi = phi
+        self.f = f
 
         print('Definition of ExplODE system sucessful.')
 
