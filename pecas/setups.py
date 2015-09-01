@@ -465,11 +465,9 @@ class ODEsetup(SetupsBaseClass):
             WUphi.append(self.Vars["WU", -1, 0])
 
 
-        # Mapped calculation of the measurement nodes
+        # Mapped calculation of the collocation equations
 
-        # inp = ca.MX.sym("inp", self.nx, self.ntauroot+1)
-
-        # inp = cat.struct_symMX([cat.entry("inp", repeat = self.ntauroot+1, shape = self.nx)])
+        # Collocation nodes
 
         inp = ca.MX.sym("inp", self.nx, self.ntauroot+1)
 
@@ -485,22 +483,7 @@ class ODEsetup(SetupsBaseClass):
         XP_JKx = ca.horzcat([op])
 
 
-        # ipdb.set_trace()
-
-        # node = 
-
-        # def make_node(inp):
-
-        #     out = 0;
-
-        #     for j in range(1, ntauroot + 1):
-            
-        #         for r in range(ntauroot + 1):
-
-        #             out += C[r,j] * inp[r]
-
-        #     return out
-
+        # Continuity nodes
 
         conti = sum([self.D[r] * inp[:, r] for r in range(self.ntauroot + 1)])
 
@@ -510,24 +493,52 @@ class ODEsetup(SetupsBaseClass):
 
         XF_Kx = ca.horzcat([op])
 
-        # ipdb.set_trace()
 
-        Tx = []
-        Ux = []
-        XCx = []
-        XDx = []
-        WEx = []
-        WUx = []
+        Tx = [self.T[k,j] \
+            for k in range(self.nsteps) \
+            for j in range(1, self.ntauroot + 1)]
 
-        HKx = []
-        XP_JKx = []
-        XF_Kx = []
+        Ux = [ca.repmat(self.uN[:, k], 1, self.ntauroot) \
+            for k in range(self.nsteps)]
 
-        for k in range(self.nsteps):
+        XCx = [self.Vars["X",k,j]  \
+            for k in range(self.nsteps) \
+            for j in range(1, self.ntauroot + 1)]
+
+        XDx = [self.Vars["X",k+1,0] for k in range(self.nsteps-1)]
+
+        XDx = XDx + [self.Vars["XF"]]
+
+        WEx = [self.Vars["WE", k, j-1] \
+            for k in range(self.nsteps) \
+            for j in range(1, self.ntauroot + 1)]
+
+        WUx = [self.Vars["WU", k, j-1] \
+            for k in range(self.nsteps) \
+             for j in range(1, self.ntauroot + 1)]
+
+        HKx = [ca.repmat((self.tu[k + 1] - self.tu[k]), 1, self.ntauroot) \
+            for k in range(self.nsteps)]
+    
+
+        # XP_JKx = []
+        # XF_Kx = []
+
+        # Tx = []
+        # Ux = []
+        # XCx = []
+        # XDx = []
+        # WEx = []
+        # WUx = []
+
+        # HKx = []
+        # XP_JKx = []
+
+        # for k in range(self.nsteps):
 
             # For all collocation points
 
-            for j in range(1, self.ntauroot + 1):
+            # for j in range(1, self.ntauroot + 1):
                 
                 # Get an expression for the state derivative at
                 # the collocation point
@@ -540,13 +551,13 @@ class ODEsetup(SetupsBaseClass):
           
                 # Add collocation equations to the NLP
 
-                Tx.append(self.T[k][j])
-                Ux.append(self.uN[:, k])
-                XCx.append(self.Vars["X",k,j])
-                WEx.append(self.Vars["WE", k, j-1])
-                WUx.append(self.Vars["WU", k, j-1])
+                # Tx.append(self.T[k][j])
+                # Ux.append(self.uN[:, k])
+                # XCx.append(self.Vars["X",k,j])
+                # WEx.append(self.Vars["WE", k, j-1])
+                # WUx.append(self.Vars["WU", k, j-1])
 
-                HKx.append(hk)
+                # HKx.append(hk)
                 # XP_JKx.append(xp_jk)
 
                 # [fk] = ffcn([ \
@@ -569,17 +580,17 @@ class ODEsetup(SetupsBaseClass):
             
             # XF_Kx.append(xf_k)
 
-            if k == (self.nsteps - 1):
+            # if k == (self.nsteps - 1):
 
-                XDx.append(self.Vars["XF"])
+            #     XDx.append(self.Vars["XF"])
 
                 # self.g.append(self.Vars["XF"] - xf_k)
 
-            else:
+            # else:
 
                 # self.g.append(self.Vars["X",k+1,0] - xf_k)
 
-                XDx.append(self.Vars["X",k+1,0])
+                # XDx.append(self.Vars["X",k+1,0])
 
         # Concatenate constraints
 
@@ -652,6 +663,9 @@ class ODEsetup(SetupsBaseClass):
         # nodefcn = ca.MXFunction("nodefcn", [a, b, c], [a * b - c])
         # nodefcn = nodefcn.expand()
         # [g_app] = nodefcn.map([HKx, FK, XP_JKx], "openmp")
+
+        # ipdb.set_trace()
+
 
         self.g.append((ca.repmat(HKx, self.nx, 1) * FK - XP_JKx)[:])
         # self.g.append(g_app[:])
