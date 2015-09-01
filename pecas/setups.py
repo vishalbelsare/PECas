@@ -238,6 +238,7 @@ class ODEsetup(SetupsBaseClass):
             xinit = xinit)
 
 
+    @profile
     def __init__(self, system = None, \
         tu = None, uN = None, \
         ty = None, yN = None,
@@ -479,6 +480,53 @@ class ODEsetup(SetupsBaseClass):
                     #     t_meas_j, self.uN[:, k], x_temp, \
                     #     self.Vars["WU", k, 0],self.Vars["P"]])[0])
 
+
+        if self.tu[-1] in self.ty:
+
+            Tphi.append(self.tu[-1])
+            Uphi.append(self.uN[:, -1])
+            Xphi.append(self.Vars["XF"])
+            WUphi.append(self.Vars["WU", -1, 0])
+
+
+
+        # inp = ca.MX.sym("inp", self.nx, self.ntauroot+1)
+
+        # inp = cat.struct_symMX([cat.entry("inp", repeat = self.ntauroot+1, shape = self.nx)])
+
+        inp = ca.MX.sym("inp", self.nx, self.ntauroot+1)
+
+        node = ca.horzcat([sum([self.C[r,j] * inp[:, r] for r in range(self.ntauroot + 1)]) for j in range(1, self.ntauroot + 1)])
+
+        fnode = ca.MXFunction("fnode", [inp], [node])
+
+        bl = [ca.horzcat(e) for e in self.Vars["X"]]
+
+        # ipdb.set_trace()
+
+
+        [op] = fnode.map([ca.horzcat(bl)])
+
+        XP_JKx = ca.horzcat([op])
+
+        # node = 
+
+        # def make_node(inp):
+
+        #     out = 0;
+
+        #     for j in range(1, ntauroot + 1):
+            
+        #         for r in range(ntauroot + 1):
+
+        #             out += C[r,j] * inp[r]
+
+        #     return out
+
+
+
+        for k in range(self.nsteps):
+
             # For all collocation points
 
             for j in range(1, self.ntauroot + 1):
@@ -486,11 +534,11 @@ class ODEsetup(SetupsBaseClass):
                 # Get an expression for the state derivative at
                 # the collocation point
 
-                xp_jk = 0
+                # xp_jk = 0
                 
-                for r in range(self.ntauroot + 1):
+                # for r in range(self.ntauroot + 1):
                     
-                    xp_jk += self.C[r,j] * self.Vars["X",k,r]
+                #     xp_jk += self.C[r,j] * self.Vars["X",k,r]
           
                 # Add collocation equations to the NLP
 
@@ -501,7 +549,7 @@ class ODEsetup(SetupsBaseClass):
                 WUx.append(self.Vars["WU", k, j-1])
 
                 HKx.append(hk)
-                XP_JKx.append(xp_jk)
+                # XP_JKx.append(xp_jk)
 
                 # [fk] = ffcn([ \
                 #     self.T[k][j], self.uN[:, k], self.Vars["X",k,j], \
@@ -548,12 +596,12 @@ class ODEsetup(SetupsBaseClass):
             #     self.Vars["P"], self.uN[:, k], self.Vars["WE", k, 0],\
             #     self.Vars["WU", k, 0]])[0])
 
-        if self.tu[-1] in self.ty:
+        # if self.tu[-1] in self.ty:
 
-            Tphi.append(self.tu[-1])
-            Uphi.append(self.uN[:, -1])
-            Xphi.append(self.Vars["XF"])
-            WUphi.append(self.Vars["WU", -1, 0])
+        #     Tphi.append(self.tu[-1])
+        #     Uphi.append(self.uN[:, -1])
+        #     Xphi.append(self.Vars["XF"])
+        #     WUphi.append(self.Vars["WU", -1, 0])
             # Pphi.append(self.Vars["P"])
 
             # self.phiN.append(phifcn([self.tu[-1], self.uN[:, -1], \
@@ -563,33 +611,38 @@ class ODEsetup(SetupsBaseClass):
 
         # ipdb.set_trace()
 
-        Tphi  = ca.horzcat(Tphi)
-        Uphi  = ca.horzcat(Uphi)
-        Xphi  = ca.horzcat(Xphi)
-        WUphi  = ca.horzcat(WUphi)
+        # Tphi  = ca.horzcat(Tphi)
+        # Uphi  = ca.horzcat(Uphi)
+        # Xphi  = ca.horzcat(Xphi)
+        # WUphi  = ca.horzcat(WUphi)
         # Pphi = ca.horzcat(Pphi)
 
-        Tx = ca.horzcat(Tx)
-        Ux = ca.horzcat(Ux)
-        XCx = ca.horzcat(XCx)
+        # Tx = ca.horzcat(Tx)
+        # Ux = ca.horzcat(Ux)
+        # XCx = ca.horzcat(XCx)
         XDx = ca.horzcat(XDx)
-        WEx = ca.horzcat(WEx)
-        WUx = ca.horzcat(WUx)
+        # WEx = ca.horzcat(WEx)
+        # WUx = ca.horzcat(WUx)
 
         HKx = ca.horzcat(HKx)
-        XP_JKx = ca.horzcat(XP_JKx)
+        # XP_JKx = ca.horzcat(XP_JKx)
         XF_Kx = ca.horzcat(XF_Kx)
 
+        # ipdb.set_trace()
+
+        # inp1 = [ca.vertcat(k) for k in Tphi, Uphi, Xphi, WUphi]
 
         # expphifcn = phifcn.expand()
         # [self.phiN] = expphifcn.map([Tphi, Uphi, Xphi, WUphi, \
 
-        [self.phiN] = phifcn.map([Tphi, Uphi, Xphi, WUphi, \
-            ca.repmat(self.Vars["P"], 1, Tphi.size())])
+        [self.phiN] = phifcn.map( \
+            [ca.horzcat(k) for k in Tphi, Uphi, Xphi, WUphi] + \
+            [ca.repmat(self.Vars["P"], 1, len(Tphi))])
+
         self.phiN = self.phiN[:]
 
-        [FK] = ffcn.map([Tx, Ux, XCx, WEx, WUx, \
-            ca.repmat(self.Vars["P"], 1, Tx.size())])
+        [FK] = ffcn.map([ca.horzcat(k) for k in Tx, Ux, XCx, WEx, WUx] + \
+            [ca.repmat(self.Vars["P"], 1, len(Tx))])
         # FK = FK[:]
 
         # ipdb.set_trace()
