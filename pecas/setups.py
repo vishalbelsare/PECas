@@ -403,8 +403,6 @@ class ODEsetup(SetupsBaseClass):
 
         # Initialize measurement function
 
-        # ipdb.set_trace()
-
         phifcn = ca.MXFunction("phifcn", \
             [system.t, system.u, system.x, system.wu, system.p], \
             [system.phi])
@@ -493,6 +491,7 @@ class ODEsetup(SetupsBaseClass):
 
         XF_Kx = ca.horzcat([op])
 
+        # Variables
 
         Tx = [self.T[k,j] \
             for k in range(self.nsteps) \
@@ -520,129 +519,10 @@ class ODEsetup(SetupsBaseClass):
         HKx = [ca.repmat((self.tu[k + 1] - self.tu[k]), 1, self.ntauroot) \
             for k in range(self.nsteps)]
     
-
-        # XP_JKx = []
-        # XF_Kx = []
-
-        # Tx = []
-        # Ux = []
-        # XCx = []
-        # XDx = []
-        # WEx = []
-        # WUx = []
-
-        # HKx = []
-        # XP_JKx = []
-
-        # for k in range(self.nsteps):
-
-            # For all collocation points
-
-            # for j in range(1, self.ntauroot + 1):
-                
-                # Get an expression for the state derivative at
-                # the collocation point
-
-                # xp_jk = 0
-                
-                # for r in range(self.ntauroot + 1):
-                    
-                #     xp_jk += self.C[r,j] * self.Vars["X",k,r]
-          
-                # Add collocation equations to the NLP
-
-                # Tx.append(self.T[k][j])
-                # Ux.append(self.uN[:, k])
-                # XCx.append(self.Vars["X",k,j])
-                # WEx.append(self.Vars["WE", k, j-1])
-                # WUx.append(self.Vars["WU", k, j-1])
-
-                # HKx.append(hk)
-                # XP_JKx.append(xp_jk)
-
-                # [fk] = ffcn([ \
-                #     self.T[k][j], self.uN[:, k], self.Vars["X",k,j], \
-                #     self.Vars["WE", k, j-1], self.Vars["WU", k, j-1], \
-                #     self.Vars["P"]])
-
-                # self.g.append(hk * fk - xp_jk)
-
-            # Get an expression for the state at the end of
-            # the finite element
-            
-            # xf_k = 0
-
-            # for r in range(self.ntauroot + 1):
-
-            #     xf_k += self.D[r] * self.Vars["X",k,r]
-            
-            # Add the continuity equation to NLP
-            
-            # XF_Kx.append(xf_k)
-
-            # if k == (self.nsteps - 1):
-
-            #     XDx.append(self.Vars["XF"])
-
-                # self.g.append(self.Vars["XF"] - xf_k)
-
-            # else:
-
-                # self.g.append(self.Vars["X",k+1,0] - xf_k)
-
-                # XDx.append(self.Vars["X",k+1,0])
-
-        # Concatenate constraints
-
-        # self.g = ca.vertcat(self.g)
-    
-
-        # for k in range(self.nsteps):
-
-            # DEPENDECY ON U NOT POSSIBLE AT THIS POINT! len(U) = N, not N + 1!
-            # self.phiN.append(yfcn.call([self.tu[k], self.Vars["U", k, 0], \
-            # self.phiN.append(yfcn.call([self.tu[k], self.Vars["X", k, 0], \
-            #     self.Vars["P"], self.uN[:, k], self.Vars["WE", k, 0],\
-            #     self.Vars["WU", k, 0]])[0])
-
-        # if self.tu[-1] in self.ty:
-
-        #     Tphi.append(self.tu[-1])
-        #     Uphi.append(self.uN[:, -1])
-        #     Xphi.append(self.Vars["XF"])
-        #     WUphi.append(self.Vars["WU", -1, 0])
-            # Pphi.append(self.Vars["P"])
-
-            # self.phiN.append(phifcn([self.tu[-1], self.uN[:, -1], \
-                # self.Vars["XF"], self.Vars["WU", -1, 0], self.Vars["P"]])[0])
-
-        # self.phiN = ca.vertcat(self.phiN)
-
-        # ipdb.set_trace()
-
-        # Tphi  = ca.horzcat(Tphi)
-        # Uphi  = ca.horzcat(Uphi)
-        # Xphi  = ca.horzcat(Xphi)
-        # WUphi  = ca.horzcat(WUphi)
-        # Pphi = ca.horzcat(Pphi)
-
-        # Tx = ca.horzcat(Tx)
-        # Ux = ca.horzcat(Ux)
-        # XCx = ca.horzcat(XCx)
         XDx = ca.horzcat(XDx)
-        # WEx = ca.horzcat(WEx)
-        # WUx = ca.horzcat(WUx)
-
         HKx = ca.horzcat(HKx)
-        # XP_JKx = ca.horzcat(XP_JKx)
-        # XF_Kx = ca.horzcat(XF_Kx)
 
-        # ipdb.set_trace()
-
-        # inp1 = [ca.vertcat(k) for k in Tphi, Uphi, Xphi, WUphi]
-
-        # expphifcn = phifcn.expand()
-        # [self.phiN] = expphifcn.map([Tphi, Uphi, Xphi, WUphi, \
+        # Evaluate
 
         [self.phiN] = phifcn.map( \
             [ca.horzcat(k) for k in Tphi, Uphi, Xphi, WUphi] + \
@@ -652,27 +532,10 @@ class ODEsetup(SetupsBaseClass):
 
         [FK] = ffcn.map([ca.horzcat(k) for k in Tx, Ux, XCx, WEx, WUx] + \
             [ca.repmat(self.Vars["P"], 1, len(Tx))])
-        # FK = FK[:]
-
-        # ipdb.set_trace()
-
-        # a = ca.MX.sym("a", 1)
-        # b = ca.MX.sym("b", self.nx)
-        # c = ca.MX.sym("c", self.nx)
-
-        # nodefcn = ca.MXFunction("nodefcn", [a, b, c], [a * b - c])
-        # nodefcn = nodefcn.expand()
-        # [g_app] = nodefcn.map([HKx, FK, XP_JKx], "openmp")
-
-        # ipdb.set_trace()
-
 
         self.g.append((ca.repmat(HKx, self.nx, 1) * FK - XP_JKx)[:])
-        # self.g.append(g_app[:])
 
         self.g.append((XDx - XF_Kx)[:])
-
-        # ipdb.set_trace()
 
         self.g = ca.vertcat(self.g)
 

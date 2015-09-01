@@ -261,7 +261,7 @@ class LSq(PECasBaseClass):
         wv = None, wwe = None, wwu = None, \
         pinit = None, \
         xinit = None, \
-        linear_solver = "ma97", \
+        linear_solver = "mumps", \
         scheme = "radau", \
         order = 3):
 
