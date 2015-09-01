@@ -14,8 +14,6 @@ import systems
 import setups
 import intro
 
-import ipdb
-
 from abc import ABCMeta, abstractmethod
 
 class PECasBaseClass:
