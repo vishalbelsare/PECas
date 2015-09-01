@@ -238,7 +238,7 @@ class ODEsetup(SetupsBaseClass):
             xinit = xinit)
 
 
-    @profile
+    # @profile
     def __init__(self, system = None, \
         tu = None, uN = None, \
         ty = None, yN = None,
@@ -418,28 +418,15 @@ class ODEsetup(SetupsBaseClass):
         ffcn = ca.MXFunction("ffcn", \
             [system.t, system.u, system.x, system.we, system.wu, system.p], \
             [system.f])
-        # ffcn = ffcn.expand()
 
-        # Structs to hold variables for late mapped evaluation
+        # Collect information for measurement function
+
+        # Structs to hold variables for later mapped evaluation
 
         Tphi = []
         Uphi = []
         Xphi = []
         WUphi = []
-        # Pphi = []
-
-        Tx = []
-        Ux = []
-        XCx = []
-        XDx = []
-        WEx = []
-        WUx = []
-
-        HKx = []
-        XP_JKx = []
-        XF_Kx = []
-
-        # For all finite elements
 
         for k in range(self.nsteps):
 
@@ -451,17 +438,11 @@ class ODEsetup(SetupsBaseClass):
 
                 Uphi.append(self.uN[:, k])
                 WUphi.append(self.Vars["WU", k, 0])
-                # Pphi.append(self.Vars["P"])
-
 
                 if t_meas_j == self.tu[k]:
 
                     Tphi.append(self.tu[k])
                     Xphi.append(self.Vars["X", k, 0])
-
-                    # self.phiN.append(phifcn([ \
-                    #     self.tu[k], self.uN[:, k], self.Vars["X", k, 0], \
-                    #     self.Vars["WU", k, 0], self.Vars["P"]])[0])
 
                 else:
 
@@ -476,11 +457,6 @@ class ODEsetup(SetupsBaseClass):
                     Tphi.appaned(self.t_meas_j)
                     Xphi.append(x_temp)
 
-                    # self.phiN.append(phifcn([\
-                    #     t_meas_j, self.uN[:, k], x_temp, \
-                    #     self.Vars["WU", k, 0],self.Vars["P"]])[0])
-
-
         if self.tu[-1] in self.ty:
 
             Tphi.append(self.tu[-1])
@@ -489,6 +465,7 @@ class ODEsetup(SetupsBaseClass):
             WUphi.append(self.Vars["WU", -1, 0])
 
 
+        # Mapped calculation of the measurement nodes
 
         # inp = ca.MX.sym("inp", self.nx, self.ntauroot+1)
 
@@ -502,12 +479,13 @@ class ODEsetup(SetupsBaseClass):
 
         bl = [ca.horzcat(e) for e in self.Vars["X"]]
 
-        # ipdb.set_trace()
-
 
         [op] = fnode.map([ca.horzcat(bl)])
 
         XP_JKx = ca.horzcat([op])
+
+
+        # ipdb.set_trace()
 
         # node = 
 
@@ -524,6 +502,26 @@ class ODEsetup(SetupsBaseClass):
         #     return out
 
 
+        conti = sum([self.D[r] * inp[:, r] for r in range(self.ntauroot + 1)])
+
+        fconti = ca.MXFunction("fcont", [inp], [conti])
+
+        [op] = fconti.map([ca.horzcat(bl)])
+
+        XF_Kx = ca.horzcat([op])
+
+        # ipdb.set_trace()
+
+        Tx = []
+        Ux = []
+        XCx = []
+        XDx = []
+        WEx = []
+        WUx = []
+
+        HKx = []
+        XP_JKx = []
+        XF_Kx = []
 
         for k in range(self.nsteps):
 
@@ -561,15 +559,15 @@ class ODEsetup(SetupsBaseClass):
             # Get an expression for the state at the end of
             # the finite element
             
-            xf_k = 0
+            # xf_k = 0
 
-            for r in range(self.ntauroot + 1):
+            # for r in range(self.ntauroot + 1):
 
-                xf_k += self.D[r] * self.Vars["X",k,r]
+            #     xf_k += self.D[r] * self.Vars["X",k,r]
             
             # Add the continuity equation to NLP
             
-            XF_Kx.append(xf_k)
+            # XF_Kx.append(xf_k)
 
             if k == (self.nsteps - 1):
 
@@ -626,7 +624,7 @@ class ODEsetup(SetupsBaseClass):
 
         HKx = ca.horzcat(HKx)
         # XP_JKx = ca.horzcat(XP_JKx)
-        XF_Kx = ca.horzcat(XF_Kx)
+        # XF_Kx = ca.horzcat(XF_Kx)
 
         # ipdb.set_trace()
 

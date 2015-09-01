@@ -348,7 +348,7 @@ class LSq(PECasBaseClass):
             order = order)
 
 
-
+    # @profile
     def run_parameter_estimation(self):
 
         r'''
