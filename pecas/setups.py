@@ -32,7 +32,7 @@ class SetupsBaseClass(object):
             ' PECas system initialization ' + 25 * '-')
         print('\nStart system initialization ...')
 
-
+    # @profile
     def check_and_set_bounds_and_initials(self, \
         uN = None, \
         pinit = None, \
@@ -117,17 +117,8 @@ class SetupsBaseClass(object):
             self.Varsinit["XF"] = xinit[:,-1]
 
 
-            # Set the bounds on the equation errors
-
-            self.Varsinit["WE",:] = ca.tools.repeated(0.0)
-            
-            # Set the bounds on the input errors
-            
-            self.Varsinit["WU",:] = ca.tools.repeated(0.0)
-            
-        # Set the bounds on the measurement errors
-
-        self.Varsinit["V",:] = ca.tools.repeated(0.0)
+        # All other initial values are alreday zero from the
+        # default initialization
 
 
 class BSsetup(SetupsBaseClass):
@@ -208,7 +199,7 @@ class BSsetup(SetupsBaseClass):
 
         self.phiN = ca.vertcat(self.phiN)
 
-        self.phiNfcn = ca.MXFunction("phiNfcn", [self.Vars], [self.phiN])
+        # self.phiNfcn = ca.MXFunction("phiNfcn", [self.Vars], [self.phiN])
 
         # Set up g
 
@@ -309,6 +300,8 @@ class ODEsetup(SetupsBaseClass):
         self.ntauroot = len(self.tauroot) - 1
 
         # Define the struct holding the variables
+
+        # ipdb.set_trace()
 
         self.Vars = cat.struct_symMX([
                 (
@@ -466,31 +459,35 @@ class ODEsetup(SetupsBaseClass):
 
         # Collocation nodes
 
-        inp = ca.MX.sym("inp", self.nx, self.ntauroot+1)
+        xnode = ca.MX.sym("xnode", self.nx, self.ntauroot+1)
 
-        node = ca.horzcat([sum([self.C[r,j] * inp[:, r] for r in range(self.ntauroot + 1)]) for j in range(1, self.ntauroot + 1)])
+        collnode = ca.horzcat([sum([self.C[r,j] * xnode[:, r] \
+            for r in range(self.ntauroot + 1)]) \
+            for j in range(1, self.ntauroot + 1)])
 
-        fnode = ca.MXFunction("fnode", [inp], [node])
+        collnodefcn = ca.MXFunction("collnodefcn", [xnode], [collnode])
 
         bl = [ca.horzcat(e) for e in self.Vars["X"]]
 
 
-        [op] = fnode.map([ca.horzcat(bl)])
+        [op] = collnodefcn.map([ca.horzcat(bl)])
 
         XP_JKx = ca.horzcat([op])
 
 
         # Continuity nodes
 
-        conti = sum([self.D[r] * inp[:, r] for r in range(self.ntauroot + 1)])
+        contnode = sum([self.D[r] * xnode[:, r] \
+            for r in range(self.ntauroot + 1)])
 
-        fconti = ca.MXFunction("fcont", [inp], [conti])
+        contnodefcn = ca.MXFunction("contnodefcn", [xnode], [contnode])
 
-        [op] = fconti.map([ca.horzcat(bl)])
+        [op] = contnodefcn.map([ca.horzcat(bl)])
 
         XF_Kx = ca.horzcat([op])
 
-        # Variables
+
+        # Collocation variables
 
         Tx = [self.T[k,j] \
             for k in range(self.nsteps) \
@@ -511,9 +508,13 @@ class ODEsetup(SetupsBaseClass):
             for k in range(self.nsteps) \
             for j in range(1, self.ntauroot + 1)]
 
+        # WEx = sum(self.Vars["WE"], [])
+
         WUx = [self.Vars["WU", k, j-1] \
             for k in range(self.nsteps) \
              for j in range(1, self.ntauroot + 1)]
+
+        # WUx = sum(self.Vars["WU"], [])
 
         HKx = [ca.repmat((self.tu[k + 1] - self.tu[k]), 1, self.ntauroot) \
             for k in range(self.nsteps)]
@@ -538,7 +539,7 @@ class ODEsetup(SetupsBaseClass):
 
         self.g = ca.vertcat(self.g)
 
-        self.phiNfcn = ca.MXFunction("phiNfcn", [self.Vars], [self.phiN])
+        # self.phiNfcn = ca.MXFunction("phiNfcn", [self.Vars], [self.phiN])
 
         self.tend_setup = time.time()
         self.duration_setup = self.tend_setup - self.tstart_setup

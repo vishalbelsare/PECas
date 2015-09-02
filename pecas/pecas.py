@@ -20,6 +20,7 @@ class PECasBaseClass:
 
     __metaclass__ = ABCMeta
 
+    # @profile
     @abstractmethod
     def __init__(self, system = None, \
         tu = None, uN = None, \
@@ -259,7 +260,7 @@ class LSq(PECasBaseClass):
         wv = None, wwe = None, wwu = None, \
         pinit = None, \
         xinit = None, \
-        linear_solver = "mumps", \
+        linear_solver = "ma97", \
         scheme = "radau", \
         order = 3):
 
@@ -396,51 +397,39 @@ this might take some time ...
 
         self.tstart_estimation = time.time()
 
-        A = []
+        g = ca.vertcat([self.pesetup.phiN - self.yN + \
+                ca.vertcat(self.pesetup.Vars["V"])])
 
-        for k, elem in enumerate(self.pesetup.Vars["V"]):
-        
-            A.append(elem)
-
-        # a = ca.MX.sym("a", 1)
-        # b = ca.MX.sym("b", 1)
-        # c = ca.MX.sym("c", 1)
-
-        # dfcn = ca.MXFunction("dfcn", [a, b, c], [a-b+c])
-        # [g_app] = dfcn.map([self.pesetup.phiN.T, np.atleast_2d(self.yN), ca.vertcat(A).T])
-
-        # g = ca.vertcat([g_app[:]])
-        g = ca.vertcat([self.pesetup.phiN - self.yN + ca.vertcat(A)])
-
+        A = self.pesetup.Vars["V"]
 
         if "WE" in self.pesetup.Vars.keys():
 
-            W = []
+            # W = []
 
-            for k, elem in enumerate(self.pesetup.Vars["WE"]):
+            # for k, elem in enumerate(self.pesetup.Vars["WE"]):
 
-                W.append(elem)
+            #     W.append(elem)
 
-            A = A + sum(W, [])
+            # A = A + sum(W, [])
+
+            A = A + sum(self.pesetup.Vars["WE"], [])
 
 
         if "WU" in self.pesetup.Vars.keys():
 
-            W = []
+            # W = []
 
-            for k, elem in enumerate(self.pesetup.Vars["WU"]):
+            # for k, elem in enumerate(self.pesetup.Vars["WU"]):
 
-                W.append(elem)
+            #     W.append(elem)
 
-            A = A + sum(W, [])
+            # A = A + sum(W, [])
 
+            A = A + sum(self.pesetup.Vars["WU"], [])
 
         A = ca.vertcat(A)
 
         self.reslsq = ca.mul([A.T, self.W, A])
-
-        # ipdb.set_trace()
-        # self.reslsq = ca.inner_prod(ca.mul(self.W, A), A)
 
         self.A = A
 
