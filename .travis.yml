@@ -3,7 +3,7 @@ language: python
 matrix:
   include:
     - python: 2.7
-      env: NUMPY=1.8 SCIPY=0.13 CASADIVERSION=5dcd444
+      env: NUMPY=1.8 SCIPY=0.13 CASADIVERSION=5dcd444 SUBDIR=commits/
 
 notifications:
   email: false
@@ -21,7 +21,7 @@ install:
  - conda install --yes numpy=$NUMPY scipy=$SCIPY matplotlib pip
  - pip install setuptools
 
- - wget http://sourceforge.net/projects/casadi/files/CasADi/$CASADIVERSION/linux/casadi-py27-np1.9.1-$CASADIVERSION.tar.gz/download -O casadi-py27-np1.9.1-$CASADIVERSION.tar.gz
+ - wget http://sourceforge.net/projects/casadi/files/CasADi/$SUBDIR$CASADIVERSION/linux/casadi-py27-np1.9.1-$CASADIVERSION.tar.gz/download -O casadi-py27-np1.9.1-$CASADIVERSION.tar.gz
  - mkdir $HOME/casadi-py27-np1.9.1-$CASADIVERSION
  - tar -zxvf casadi-py27-np1.9.1-$CASADIVERSION.tar.gz -C $HOME/casadi-py27-np1.9.1-$CASADIVERSION
 
