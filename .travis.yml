@@ -3,8 +3,7 @@ language: python
 matrix:
   include:
     - python: 2.7
-      env: NUMPY=1.8 SCIPY=0.13
-      env: CASADIVERSION=5dcd444
+      env: NUMPY=1.8 SCIPY=0.13 CASADIVERSION=5dcd444
 
 notifications:
   email: false
