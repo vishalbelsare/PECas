@@ -4,6 +4,7 @@ matrix:
   include:
     - python: 2.7
       env: NUMPY=1.8 SCIPY=0.13
+      env: CASADIVERSION=5dcd444
 
 notifications:
   email: false
@@ -21,9 +22,9 @@ install:
  - conda install --yes numpy=$NUMPY scipy=$SCIPY matplotlib pip
  - pip install setuptools
 
- - wget http://sourceforge.net/projects/casadi/files/CasADi/2.4.0-rc1/linux/casadi-py27-np1.9.1-v2.4.0-rc1.tar.gz/download -O casadi-py27-np1.9.1-v2.4.0-rc1.tar.gz
- - mkdir $HOME/casadi-py27-np1.9.1-v2.4.0-rc1
- - tar -zxvf casadi-py27-np1.9.1-v2.4.0-rc1.tar.gz -C $HOME/casadi-py27-np1.9.1-v2.4.0-rc1
+ - wget http://sourceforge.net/projects/casadi/files/CasADi/$CASADIVERSION/linux/casadi-py27-np1.9.1-$CASADIVERSION.tar.gz/download -O casadi-py27-np1.9.1-$CASADIVERSION.tar.gz
+ - mkdir $HOME/casadi-py27-np1.9.1-$CASADIVERSION
+ - tar -zxvf casadi-py27-np1.9.1-$CASADIVERSION.tar.gz -C $HOME/casadi-py27-np1.9.1-$CASADIVERSION
 
 # - travis_retry wget http://sourceforge.net/projects/casadi/files/CasADi/2.3.0-rc2/Ubuntu-12.04/python-casadi_2.3.0rc2-2_amd64.deb/download -O python-casadi_2.3.0rc2-2_amd64.deb
 # - sudo dpkg -i python-casadi_2.3.0rc2-2_amd64.deb
@@ -33,7 +34,7 @@ install:
 
 before_script:
  - export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages:/usr/lib/pymodules/python2.7
- - export PYTHONPATH=$PYTHONPATH:$HOME/casadi-py27-np1.9.1-v2.4.0-rc1
+ - export PYTHONPATH=$PYTHONPATH:$HOME/casadi-py27-np1.9.1-$CASADIVERSION
 
 script:
  - python -c 'import numpy; print numpy.version.version'
