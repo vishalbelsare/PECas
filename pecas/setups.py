@@ -7,6 +7,7 @@ import numpy as np
 from abc import ABCMeta, abstractmethod
 
 import time
+import ipdb
 
 import systems
 import intro
@@ -52,7 +53,7 @@ class SetupsBaseClass(object):
         # Define structures for initial values from the original
         # variable struct of the problem
 
-        self.Varsinit = self.Vars()
+        # self.Varsinit = self.Vars()
 
         # Set controls values
         # (only if the number of controls is not 0, else set them 0)
@@ -61,13 +62,16 @@ class SetupsBaseClass(object):
 
             if uN is None:
                 uN = np.zeros((self.nu, self.nsteps))
+                # uN = np.zeros((self.nsteps, self.nu))
 
             uN = np.atleast_2d(uN)
 
             if uN.shape == (self.nsteps, self.nu):
+            # if uN.shape == (self.nu, self.nsteps):
                 uN = uN.T
 
             if not uN.shape == (self.nu, self.nsteps):
+            # if not uN.shape == (self.nsteps, self.nu):
 
                 raise ValueError( \
                     "Wrong dimension for control values uN.")
@@ -77,6 +81,7 @@ class SetupsBaseClass(object):
         else:
 
             self.uN = ca.DMatrix(0, self.nsteps)
+            # self.uN = ca.DMatrix(self.nsteps, 0)
 
         # Set initials for the parameters
 
@@ -90,32 +95,43 @@ class SetupsBaseClass(object):
             raise ValueError( \
                 "Wrong dimension for argument pinit.")
 
-        self.Varsinit["P",:] = pinit
+        # self.Varsinit["P",:] = pinit
+        self.Pinit = pinit
 
 
         # If it's a dynamic problem, set initials and bounds for the states
 
-        if "X" in self.Vars.keys():
+        # if "X" in self.Vars.keys():
+        if type(self.system) is not systems.BasicSystem:
 
             if xinit is None:
                 xinit = np.zeros((self.nx, self.nsteps + 1))
+                # xinit = np.zeros((self.nsteps + 1, self.nx))
 
             xinit = np.atleast_2d(xinit)
 
             if xinit.shape == (self.nsteps + 1, self.nx):
+            # if xinit.shape == (self.nx, self.nsteps + 1):
                 xinit = xinit.T
 
             if not xinit.shape == (self.nx, self.nsteps + 1):
+            # if not xinit.shape == (self.nsteps + 1, self.nx):
 
                 raise ValueError( \
                     "Wrong dimension for argument xinit.")
 
-            for k in range(self.nsteps):
+            # for k in range(self.nsteps):
 
-                self.Varsinit["X",k,:] = ca.tools.repeated(xinit[:,k])
+            #     self.Varsinit["X",k,:] = ca.tools.repeated(xinit[:,k])
 
-            self.Varsinit["XF"] = xinit[:,-1]
+            # self.Varsinit["XF"] = xinit[:,-1]
 
+        self.Xinit = ca.repmat(xinit[:-1,:], self.ntauroot+1, 1)
+        self.XFinit = xinit[:,-1]
+
+        self.Vinit = np.zeros(self.V.shape)
+        self.WEinit = np.zeros(self.WE.shape)
+        self.WUnit = np.zeros(self.WU.shape)
 
         # All other initial values are alreday zero from the
         # default initialization
@@ -301,22 +317,28 @@ class ODEsetup(SetupsBaseClass):
 
         # Define the struct holding the variables
 
-        # ipdb.set_trace()
+        # self.Vars = cat.struct_symMX([
+        #         (
+        #             cat.entry("P", shape = self.np), \
+        #             cat.entry("X", repeat = [self.nsteps, self.ntauroot+1], \
+        #                 shape = self.nx), \
+        #             cat.entry("XF", shape = self.nx), \
+        #             cat.entry("V", repeat = [self.nsteps+1], \
+        #                 shape = self.nphi),
+        #             cat.entry("WE", repeat = [self.nsteps, self.ntauroot], \
+        #                 shape = self.nwe),
+        #             cat.entry("WU", repeat = [self.nsteps, self.ntauroot], \
+        #                 shape = self.nwu)
+        #         )
+        #     ])
 
-        self.Vars = cat.struct_symMX([
-                (
-                    cat.entry("P", shape = self.np), \
-                    cat.entry("X", repeat = [self.nsteps, self.ntauroot+1], \
-                        shape = self.nx), \
-                    cat.entry("XF", shape = self.nx), \
-                    cat.entry("V", repeat = [self.nsteps+1], \
-                        shape = self.nphi),
-                    cat.entry("WE", repeat = [self.nsteps, self.ntauroot], \
-                        shape = self.nwe),
-                    cat.entry("WU", repeat = [self.nsteps, self.ntauroot], \
-                        shape = self.nwu)
-                )
-            ])
+        self.P = ca.MX.sym("P", self.np)
+        self.X = ca.MX.sym("X", (self.nx * (self.ntauroot+1)), self.nsteps)
+        self.XF = ca.MX.sym("XF", self.nx)
+
+        self.V = ca.MX.sym("V", self.nphi, self.nsteps+1)
+        self.WE = ca.MX.sym("WE", (self.nwe * self.ntauroot), self.nsteps)
+        self.WU = ca.MX.sym("WU", (self.nwu * self.ntauroot), self.nsteps)
 
         # Define bounds and initial values
 
@@ -324,7 +346,6 @@ class ODEsetup(SetupsBaseClass):
             uN = uN, \
             pinit = pinit, \
             xinit = xinit)
-
 
         # Set tp the collocation coefficients
 
@@ -350,6 +371,8 @@ class ODEsetup(SetupsBaseClass):
 
                 self.T[k,j] = self.tu[k] + \
                     (self.tu[k+1] - self.tu[k]) * self.tauroot[j]
+
+        self.T = self.T.T
 
         # For all collocation points
 
@@ -398,6 +421,7 @@ class ODEsetup(SetupsBaseClass):
         phifcn = ca.MXFunction("phifcn", \
             [system.t, system.u, system.x, system.wu, system.p], \
             [system.phi])
+        # phifcn.expand()
 
         # Initialzie setup of g
 
@@ -408,6 +432,7 @@ class ODEsetup(SetupsBaseClass):
         ffcn = ca.MXFunction("ffcn", \
             [system.t, system.u, system.x, system.we, system.wu, system.p], \
             [system.f])
+        # ffcn.expand()
 
         # Collect information for measurement function
 
@@ -427,12 +452,12 @@ class ODEsetup(SetupsBaseClass):
             for t_meas_j in t_meas:
 
                 Uphi.append(self.uN[:, k])
-                WUphi.append(self.Vars["WU", k, 0])
+                WUphi.append(self.WU[:self.nwu, k])
 
                 if t_meas_j == self.tu[k]:
 
                     Tphi.append(self.tu[k])
-                    Xphi.append(self.Vars["X", k, 0])
+                    Xphi.append(self.X[:self.nx, k])
 
                 else:
 
@@ -442,7 +467,8 @@ class ODEsetup(SetupsBaseClass):
 
                     for r in range(self.ntauroot + 1):
 
-                        x_temp += self.lfcns[r]([tau])[0] * self.Vars["X",k,r]
+                        x_temp += self.lfcns[r]([tau])[0] * \
+                        self.X[r*self.nx : (r+1) * self.nx, k]
 
                     Tphi.appaned(self.t_meas_j)
                     Xphi.append(x_temp)
@@ -450,94 +476,148 @@ class ODEsetup(SetupsBaseClass):
         if self.tu[-1] in self.ty:
 
             Tphi.append(self.tu[-1])
-            Uphi.append(self.uN[:, -1])
-            Xphi.append(self.Vars["XF"])
-            WUphi.append(self.Vars["WU", -1, 0])
-
+            Uphi.append(self.uN[:,-1])
+            Xphi.append(self.XF)
+            WUphi.append(self.WU[:,-1])
 
         # Mapped calculation of the collocation equations
 
         # Collocation nodes
 
-        xnode = ca.MX.sym("xnode", self.nx, self.ntauroot+1)
+        hc = ca.MX.sym("hc", 1)
+        tc = ca.MX.sym("tc", self.ntauroot)
+        xc = ca.MX.sym("xc", self.nx * (self.ntauroot+1))
+        wec = ca.MX.sym("wenc", self.nwe * self.ntauroot)
+        wuc = ca.MX.sym("wunc", self.nwu * self.ntauroot)
 
-        collnode = ca.horzcat([sum([self.C[r,j] * xnode[:, r] \
-            for r in range(self.ntauroot + 1)]) \
-            for j in range(1, self.ntauroot + 1)])
+        # collnode1 = ca.horzcat([sum([self.C[r,j] * \
+        #     xnode[r*self.nx : (r+1)*self.nx] \
+        #     for r in range(self.ntauroot + 1)]) \
+        #     for j in range(1, self.ntauroot + 1)])
 
-        collnodefcn = ca.MXFunction("collnodefcn", [xnode], [collnode])
+        coleqn = ca.vertcat([ \
 
-        bl = [ca.horzcat(e) for e in self.Vars["X"]]
+            hc * ffcn([tc[j-1], \
+                system.u, \
+                xc[j*self.nx : (j+1)*self.nx], \
+                wec[(j-1)*self.nwe : j*self.nwe], \
+                wuc[(j-1)*self.nwu : j*self.nwu], \
+                system.p])[0] - \
+
+            sum([self.C[r,j] * xc[r*self.nx : (r+1)*self.nx] \
+
+                for r in range(self.ntauroot + 1)]) \
+                    
+                    for j in range(1, self.ntauroot + 1)])
+
+        # collnodefcn = ca.MXFunction("collnodefcn", [xnode], [collnode])
+        # collnodefcn.expand()
+
+        coleqnfcn = ca.MXFunction("coleqnfcn", \
+            [hc, tc, system.u, xc, wec, wuc, system.p], \
+            [coleqn])
+
+        [g1] = coleqnfcn.map([ \
+            np.atleast_2d((self.tu[:-1] - self.tu[1:])), self.T[1:,:], \
+            self.uN, self.X, self.WE, self.WU, self.P])
+
+        # out2 = coleqnfcn.map([np.atleast_2d(self.T[:,0]), self.T[:,1:].T, self.uN.T, self.X.T, self.WE.T, self.WU.T, self.P])
+        
+        # bl = [ca.horzcat(e) for e in self.Vars["X"]]
 
 
-        [op] = collnodefcn.map([ca.horzcat(bl)])
+        # [op] = collnodefcn.map([ca.horzcat(bl)])
 
-        XP_JKx = ca.horzcat([op])
+        # XP_JKx = ca.horzcat([op])
 
 
         # Continuity nodes
 
-        contnode = sum([self.D[r] * xnode[:, r] \
+        xnext = ca.MX.sym("xnext", self.nx)
+
+        conteqn = xnext - sum([self.D[r] * xc[r*self.nx : (r+1)*self.nx] \
             for r in range(self.ntauroot + 1)])
 
-        contnodefcn = ca.MXFunction("contnodefcn", [xnode], [contnode])
+        conteqnfcn = ca.MXFunction("conteqnfcn", [xnext, xc], [conteqn])
 
-        [op] = contnodefcn.map([ca.horzcat(bl)])
+        ipdb.set_trace()
 
-        XF_Kx = ca.horzcat([op])
+        [g2] = conteqnfcn.map([ \
+            ca.horzcat([self.X[:self.nx, 1:], self.XF]), self.X])
+
+        # contnodefcn.expand()
+
+        # [op] = contnodefcn.map([ca.horzcat(bl)])
+
+        # XF_Kx = ca.horzcat([op])
 
 
         # Collocation variables
 
-        Tx = [self.T[k,j] \
-            for k in range(self.nsteps) \
-            for j in range(1, self.ntauroot + 1)]
+        # Tx = [self.T[k,j] \
+        #     for k in range(self.nsteps) \
+        #     for j in range(1, self.ntauroot + 1)]
 
-        Ux = [ca.repmat(self.uN[:, k], 1, self.ntauroot) \
-            for k in range(self.nsteps)]
+        # Ux = [ca.repmat(self.uN[:, k], 1, self.ntauroot) \
+        #     for k in range(self.nsteps)]
 
-        XCx = [self.Vars["X",k,j]  \
-            for k in range(self.nsteps) \
-            for j in range(1, self.ntauroot + 1)]
+        # XCx = [self.Vars["X",k,j]  \
+        #     for k in range(self.nsteps) \
+        #     for j in range(1, self.ntauroot + 1)]
 
-        XDx = [self.Vars["X",k+1,0] for k in range(self.nsteps-1)]
+        # XDx = [self.Vars["X",k+1,0] for k in range(self.nsteps-1)]
 
-        XDx = XDx + [self.Vars["XF"]]
+        # XDx = XDx + [self.Vars["XF"]]
 
-        WEx = [self.Vars["WE", k, j-1] \
-            for k in range(self.nsteps) \
-            for j in range(1, self.ntauroot + 1)]
+        # WEx = [self.Vars["WE", k, j-1] \
+        #     for k in range(self.nsteps) \
+        #     for j in range(1, self.ntauroot + 1)]
 
-        # WEx = sum(self.Vars["WE"], [])
+        # # WEx = sum(self.Vars["WE"], [])
 
-        WUx = [self.Vars["WU", k, j-1] \
-            for k in range(self.nsteps) \
-             for j in range(1, self.ntauroot + 1)]
+        # WUx = [self.Vars["WU", k, j-1] \
+        #     for k in range(self.nsteps) \
+        #      for j in range(1, self.ntauroot + 1)]
 
-        # WUx = sum(self.Vars["WU"], [])
+        # # WUx = sum(self.Vars["WU"], [])
 
-        HKx = [ca.repmat((self.tu[k + 1] - self.tu[k]), 1, self.ntauroot) \
-            for k in range(self.nsteps)]
+        # HKx = [ca.repmat((self.tu[k + 1] - self.tu[k]), 1, self.ntauroot) \
+        #     for k in range(self.nsteps)]
     
-        XDx = ca.horzcat(XDx)
-        HKx = ca.horzcat(HKx)
+        # XDx = ca.horzcat(XDx)
+        # HKx = ca.horzcat(HKx)
 
         # Evaluate
 
         [self.phiN] = phifcn.map( \
             [ca.horzcat(k) for k in Tphi, Uphi, Xphi, WUphi] + \
-            [ca.repmat(self.Vars["P"], 1, len(Tphi))])
+            [self.P])
 
-        self.phiN = self.phiN[:]
+        # self.phiN = self.phiN[:]
 
-        [FK] = ffcn.map([ca.horzcat(k) for k in Tx, Ux, XCx, WEx, WUx] + \
-            [ca.repmat(self.Vars["P"], 1, len(Tx))])
+        # [FK] = ffcn.map([ca.horzcat(k) for k in Tx, Ux, XCx, WEx, WUx] + \
+        #     [ca.repmat(self.Vars["P"], 1, len(Tx))])
 
-        self.g.append((ca.repmat(HKx, self.nx, 1) * FK - XP_JKx)[:])
+        # ipdb.set_trace()
 
-        self.g.append((XDx - XF_Kx)[:])
+        # a = ca.MX.sym("a", self.nx)
+        # b = ca.MX.sym("b", self.nx)
+        # c = ca.MX.sym("c", self.nx)
+        # d = a * b - c
+        # gfunc = ca.MXFunction("gfunc", [a, b, c], [d])
+        # gfunc.expand()
 
-        self.g = ca.vertcat(self.g)
+        # [gall] = gfunc.map([ca.repmat(HKx, self.nx, 1), FK ,XP_JKx])
+
+
+        # self.g.append((ca.repmat(HKx, self.nx, 1) * FK - XP_JKx)[:])
+
+        # self.g.append((XDx - XF_Kx)[:])
+
+        # self.g = ca.vertcat(self.g)
+
+        # self.g = ca.vertcat([gall[:], (XDx - XF_Kx)[:]])
+        self.g = ca.vertcat([g1, g2])[:]
 
         # self.phiNfcn = ca.MXFunction("phiNfcn", [self.Vars], [self.phiN])
 

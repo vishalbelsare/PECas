@@ -444,7 +444,7 @@ this might take some time ...
         reslsqfcn = ca.MXFunction("reslsqfcn", ca.nlpIn(x=self.pesetup.Vars), \
             ca.nlpOut(f=self.reslsq, g=g))
 
-        reslsqfcn = reslsqfcn.expand()
+        # reslsqfcn = reslsqfcn.expand()
 
         # Initialize the solver, solve the optimization problem
 

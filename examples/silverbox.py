@@ -3,7 +3,7 @@ import pylab as pl
 import casadi as ca
 import pecas
 
-N = 10000
+N = 1000
 fs = 610.1
 
 p_true = ca.DMatrix([5.625e-6,2.3e-4,1,4.69])
@@ -60,13 +60,13 @@ lsqpe = pecas.LSq( \
 lsqpe.run_parameter_estimation()
 lsqpe.run_simulation(x0 = [0.0, 0.0])
 
-pl.close("all")
-pl.figure()
+# pl.close("all")
+# pl.figure()
 
-pl.scatter(t, pl.squeeze(y_data[0,:]))
-pl.plot(t, lsqpe.Xsim[0,:].T)
+# pl.scatter(t, pl.squeeze(y_data[0,:]))
+# pl.plot(t, lsqpe.Xsim[0,:].T)
 
-pl.scatter(t, pl.squeeze(y_data[1,:]))
-pl.plot(t, lsqpe.Xsim[1,:].T)
+# pl.scatter(t, pl.squeeze(y_data[1,:]))
+# pl.plot(t, lsqpe.Xsim[1,:].T)
 
-pl.show()
+# pl.show()
