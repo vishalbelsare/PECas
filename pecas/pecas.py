@@ -398,48 +398,14 @@ this might take some time ...
 
         self.tstart_estimation = time.time()
 
-        # g = ca.vertcat([self.pesetup.phiN - self.yN + \
-        #         ca.vertcat(self.pesetup.Vars["V"])])
         g = ca.vertcat([ca.vec(self.pesetup.phiN) - self.yN + \
             ca.vec(self.pesetup.V)])
 
-
-
-        # A = self.pesetup.Vars["V"]
-        # A = ca.veccat([self.pesetup.V, self.pesetup.WE, self.pesetup.WU])
-        A = ca.veccat([self.pesetup.V, self.pesetup.WE, self.pesetup.WU])#, self.pesetup.WE, self.pesetup.WU])
-
-        # if "WE" in self.pesetup.Vars.keys():
-
-            # W = []
-
-            # for k, elem in enumerate(self.pesetup.Vars["WE"]):
-
-            #     W.append(elem)
-
-            # A = A + sum(W, [])
-
-        #     A = A + sum(self.pesetup.Vars["WE"], [])
-
-
-        # if "WU" in self.pesetup.Vars.keys():
-
-            # W = []
-
-            # for k, elem in enumerate(self.pesetup.Vars["WU"]):
-
-            #     W.append(elem)
-
-            # A = A + sum(W, [])
-
-        #     A = A + sum(self.pesetup.Vars["WU"], [])
-
-        # A = ca.vertcat(A)
+        A = ca.veccat([self.pesetup.V, self.pesetup.WE, self.pesetup.WU])
 
         self.reslsq = ca.mul([A.T, self.W, A])
 
         self.A = A
-
 
         if self.pesetup.g.size():
 
@@ -462,8 +428,6 @@ this might take some time ...
         reslsqfcn = ca.MXFunction("reslsqfcn", ca.nlpIn(x=Vars), \
             ca.nlpOut(f=self.reslsq, g=g))
 
-        # reslsqfcn = reslsqfcn.expand()
-
         # Initialize the solver, solve the optimization problem
 
         solver = ca.NlpSolver("solver", "ipopt", reslsqfcn, \
@@ -481,9 +445,6 @@ this might take some time ...
                 self.pesetup.WUinit, \
 
             ])  
-
-        # ipdb.set_trace()
-
 
         sol = solver(x0 = Varsinit, lbg = 0, ubg = 0)
 
