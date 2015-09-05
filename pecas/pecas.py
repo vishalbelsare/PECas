@@ -9,6 +9,7 @@ from operator import itemgetter
 # from scipy.misc import comb
 
 import time
+import ipdb
 
 import systems
 import setups
@@ -215,7 +216,7 @@ match the dimensions of the input errors given in wu.''')
 
         try:
             
-            return np.array(self.pesetup.Vars()(self.Varshat)["P"])
+            return np.array(self.Varshat[:self.pesetup.np])
 
         except AttributeError:
             
@@ -397,12 +398,18 @@ this might take some time ...
 
         self.tstart_estimation = time.time()
 
-        g = ca.vertcat([self.pesetup.phiN - self.yN + \
-                ca.vertcat(self.pesetup.Vars["V"])])
+        # g = ca.vertcat([self.pesetup.phiN - self.yN + \
+        #         ca.vertcat(self.pesetup.Vars["V"])])
+        g = ca.vertcat([ca.vec(self.pesetup.phiN) - self.yN + \
+            ca.vec(self.pesetup.V)])
 
-        A = self.pesetup.Vars["V"]
 
-        if "WE" in self.pesetup.Vars.keys():
+
+        # A = self.pesetup.Vars["V"]
+        # A = ca.veccat([self.pesetup.V, self.pesetup.WE, self.pesetup.WU])
+        A = ca.veccat([self.pesetup.V, self.pesetup.WE, self.pesetup.WU])#, self.pesetup.WE, self.pesetup.WU])
+
+        # if "WE" in self.pesetup.Vars.keys():
 
             # W = []
 
@@ -412,10 +419,10 @@ this might take some time ...
 
             # A = A + sum(W, [])
 
-            A = A + sum(self.pesetup.Vars["WE"], [])
+        #     A = A + sum(self.pesetup.Vars["WE"], [])
 
 
-        if "WU" in self.pesetup.Vars.keys():
+        # if "WU" in self.pesetup.Vars.keys():
 
             # W = []
 
@@ -425,9 +432,9 @@ this might take some time ...
 
             # A = A + sum(W, [])
 
-            A = A + sum(self.pesetup.Vars["WU"], [])
+        #     A = A + sum(self.pesetup.Vars["WU"], [])
 
-        A = ca.vertcat(A)
+        # A = ca.vertcat(A)
 
         self.reslsq = ca.mul([A.T, self.W, A])
 
@@ -440,8 +447,19 @@ this might take some time ...
 
         self.g = g
 
+        Vars = ca.veccat([
 
-        reslsqfcn = ca.MXFunction("reslsqfcn", ca.nlpIn(x=self.pesetup.Vars), \
+                self.pesetup.P, \
+                self.pesetup.X, \
+                self.pesetup.XF, \
+                self.pesetup.V, \
+                self.pesetup.WE, \
+                self.pesetup.WU, \
+
+            ])
+
+
+        reslsqfcn = ca.MXFunction("reslsqfcn", ca.nlpIn(x=Vars), \
             ca.nlpOut(f=self.reslsq, g=g))
 
         # reslsqfcn = reslsqfcn.expand()
@@ -453,12 +471,25 @@ this might take some time ...
 
         # Store the results of the computation
 
-        sol = solver(x0 = self.pesetup.Varsinit, \
-            lbg = 0, ubg = 0)
+        Varsinit = ca.veccat([
+
+                self.pesetup.Pinit, \
+                self.pesetup.Xinit, \
+                self.pesetup.XFinit, \
+                self.pesetup.Vinit, \
+                self.pesetup.WEinit, \
+                self.pesetup.WUinit, \
+
+            ])  
+
+        # ipdb.set_trace()
+
+
+        sol = solver(x0 = Varsinit, lbg = 0, ubg = 0)
 
         self.Varshat = sol["x"]
         self.rhat = sol["f"]
-        self.dv_lambdahat = sol["lam_g"]
+        # self.dv_lambdahat = sol["lam_g"]
         
         # Ysim = self.pesetup.phiNfcn([self.Varshat])[0]
         # Ym = np.reshape(self.yN.T,(Ysim.shape))

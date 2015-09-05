@@ -77,7 +77,7 @@ lsqpe.show_results()
 
 lsqpe.run_simulation([numeas[0], wmeas[0]])
 nusim = lsqpe.Xsim[0,:].T
-wsim = lsqpe.Xhat[1,:].T
+wsim = lsqpe.Xsim[1,:].T
 
 pl.close("all")
 

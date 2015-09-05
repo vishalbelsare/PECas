@@ -126,15 +126,12 @@ class SetupsBaseClass(object):
 
             # self.Varsinit["XF"] = xinit[:,-1]
 
-        self.Xinit = ca.repmat(xinit[:-1,:], self.ntauroot+1, 1)
+        self.Xinit = ca.repmat(xinit[:,:-1], self.ntauroot+1, 1)
         self.XFinit = xinit[:,-1]
 
         self.Vinit = np.zeros(self.V.shape)
         self.WEinit = np.zeros(self.WE.shape)
-        self.WUnit = np.zeros(self.WU.shape)
-
-        # All other initial values are alreday zero from the
-        # default initialization
+        self.WUinit = np.zeros(self.WU.shape)
 
 
 class BSsetup(SetupsBaseClass):
@@ -337,8 +334,22 @@ class ODEsetup(SetupsBaseClass):
         self.XF = ca.MX.sym("XF", self.nx)
 
         self.V = ca.MX.sym("V", self.nphi, self.nsteps+1)
-        self.WE = ca.MX.sym("WE", (self.nwe * self.ntauroot), self.nsteps)
-        self.WU = ca.MX.sym("WU", (self.nwu * self.ntauroot), self.nsteps)
+
+        if self.nwe != 0:
+
+            self.WE = ca.MX.sym("WE", (self.nwe * self.ntauroot), self.nsteps)
+
+        else:
+
+            self.WE = ca.DMatrix(0, self.nsteps)
+
+        if self.nwu != 0:
+                
+            self.WU = ca.MX.sym("WU", (self.nwu * self.ntauroot), self.nsteps)
+
+        else:
+
+            self.WU = ca.DMatrix(0, self.nsteps)
 
         # Define bounds and initial values
 
@@ -420,6 +431,7 @@ class ODEsetup(SetupsBaseClass):
 
         phifcn = ca.MXFunction("phifcn", \
             [system.t, system.u, system.x, system.wu, system.p], \
+            # [system.t, system.u, system.x, system.p], \
             [system.phi])
         # phifcn.expand()
 
@@ -431,6 +443,7 @@ class ODEsetup(SetupsBaseClass):
 
         ffcn = ca.MXFunction("ffcn", \
             [system.t, system.u, system.x, system.we, system.wu, system.p], \
+            # [system.t, system.u, system.x, system.wu, system.p], \
             [system.f])
         # ffcn.expand()
 
@@ -515,11 +528,16 @@ class ODEsetup(SetupsBaseClass):
 
         coleqnfcn = ca.MXFunction("coleqnfcn", \
             [hc, tc, system.u, xc, wec, wuc, system.p], \
+            # [hc, tc, system.u, xc, wuc, system.p], \
             [coleqn])
+        coleqnfcn.expand()
+
+        # ipdb.set_trace()
 
         [g1] = coleqnfcn.map([ \
-            np.atleast_2d((self.tu[:-1] - self.tu[1:])), self.T[1:,:], \
+            np.atleast_2d((self.tu[1:] - self.tu[:-1])), self.T[1:,:], \
             self.uN, self.X, self.WE, self.WU, self.P])
+            # self.uN, self.X, self.WU, self.P])
 
         # out2 = coleqnfcn.map([np.atleast_2d(self.T[:,0]), self.T[:,1:].T, self.uN.T, self.X.T, self.WE.T, self.WU.T, self.P])
         
@@ -539,8 +557,9 @@ class ODEsetup(SetupsBaseClass):
             for r in range(self.ntauroot + 1)])
 
         conteqnfcn = ca.MXFunction("conteqnfcn", [xnext, xc], [conteqn])
+        conteqnfcn.expand()
 
-        ipdb.set_trace()
+        # ipdb.set_trace()
 
         [g2] = conteqnfcn.map([ \
             ca.horzcat([self.X[:self.nx, 1:], self.XF]), self.X])
@@ -591,6 +610,7 @@ class ODEsetup(SetupsBaseClass):
 
         [self.phiN] = phifcn.map( \
             [ca.horzcat(k) for k in Tphi, Uphi, Xphi, WUphi] + \
+            # [ca.horzcat(k) for k in Tphi, Uphi, Xphi] + \
             [self.P])
 
         # self.phiN = self.phiN[:]
@@ -616,8 +636,10 @@ class ODEsetup(SetupsBaseClass):
 
         # self.g = ca.vertcat(self.g)
 
+        # ipdb.set_trace()
+
         # self.g = ca.vertcat([gall[:], (XDx - XF_Kx)[:]])
-        self.g = ca.vertcat([g1, g2])[:]
+        self.g = ca.veccat([g1, g2])
 
         # self.phiNfcn = ca.MXFunction("phiNfcn", [self.Vars], [self.phiN])
 
