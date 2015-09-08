@@ -47,7 +47,7 @@ y_data += 1e-3 * pl.random((x.shape[0], N+1))
 
 wv = pl.ones(y_data.shape)
 
-lsqpe = pecas.LSqGN( \
+lsqpe = pecas.LSq( \
     system = odesys, \
     tu = t, \
     uN = u_data, \
