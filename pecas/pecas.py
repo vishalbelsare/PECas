@@ -247,6 +247,248 @@ The method run_parameter_estimation() must be run first, before trying to
 obtain the optimal values.
 ''')     
 
+class LSqGN(PECasBaseClass):
+
+    '''The class :class:`LSq` is used to set up least squares parameter
+    estimation problems for systems defined with one of the PECas systems
+    classes, using a given set of user provided control 
+    data, measurement data and different kinds of weightings.'''
+
+    def __init__(self, system = None, \
+        tu = None, uN = None, \
+        ty = None, yN = None, \
+        wv = None, wwe = None, wwu = None, \
+        pinit = None, \
+        xinit = None, \
+        linear_solver = "mumps", \
+        scheme = "radau", \
+        order = 3):
+
+        r'''
+        :param system: system considered for parameter estimation, specified
+                       using a PECas systems class
+        :type system: pecas.systems
+
+        :param tu: time points :math:`t_u \in \mathbb{R}^{N}`
+                   for the controls (also used for
+                   defining the collocation nodes)
+        :type tu: numpy.ndarray, casadi.DMatrix, list
+
+        :param uN: values for the controls at the switching time points 
+                   :math:`u_N \in \mathbb{R}^{n_u \times N-1}`; note that the
+                   the second dimension of :math:`u_N` is :math:`N-1` istead of
+                   :math:`N`, since the control value at the last switching
+                   point is never applied
+        :type uN: numpy.ndarray, casadi.DMatrix
+
+        :param ty: optional, time points :math:`t_y \in \mathbb{R}^{M}`
+                   for the measurements; if no value is given, the time
+                   points for the controls :math:`t_u` are used; if the values
+                   in :math:`t_y` do not match with the values in :math:`t_u`,
+                   a continuous
+                   output approach will be used for setting up the
+                   parameter estimation problem
+        :type ty: numpy.ndarray, casadi.DMatrix, list
+
+        :param yN: values for the measurements at the defined time points 
+                   :math:`u_y \in \mathbb{R}^{n_y \times M}`
+        :type yN: numpy.ndarray, casadi.DMatrix    
+
+        :param wv: weightings for the measurements
+                   :math:`w_v \in \mathbb{R}^{n_y \times M}`
+        :type wv: numpy.ndarray, casadi.DMatrix    
+
+        :param wwe: weightings for equation errors
+                   :math:`w_{w_e} \in \mathbb{R}^{n_{w_e}}` (only necessary 
+                   if equation errors are used within `system`)
+        :type wwe: numpy.ndarray, casadi.DMatrix    
+
+        :param wwu: weightings for the input errors
+                   :math:`w_{w_u} \in \mathbb{R}^{n_{w_u}}` (only necessary
+                   if input errors are used within `system`)
+        :type wwu: numpy.ndarray, casadi.DMatrix    
+
+        :param pinit: optional, initial guess for the values of the
+                      parameters to be
+                      estimated :math:`p_{init} \in \mathbb{R}^{n_p}`; if no
+                      value is given, 0 will be used; a poorly or wrongly
+                      chosen initial guess might cause the estimation to fail
+        :type pinit: numpy.ndarray, casadi.DMatrix
+
+        :param xinit: optional, initial guess for the values of the
+                      states to be
+                      estimated :math:`x_{init} \in \mathbb{R}^{n_x \times N}`;
+                      if no value is given, 0 will be used; a poorly or wrongly
+                      chosen initial guess might cause the estimation to fail
+        :type xinit: numpy.ndarray, casadi.DMatrix
+
+        :param linear_solver: set the linear solver for IPOPT; this option is
+                              only interesting if HSL is installed
+        :type linear_solver: str
+
+        :param scheme: collocation scheme, possible values are `legendre` and
+                       `radau`
+        :type scheme: str
+
+        :param order: order of collocation polynominals
+                      :math:`d \in \mathbb{Z}`
+        :type order: int
+
+        '''
+
+        super(LSqGN, self).__init__(system = system, \
+            tu = tu, uN = uN, \
+            ty = ty, yN = yN, \
+            wv = wv, wwe = wwe, wwu = wwu, \
+            pinit = pinit, \
+            xinit = xinit, \
+            linear_solver = linear_solver, \
+            scheme = scheme, \
+            order = order)
+
+
+    # @profile
+    def run_parameter_estimation(self):
+
+        r'''
+        This functions will run a least squares parameter estimation for the
+        given problem and data set.
+        For this, an NLP of the following
+        structure is set up with a direct collocation approach and solved
+        using IPOPT:
+
+        .. math::
+
+            \begin{aligned}
+                & \text{arg}\,\underset{x, p, v, w_e, w_u}{\text{min}} & & \| v \|_{W_{v}}^{2} + \| w_{e} \|_{W_{w_{e}}}^{2} + \| w_{u} \|_{W_{w_{u}}}^{2}\\
+                & \text{subject to:} & & y_{l} - \phi(t_{l}, u_{l}, x_{l}, p) + v_{l} = 0 \\
+                & & & (t_{k+1} - t_{k}) f(t_{k,j}, u_{k,j}, x_{k,j}, p, w_{e,k,j}, w_{u,k,j}) - \sum_{r=0}^{d} \dot{L}_r(\tau_j) x_{k,r} = 0 \\
+                & & & x_{k+1,0} - \sum_{r=0}^{d} L_r(1) x_{k,r} = 0 \\
+                & & & t_{k,j} = t_k + (t_{k+1} - t_{k}) \tau_j \\
+                & & & L_r(\tau) = \prod_{r=0,r\neq j}^{d} \frac{\tau - \tau_r}{\tau_j - \tau_r}\\
+                & \text{for:} & & k = 1, \dots, N, ~~~ l = 1, \dots, M, ~~~ j = 1, \dots, d, ~~~ r = 1, \dots, d \\
+                & & & \tau_j = \text{time points w. r. t. scheme and order}
+            \end{aligned}
+
+
+        The status of IPOPT provides information whether the computation could
+        be finished sucessfully. The optimal values for all optimization
+        variables :math:`\hat{x}` can be accessed
+        via the class variable ``LSq.Xhat``, while the estimated parameters
+        :math:`\hat{p}` can also be accessed separately via the class attribute
+        ``LSq.phat``.
+
+        **Please be aware:** IPOPT finishing sucessfully does not necessarly
+        mean that the estimation results for the unknown parameters are useful
+        for your purposes, it just means that IPOPT was able to solve the given
+        optimization problem.
+        You have in any case to verify your results, e. g. by simulation using
+        the class function :func:`run_simulation`.
+        '''          
+
+        intro.pecas_intro()
+        print('\n' + 18 * '-' + \
+            ' PECas least squares parameter estimation ' + 18 * '-')
+
+        print('''
+Starting least squares parameter estimation using IPOPT, 
+this might take some time ...
+''')
+        self.tstart_estimation = time.time()
+
+        g = ca.vertcat([ca.vec(self.pesetup.phiN) - self.yN + \
+            ca.vec(self.pesetup.V)])
+
+        R = ca.veccat([self.pesetup.V, self.pesetup.WE, self.pesetup.WU])
+
+        R = R * ca.sqrt(ca.diag(self.W))
+
+        self.R = R
+
+        if self.pesetup.g.size():
+
+            g = ca.vertcat([g, self.pesetup.g])
+
+        self.g = g
+
+        Vars = ca.veccat([
+
+                self.pesetup.P, \
+                self.pesetup.X, \
+                self.pesetup.XF, \
+                self.pesetup.V, \
+                self.pesetup.WE, \
+                self.pesetup.WU, \
+
+            ])
+
+
+        nlp = ca.MXFunction("nlp", ca.nlpIn(x=Vars), \
+            ca.nlpOut(f=(0.5 * ca.mul([R.T, R])), g=g))
+
+        gradF = nlp.gradient()
+        jacG = nlp.jacobian("x", "g")
+
+        gradF.derivative(0, 1)
+
+        J = ca.jacobian(self.R, Vars)
+
+        sigma = ca.MX.sym("sigma")
+        hessLag = ca.MXFunction("H", \
+            ca.hessLagIn(x = Vars, lam_f = sigma), \
+            ca.hessLagOut(hess = sigma * ca.mul(J.T, J)))
+
+        options = {}
+        options["hess_lag"] = hessLag
+        options["grad_f"] = gradF
+        options["jac_g"] = jacG
+
+        options["tol"] = 1e-10
+        options["linear_solver"] = self.linear_solver
+
+        # Initialize the solver, solve the optimization problem
+
+        solver = ca.NlpSolver("solver", "ipopt", nlp, options)
+
+        # Store the results of the computation
+
+        Varsinit = ca.veccat([
+
+                self.pesetup.Pinit, \
+                self.pesetup.Xinit, \
+                self.pesetup.XFinit, \
+                self.pesetup.Vinit, \
+                self.pesetup.WEinit, \
+                self.pesetup.WUinit, \
+
+            ])  
+
+        sol = solver(x0 = Varsinit, lbg = 0, ubg = 0)
+
+        self.Varshat = sol["x"]
+        self.rhat = sol["f"]
+        # self.dv_lambdahat = sol["lam_g"]
+        
+        # Ysim = self.pesetup.phiNfcn([self.Varshat])[0]
+        # Ym = np.reshape(self.yN.T,(Ysim.shape))
+        # res = Ym-Ysim
+        # self.residual = []
+        # self.Rsquared = []
+
+        # for i in range(self.pesetup.ny):   
+
+        #     self.residual.append(\
+        #         (np.linalg.norm(res[i:-1:self.pesetup.ny]))**2)
+        #     self.Rsquared.append(1 - self.residual[i] / \
+        #         (np.linalg.norm(Ym[i:-1:self.pesetup.ny]))**2)
+        
+        self.tend_estimation = time.time()
+        self.duration_estimation = self.tend_estimation - \
+            self.tstart_estimation
+
+        print('''
+Parameter estimation finished. Check IPOPT output for status information.''')
+
 
 class LSq(PECasBaseClass):
 
@@ -425,13 +667,13 @@ this might take some time ...
             ])
 
 
-        reslsqfcn = ca.MXFunction("reslsqfcn", ca.nlpIn(x=Vars), \
+        nlp = ca.MXFunction("nlp", ca.nlpIn(x=Vars), \
             ca.nlpOut(f=self.reslsq, g=g))
 
         # Initialize the solver, solve the optimization problem
 
-        solver = ca.NlpSolver("solver", "ipopt", reslsqfcn, \
-            {"tol":1e-1, "linear_solver":self.linear_solver})
+        solver = ca.NlpSolver("solver", "ipopt", nlp, \
+            {"tol":1e-10, "linear_solver":self.linear_solver})
 
         # Store the results of the computation
 

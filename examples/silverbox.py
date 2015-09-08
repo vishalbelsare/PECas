@@ -3,7 +3,7 @@ import pylab as pl
 import casadi as ca
 import pecas
 
-N = 1000
+N = 10000
 fs = 610.1
 
 p_true = ca.DMatrix([5.625e-6,2.3e-4,1,4.69])
@@ -47,7 +47,7 @@ y_data += 1e-3 * pl.random((x.shape[0], N+1))
 
 wv = pl.ones(y_data.shape)
 
-lsqpe = pecas.LSq( \
+lsqpe = pecas.LSqGN( \
     system = odesys, \
     tu = t, \
     uN = u_data, \
