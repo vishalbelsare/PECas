@@ -12,13 +12,13 @@ Prerequesites
 
 In order to use PECas, please make sure that
 `Python <https://www.python.org/>`_ (currently supported version is Python 2.7) as well as
-`Python Numpy <http://www.numpy.org/>`_ (>= 1.8) and
-`PyLab <http://wiki.scipy.org/PyLab>`_ are installed on your system. On Ubuntu 14.04, this can easily be ensured by running
+`Python Numpy <http://www.numpy.org/>`_ (>= 1.8), 
+`PyLab <http://wiki.scipy.org/PyLab>`_ and `Python Setuptools <http://wiki.ubuntuusers.de/Python_setuptools>`_ are installed on your system. On Ubuntu 14.04, this can easily be ensured by running
 
 .. code:: bash
 
     sudo apt-get update
-    sudo apt-get install python python-numpy python-scipy python-matplotlib
+    sudo apt-get install python python-numpy python-scipy python-matplotlib python-setuptools
 
 Note that you need root privileges to do this. Also, a recent version of `CasADi <http://casadi.org>`_ (>= 2.4.0-rc2) needs to be installed on your system. You can obtain a recent version from the `CasADi web page <http://casadi.org>`_, and follow the installation instructions there.
 
