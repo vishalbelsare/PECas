@@ -1,4 +1,4 @@
-PECas 0.3
+PECas 0.4
 =========
 
 Parameter estimation using CasADi
@@ -11,7 +11,7 @@ problems and for interpretation of the results recieved. It does so by providing
 
 As it's name suggests, PECas makes use of the optimization framework
 [CasADi](http://casadi.org) to solve parameter estimation
-problems.
+problems. For PECas to work, you need CasADi version >= 2.4.0-rc2 to be installed on your system.
 
 **Please note:** PECas is still in it's testing state, and does not yet contain all the features it will provide in future versions. Therefore, you should check for updates on a regular basis.
 
