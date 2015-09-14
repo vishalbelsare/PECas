@@ -21,7 +21,6 @@ class PECasBaseClass:
 
     __metaclass__ = ABCMeta
 
-    # @profile
     @abstractmethod
     def __init__(self, system = None, \
         tu = None, uN = None, \
@@ -231,21 +230,33 @@ obtain the optimal values.
     @property
     def Xhat(self):
 
-        xhat = []
+        xhat = np.ndarray((self.pesetup.nx, 0))
 
         try:
 
-            for i in range (self.pesetup.nx):
-                T = self.pesetup.Vars()(self.Varshat)["X",:,0,i]
-                T.append(self.pesetup.Vars()(self.Varshat)["XF",i])
-                xhat.append(T)
-            return np.array(xhat)
+            for i in range (self.pesetup.nsteps + 1):
+
+                xhat = np.append( \
+
+                    xhat, \
+
+                    self.Varshat[ \
+                    self.pesetup.np + self.pesetup.nx * \
+                        (self.pesetup.ntauroot+1) * i : \
+
+                    self.pesetup.np + self.pesetup.nx * \
+                        (self.pesetup.ntauroot+1) * i + self.pesetup.nx], \
+
+                    axis = 1)
+
+            return xhat
+
 
         except AttributeError:
 
             raise AttributeError('''
 The method run_parameter_estimation() must be run first, before trying to
-obtain the optimal values.
+obtain the estimated state values.
 ''')     
 
 
@@ -262,7 +273,7 @@ class LSq(PECasBaseClass):
         wv = None, wwe = None, wwu = None, \
         pinit = None, \
         xinit = None, \
-        linear_solver = "mumps", \
+        linear_solver = "ma97", \
         scheme = "radau", \
         order = 3):
 
@@ -349,10 +360,13 @@ class LSq(PECasBaseClass):
             order = order)
 
 
-    # @profile
-    def run_parameter_estimation(self, method = "gauss-newton"):
+    def run_parameter_estimation(self, hessian = "gauss-newton"):
 
         r'''
+        :param hessian: Method of hessian calculation/approximation; possible
+                        values are `gauss-newton` and `exact-hessian`
+        :type hessian: str
+
         This functions will run a least squares parameter estimation for the
         given problem and data set.
         For this, an NLP of the following
@@ -430,7 +444,7 @@ this might take some time ...
         options["tol"] = 1e-10
         options["linear_solver"] = self.linear_solver
 
-        if method == "gauss-newton":
+        if hessian == "gauss-newton":
 
             gradF = nlp.gradient()
             jacG = nlp.jacobian("x", "g")
@@ -447,6 +461,18 @@ this might take some time ...
             options["hess_lag"] = hessLag
             options["grad_f"] = gradF
             options["jac_g"] = jacG
+
+        elif hessian == "exact-hessian":
+
+            # let NlpSolver-class compute everything
+
+            pass
+
+        else:
+
+            raise NotImplementedError( \
+                "Requested method is not implemented. Availabe methods " + \
+                "are 'gauss-newton' (default) and 'exact-hessian'.")
 
         # Initialize the solver, solve the optimization problem
 
@@ -665,17 +691,17 @@ this might take some time ...
 
         try:
 
-            N1 = ca.MX(self.pesetup.Vars.shape[0] - self.W.shape[0], \
+            N1 = ca.MX(self.Vars.shape[0] - self.W.shape[0], \
                 self.W.shape[0])
 
-            N2 = ca.MX(self.pesetup.Vars.shape[0] - self.W.shape[0], \
-                self.pesetup.Vars.shape[0] - self.W.shape[0])
+            N2 = ca.MX(self.Vars.shape[0] - self.W.shape[0], \
+                self.Vars.shape[0] - self.W.shape[0])
 
-            hess = ca.blockcat([[N2, N1], [N1.T, self.W],])
+            hess = ca.blockcat([[N2, N1], [N1.T, ca.diag(self.W)],])
 
-            hess = hess + 1e-10 * ca.diag(self.pesetup.Vars)
+            # hess = hess + 1e-10 * ca.diag(self.Vars)
             
-            J2 = ca.jacobian(self.g, self.pesetup.Vars)
+            J2 = ca.jacobian(self.g, self.Vars)
 
             kkt = ca.blockcat( \
 
@@ -696,12 +722,11 @@ this might take some time ...
             F11 = B1 - ca.mul([E.T, Dinv])
 
             self.beta = self.rhat / (self.yN.size + self.g.size1() - \
-                    self.pesetup.Vars.size)
+                    self.Vars.size())
 
-            self.fcovp = ca.MXFunction([self.pesetup.Vars], \
+            self.fcovp = ca.MXFunction("fcovp", [self.Vars], \
                 [self.beta * ca.solve(F11, ca.MX.eye(F11.size1()))])
 
-            self.fcovp.init()
             [self.Covp] = self.fcovp([self.Varshat])
 
             print( \

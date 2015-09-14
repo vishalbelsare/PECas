@@ -110,8 +110,13 @@ class SetupsBaseClass(object):
                     "Wrong dimension for argument xinit.")
 
 
-        self.Xinit = ca.repmat(xinit[:,:-1], self.ntauroot+1, 1)
-        self.XFinit = xinit[:,-1]
+            self.Xinit = ca.repmat(xinit[:,:-1], self.ntauroot+1, 1)
+            self.XFinit = xinit[:,-1]
+
+        else:
+
+            self.Xinit = ca.DMatrix(0, 0)
+            self.XFinit = ca.DMatrix(0, 0)
 
         self.Vinit = np.zeros(self.V.shape)
         self.WEinit = np.zeros(self.WE.shape)
@@ -168,13 +173,14 @@ class BSsetup(SetupsBaseClass):
 
         # Define the struct holding the variables
 
-        self.Vars = cat.struct_symMX([
-                (
-                    cat.entry("P", shape = self.np),
-                    cat.entry("V", repeat = [self.nsteps], \
-                        shape = self.nphi),
-                )
-            ])
+        self.P = ca.MX.sym("P", self.np)
+        self.X = ca.DMatrix(0, self.nsteps)
+        self.XF = ca.DMatrix(0, self.nsteps)
+        
+        self.V = ca.MX.sym("V", self.nphi, self.nsteps)
+
+        self.WE = ca.DMatrix(0, self.nsteps)
+        self.WU = ca.DMatrix(0, self.nsteps)
 
         # Set bounds and initial values
 
@@ -192,7 +198,7 @@ class BSsetup(SetupsBaseClass):
         for k in range(self.nsteps):
 
             self.phiN.append(phifcn([self.tu[k], \
-                self.uN[:, k], self.Vars["P"]])[0])
+                self.uN[:, k], self.P])[0])
 
         self.phiN = ca.vertcat(self.phiN)
 
@@ -204,7 +210,7 @@ class BSsetup(SetupsBaseClass):
 
         gfcn = ca.MXFunction("gfcn", [system.p], [system.g])
 
-        self.g = gfcn.call([self.Vars["P"]])[0]
+        self.g = gfcn.call([self.P])[0]
 
         self.tend_setup = time.time()
         self.duration_setup = self.tend_setup - self.tstart_setup
@@ -486,7 +492,7 @@ class ODEsetup(SetupsBaseClass):
 
         coleqnfcn = ca.MXFunction("coleqnfcn", \
             [hc, tc, system.u, xc, wec, wuc, system.p], [coleqn])
-        coleqnfcn.expand()
+        coleqnfcn = coleqnfcn.expand()
 
         [gcol] = coleqnfcn.map([ \
             np.atleast_2d((self.tu[1:] - self.tu[:-1])), self.T[1:,:], \
@@ -501,7 +507,7 @@ class ODEsetup(SetupsBaseClass):
             for r in range(self.ntauroot + 1)])
 
         conteqnfcn = ca.MXFunction("conteqnfcn", [xnext, xc], [conteqn])
-        conteqnfcn.expand()
+        conteqnfcn = conteqnfcn.expand()
 
         [gcont] = conteqnfcn.map([ \
             ca.horzcat([self.X[:self.nx, 1:], self.XF]), self.X])
