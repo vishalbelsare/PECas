@@ -9,7 +9,6 @@ from operator import itemgetter
 # from scipy.misc import comb
 
 import time
-import ipdb
 
 import systems
 import setups

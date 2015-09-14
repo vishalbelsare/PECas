@@ -7,7 +7,6 @@ import numpy as np
 from abc import ABCMeta, abstractmethod
 
 import time
-import ipdb
 
 import systems
 import intro
