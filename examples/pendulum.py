@@ -69,7 +69,8 @@ lsqpe = pecas.LSq( \
     linear_solver = "ma97", \
     yN = yN, wv = wv)
 
-lsqpe.run_parameter_estimation()
+# lsqpe.run_parameter_estimation(hessian = "gauss-newton")
+lsqpe.run_parameter_estimation(hessian = "exact-hessian")
 lsqpe.show_results()
 
 lsqpe.compute_covariance_matrix()

@@ -33,18 +33,19 @@ odesys.show_system_information(showEquations = True)
 data = pl.array(pl.loadtxt("data_2d_vehicle.dat", \
     delimiter = ", ", skiprows = 1))
 
-ty = data[400:650, 1]
+ty = data[300:850, 1]
 
-yN = data[400:650, [2, 4, 6, 8]]
+yN = data[300:850, [2, 4, 6, 8]]
 # wv = 1 / (0.1**2) * pl.ones(yN.shape)
 wv = pl.ones(yN.shape)
-wv[:, 0] = 0.1
-wv[:, 1] = 0.1
-wv[:,2] = 0.1
-wv[:,3] = 0.01
-uN = data[400:649, [9, 10]]
+# wv[:, 0] = 10.0
+# wv[:, 1] = 0.1
+# wv[:,2] = 0.1
+wv[:,3] = 0.1
+uN = data[300:849, [9, 10]]
 # wwe = [1 / 1e-1] * 4
-wwe = [1.0] * 2 + [0.1] + [0.5]
+# wwe = [1.0] * 2 + [0.1] + [0.5]
+wwe = [10.0] * 2 + [1.0] * 2
 # wwe[0] = 1 / 1e-3
 # wwe[-1] = 1 / 1e-3
 # wwe = [1 / 1e-2] * 3 + [1/1e-1]
@@ -63,7 +64,7 @@ lsqpe = pecas.LSq(system = odesys, \
     scheme = "radau", \
     order = 3)
 
-lsqpe.run_parameter_estimation()
+lsqpe.run_parameter_estimation(hessian = "exact-hessian")
 
 # lsqpe.covmat_schur()
 # var1 = lsqpe.Covp 
@@ -88,7 +89,7 @@ lsqpe.run_parameter_estimation()
 # psihat = lsqpe.Xhat[2]
 # vhat = lsqpe.Xhat[3]
 
-lsqpe.run_simulation(yN[0,:])
+lsqpe.run_simulation(x0 = yN[0,:])
 
 xhat = lsqpe.Xsim[0,:].T
 yhat = lsqpe.Xsim[1,:].T
