@@ -48,7 +48,7 @@ lsqpe = pecas.LSq(system = odesys, \
     pinit = [0.5, 1.0], \
     xinit = yN, \
     yN = yN, \
-    linear_solver = "ma97", \
+    # linear_solver = "ma97", \
     wv = wv)
 
 lsqpe.run_parameter_estimation(hessian = "gauss-newton")

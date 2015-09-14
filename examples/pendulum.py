@@ -66,7 +66,7 @@ lsqpe = pecas.LSq( \
     uN = uN, \
     pinit = 1, \
     xinit = yN, 
-    linear_solver = "ma97", \
+    # linear_solver = "ma97", \
     yN = yN, wv = wv)
 
 # lsqpe.run_parameter_estimation(hessian = "gauss-newton")

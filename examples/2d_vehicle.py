@@ -59,8 +59,7 @@ lsqpe = pecas.LSq(system = odesys, \
     ty = ty, yN =yN, \
     wv = wv, wwe = wwe, \
     xinit = yN, \
-    # linear_solver = "mumps", \
-    linear_solver = "ma97", \
+    # linear_solver = "ma97", \
     scheme = "radau", \
     order = 3)
 

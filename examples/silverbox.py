@@ -54,7 +54,7 @@ lsqpe = pecas.LSq( \
     yN = y_data, \
     pinit = p_guess, \
     xinit = y_data, \
-    linear_solver = "ma97", \
+    # linear_solver = "ma97", \
     wv = wv)
 
 lsqpe.run_parameter_estimation()
