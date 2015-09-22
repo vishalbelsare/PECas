@@ -60,13 +60,13 @@ lsqpe = pecas.LSq( \
 lsqpe.run_parameter_estimation()
 lsqpe.run_simulation(x0 = [0.0, 0.0])
 
-# pl.close("all")
-# pl.figure()
+pl.close("all")
+pl.figure()
 
-# pl.scatter(t, pl.squeeze(y_data[0,:]))
-# pl.plot(t, lsqpe.Xsim[0,:].T)
+pl.scatter(t, pl.squeeze(y_data[0,:]))
+pl.plot(t, lsqpe.Xsim[0,:].T)
 
-# pl.scatter(t, pl.squeeze(y_data[1,:]))
-# pl.plot(t, lsqpe.Xsim[1,:].T)
+pl.scatter(t, pl.squeeze(y_data[1,:]))
+pl.plot(t, lsqpe.Xsim[1,:].T)
 
-# pl.show()
+pl.show()
