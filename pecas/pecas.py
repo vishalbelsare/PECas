@@ -609,7 +609,7 @@ parameter set in the argument psim.
 
         else:
 
-            if not np.squeeze(psim).shape[0] == self.pesetup.np:
+            if not np.atleast_1d(np.squeeze(psim)).shape[0] == self.pesetup.np:
 
                 raise ValueError("Wrong dimension for parameter set psim.")
 

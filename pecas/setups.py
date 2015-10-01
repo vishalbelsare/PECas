@@ -461,7 +461,7 @@ class ODEsetup(SetupsBaseClass):
             Tphi.append(self.tu[-1])
             Uphi.append(self.uN[:,-1])
             Xphi.append(self.XF)
-            WUphi.append(self.WU[:,-1])
+            WUphi.append(self.WU[:self.nwu,-1])
 
 
         # Mapped calculation of the collocation equations
