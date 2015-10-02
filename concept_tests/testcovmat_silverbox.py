@@ -2,17 +2,6 @@ import casadi as ca
 import pylab as pl
 import pecas
 
-# (Model and data taken from: Diehl, Moritz: Course on System Identification, 
-# exercise 7, SYSCOP, IMTEK, University of Freiburg, 2014/2015)
-
-# Defining constant problem parameters: 
-#
-#     - m: representing the ball of the mass in kg
-#     - L: the length of the pendulum bar in meters
-#     - g: the gravity constant in m/s^2
-#     - psi: the actuation angle of the manuver in radians, which stays
-#            constant for this problem
-
 N = 1000
 fs = 610.1
 
@@ -55,16 +44,19 @@ lsqpe_sim.run_simulation(x0 = [0.0, 0.0], psim = p_true/scale)
 
 p_test = []
 
+sigma = 0.01
+wv = (1. / sigma**2) * pl.ones(yN.shape)
+
 for k in range(200):
 
-    y_test = lsqpe_sim.Xsim + 0.1 * (pl.rand(*lsqpe_sim.Xsim.shape) - 0.5)
+    y_test = lsqpe_sim.Xsim + sigma * (pl.randn(*lsqpe_sim.Xsim.shape))
 
     lsqpe_test = pecas.LSq( \
     system = odesys, tu = tu, \
     uN = uN, \
     pinit = p_guess, \
     xinit = y_test, 
-    # linear_solver = "ma97", \
+    linear_solver = "ma97", \
     yN = y_test, wv = wv)
 
     lsqpe_test.run_parameter_estimation()

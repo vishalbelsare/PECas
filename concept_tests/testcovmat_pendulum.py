@@ -54,9 +54,12 @@ lsqpe_sim.run_simulation(x0 = yN[:,0], psim = [3.0])
 
 p_test = []
 
+sigma = 0.1
+wv = (1. / sigma**2) * pl.ones(yN.shape)
+
 for k in range(100):
 
-    y_test = lsqpe_sim.Xsim + 0.1 * (pl.rand(*lsqpe_sim.Xsim.shape) - 0.5)
+    y_test = lsqpe_sim.Xsim + sigma * (pl.randn(*lsqpe_sim.Xsim.shape))
 
     lsqpe_test = pecas.LSq( \
     system = odesys, tu = tu, \
