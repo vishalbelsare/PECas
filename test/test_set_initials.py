@@ -8,7 +8,7 @@ import pecas
 
 import unittest
 
-class BSSetBoundsInitialsTest(object):
+class BSSetInitialsTest(object):
 
     def test_valid_timegrid_inputs(self):
 
@@ -72,7 +72,7 @@ class BSSetBoundsInitialsTest(object):
                 system = self.bsys, tu = self.tu, uN = uarg)
 
 
-class ODESetBoundsInitialsTest(object):
+class ODESetInitialsTest(object):
 
     def test_valid_timegrid_inputs(self):
 

@@ -8,7 +8,7 @@ import pecas
 
 import unittest
 
-class BSPERunTest(object):
+class BSLsqPETest(object):
 
     def lsq_run(self):
 
@@ -52,7 +52,7 @@ class BSPERunTest(object):
         # self.comp_covmat()
 
 
-class ODEPERunTest(object):
+class ODELsqPETest(object):
 
     def lsq_run(self):
 

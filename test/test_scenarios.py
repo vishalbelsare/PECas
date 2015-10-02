@@ -3,14 +3,14 @@ import numpy as np
 import pecas
 
 import unittest
-import test_set_bounds_initials
+import test_set_initials
 import test_lsq_init
-import test_lsq_run
+import test_lsq_pe
 
 class TestBasicSystemNoConstraints(unittest.TestCase, \
-    test_set_bounds_initials.BSSetBoundsInitialsTest, \
-    test_lsq_init.BSPESetupTest, \
-    test_lsq_run.BSPERunTest):
+    test_set_initials.BSSetInitialsTest, \
+    test_lsq_init.BSLsqInitTest, \
+    test_lsq_pe.BSLsqPETest):
 
     _multiprocess_can_split_ = True
 
@@ -52,9 +52,9 @@ class TestBasicSystemNoConstraints(unittest.TestCase, \
 
 
 class TestBasicSystemConstraints(unittest.TestCase, \
-    test_set_bounds_initials.BSSetBoundsInitialsTest, \
-    test_lsq_init.BSPESetupTest, \
-    test_lsq_run.BSPERunTest):
+    test_set_initials.BSSetInitialsTest, \
+    test_lsq_init.BSLsqInitTest, \
+    test_lsq_pe.BSLsqPETest):
 
     def setUp(self):
 
@@ -95,9 +95,9 @@ class TestBasicSystemConstraints(unittest.TestCase, \
 
 
 class TestLotkaVolterra(unittest.TestCase, \
-    test_set_bounds_initials.ODESetBoundsInitialsTest, \
-    test_lsq_init.ODEPESetupTest, \
-    test_lsq_run.ODEPERunTest):
+    test_set_initials.ODESetInitialsTest, \
+    test_lsq_init.ODELsqInitTest, \
+    test_lsq_pe.ODELsqPETest):
 
     # (model and data taken from Bock, Sager et al.: Uebungen Numerische
     # Mathematik II, Blatt 9, IWR, Universitaet Heidelberg, 2006)
@@ -164,9 +164,9 @@ class TestLotkaVolterra(unittest.TestCase, \
 
 
 class Test1DVehicle(unittest.TestCase, \
-    test_set_bounds_initials.ODESetBoundsInitialsTest, \
-    test_lsq_init.ODEPESetupTest, \
-    test_lsq_run.ODEPERunTest, \
+    test_set_initials.ODESetInitialsTest, \
+    test_lsq_init.ODELsqInitTest, \
+    test_lsq_pe.ODELsqPETest, \
     ):
 
     # (model and data taken from Diehl, Moritz: Course on System Identification,
@@ -224,9 +224,9 @@ class Test1DVehicle(unittest.TestCase, \
 
 
 class Test2DVehicle(unittest.TestCase, \
-    test_set_bounds_initials.ODESetBoundsInitialsTest, \
-    test_lsq_init.ODEPESetupTest, \
-    test_lsq_run.ODEPERunTest, \
+    test_set_initials.ODESetInitialsTest, \
+    test_lsq_init.ODELsqInitTest, \
+    test_lsq_pe.ODELsqPETest, \
     ):
 
     # (model and data taken from Verschueren, Robin: Design and implementation 
@@ -305,9 +305,9 @@ class Test2DVehicle(unittest.TestCase, \
 
 
 class PedulumBar(unittest.TestCase, \
-    test_set_bounds_initials.ODESetBoundsInitialsTest, \
-    test_lsq_init.ODEPESetupTest, \
-    test_lsq_run.ODEPERunTest, \
+    test_set_initials.ODESetInitialsTest, \
+    test_lsq_init.ODELsqInitTest, \
+    test_lsq_pe.ODELsqPETest, \
     ):
 
     def setUp(self):
