@@ -497,7 +497,9 @@ this might take some time ...
         # self.rhat = sol["f"]
 
         R_squared_fcn = ca.MXFunction("R_squared_fcn", [self.Vars], 
-            [ca.mul([self.pesetup.V[:].T, self.pesetup.V[:]])])
+            [ca.mul([ \
+                ca.veccat([self.pesetup.V, self.pesetup.WE, self.pesetup.WU]).T, 
+                ca.veccat([self.pesetup.V, self.pesetup.WE, self.pesetup.WU])])])
 
         self.R_squared = R_squared_fcn([self.Varshat])
 
@@ -736,18 +738,11 @@ this might take some time ...
 
             F11 = B1 - ca.mul([E.T, Dinv])
 
-            # self.beta = self.rhat / (self.yN.size + self.g.size1() - \
-            #         self.Vars.size())
-
-            self.beta = ca.mul([ \
-                self.pesetup.V[:].T, ca.diag(self.W), self.pesetup.V[:]]) / \
+            self.beta = ca.mul([self.R.T, self.R]) / \
                 (self.yN.size + self.g.size1() - self.Vars.size())
 
             self.fcovp = ca.MXFunction("fcovp", [self.Vars], \
                 [self.beta * ca.solve(F11, ca.MX.eye(F11.size1()))])
-
-            # self.fcovp = ca.MXFunction("fcovp", [self.Vars], \
-            #     [ca.solve(F11, ca.MX.eye(F11.size1()))])
 
             [self.Covp] = self.fcovp([self.Varshat])
 
