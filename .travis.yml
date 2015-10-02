@@ -36,7 +36,8 @@ before_script:
  - export PYTHONPATH=$PYTHONPATH:$HOME/casadi-py27-np1.9.1-v$CASADIVERSION
 
 script:
- - nosetests -v --exe
+# - nosetests -v --exe
+ - py.test --cov pecas --doctest-modules pecas test
 
 after_success:
   coveralls
