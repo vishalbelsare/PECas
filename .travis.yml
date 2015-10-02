@@ -36,5 +36,7 @@ before_script:
  - export PYTHONPATH=$PYTHONPATH:$HOME/casadi-py27-np1.9.1-v$CASADIVERSION
 
 script:
- - python -c 'import numpy; print numpy.version.version'
  - nosetests -v --exe
+
+after_success:
+ - coveralls
