@@ -19,8 +19,8 @@ install:
  # - conda create --yes -n test python=$TRAVIS_PYTHON_VERSION
  # - source activate test
  - conda install --yes numpy=$NUMPY scipy=$SCIPY matplotlib nose
- # - pip install setuptools coveralls pytest-cov
- - conda install --yes -c dan_blanchard python-coveralls nose-cov
+ - pip install coveralls python-coveralls nose-cov
+ # - conda install --yes -c dan_blanchard python-coveralls nose-cov
 
  - wget http://sourceforge.net/projects/casadi/files/CasADi/$CASADIVERSION/linux/casadi-py27-np1.9.1-v$CASADIVERSION.tar.gz/download -O casadi-py27-np1.9.1-v$CASADIVERSION.tar.gz
  - mkdir $HOME/casadi-py27-np1.9.1-v$CASADIVERSION
@@ -37,7 +37,7 @@ before_script:
  - export PYTHONPATH=$PYTHONPATH:$HOME/casadi-py27-np1.9.1-v$CASADIVERSION
 
 script:
- - nosetests --with-cov --cov pecas --cov-config .coveragerc --logging-level=INFO
+ - nosetests --exe -v --with-cov
  # - py.test --cov pecas --doctest-modules pecas test
 
 after_success:
