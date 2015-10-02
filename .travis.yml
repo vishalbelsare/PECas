@@ -37,7 +37,7 @@ before_script:
 
 script:
 # - nosetests -v --exe
- - py.test --cov pecas --doctest-modules pecas test
+ - py.test --cov PECas --doctest-modules pecas test
 
 after_success:
   coveralls
