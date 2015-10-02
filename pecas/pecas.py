@@ -494,29 +494,13 @@ this might take some time ...
         sol = solver(x0 = Varsinit, lbg = 0, ubg = 0)
 
         self.Varshat = sol["x"]
-        # self.rhat = sol["f"]
 
         R_squared_fcn = ca.MXFunction("R_squared_fcn", [self.Vars], 
             [ca.mul([ \
                 ca.veccat([self.pesetup.V, self.pesetup.WE, self.pesetup.WU]).T, 
                 ca.veccat([self.pesetup.V, self.pesetup.WE, self.pesetup.WU])])])
 
-        self.R_squared = R_squared_fcn([self.Varshat])
-
-        # self.dv_lambdahat = sol["lam_g"]
-        
-        # Ysim = self.pesetup.phiNfcn([self.Varshat])[0]
-        # Ym = np.reshape(self.yN.T,(Ysim.shape))
-        # res = Ym-Ysim
-        # self.residual = []
-        # self.Rsquared = []
-
-        # for i in range(self.pesetup.ny):   
-
-        #     self.residual.append(\
-        #         (np.linalg.norm(res[i:-1:self.pesetup.ny]))**2)
-        #     self.Rsquared.append(1 - self.residual[i] / \
-        #         (np.linalg.norm(Ym[i:-1:self.pesetup.ny]))**2)
+        [self.R_squared] = R_squared_fcn([self.Varshat])
         
         self.tend_estimation = time.time()
         self.duration_estimation = self.tend_estimation - \
@@ -782,12 +766,11 @@ matrix for the estimated parameters can be computed.''')
           - in the case of the estimation of a dynamic
             system, the estimated value of the first state 
             :math:`\hat{x}(t_{0})` and the estimated value 
-            of the last state :math:`\hat{x}(t_{N})`, and
+            of the last state :math:`\hat{x}(t_{N})`,
+          - the value of :math:`R^2` measuring the goodness of fit
+            of the estimated parameters, and
           - the durations of the setup and the estimation.
         '''
-
-        # - the value of :math:`R^2` measuring the goodness of fit
-        #   of the estimated parameters,
 
         intro.pecas_intro()
 
@@ -837,19 +820,9 @@ matrix for the estimated parameters can be computed.''')
 '''    Covariance matrix for the estimated parameters not yet computed.
     Run class function compute_covariance_matrix() to do so.''')
 
-            # print( \
-            #     "\nGoodness of fit R^2" + 30 * "." + ": {0:10.8e}".format(\
-            #         self.Rsquared))
-            
-            # print("\nGoodness of fit R-squared:  ")
-            # for i in range(self.pesetup.ny):
-            #     print("R^2 - Y_{0} = {1: 10.8e}".format(i,self.Rsquared[i]))
-
-            # print("Residual" + 41 * "." + ": {0:10.8e}".format(self.residual))
-
-            # print("\nResidual:  ")
-            # for i in range(self.pesetup.ny):
-            #     print("R - Y_{0} = {1: 10.8e}".format(i,self.residual[i]))
+            print( \
+                "\nGoodness of fit R^2" + 30 * "." + ": {0:10.8e}".format(\
+                    float(self.R_squared)))
 
             print("\nDuration of the problem setup"+ 20 * "." + \
                 ": {0:10.8e} s".format(self.pesetup.duration_setup))
