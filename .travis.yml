@@ -19,7 +19,7 @@ install:
  # - conda create --yes -n test python=$TRAVIS_PYTHON_VERSION
  # - source activate test
  - conda install --yes numpy=$NUMPY scipy=$SCIPY matplotlib nose
- - pip install coveralls python-coveralls=3.7.1 nose-cov
+ - pip install coveralls python-coveralls==3.7.1 nose-cov
  # - conda install --yes -c dan_blanchard python-coveralls nose-cov
 
  - wget http://sourceforge.net/projects/casadi/files/CasADi/$CASADIVERSION/linux/casadi-py27-np1.9.1-v$CASADIVERSION.tar.gz/download -O casadi-py27-np1.9.1-v$CASADIVERSION.tar.gz
