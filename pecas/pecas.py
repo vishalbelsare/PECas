@@ -869,14 +869,12 @@ and compute_covariance_matrix() before all results can be displayed.
         inside of one plot window.
         '''
 
-#         try:
+        if not hasattr(self, Covp):
 
-# [... something that checks if covariance matrix had been computed]
-
-#             raise AttributeError('''
-# You must execute both run_parameter_estimation() and
-# compute_covariance_matrix() before the confidece ellipsoids can be plotted.
-# ''')
+            raise AttributeError('''
+You must execute both run_parameter_estimation() and
+compute_covariance_matrix() before the confidece ellipsoids can be plotted.
+''')
 
         if type(indices) is not list:
 
