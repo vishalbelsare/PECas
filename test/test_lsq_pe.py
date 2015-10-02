@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Test the ODE's setup mehthod (collocation struct builder)
+from numpy import testing
 
 import casadi as ca
 import pecas
 
 import unittest
 
-class BSPERunTest(object):
+class BSLsqPETest(object):
 
     def lsq_run(self):
 
@@ -25,12 +25,9 @@ class BSPERunTest(object):
         self.lsqpe.run_parameter_estimation()
 
         phat = self.lsqpe.phat
-        print(phat)
 
-        for k, pk in enumerate(phat):
-            self.assertAlmostEqual(pk, self.phat[k], places = 5)
+        testing.assert_almost_equal(phat, self.phat, decimal = 5)
 
-        # self.lsqpe.show_system_information(showEquations = True)
         self.lsqpe.show_results()
 
 
@@ -52,7 +49,7 @@ class BSPERunTest(object):
         # self.comp_covmat()
 
 
-class ODEPERunTest(object):
+class ODELsqPETest(object):
 
     def lsq_run(self):
 
@@ -71,15 +68,10 @@ class ODEPERunTest(object):
         self.lsqpe.run_parameter_estimation()
 
         phat = self.lsqpe.phat
-        print(phat)
-        
         Xhat = self.lsqpe.Xhat
-        print(Xhat)
 
-        for k, pk in enumerate(phat):
-            self.assertAlmostEqual(pk, self.phat[k], places = 5)
+        testing.assert_almost_equal(phat, self.phat, decimal = 5)
 
-        # self.lsqpe.show_system_information(showEquations = True)
         self.lsqpe.show_results()
 
 

@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Test the ODE's setup mehthod (collocation struct builder)
-
 import casadi as ca
 import numpy as np
 import pecas
 
 import unittest
 
-class BSPESetupTest(object):
+class BSLsqInitTest(object):
 
     def test_valid_lsq_init(self):
 
@@ -44,7 +42,7 @@ class BSPESetupTest(object):
             yN = self.yN, wv = np.atleast_2d(self.wv)[:-1])
 
 
-class ODEPESetupTest(object):
+class ODELsqInitTest(object):
 
     def test_valid_lsq_init(self):
 

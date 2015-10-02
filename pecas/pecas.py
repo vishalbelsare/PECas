@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import casadi as ca
-import casadi.tools as cat
+# import casadi.tools as cat
 
 import numpy as np
+import matplotlib.pyplot as plt
 from operator import itemgetter
-# from scipy.misc import comb
+from scipy.misc import comb
 
 import time
 
@@ -563,6 +564,11 @@ Parameter estimation finished. Check IPOPT output for status information.''')
 
         '''
 
+        intro.pecas_intro()
+        print('\n' + 27 * '-' + \
+            ' PECas system simulation ' + 26 * '-')
+        print('\nPerforming system simulation, this might take some time ...') 
+
         if not type(self.pesetup.system) is systems.ExplODE:
 
             raise NotImplementedError("Until now, this function can only " + \
@@ -577,7 +583,7 @@ Parameter estimation finished. Check IPOPT output for status information.''')
 
         x0 = np.squeeze(np.asarray(x0))
 
-        if x0.shape[0] != self.pesetup.nx:
+        if np.atleast_1d(x0).shape[0] != self.pesetup.nx:
 
             raise ValueError("Wrong dimension for initial value x0.")
 
@@ -667,6 +673,10 @@ method-argument of the function.
 
 
         self.Xsim = ca.horzcat(Xsim)
+
+        print( \
+'''System simulation finished.''')
+
 
 
     def compute_covariance_matrix(self):
@@ -860,98 +870,89 @@ and compute_covariance_matrix() before all results can be displayed.
             np.set_printoptions()
 
 
-#     def plot_confidence_ellipsoids(self, indices = []):
+    def plot_confidence_ellipsoids(self, indices = []):
 
-#         r'''
-#         --- docstring tbd ---
-        
-#         '''
+        r'''
+        :param indices: List of the indices of the parameters in
+                        :math:`\hat{p}` for
+                        which the confidence ellipsoids shall be plotted.
+                        The indices must be defined by list entries of type
+                        *int*. If an empty list is supported (default),
+                        the ellipsoids for all parameters are plotted.
 
-#         raise NotImplementedError( \
-# '''
-# This feature of PECas is currently disabled, but will be available again in a
-# future version of PECas.
-# ''')
+        :type indices: list
+        :raises: AttributeError, ValueError, TypeError
 
-#         '''
-#         This function plots the confidence ellipsoids pairwise for all
-#         parameters defined in ``indices``. The plots are displayed in subplots
-#         inside of one plot window. For naming the plots, the variable names
-#         defined within the SX/MX-variables that contain the parameters are used.
+        This function plots the confidence ellipsoids pairwise for all
+        parameters defined in ``indices``. The plots are displayed in subplots
+        inside of one plot window.
+        '''
 
-#         :param indices: List of the indices of the parameters in :math:`x` for
-#                         which the confidence ellipsoids shall be plotted.
-#                         The indices must be defined by list entries of type
-#                         *int*. If an empty list is supported (which is also
-#                         the default case),
-#                         the ellipsoids for all parameters are plotted.
-#         :type indices: list
-#         :raises: AttributeError, ValueError, TypeError
+#         try:
 
-#         '''
-
-#         if (self.get_xhat(msg = False) is None) or \
-#             (self.get_Covx(msg = False) is None):
+# [... something that checks if covariance matrix had been computed]
 
 #             raise AttributeError('''
 # You must execute both run_parameter_estimation() and
 # compute_covariance_matrix() before the confidece ellipsoids can be plotted.
 # ''')
 
-#         if type(indices) is not list:
-#             raise TypeError('''
-# The variable containing the indices of the parameters has to be of type list.
-# ''')
+        if type(indices) is not list:
 
-#         # If the list of indices is empty, create a list that contains
-#         # all indices
+            raise TypeError('''
+The variable containing the indices of the parameters has to be of type list.
+''')
 
-#         if len(indices) == 0:
-#             indices = range(0, self.__d)
+        # If the list of indices is empty, create a list that contains
+        # all indices
 
-#         if len(indices) == 1:
-#             raise ValueError('''
-# A confidence ellipsoid can not be plotted for only one single parameter. The
-# list of indices must therefor contain more than only one entry.
-# ''')            
+        if len(indices) == 0:
+            indices = range(0, self.pesetup.np)
 
-#         for ind in indices:
-#             if type(ind) is not int:
-#                 raise TypeError('''
-# All list entries for the indices have to be of type int.
-# ''')
+        if len(indices) == 1:
+            raise ValueError('''
+A confidence ellipsoid can not be plotted for only one single parameter. The
+list of indices must therefor contain more than only one entry.
+''')            
 
-#         nplots = int(round(comb(len(indices), 2)))
-#         plotfig = np.figure()
-#         plcount = 1
+        for ind in indices:
 
-#         xy = np.array([np.cos(np.linspace(0,2*np.pi,100)), \
-#                     np.sin(np.linspace(0,2*np.pi,100))])
+            if type(ind) is not int:
+                
+                raise TypeError('''
+All list entries for the indices have to be of type int.
+''')
 
-#         for j, ind1 in enumerate(indices):
+        nplots = int(round(comb(len(indices), 2)))
+        plotfig = plt.figure()
+        plcount = 1
 
-#             for k, ind2 in enumerate(indices[j+1:]):
+        xy = np.array([np.cos(np.linspace(0,2*np.pi,100)), \
+                    np.sin(np.linspace(0,2*np.pi,100))])
 
-#                 covs = np.array([ \
+        for j, ind1 in enumerate(indices):
 
-#                         [self.__Covx[ind1, ind1], self.__Covx[ind1, ind2]], \
-#                         [self.__Covx[ind2, ind1], self.__Covx[ind2, ind2]] \
+            for k, ind2 in enumerate(indices[j+1:]):
 
-#                     ])
+                covs = np.array([ \
 
-#                 w, v = np.linalg.eig(covs)
+                        [self.Covp[ind1, ind1], self.Covp[ind1, ind2]], \
+                        [self.Covp[ind2, ind1], self.Covp[ind2, ind2]] \
 
-#                 ellipse = ca.mul(np.array([self.__xhat[ind1], \
-#                     self.__xhat[ind2]]), \
-#                     np.ones([1,100])) + ca.mul([v, np.diag(w), xy])
+                    ])
 
-#                 ax = plotfig.add_subplot(nplots, 1, plcount)
-#                 ax.plot(np.array(ellipse[0,:]).T, np.array(ellipse[1,:]).T, \
-#                     label = str(self.__x[ind1].getName()) + ' - ' + \
-#                     str(self.__x[ind2].getName()))
-#                 ax.scatter(self.__xhat[ind1], self.__xhat[ind2])
-#                 ax.legend(loc="upper left")
+                w, v = np.linalg.eig(covs)
 
-#                 plcount += 1
+                ellipse = ca.mul(np.array([self.phat[ind1], \
+                    self.phat[ind2]]), \
+                    np.ones([1,100])) + ca.mul([v, np.diag(w), xy])
 
-#         np.show()
+                ax = plotfig.add_subplot(nplots, 1, plcount)
+                ax.plot(np.array(ellipse[0,:]).T, np.array(ellipse[1,:]).T, \
+                    label = 'p' + str(ind1) + ' - p' + str(ind2))
+                ax.scatter(self.phat[ind1], self.phat[ind2])
+                ax.legend(loc="upper left")
+
+                plcount += 1
+
+        plt.show()

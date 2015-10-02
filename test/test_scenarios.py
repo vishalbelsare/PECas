@@ -3,14 +3,16 @@ import numpy as np
 import pecas
 
 import unittest
-import test_set_bounds_initials
+import test_set_initials
 import test_lsq_init
-import test_lsq_run
+import test_lsq_sim
+import test_lsq_pe
 
 class TestBasicSystemNoConstraints(unittest.TestCase, \
-    test_set_bounds_initials.BSSetBoundsInitialsTest, \
-    test_lsq_init.BSPESetupTest, \
-    test_lsq_run.BSPERunTest):
+    test_set_initials.BSSetInitialsTest, \
+    test_lsq_init.BSLsqInitTest, \
+    test_lsq_sim.BSLsqSimTest, \
+    test_lsq_pe.BSLsqPETest):
 
     _multiprocess_can_split_ = True
 
@@ -48,13 +50,14 @@ class TestBasicSystemNoConstraints(unittest.TestCase, \
 
         self.pinit = None
 
-        self.phat = [6.24]
+        self.phat = np.atleast_2d([6.24])
 
 
 class TestBasicSystemConstraints(unittest.TestCase, \
-    test_set_bounds_initials.BSSetBoundsInitialsTest, \
-    test_lsq_init.BSPESetupTest, \
-    test_lsq_run.BSPERunTest):
+    test_set_initials.BSSetInitialsTest, \
+    test_lsq_init.BSLsqInitTest, \
+    test_lsq_sim.BSLsqSimTest, \
+    test_lsq_pe.BSLsqPETest):
 
     def setUp(self):
 
@@ -91,13 +94,14 @@ class TestBasicSystemConstraints(unittest.TestCase, \
 
         self.pinit = [1, 1]
 
-        self.phat = [0.961943, 1.03666]
+        self.phat = np.atleast_2d([0.961943, 1.03666]).T
 
 
 class TestLotkaVolterra(unittest.TestCase, \
-    test_set_bounds_initials.ODESetBoundsInitialsTest, \
-    test_lsq_init.ODEPESetupTest, \
-    test_lsq_run.ODEPERunTest):
+    test_set_initials.ODESetInitialsTest, \
+    test_lsq_init.ODELsqInitTest, \
+    test_lsq_sim.ODELsqSimTest, \
+    test_lsq_pe.ODELsqPETest):
 
     # (model and data taken from Bock, Sager et al.: Uebungen Numerische
     # Mathematik II, Blatt 9, IWR, Universitaet Heidelberg, 2006)
@@ -160,13 +164,14 @@ class TestLotkaVolterra(unittest.TestCase, \
 
         self.xinit = self.yN
 
-        self.phat = [0.69348187, 0.34116928]
+        self.phat = np.atleast_2d([0.69348187, 0.34116928]).T
 
 
 class Test1DVehicle(unittest.TestCase, \
-    test_set_bounds_initials.ODESetBoundsInitialsTest, \
-    test_lsq_init.ODEPESetupTest, \
-    test_lsq_run.ODEPERunTest, \
+    test_set_initials.ODESetInitialsTest, \
+    test_lsq_init.ODELsqInitTest, \
+    test_lsq_sim.ODELsqSimTest, \
+    test_lsq_pe.ODELsqPETest, \
     ):
 
     # (model and data taken from Diehl, Moritz: Course on System Identification,
@@ -210,7 +215,7 @@ class Test1DVehicle(unittest.TestCase, \
             self.tu.size - 1)), \
             np.ones((self.tu.size - 1, self.u.size()))]
 
-        self.yN = data[:, 1]
+        self.yN = np.atleast_2d(data[:, 1]).T
         self.wv = 1 / (0.01**2) * np.ones(self.yN.shape)
         self.uN = data[:-1, 2]
         self.wwe = 1 / 1e-4
@@ -220,17 +225,19 @@ class Test1DVehicle(unittest.TestCase, \
 
         self.xinit = self.yN
 
-        self.phat = [0.05381561, 0.6090617]
+        self.phat = np.atleast_2d([0.05381561, 0.6090617]).T
 
 
 class Test2DVehicle(unittest.TestCase, \
-    test_set_bounds_initials.ODESetBoundsInitialsTest, \
-    test_lsq_init.ODEPESetupTest, \
-    test_lsq_run.ODEPERunTest, \
+    test_set_initials.ODESetInitialsTest, \
+    test_lsq_init.ODELsqInitTest, \
+    test_lsq_sim.ODELsqSimTest, \
+    test_lsq_pe.ODELsqPETest, \
     ):
 
-    # (model and data taken from Verschueren, Robin: Design and implementation 
-    # of a time-optimal controller for model race cars, KU Leuven, 2014)
+    # (model and data taken and adapted from Verschueren, Robin: Design and
+    # implementation of a time-optimal controller for model race cars, 
+    # KU Leuven, 2014)
 
     def setUp(self):
 
@@ -301,13 +308,15 @@ class Test2DVehicle(unittest.TestCase, \
 
         # self.phat = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
         # self.phat = [0.5, 17.06, 3.98281, -10, -7.57932, 3]
-        self.phat = [-5.69732401, -20.4278332, 5.43210821, -0.4871933]
+        self.phat = np.atleast_2d( \
+            [-5.69732401, -20.4278332, 5.43210821, -0.4871933]).T
 
 
 class PedulumBar(unittest.TestCase, \
-    test_set_bounds_initials.ODESetBoundsInitialsTest, \
-    test_lsq_init.ODEPESetupTest, \
-    test_lsq_run.ODEPERunTest, \
+    test_set_initials.ODESetInitialsTest, \
+    test_lsq_init.ODELsqInitTest, \
+    test_lsq_sim.ODELsqSimTest, \
+    test_lsq_pe.ODELsqPETest, \
     ):
 
     def setUp(self):
@@ -363,7 +372,7 @@ class PedulumBar(unittest.TestCase, \
         phim = data[:50, 1]
         wm = data[:50, 2]
 
-        self.yN = np.array([phim, wm])
+        self.yN = np.array([phim, wm]).T
         self.uN = [psi] * (N-1)
 
         self.wv = np.array([
@@ -380,4 +389,4 @@ class PedulumBar(unittest.TestCase, \
 
         self.xinit = None
 
-        self.phat = [2.98427]
+        self.phat = np.atleast_2d([2.98427]).T
