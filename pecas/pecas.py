@@ -903,6 +903,10 @@ All list entries for the indices have to be of type int.
 ''')
 
         nplots = int(round(comb(len(indices), 2)))
+
+        # TODO! Don't plot! Save every figure, system temp folder as default, 
+        # set different location by argument
+
         plotfig = plt.figure()
         plcount = 1
 
