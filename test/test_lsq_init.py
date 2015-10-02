@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Test the ODE's setup mehthod (collocation struct builder)
-
 import casadi as ca
 import numpy as np
 import pecas

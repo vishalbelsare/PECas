@@ -453,7 +453,7 @@ class ODEsetup(SetupsBaseClass):
                         x_temp += self.lfcns[r]([tau])[0] * \
                         self.X[r*self.nx : (r+1) * self.nx, k]
 
-                    Tphi.appaned(self.t_meas_j)
+                    Tphi.append(t_meas_j)
                     Xphi.append(x_temp)
 
         if self.tu[-1] in self.ty:

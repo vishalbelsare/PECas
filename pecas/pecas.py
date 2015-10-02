@@ -582,7 +582,7 @@ Parameter estimation finished. Check IPOPT output for status information.''')
 
         x0 = np.squeeze(np.asarray(x0))
 
-        if x0.shape[0] != self.pesetup.nx:
+        if np.atleast_1d(x0).shape[0] != self.pesetup.nx:
 
             raise ValueError("Wrong dimension for initial value x0.")
 
