@@ -229,8 +229,9 @@ class Test2DVehicle(unittest.TestCase, \
     test_lsq_pe.ODELsqPETest, \
     ):
 
-    # (model and data taken from Verschueren, Robin: Design and implementation 
-    # of a time-optimal controller for model race cars, KU Leuven, 2014)
+    # (model and data taken and adapted from Verschueren, Robin: Design and
+    # implementation of a time-optimal controller for model race cars, 
+    # KU Leuven, 2014)
 
     def setUp(self):
 
