@@ -14,12 +14,12 @@ before_install:
  - bash miniconda.sh -b -p $HOME/miniconda
  - export PATH=/home/travis/miniconda/bin:$PATH
  - conda update --yes conda
+ - pip install setuptools coveralls pytest pytest-cov
 
 install:
  - conda create --yes -n test python=$TRAVIS_PYTHON_VERSION
  - source activate test
  - conda install --yes numpy=$NUMPY scipy=$SCIPY matplotlib pip
- - pip install setuptools coveralls pytest-cov
 
  - wget http://sourceforge.net/projects/casadi/files/CasADi/$CASADIVERSION/linux/casadi-py27-np1.9.1-v$CASADIVERSION.tar.gz/download -O casadi-py27-np1.9.1-v$CASADIVERSION.tar.gz
  - mkdir $HOME/casadi-py27-np1.9.1-v$CASADIVERSION
@@ -37,7 +37,7 @@ before_script:
 
 script:
 # - nosetests -v --exe
- - py.test --cov PECas --doctest-modules pecas test
+ - py.test
 
 after_success:
-  coveralls
+ - coveralls
