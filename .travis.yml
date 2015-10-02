@@ -39,4 +39,4 @@ script:
  - nosetests -v --exe
 
 after_success:
- - coveralls
+  coveralls
