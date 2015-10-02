@@ -563,6 +563,11 @@ Parameter estimation finished. Check IPOPT output for status information.''')
 
         '''
 
+        intro.pecas_intro()
+        print('\n' + 27 * '-' + \
+            ' PECas system simulation ' + 26 * '-')
+        print('\nPerforming system simulation, this might take some time ...') 
+
         if not type(self.pesetup.system) is systems.ExplODE:
 
             raise NotImplementedError("Until now, this function can only " + \
@@ -667,6 +672,10 @@ method-argument of the function.
 
 
         self.Xsim = ca.horzcat(Xsim)
+
+        print( \
+'''System simulation finished.''')
+
 
 
     def compute_covariance_matrix(self):
