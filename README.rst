@@ -18,7 +18,7 @@ PECas holds a user-friendly environment for solving parameter estimation
 problems and for interpretation of the results recieved. It does so by providing Python classes that can be initialized with the problem specifications, while the computations can then easily be performed by using the available class functions.
 
 As it's name suggests, PECas makes use of the optimization framework
-`casadi <http://casadi.org>`_ to solve parameter estimation
+`CasADi <http://casadi.org>`_ to solve parameter estimation
 problems. For PECas to work, you need CasADi version >= 2.4.0-rc2 to be installed on your system.
 
 **Please note:** PECas is still in it's testing state, and does not yet contain all the features it will provide in future versions. Therefore, you should check for updates on a regular basis.
