@@ -6,11 +6,11 @@ Parameter estimation using CasADi
 
 |travis| |coverall|
 
-.. image:: |travis| https://travis-ci.org/adbuerger/PECas.svg?branch=master
+.. |travis| image:: https://travis-ci.org/adbuerger/PECas.svg?branch=master
     :target: https://travis-ci.org/adbuerger/PECas
     :alt: Travis CI build status master branch
 
-.. image:: |coverall| https://coveralls.io/repos/adbuerger/PECas/badge.svg?branch=master&service=github
+.. |coverall| image:: https://coveralls.io/repos/adbuerger/PECas/badge.svg?branch=master&service=github
     :target: https://coveralls.io/github/adbuerger/PECas?branch=master
     :alt: Coverage Status
 
