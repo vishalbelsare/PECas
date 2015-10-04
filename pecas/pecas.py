@@ -722,8 +722,11 @@ this might take some time ...
 
             F11 = B1 - ca.mul([E.T, Dinv])
 
-            self.beta = ca.mul([self.R.T, self.R]) / \
-                (self.yN.size + self.g.size1() - self.Vars.size())
+            self.fbeta = ca.MXFunction("fbeta", [self.Vars], 
+                [ca.mul([self.R.T, self.R]) / \
+                (self.yN.size + self.g.size1() - self.Vars.size())])
+
+            [self.beta] = self.fbeta([self.Varshat])
 
             self.fcovp = ca.MXFunction("fcovp", [self.Vars], \
                 [self.beta * ca.solve(F11, ca.MX.eye(F11.size1()))])
