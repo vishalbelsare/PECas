@@ -2,6 +2,8 @@ import casadi as ca
 import pylab as pl
 import pecas
 
+import os
+
 # (Model and data taken from: Diehl, Moritz: Course on System Identification, 
 # exercise 7, SYSCOP, IMTEK, University of Freiburg, 2014/2015)
 
@@ -49,35 +51,123 @@ lsqpe_sim = pecas.LSq( \
     # linear_solver = "ma97", \
     yN = yN, wv = wv)
 
+ptrue = [3.0]
 
-lsqpe_sim.run_simulation(x0 = yN[:,0], psim = [3.0])
+lsqpe_sim.run_simulation(x0 = yN[:,0], psim = ptrue)
 
 p_test = []
 
 sigma = 0.1
 wv = (1. / sigma**2) * pl.ones(yN.shape)
 
-for k in range(100):
+repetitions = 100
 
-    y_test = lsqpe_sim.Xsim + sigma * (pl.randn(*lsqpe_sim.Xsim.shape))
+for k in range(repetitions):
+
+    y_randn = lsqpe_sim.Xsim + sigma * (pl.randn(*lsqpe_sim.Xsim.shape))
 
     lsqpe_test = pecas.LSq( \
     system = odesys, tu = tu, \
     uN = uN, \
     pinit = 1, \
-    xinit = y_test, 
+    xinit = y_randn, 
     # linear_solver = "ma97", \
-    yN = y_test, wv = wv)
+    yN = y_randn, wv = wv)
 
     lsqpe_test.run_parameter_estimation()
 
     p_test.append(lsqpe_test.phat)
 
 
-p_std = pl.std(p_test, ddof=1)
 p_mean = pl.mean(p_test)
-print p_mean
-print p_std
+p_std = pl.std(p_test, ddof=0)
 
 lsqpe_test.compute_covariance_matrix()
-print ca.sqrt(lsqpe_test.Covp)
+
+
+# Generate report
+
+print("\np_mean         = " + str(ca.DMatrix(p_mean)))
+print("phat_last_exp  = " + str(ca.DMatrix(lsqpe_test.phat)))
+
+print("\np_sd           = " + str(ca.DMatrix(p_std)))
+print("sd_from_covmat = " + str(ca.diag(ca.sqrt(lsqpe_test.Covp))))
+print("beta           = " + str(lsqpe_test.beta))
+
+print("\ndelta_abs_sd   = " + str(ca.fabs(ca.DMatrix(p_std) - \
+    ca.diag(ca.sqrt(lsqpe_test.Covp)))))
+print("delta_rel_sd   = " + str(ca.fabs(ca.DMatrix(p_std) - \
+    ca.diag(ca.sqrt(lsqpe_test.Covp))) / ca.DMatrix(p_std)))
+
+
+fname = os.path.basename(__file__)[:-3] + ".rst"
+
+report = open(fname, "w")
+report.write( \
+'''Concept test: covariance matrix computation
+===========================================
+
+Simulate system. Then: add gaussian noise N~(0, sigma^2), estimate,
+store estimated parameter, repeat.
+
+.. code-block:: python
+
+    y_randn = lsqpe_sim.Xsim + sigma * \
+(np.random.randn(*lsqpe_sim.Xsim.shape))
+
+Afterwards, compute standard deviation of estimated parameters, 
+and compare to single covariance matrix computation done in PECas.
+
+''')
+
+prob = "ODE, 2 states, 1 control, 1 param, (pendulum)"
+report.write(prob)
+report.write("\n" + "-" * len(prob) + "\n\n.. code-block:: python")
+
+report.write( \
+'''.. code-block:: python
+
+    ------------------------ PECas system information ------------------------
+
+    The system is a dynamic system defined by a set of
+    explicit ODEs xdot which establish the system state x:
+        xdot = f(t, u, x, p, we, wu)
+    and by an output function phi which sets the system measurements:
+        y = phi(t, x, p).
+
+    Particularly, the system has:
+        1 inputs u
+        1 parameters p
+        2 states x
+        2 outputs phi
+
+    Where xdot is defined by: 
+    xdot[0] = x[1]
+    xdot[1] = (((p/9)*(u-x[0]))-(3.27*sin(x[0])))
+
+    And where phi is defined by: 
+    y[0] = x[0]
+    y[1] = x[1]
+''')
+
+report.write("\n**Test results:**\n\n.. code-block:: python")
+
+report.write("\n\n    repetitions    = " + str(repetitions))
+report.write("\n    sigma          = " + str(sigma))
+
+report.write("\n\n    p_orig         = " + str(ca.DMatrix(ptrue)))
+report.write("\n\n    p_mean         = " + str(ca.DMatrix(p_mean)))
+report.write("\n    phat_last_exp  = " + str(ca.DMatrix(lsqpe_test.phat)))
+
+report.write("\n\n    p_sd           = " + str(ca.DMatrix(p_std)))
+report.write("\n    sd_from_covmat = " + str(ca.diag(ca.sqrt(lsqpe_test.Covp))))
+report.write("\n    beta           = " + str(lsqpe_test.beta))
+
+report.write("\n\n    delta_abs_sd   = " + str(ca.fabs(ca.DMatrix(p_std) - \
+    ca.diag(ca.sqrt(lsqpe_test.Covp)))))
+report.write("\n    delta_rel_sd   = " + str(ca.fabs(ca.DMatrix(p_std) - \
+    ca.diag(ca.sqrt(lsqpe_test.Covp))) / ca.DMatrix(p_std)) + "\n")
+
+report.close()
+
+os.system("rst2pdf " + fname)

@@ -2,6 +2,8 @@ import casadi as ca
 import pylab as pl
 import pecas
 
+import os
+
 N = 1000
 fs = 610.1
 
@@ -47,17 +49,19 @@ p_test = []
 sigma = 0.01
 wv = (1. / sigma**2) * pl.ones(yN.shape)
 
-for k in range(200):
+repetitions = 100
 
-    y_test = lsqpe_sim.Xsim + sigma * (pl.randn(*lsqpe_sim.Xsim.shape))
+for k in range(repetitions):
+
+    y_randn = lsqpe_sim.Xsim + sigma * (pl.randn(*lsqpe_sim.Xsim.shape))
 
     lsqpe_test = pecas.LSq( \
     system = odesys, tu = tu, \
     uN = uN, \
     pinit = p_guess, \
-    xinit = y_test, 
+    xinit = y_randn, 
     linear_solver = "ma97", \
-    yN = y_test, wv = wv)
+    yN = y_randn, wv = wv)
 
     lsqpe_test.run_parameter_estimation()
 
@@ -70,13 +74,95 @@ p_std = []
 for j, e in enumerate(p_true):
 
     p_mean.append(pl.mean([k[j] for k in p_test]))
-    p_std.append(pl.std([k[j] for k in p_test], ddof = 1))
-
-
-print pl.asarray(p_mean)
-print pl.asarray(p_std)
+    p_std.append(pl.std([k[j] for k in p_test], ddof = 0))
 
 lsqpe_test.compute_covariance_matrix()
-print lsqpe_test.phat
-print ca.diag(ca.sqrt(lsqpe_test.Covp))
 
+
+# Generate report
+
+print("\np_mean         = " + str(ca.DMatrix(p_mean)))
+print("phat_last_exp  = " + str(ca.DMatrix(lsqpe_test.phat)))
+
+print("\np_sd           = " + str(ca.DMatrix(p_std)))
+print("sd_from_covmat = " + str(ca.diag(ca.sqrt(lsqpe_test.Covp))))
+print("beta           = " + str(lsqpe_test.beta))
+
+print("\ndelta_abs_sd   = " + str(ca.fabs(ca.DMatrix(p_std) - \
+    ca.diag(ca.sqrt(lsqpe_test.Covp)))))
+print("delta_rel_sd   = " + str(ca.fabs(ca.DMatrix(p_std) - \
+    ca.diag(ca.sqrt(lsqpe_test.Covp))) / ca.DMatrix(p_std)))
+
+
+fname = os.path.basename(__file__)[:-3] + ".rst"
+
+report = open(fname, "w")
+report.write( \
+'''Concept test: covariance matrix computation
+===========================================
+
+Simulate system. Then: add gaussian noise N~(0, sigma^2), estimate,
+store estimated parameter, repeat.
+
+.. code-block:: python
+
+    y_randn = lsqpe_sim.Xsim + sigma * \
+(np.random.randn(*lsqpe_sim.Xsim.shape))
+
+Afterwards, compute standard deviation of estimated parameters, 
+and compare to single covariance matrix computation done in PECas.
+
+''')
+
+prob = "ODE, 2 states, 1 control, 1 param, (silverbox)"
+report.write(prob)
+report.write("\n" + "-" * len(prob) + "\n\n.. code-block:: python")
+
+report.write( \
+'''.. code-block:: python
+
+    ------------------------ PECas system information ------------------------
+
+    The system is a dynamic system defined by a set of
+    explicit ODEs xdot which establish the system state x:
+        xdot = f(t, u, x, p, we, wu)
+    and by an output function phi which sets the system measurements:
+        y = phi(t, x, p).
+
+    Particularly, the system has:
+        1 inputs u
+        4 parameters p
+        2 states x
+        2 outputs phi
+
+    Where xdot is defined by: 
+    xdot[0] = x[1]
+    xdot[1] = ((((u-(p[3]*pow(x[0],3)))-(p[2]*x[0]))- 
+        ((0.0001*p[1])*x[1]))/(1e-06*p[0]))
+
+    And where phi is defined by: 
+    y[0] = x[0]
+    y[1] = x[1]
+''')
+
+report.write("\n**Test results:**\n\n.. code-block:: python")
+
+report.write("\n\n    repetitions    = " + str(repetitions))
+report.write("\n    sigma          = " + str(sigma))
+
+report.write("\n\n    p_orig         = " + str(ca.DMatrix(p_true/scale)))
+report.write("\n\n    p_mean         = " + str(ca.DMatrix(p_mean)))
+report.write("\n    phat_last_exp  = " + str(ca.DMatrix(lsqpe_test.phat)))
+
+report.write("\n\n    p_sd           = " + str(ca.DMatrix(p_std)))
+report.write("\n    sd_from_covmat = " + str(ca.diag(ca.sqrt(lsqpe_test.Covp))))
+report.write("\n    beta           = " + str(lsqpe_test.beta))
+
+report.write("\n\n    delta_abs_sd   = " + str(ca.fabs(ca.DMatrix(p_std) - \
+    ca.diag(ca.sqrt(lsqpe_test.Covp)))))
+report.write("\n    delta_rel_sd   = " + str(ca.fabs(ca.DMatrix(p_std) - \
+    ca.diag(ca.sqrt(lsqpe_test.Covp))) / ca.DMatrix(p_std)) + "\n")
+
+report.close()
+
+os.system("rst2pdf " + fname)
