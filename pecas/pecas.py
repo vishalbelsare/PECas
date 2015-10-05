@@ -10,6 +10,7 @@ from operator import itemgetter
 from scipy.misc import comb
 
 import time
+import ipdb
 
 import systems
 import setups
@@ -448,8 +449,12 @@ this might take some time ...
 
         if hessian == "gauss-newton":
 
+            ipdb.set_trace()
+
             gradF = nlp.gradient()
             jacG = nlp.jacobian("x", "g")
+
+            # Can't the following be implemented more efficiently?!
 
             # gradF.derivative(0, 1)
 
@@ -676,8 +681,15 @@ method-argument of the function.
     def compute_covariance_matrix(self):
 
         r'''
-        This function is yet experimental, and will be presented in detail in
-        a future version of PECas.
+        This function computes the covariance matrix of the estimated
+        parameters from the inverse of the KKT matrix of the
+        parameter estimation problem. For efficiency, the only the inverse of
+        the relevant part of the matrix is computed using a Schur complement.
+
+        .. math::
+
+            \begin{pmatrix} {insterkktmatrix} \end{pmatrix}
+
         '''
 
         intro.pecas_intro()
@@ -704,6 +716,8 @@ this might take some time ...
 
             # hess = hess + 1e-10 * ca.diag(self.Vars)
             
+            # J2 can be re-used from parameter estimation, right?
+
             J2 = ca.jacobian(self.g, self.Vars)
 
             kkt = ca.blockcat( \
