@@ -376,8 +376,10 @@ class LSq(PECasBaseClass):
         .. math::
 
             \begin{aligned}
-                & \text{arg}\,\underset{x, p, v, w_e, w_u}{\text{min}} & & \| v \|_{W_{v}}^{2} + \| w_{e} \|_{W_{w_{e}}}^{2} + \| w_{u} \|_{W_{w_{u}}}^{2}\\
-                & \text{subject to:} & & y_{l} - \phi(t_{l}, u_{l}, x_{l}, p) + v_{l} = 0 \\
+                & \text{arg}\,\underset{x, p, v, w_e, w_u}{\text{min}} & & \frac{1}{2} \| R \|_2^2 \\
+                & \text{subject to:} & & R = W^{^\mathbb{1}/_\mathbb{2}} \begin{pmatrix} {v} \\ {w_e} \\ {w_u} \end{pmatrix} \\
+                & & & W = \begin{pmatrix} {W_{v}}^T & {W_{w_{e}}}^T & {W_{w_{u}}}^T \end{pmatrix} \\
+                & & & v_{l} + y_{l} - \phi(t_{l}, u_{l}, x_{l}, p) = 0 \\
                 & & & (t_{k+1} - t_{k}) f(t_{k,j}, u_{k,j}, x_{k,j}, p, w_{e,k,j}, w_{u,k,j}) - \sum_{r=0}^{d} \dot{L}_r(\tau_j) x_{k,r} = 0 \\
                 & & & x_{k+1,0} - \sum_{r=0}^{d} L_r(1) x_{k,r} = 0 \\
                 & & & t_{k,j} = t_k + (t_{k+1} - t_{k}) \tau_j \\
