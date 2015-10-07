@@ -115,17 +115,17 @@ class TestLotkaVolterra(unittest.TestCase, \
         self.u = ca.MX.sym("u", 0)
 
         # self.v = ca.MX.sym("v", 2)
-        self.we = ca.MX.sym("we", 2)
+        self.eps_e = ca.MX.sym("eps_e", 2)
 
         self.f = ca.vertcat( \
             [-1.0 * self.x[0] + self.p[0] * self.x[0] * self.x[1], 
             1.0 * self.x[1] - self.p[1] * self.x[0] * self.x[1]]) + \
-            self.we
+            self.eps_e
 
         self.phi = self.x
 
         self.odesys = pecas.systems.ExplODE(x = self.x, u = self.u, \
-            p = self.p, we = self.we, f = self.f, phi = self.phi)
+            p = self.p, eps_e = self.eps_e, f = self.f, phi = self.phi)
 
         # Inputs
 
@@ -157,8 +157,8 @@ class TestLotkaVolterra(unittest.TestCase, \
         self.yN = data[:, 1::2]
         self.wv = 1.0 / data[:, 2::2]**2
         self.uN = None
-        self.wwe = [1.0 / 1e-4, 1.0 / 1e-4]
-        self.wwu = None
+        self.weps_e = [1.0 / 1e-4, 1.0 / 1e-4]
+        self.weps_u = None
 
         self.pinit = [0.5, 1.0]
 
@@ -184,14 +184,14 @@ class Test1DVehicle(unittest.TestCase, \
         self.x = ca.MX.sym("x", 1)
         self.p = ca.MX.sym("p", 2)
         self.u = ca.MX.sym("u", 1)
-        self.we = ca.MX.sym("we", 1)
+        self.eps_e = ca.MX.sym("eps_e", 1)
 
-        self.f = 10.0 * self.u - self.p[0] - self.p[1] * self.x + self.we
+        self.f = 10.0 * self.u - self.p[0] - self.p[1] * self.x + self.eps_e
 
         self.phi = self.x
 
         self.odesys = pecas.systems.ExplODE(x = self.x, u = self.u, \
-            p = self.p, we = self.we, f = self.f, phi = self.phi)
+            p = self.p, eps_e = self.eps_e, f = self.f, phi = self.phi)
 
         # Inputs
 
@@ -218,8 +218,8 @@ class Test1DVehicle(unittest.TestCase, \
         self.yN = np.atleast_2d(data[:, 1]).T
         self.wv = 1 / (0.01**2) * np.ones(self.yN.shape)
         self.uN = data[:-1, 2]
-        self.wwe = 1 / 1e-4
-        self.wwu = None
+        self.weps_e = 1 / 1e-4
+        self.weps_u = None
 
         self.pinit = [0.08, 0.5]
 
@@ -246,27 +246,27 @@ class Test2DVehicle(unittest.TestCase, \
         self.x = ca.MX.sym("x", 4)
         self.p = ca.MX.sym("p", 4)
         self.u = ca.MX.sym("u", 2)
-        self.we = ca.MX.sym("we", 4)
+        self.eps_e = ca.MX.sym("eps_e", 4)
 
         self.f = ca.vertcat( \
 
-            [self.x[3] * np.cos(self.x[2] + 0.5 * self.u[0] + self.we[0]),
+            [self.x[3] * np.cos(self.x[2] + 0.5 * self.u[0] + self.eps_e[0]),
 
-            self.x[3] * np.sin(self.x[2] + 0.5 * self.u[0] + self.we[1]),
+            self.x[3] * np.sin(self.x[2] + 0.5 * self.u[0] + self.eps_e[1]),
 
-            self.x[3] * self.u[0] * 17.06 + self.we[2],
+            self.x[3] * self.u[0] * 17.06 + self.eps_e[2],
 
             self.p[0] * self.u[1] \
                 - self.p[1] * self.u[1] * self.x[3] \
                 - self.p[2] * self.x[3]**2 \
                 - self.p[3] \
                 - (self.x[3] * self.u[0])**2 * 17.06 * 0.5 \
-                + self.we[3]])
+                + self.eps_e[3]])
 
         self.phi = self.x
 
         self.odesys = pecas.systems.ExplODE(x = self.x, u = self.u, \
-            p = self.p, we = self.we, f = self.f, phi = self.phi)
+            p = self.p, eps_e = self.eps_e, f = self.f, phi = self.phi)
 
         # Inputs
 
@@ -296,8 +296,8 @@ class Test2DVehicle(unittest.TestCase, \
         self.yN = data[300:400, [2, 4, 6, 8]]
         self.wv = 1 / (0.1**2) * np.ones(self.yN.shape)
         self.uN = data[300:399, [9, 10]]
-        self.wwe = [1 / 1e-4] * 4
-        self.wwu = None
+        self.weps_e = [1 / 1e-4] * 4
+        self.weps_u = None
 
         # self.pinit = [1.5, 5, 0.07, 0.70]
         self.pinit = [11.5, 5, 0.07, 0.70], \
@@ -382,8 +382,8 @@ class PedulumBar(unittest.TestCase, \
 
             ])
 
-        self.wwe = None
-        self.wwu = None
+        self.weps_e = None
+        self.weps_u = None
 
         self.pinit = 1
 

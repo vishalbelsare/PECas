@@ -28,6 +28,6 @@ class ODELsqSimTest(object):
             pinit = self.pinit, \
             xinit = self.xinit, \
             yN = self.yN, \
-            wv = self.wv, wwe = self.wwe, wwu = self.wwu)
+            wv = self.wv, weps_e = self.weps_e, weps_u = self.weps_u)
 
         self.lsqpe.run_simulation(x0 = self.yN[0, :], psim = self.phat)

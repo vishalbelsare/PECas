@@ -118,8 +118,8 @@ class SetupsBaseClass(object):
             self.XFinit = ca.DMatrix(0, 0)
 
         self.Vinit = np.zeros(self.V.shape)
-        self.WEinit = np.zeros(self.WE.shape)
-        self.WUinit = np.zeros(self.WU.shape)
+        self.EPS_Einit = np.zeros(self.EPS_E.shape)
+        self.EPS_Uinit = np.zeros(self.EPS_U.shape)
 
 
 class BSsetup(SetupsBaseClass):
@@ -178,8 +178,8 @@ class BSsetup(SetupsBaseClass):
         
         self.V = ca.MX.sym("V", self.nphi, self.nsteps)
 
-        self.WE = ca.DMatrix(0, self.nsteps)
-        self.WU = ca.DMatrix(0, self.nsteps)
+        self.EPS_E = ca.DMatrix(0, self.nsteps)
+        self.EPS_U = ca.DMatrix(0, self.nsteps)
 
         # Set bounds and initial values
 
@@ -255,8 +255,8 @@ class ODEsetup(SetupsBaseClass):
         self.nx = system.x.shape[0]
         self.nu = system.u.shape[0]
         self.np = system.p.shape[0]
-        self.nwe = system.we.shape[0]
-        self.nwu = system.wu.shape[0]        
+        self.neps_e = system.eps_e.shape[0]
+        self.neps_u = system.eps_u.shape[0]        
         self.nphi = system.phi.shape[0]
 
         if np.atleast_2d(tu).shape[0] == 1:
@@ -309,21 +309,23 @@ class ODEsetup(SetupsBaseClass):
 
         self.V = ca.MX.sym("V", self.nphi, self.nsteps+1)
 
-        if self.nwe != 0:
+        if self.neps_e != 0:
 
-            self.WE = ca.MX.sym("WE", (self.nwe * self.ntauroot), self.nsteps)
+            self.EPS_E = ca.MX.sym("EPS_E", \
+                (self.neps_e * self.ntauroot), self.nsteps)
 
         else:
 
-            self.WE = ca.DMatrix(0, self.nsteps)
+            self.EPS_E = ca.DMatrix(0, self.nsteps)
 
-        if self.nwu != 0:
+        if self.neps_u != 0:
                 
-            self.WU = ca.MX.sym("WU", (self.nwu * self.ntauroot), self.nsteps)
+            self.EPS_U = ca.MX.sym("EPS_U", \
+                (self.neps_u * self.ntauroot), self.nsteps)
 
         else:
 
-            self.WU = ca.DMatrix(0, self.nsteps)
+            self.EPS_U = ca.DMatrix(0, self.nsteps)
 
         # Define bounds and initial values
 
@@ -404,7 +406,7 @@ class ODEsetup(SetupsBaseClass):
         # Initialize measurement function
 
         phifcn = ca.MXFunction("phifcn", \
-            [system.t, system.u, system.x, system.wu, system.p], \
+            [system.t, system.u, system.x, system.eps_u, system.p], \
             [system.phi])
 
         # Initialzie setup of g
@@ -414,8 +416,8 @@ class ODEsetup(SetupsBaseClass):
         # Initialize ODE right-hand-side
 
         ffcn = ca.MXFunction("ffcn", \
-            [system.t, system.u, system.x, system.we, system.wu, system.p], \
-            [system.f])
+            [system.t, system.u, system.x, system.eps_e, system.eps_u, \
+            system.p], [system.f])
 
         # Collect information for measurement function
 
@@ -424,7 +426,7 @@ class ODEsetup(SetupsBaseClass):
         Tphi = []
         Uphi = []
         Xphi = []
-        WUphi = []
+        EPS_Uphi = []
 
         for k in range(self.nsteps):
 
@@ -435,7 +437,7 @@ class ODEsetup(SetupsBaseClass):
             for t_meas_j in t_meas:
 
                 Uphi.append(self.uN[:, k])
-                WUphi.append(self.WU[:self.nwu, k])
+                EPS_Uphi.append(self.EPS_U[:self.neps_u, k])
 
                 if t_meas_j == self.tu[k]:
 
@@ -461,7 +463,7 @@ class ODEsetup(SetupsBaseClass):
             Tphi.append(self.tu[-1])
             Uphi.append(self.uN[:,-1])
             Xphi.append(self.XF)
-            WUphi.append(self.WU[:self.nwu,-1])
+            EPS_Uphi.append(self.EPS_U[:self.neps_u,-1])
 
 
         # Mapped calculation of the collocation equations
@@ -471,16 +473,16 @@ class ODEsetup(SetupsBaseClass):
         hc = ca.MX.sym("hc", 1)
         tc = ca.MX.sym("tc", self.ntauroot)
         xc = ca.MX.sym("xc", self.nx * (self.ntauroot+1))
-        wec = ca.MX.sym("wenc", self.nwe * self.ntauroot)
-        wuc = ca.MX.sym("wunc", self.nwu * self.ntauroot)
+        eps_ec = ca.MX.sym("eps_ec", self.neps_e * self.ntauroot)
+        eps_uc = ca.MX.sym("eps_uc", self.neps_u * self.ntauroot)
 
         coleqn = ca.vertcat([ \
 
             hc * ffcn([tc[j-1], \
                 system.u, \
                 xc[j*self.nx : (j+1)*self.nx], \
-                wec[(j-1)*self.nwe : j*self.nwe], \
-                wuc[(j-1)*self.nwu : j*self.nwu], \
+                eps_ec[(j-1)*self.neps_e : j*self.neps_e], \
+                eps_uc[(j-1)*self.neps_u : j*self.neps_u], \
                 system.p])[0] - \
 
             sum([self.C[r,j] * xc[r*self.nx : (r+1)*self.nx] \
@@ -490,12 +492,12 @@ class ODEsetup(SetupsBaseClass):
                     for j in range(1, self.ntauroot + 1)])
 
         coleqnfcn = ca.MXFunction("coleqnfcn", \
-            [hc, tc, system.u, xc, wec, wuc, system.p], [coleqn])
+            [hc, tc, system.u, xc, eps_ec, eps_uc, system.p], [coleqn])
         coleqnfcn = coleqnfcn.expand()
 
         [gcol] = coleqnfcn.map([ \
             np.atleast_2d((self.tu[1:] - self.tu[:-1])), self.T[1:,:], \
-            self.uN, self.X, self.WE, self.WU, self.P])
+            self.uN, self.X, self.EPS_E, self.EPS_U, self.P])
 
 
         # Continuity nodes
@@ -520,7 +522,7 @@ class ODEsetup(SetupsBaseClass):
         # Evaluation of the measurement function
 
         [self.phiN] = phifcn.map( \
-            [ca.horzcat(k) for k in Tphi, Uphi, Xphi, WUphi] + \
+            [ca.horzcat(k) for k in Tphi, Uphi, Xphi, EPS_Uphi] + \
             [self.P])
 
         # self.phiNfcn = ca.MXFunction("phiNfcn", [self.Vars], [self.phiN])

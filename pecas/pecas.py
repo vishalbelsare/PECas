@@ -26,7 +26,7 @@ class PECasBaseClass:
     def __init__(self, system = None, \
         tu = None, uN = None, \
         ty = None, yN = None, \
-        wv = None, wwe = None, wwu = None, \
+        wv = None, weps_e = None, weps_u = None, \
         pinit = None, \
         xinit = None, \
         linear_solver = None, \
@@ -120,27 +120,27 @@ but you supported wv of dimension:
                 wv[k, :]
 
 
-        self.wwe = []
+        self.weps_e = []
 
         try:
 
-            if self.pesetup.nwe != 0:
+            if self.pesetup.neps_e != 0:
 
-                wwe = np.atleast_2d(wwe)
+                weps_e = np.atleast_2d(weps_e)
 
                 try:
 
-                    if wwe.shape == (1, self.pesetup.nwe):
+                    if weps_e.shape == (1, self.pesetup.neps_e):
 
-                        wwe = wwe.T
+                        weps_e = weps_e.T
 
-                    if not wwe.shape == (self.pesetup.nwe, 1):
+                    if not weps_e.shape == (self.pesetup.neps_e, 1):
 
                         raise ValueError('''
-The dimensions of the weights of the equation errors given in wwe does not
-match the dimensions of the equation errors given in we.''')
+The dimensions of the weights of the equation errors given in weps_e does not
+match the dimensions of the equation errors given in eps_e.''')
 
-                    self.wwe = wwe
+                    self.weps_e = weps_e
 
                 except AttributeError:
 
@@ -150,39 +150,39 @@ match the dimensions of the equation errors given in we.''')
 
                     # if self.ww is not None:
 
-                        self.wwe = np.squeeze(ca.repmat(wwe, self.pesetup.nsteps * \
+                        self.weps_e = np.squeeze(ca.repmat(weps_e, self.pesetup.nsteps * \
                             (len(self.pesetup.tauroot)-1), 1))
 
                 except AttributeError:
 
-                    self.wwe = []
+                    self.weps_e = []
 
         except AttributeError:
 
             pass
 
 
-        self.wwu = []
+        self.weps_u = []
 
         try:
 
-            if self.pesetup.nwu != 0:
+            if self.pesetup.neps_u != 0:
 
-                wwu = np.atleast_2d(wwu)
+                weps_u = np.atleast_2d(weps_u)
 
                 try:
 
-                    if wwu.shape == (1, self.pesetup.nwu):
+                    if weps_u.shape == (1, self.pesetup.neps_u):
 
-                        wwu = wwu.T
+                        weps_u = weps_u.T
 
-                    if not wwu.shape == (self.pesetup.nwu, 1):
+                    if not weps_u.shape == (self.pesetup.neps_u, 1):
 
                         raise ValueError('''
-The dimensions of the weights of the input errors given in wwu does not
-match the dimensions of the input errors given in wu.''')
+The dimensions of the weights of the input errors given in weps_u does not
+match the dimensions of the input errors given in eps_u.''')
 
-                    self.wwu = wwu
+                    self.weps_u = weps_u
 
                 except AttributeError:
 
@@ -192,12 +192,12 @@ match the dimensions of the input errors given in wu.''')
 
                     # if self.ww is not None:
 
-                        self.wwu = np.squeeze(ca.repmat(wwu, self.pesetup.nsteps * \
+                        self.weps_u = np.squeeze(ca.repmat(weps_u, self.pesetup.nsteps * \
                             (len(self.pesetup.tauroot)-1), 1))
 
                 except AttributeError:
 
-                    self.wwu = []
+                    self.weps_u = []
 
         except AttributeError:
 
@@ -206,8 +206,8 @@ match the dimensions of the input errors given in wu.''')
 
         # Set up the covariance matrix for the measurements
 
-        # self.W = ca.diag(np.concatenate((self.wv, self.wwe,self.wwu)))
-        self.W = np.concatenate((self.wv, self.wwe,self.wwu))
+        # self.w = ca.diag(np.concatenate((self.wv, self.weps_e,self.weps_u)))
+        self.w = ca.veccat((self.wv, self.weps_e,self.weps_u))
 
         print('Setup of the parameter estimation problem sucessful.')        
 
@@ -271,7 +271,7 @@ class LSq(PECasBaseClass):
     def __init__(self, system = None, \
         tu = None, uN = None, \
         ty = None, yN = None, \
-        wv = None, wwe = None, wwu = None, \
+        wv = None, weps_e = None, weps_u = None, \
         pinit = None, \
         xinit = None, \
         linear_solver = "mumps", \
@@ -312,15 +312,17 @@ class LSq(PECasBaseClass):
                    :math:`w_v \in \mathbb{R}^{n_y \times M}`
         :type wv: numpy.ndarray, casadi.DMatrix    
 
-        :param wwe: weightings for equation errors
-                   :math:`w_{w_e} \in \mathbb{R}^{n_{w_e}}` (only necessary 
+        :param weps_e: weightings for equation errors
+                   :math:`w_{\epsilon_e} \in \mathbb{R}^{n_{\epsilon_e}}`
+                   (only necessary 
                    if equation errors are used within `system`)
-        :type wwe: numpy.ndarray, casadi.DMatrix    
+        :type weps_e: numpy.ndarray, casadi.DMatrix    
 
-        :param wwu: weightings for the input errors
-                   :math:`w_{w_u} \in \mathbb{R}^{n_{w_u}}` (only necessary
+        :param weps_u: weightings for the input errors
+                   :math:`w_{\epsilon_u} \in \mathbb{R}^{n_{\epsilon_u}}`
+                   (only necessary
                    if input errors are used within `system`)
-        :type wwu: numpy.ndarray, casadi.DMatrix    
+        :type weps_u: numpy.ndarray, casadi.DMatrix    
 
         :param pinit: optional, initial guess for the values of the
                       parameters to be
@@ -353,7 +355,7 @@ class LSq(PECasBaseClass):
         super(LSq, self).__init__(system = system, \
             tu = tu, uN = uN, \
             ty = ty, yN = yN, \
-            wv = wv, wwe = wwe, wwu = wwu, \
+            wv = wv, weps_e = weps_e, weps_u = weps_u, \
             pinit = pinit, \
             xinit = xinit, \
             linear_solver = linear_solver, \
@@ -378,10 +380,10 @@ class LSq(PECasBaseClass):
 
             \begin{aligned}
                 & \text{arg}\,\underset{x, p, v, w_e, w_u}{\text{min}} & & \frac{1}{2} \| R \|_2^2 \\
-                & \text{subject to:} & & R = W^{^\mathbb{1}/_\mathbb{2}} \begin{pmatrix} {v} \\ {w_e} \\ {w_u} \end{pmatrix} \\
-                & & & W = \begin{pmatrix} {W_{v}}^T & {W_{w_{e}}}^T & {W_{w_{u}}}^T \end{pmatrix} \\
+                & \text{subject to:} & & R = w^{^\mathbb{1}/_\mathbb{2}} \begin{pmatrix} {v} \\ {\epsilon_e} \\ {\epsilon_u} \end{pmatrix} \\
+                & & & w = \begin{pmatrix} {w_{v}}^T & {w_{\epsilon_{e}}}^T & {w_{\epsilon_{u}}}^T \end{pmatrix} \\
                 & & & v_{l} + y_{l} - \phi(t_{l}, u_{l}, x_{l}, p) = 0 \\
-                & & & (t_{k+1} - t_{k}) f(t_{k,j}, u_{k,j}, x_{k,j}, p, w_{e,k,j}, w_{u,k,j}) - \sum_{r=0}^{d} \dot{L}_r(\tau_j) x_{k,r} = 0 \\
+                & & & (t_{k+1} - t_{k}) f(t_{k,j}, u_{k,j}, x_{k,j}, p, \epsilon_{e,k,j}, \epsilon_{u,k,j}) - \sum_{r=0}^{d} \dot{L}_r(\tau_j) x_{k,r} = 0 \\
                 & & & x_{k+1,0} - \sum_{r=0}^{d} L_r(1) x_{k,r} = 0 \\
                 & & & t_{k,j} = t_k + (t_{k+1} - t_{k}) \tau_j \\
                 & & & L_r(\tau) = \prod_{r=0,r\neq j}^{d} \frac{\tau - \tau_r}{\tau_j - \tau_r}\\
@@ -419,8 +421,8 @@ this might take some time ...
         g = ca.vertcat([ca.vec(self.pesetup.phiN) - self.yN + \
             ca.vec(self.pesetup.V)])
 
-        self.R = ca.sqrt(self.W) * \
-            ca.veccat([self.pesetup.V, self.pesetup.WE, self.pesetup.WU])
+        self.R = ca.sqrt(self.w) * \
+            ca.veccat([self.pesetup.V, self.pesetup.EPS_E, self.pesetup.EPS_U])
 
         if self.pesetup.g.size():
 
@@ -434,8 +436,8 @@ this might take some time ...
                 self.pesetup.X, \
                 self.pesetup.XF, \
                 self.pesetup.V, \
-                self.pesetup.WE, \
-                self.pesetup.WU, \
+                self.pesetup.EPS_E, \
+                self.pesetup.EPS_U, \
 
             ])
 
@@ -449,7 +451,7 @@ this might take some time ...
 
         if hessian == "gauss-newton":
 
-            ipdb.set_trace()
+            # ipdb.set_trace()
 
             gradF = nlp.gradient()
             jacG = nlp.jacobian("x", "g")
@@ -493,8 +495,8 @@ this might take some time ...
                 self.pesetup.Xinit, \
                 self.pesetup.XFinit, \
                 self.pesetup.Vinit, \
-                self.pesetup.WEinit, \
-                self.pesetup.WUinit, \
+                self.pesetup.EPS_Einit, \
+                self.pesetup.EPS_Uinit, \
 
             ])  
 
@@ -504,8 +506,8 @@ this might take some time ...
 
         R_squared_fcn = ca.MXFunction("R_squared_fcn", [self.Vars], 
             [ca.mul([ \
-                ca.veccat([self.pesetup.V, self.pesetup.WE, self.pesetup.WU]).T, 
-                ca.veccat([self.pesetup.V, self.pesetup.WE, self.pesetup.WU])])])
+                ca.veccat([self.pesetup.V, self.pesetup.EPS_E, self.pesetup.EPS_U]).T, 
+                ca.veccat([self.pesetup.V, self.pesetup.EPS_E, self.pesetup.EPS_U])])])
 
         [self.R_squared] = R_squared_fcn([self.Varshat])
         
@@ -621,14 +623,14 @@ parameter set in the argument psim.
 
         fp = ca.MXFunction("fp", \
             [self.pesetup.system.t, self.pesetup.system.u, \
-            self.pesetup.system.x, self.pesetup.system.we, \
-            self.pesetup.system.wu, self.pesetup.system.p], \
+            self.pesetup.system.x, self.pesetup.system.eps_e, \
+            self.pesetup.system.eps_u, self.pesetup.system.p], \
             [self.pesetup.system.f])
 
         fpeval = fp([\
             self.pesetup.system.t, self.pesetup.system.u, \
-            self.pesetup.system.x, np.zeros(self.pesetup.nwe), \
-            np.zeros(self.pesetup.nwu), psim])[0]
+            self.pesetup.system.x, np.zeros(self.pesetup.neps_e), \
+            np.zeros(self.pesetup.neps_u), psim])[0]
 
         fsim = ca.MXFunction("fsim", \
             ca.daeIn(t = self.pesetup.system.t, \
@@ -712,13 +714,13 @@ this might take some time ...
 
         try:
 
-            N1 = ca.MX(self.Vars.shape[0] - self.W.shape[0], \
-                self.W.shape[0])
+            N1 = ca.MX(self.Vars.shape[0] - self.w.shape[0], \
+                self.w.shape[0])
 
-            N2 = ca.MX(self.Vars.shape[0] - self.W.shape[0], \
-                self.Vars.shape[0] - self.W.shape[0])
+            N2 = ca.MX(self.Vars.shape[0] - self.w.shape[0], \
+                self.Vars.shape[0] - self.w.shape[0])
 
-            hess = ca.blockcat([[N2, N1], [N1.T, ca.diag(self.W)],])
+            hess = ca.blockcat([[N2, N1], [N1.T, ca.diag(self.w)],])
 
             # hess = hess + 1e-10 * ca.diag(self.Vars)
             

@@ -75,7 +75,7 @@ input-output structure and contrain equations: ''')
 
             print('''\nThe system is a dynamic system defined by a set of
 explicit ODEs xdot which establish the system state x:
-    xdot = f(t, u, x, p, we, wu)
+    xdot = f(t, u, x, p, eps_e, eps_u)
 and by an output function phi which sets the system measurements:
     y = phi(t, x, p).
 ''')
@@ -185,16 +185,16 @@ class ExplODE(PECasSystem):
     :param p: unknown parameters :math:`p \in \mathbb{R}^{n_{p}}`
     :type p: casadi.casadi.MX
 
-    :param we: equation errors :math:`w_{e} \in \mathbb{R}^{n_{w_{e}}}` (optional)
-    :type we: casadi.casadi.MX
+    :param eps_e: equation errors :math:`\epsilon_{e} \in \mathbb{R}^{n_{\epsilon_{e}}}` (optional)
+    :type eps_e: casadi.casadi.MX
 
-    :param wu: input errors :math:`w_{u} \in \mathbb{R}^{n_{w_{u}}}` (optional)
-    :type wu: casadi.casadi.MX
+    :param eps_u: input errors :math:`\epsilon_{u} \in \mathbb{R}^{n_{\epsilon_{u}}}` (optional)
+    :type eps_u: casadi.casadi.MX
 
     :param phi: output function :math:`\phi(t, u, x, p) = y \in \mathbb{R}^{n_{y}}`
     :type phi: casadi.casadi.MX
 
-    :param f: explicit system of ODEs :math:`f(t, u, x, p, w_{e}, w_{u}) = \dot{x} \in \mathbb{R}^{n_{x}}`
+    :param f: explicit system of ODEs :math:`f(t, u, x, p, \epsilon_{e}, \epsilon_{u}) = \dot{x} \in \mathbb{R}^{n_{x}}`
     :type f: casadi.casadi.MX
 
     :raises: TypeError
@@ -207,7 +207,7 @@ class ExplODE(PECasSystem):
 
         y & = & \phi(t, u, x, p) \\
 
-        \dot{x}  & = & f(t, u, x, p, w_{e}, w_{u}).
+        \dot{x}  & = & f(t, u, x, p, \epsilon_{e}, \epsilon_{u}).
 
     '''
 
@@ -216,8 +216,8 @@ class ExplODE(PECasSystem):
                  u = ca.MX.sym("u", 0), \
                  x = None, \
                  p = None, \
-                 we = ca.MX.sym("we", 0), \
-                 wu = ca.MX.sym("wu", 0), \
+                 eps_e = ca.MX.sym("eps_e", 0), \
+                 eps_u = ca.MX.sym("eps_u", 0), \
                  phi = None, \
                  f = None):
 
@@ -227,7 +227,7 @@ class ExplODE(PECasSystem):
         print('\nStarting definition of ExplODE system ...')
 
         if not all(isinstance(arg, ca.casadi.MX) for \
-            arg in [t, u, x, p, phi, f]):
+            arg in [t, u, x, p, eps_e, eps_u, phi, f]):
 
             raise TypeError('''
 Missing input argument for system definition or wrong variable type for an
@@ -236,8 +236,8 @@ input argument. Input arguments must be CasADi symbolic types.''')
         self.t = t
         self.u = u
         self.x = x
-        self.we = we
-        self.wu = wu
+        self.eps_e = eps_e
+        self.eps_u = eps_u
         self.p = p
 
         self.phi = phi
@@ -262,8 +262,8 @@ class ImplDAE(PECasSystem):
              u = ca.MX.sym("u", 0), \
              x = None, \
              p = None, \
-             we = ca.MX.sym("we", 0), \
-             wu = ca.MX.sym("wu", 0), \
+             eps_e = ca.MX.sym("eps_e", 0), \
+             eps_u = ca.MX.sym("eps_u", 0), \
              phi = None, \
              f = None, \
              g = ca.MX.sym("g", 0)):

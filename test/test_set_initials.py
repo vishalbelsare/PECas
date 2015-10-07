@@ -26,7 +26,7 @@ class BSSetInitialsTest(object):
         # Support an invalid systems-type
 
         odesys = pecas.systems.ExplODE(p = self.p, phi = self.p, x = self.p, \
-            we = self.p, wu = self.p, f = self.p)
+            eps_e = self.p, eps_u = self.p, f = self.p)
 
         self.assertRaises(TypeError, pecas.setups.BSsetup, \
             system = odesys, tu = self.tu)

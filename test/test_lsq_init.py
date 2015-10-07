@@ -53,49 +53,51 @@ class ODELsqInitTest(object):
             pinit = self.pinit, \
             xinit = self.xinit, \
             yN = self.yN, \
-            wv = self.wv, wwe = self.wwe, wwu = self.wwu)
+            wv = self.wv, weps_e = self.weps_e, weps_u = self.weps_u)
 
         pecas.LSq(system = self.odesys, \
             tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             xinit = self.xinit, \
             yN = self.yN.T, \
-            wv = self.wv, wwe = self.wwe, wwu = self.wwu)
+            wv = self.wv, weps_e = self.weps_e, weps_u = self.weps_u)
 
         pecas.LSq(system = self.odesys, \
             tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             xinit = self.xinit, \
             yN = self.yN, \
-            wv = self.wv.T, wwe = self.wwe, wwu = self.wwu)
+            wv = self.wv.T, weps_e = self.weps_e, weps_u = self.weps_u)
 
         pecas.LSq(system = self.odesys, \
             tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             xinit = self.xinit, \
             yN = self.yN, \
-            wv = self.wv, wwe = [self.wwe], wwu = self.wwu)
+            wv = self.wv, weps_e = [self.weps_e], weps_u = self.weps_u)
 
         pecas.LSq(system = self.odesys, \
             tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             xinit = self.xinit, \
             yN = self.yN, \
-            wv = self.wv, wwe = np.atleast_1d(self.wwe), wwu = self.wwu)
+            wv = self.wv, weps_e = np.atleast_1d(self.weps_e), \
+            weps_u = self.weps_u)
 
         pecas.LSq(system = self.odesys, \
             tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             xinit = self.xinit, \
             yN = self.yN, \
-            wv = self.wv, wwe = self.wwe, wwu = [self.wwu])
+            wv = self.wv, weps_e = self.weps_e, weps_u = [self.weps_u])
 
         pecas.LSq(system = self.odesys, \
             tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             xinit = self.xinit, \
             yN = self.yN, \
-            wv = self.wv, wwe = self.wwe, wwu = np.atleast_1d(self.wwu))
+            wv = self.wv, weps_e = self.weps_e, \
+            weps_u = np.atleast_1d(self.weps_u))
 
 
     def test_invalid_lsq_init(self):
@@ -105,14 +107,15 @@ class ODELsqInitTest(object):
             pinit = self.pinit, \
             xinit = self.xinit, \
             yN = np.atleast_2d(self.yN)[:, :-1], \
-            wv = self.wv, wwe = self.wwe, wwu = self.wwu)
+            wv = self.wv, weps_e = self.weps_e, weps_u = self.weps_u)
 
         self.assertRaises(ValueError, pecas.LSq, system = self.odesys, \
             tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             xinit = self.xinit, \
             yN = self.yN, \
-            wv = np.atleast_2d(self.wv)[:-1], wwe = self.wwe, wwu = self.wwu)
+            wv = np.atleast_2d(self.wv)[:-1], weps_e = self.weps_e, \
+            weps_u = self.weps_u)
 
         # self.assertRaises(ValueError, pecas.LSq, system = self.odesys, \
         #     tu = self.tu, uN = self.uN, \
@@ -121,7 +124,8 @@ class ODELsqInitTest(object):
         #     x0min = self.x0max, x0max = self.x0max, \
         #     xNmin = self.xNmin, xNmax = self.xNmax, \
         #     yN = self.yN, \
-        #     wv = self.wv, wwe = np.atleast_2d(self.wwe)[:-1], wwu = self.wwu)
+        #     wv = self.wv, weps_e = np.atleast_2d(self.weps_e)[:-1], \
+        #     weps_u = self.weps_u)
 
         # self.assertRaises(ValueError, pecas.LSq, system = self.odesys, \
         #     tu = self.tu, uN = self.uN, \
@@ -130,5 +134,6 @@ class ODELsqInitTest(object):
         #     x0min = self.x0max, x0max = self.x0max, \
         #     xNmin = self.xNmin, xNmax = self.xNmax, \
         #     yN = self.yN, \
-        #     wv = self.wv, wwe = self.wwe, wwu = np.atleast_2d(self.wwu)[:-1])
+        #     wv = self.wv, weps_e = self.weps_e, \
+        #     weps_u = np.atleast_2d(self.weps_u)[:-1])
 

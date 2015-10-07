@@ -43,25 +43,26 @@ class TestSystemsInit(unittest.TestCase):
         self.u = ca.MX.sym("u", 1)
         self.x = ca.MX.sym("x", 1)
         self.p = ca.MX.sym("p", 1)
-        self.we = ca.MX.sym("we", 1)
-        self.wu = ca.MX.sym("wu", 1)
+        self.eps_e = ca.MX.sym("eps_e", 1)
+        self.eps_u = ca.MX.sym("eps_u", 1)
         self.phi = ca.MX.sym("phi", 1)
         self.f = ca.MX.sym("f", 1)
 
-        sys = pecas.systems.ExplODE(x = self.x, p = self.p, we = self.we, \
-            phi = self.phi, f = self.f)
+        sys = pecas.systems.ExplODE(x = self.x, p = self.p, \
+            eps_e = self.eps_e, phi = self.phi, f = self.f)
         sys.show_system_information(showEquations = True)
 
         sys = pecas.systems.ExplODE(t = self.t, x = self.x, p = self.p, \
-            we = self.we, phi = self.phi, f = self.f)
+            eps_e = self.eps_e, phi = self.phi, f = self.f)
         sys.show_system_information(showEquations = True)
 
-        sys = pecas.systems.ExplODE(t = self.t, u = self.u, x = self.x, p = self.p, \
-            we = self.we, phi = self.phi, f = self.f)
+        sys = pecas.systems.ExplODE(t = self.t, u = self.u, x = self.x, \
+            p = self.p, eps_e = self.eps_e, phi = self.phi, f = self.f)
         sys.show_system_information(showEquations = True)
 
-        sys = pecas.systems.ExplODE(t = self.t, u = self.u, x = self.x, p = self.p, \
-            we = self.we, wu = self.wu, phi = self.phi, f = self.f)
+        sys = pecas.systems.ExplODE(t = self.t, u = self.u, x = self.x,\
+            p = self.p, eps_e = self.eps_e, eps_u = self.eps_u, \
+            phi = self.phi, f = self.f)
         sys.show_system_information(showEquations = True)
 
         self.assertRaises(TypeError, pecas.systems.ExplODE)
