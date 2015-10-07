@@ -72,6 +72,12 @@ class TestSystemsInit(unittest.TestCase):
         self.assertRaises(TypeError, pecas.systems.ExplODE, phi = None)
         self.assertRaises(TypeError, pecas.systems.ExplODE, f = None)
 
+        # while explicit time dependecy is not allowed:
+
+        self.assertRaises(NotImplementedError, pecas.systems.ExplODE, \
+            t = self.t, u = self.u, x = self.x, \
+            p = self.p, eps_e = self.eps_e, phi = self.phi, f = self.t)
+
 
     def test_implade_system_init(self):
 

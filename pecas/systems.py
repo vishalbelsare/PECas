@@ -233,6 +233,12 @@ class ExplODE(PECasSystem):
 Missing input argument for system definition or wrong variable type for an
 input argument. Input arguments must be CasADi symbolic types.''')
 
+        if ca.dependsOn(f, t):
+
+            raise NotImplementedError('''
+Explicit time dependecies of the ODE right hand side are not yet supported in
+PECas, but probably will be in future versions.''')
+
         self.t = t
         self.u = u
         self.x = x
