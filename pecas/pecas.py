@@ -683,12 +683,18 @@ method-argument of the function.
         r'''
         This function computes the covariance matrix of the estimated
         parameters from the inverse of the KKT matrix of the
-        parameter estimation problem. For efficiency, the only the inverse of
-        the relevant part of the matrix is computed using a Schur complement.
+        parameter estimation problem
 
         .. math::
 
-            \begin{pmatrix} {insterkktmatrix} \end{pmatrix}
+            \begin{pmatrix} allgform \end{pmatrix} = \begin{pmatrix} spezform \end{pmatrix}.
+
+        For efficiency, the only the inverse of
+        the relevant part of the matrix is computed using the Schur complement.
+
+        .. math::
+
+            \begin{pmatrix} {schurkomplement} \end{pmatrix}
 
         '''
 
