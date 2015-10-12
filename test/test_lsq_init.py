@@ -19,6 +19,11 @@ class BSLsqInitTest(object):
             yN = self.yN, wv = self.wv)
 
         pecas.LSq(system = self.bsys, \
+            tu = self.tu.T, uN = self.uN, \
+            pinit = self.pinit, \
+            yN = self.yN, wv = self.wv)
+
+        pecas.LSq(system = self.bsys, \
             tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             yN = self.yN.T, wv = self.wv)
@@ -32,6 +37,11 @@ class BSLsqInitTest(object):
     def test_invalid_lsq_init(self):
 
         self.assertRaises(ValueError, pecas.LSq, system = self.bsys, \
+            tu = self.tu[:-1], uN = self.uN, \
+            pinit = self.pinit, \
+            yN = self.yN, wv = self.wv)
+
+        self.assertRaises(ValueError, pecas.LSq, system = self.bsys, \
             tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             yN = np.atleast_2d(self.yN)[:, :-1], wv = self.wv)
@@ -40,6 +50,18 @@ class BSLsqInitTest(object):
             tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             yN = self.yN, wv = np.atleast_2d(self.wv)[:-1])
+
+        self.assertRaises(ValueError, pecas.LSq, system = self.bsys, \
+            tu = self.tu, uN = self.uN, \
+            pinit = self.pinit, \
+            yN = self.yN, wv = np.atleast_2d(self.wv)[:-1])
+
+    def test_invalid_system_input(self):
+
+        self.assertRaises(NotImplementedError, pecas.LSq, system = "dummy", \
+            tu = self.tu, uN = self.uN, \
+            pinit = self.pinit, \
+            yN = self.yN, wv = self.wv)
 
 
 class ODELsqInitTest(object):
@@ -50,6 +72,29 @@ class ODELsqInitTest(object):
 
         pecas.LSq(system = self.odesys, \
             tu = self.tu, uN = self.uN, \
+            pinit = self.pinit, \
+            xinit = self.xinit, \
+            yN = self.yN, \
+            wv = self.wv, weps_e = self.weps_e, weps_u = self.weps_u)
+
+        pecas.LSq(system = self.odesys, \
+            tu = self.tu.T, uN = self.uN, \
+            pinit = self.pinit, \
+            xinit = self.xinit, \
+            yN = self.yN, \
+            wv = self.wv, weps_e = self.weps_e, weps_u = self.weps_u)
+
+        pecas.LSq(system = self.odesys, \
+            tu = self.tu, uN = self.uN, \
+            ty = self.tu, \
+            pinit = self.pinit, \
+            xinit = self.xinit, \
+            yN = self.yN, \
+            wv = self.wv, weps_e = self.weps_e, weps_u = self.weps_u)
+
+        pecas.LSq(system = self.odesys, \
+            tu = self.tu, uN = self.uN, \
+            ty = self.tu.T, \
             pinit = self.pinit, \
             xinit = self.xinit, \
             yN = self.yN, \
@@ -111,11 +156,45 @@ class ODELsqInitTest(object):
 
         self.assertRaises(ValueError, pecas.LSq, system = self.odesys, \
             tu = self.tu, uN = self.uN, \
+            ty = np.zeros((self.tu.shape[0] - 1, self.tu.shape[0] - 1)) , \
+            pinit = self.pinit, \
+            xinit = self.xinit, \
+            yN = self.yN, \
+            wv = self.wv, weps_e = self.weps_e, weps_u = self.weps_u)
+
+        self.assertRaises(ValueError, pecas.LSq, system = self.odesys, \
+            tu = self.tu[:-1], uN = self.uN, \
+            pinit = self.pinit, \
+            xinit = self.xinit, \
+            yN = self.yN, \
+            wv = self.wv, weps_e = self.weps_e, weps_u = self.weps_u)
+
+        self.assertRaises(ValueError, pecas.LSq, system = self.odesys, \
+            tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             xinit = self.xinit, \
             yN = self.yN, \
             wv = np.atleast_2d(self.wv)[:-1], weps_e = self.weps_e, \
             weps_u = self.weps_u)
+
+        self.assertRaises(ValueError, pecas.LSq, system = self.odesys, \
+            tu = self.tu, uN = self.uN, \
+            pinit = self.pinit, \
+            xinit = self.xinit, \
+            yN = self.yN, \
+            wv = np.atleast_2d(self.wv)[:-1], weps_e = self.weps_e[:-1], \
+            weps_u = self.weps_u)
+
+    def test_invalid_system_input(self):
+
+        self.assertRaises(NotImplementedError, pecas.LSq, system = "dummy", \
+            tu = self.tu, uN = self.uN, \
+            pinit = self.pinit, \
+            xinit = self.xinit, \
+            yN = self.yN, \
+            wv = self.wv, weps_e = self.weps_e, \
+            weps_u = np.atleast_1d(self.weps_u))
+
 
         # self.assertRaises(ValueError, pecas.LSq, system = self.odesys, \
         #     tu = self.tu, uN = self.uN, \

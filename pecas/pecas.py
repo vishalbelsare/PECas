@@ -756,17 +756,19 @@ this might take some time ...
             print( \
 '''Covariance matrix computation finished, run show_results() to visualize.''')
 
-        except AttributeError:
 
-            print( \
-'''You must execute run_parameter_estimation() first before the covariance
-matrix for the estimated parameters can be computed.''')
+        except AttributeError as err:
 
-        finally:
+            errmsg = '''
+You must execute run_parameter_estimation() first before the covariance
+matrix for the estimated parameters can be computed.
+'''
 
             self.tend_cov_computation = time.time()
             self.duration_cov_computation = self.tend_cov_computation - \
                 self.tstart_cov_computation
+
+            raise AttributeError(errmsg)
 
 
     def show_results(self):

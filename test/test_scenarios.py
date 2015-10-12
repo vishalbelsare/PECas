@@ -158,7 +158,7 @@ class TestLotkaVolterra(unittest.TestCase, \
         self.wv = 1.0 / data[:, 2::2]**2
         self.uN = None
         self.weps_e = [1.0 / 1e-4, 1.0 / 1e-4]
-        self.weps_u = None
+        self.weps_u = [None]
 
         self.pinit = [0.5, 1.0]
 
@@ -218,8 +218,8 @@ class Test1DVehicle(unittest.TestCase, \
         self.yN = np.atleast_2d(data[:, 1]).T
         self.wv = 1 / (0.01**2) * np.ones(self.yN.shape)
         self.uN = data[:-1, 2]
-        self.weps_e = 1 / 1e-4
-        self.weps_u = None
+        self.weps_e = [1 / 1e-4]
+        self.weps_u = [None]
 
         self.pinit = [0.08, 0.5]
 
@@ -297,7 +297,7 @@ class Test2DVehicle(unittest.TestCase, \
         self.wv = 1 / (0.1**2) * np.ones(self.yN.shape)
         self.uN = data[300:399, [9, 10]]
         self.weps_e = [1 / 1e-4] * 4
-        self.weps_u = None
+        self.weps_u = [None]
 
         # self.pinit = [1.5, 5, 0.07, 0.70]
         self.pinit = [11.5, 5, 0.07, 0.70], \
@@ -382,8 +382,8 @@ class PedulumBar(unittest.TestCase, \
 
             ])
 
-        self.weps_e = None
-        self.weps_u = None
+        self.weps_e = [None]
+        self.weps_u = [None]
 
         self.pinit = 1
 

@@ -102,6 +102,7 @@ and by an output function phi which sets the system measurements:
                          i, yi))
 
         else:
+            
             raise NotImplementedError('''
 This feature of PECas is currently disabled, but will be 
 available when the DAE systems are implemented.
