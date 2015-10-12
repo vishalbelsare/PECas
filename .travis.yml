@@ -15,7 +15,7 @@ before_install:
  - export PATH=/home/travis/miniconda/bin:$PATH
  - conda update --yes conda
 
- - pip instal --upgrade pip
+ - pip install --upgrade pip
  - pip install setuptools --no-use-wheel --upgrade
 
 install:
