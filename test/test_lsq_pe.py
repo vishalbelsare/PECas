@@ -62,16 +62,14 @@ class BSLsqPETest(object):
 
         self.assertRaises(AttributeError, getattr, self.lsqpe, "Cvox")
 
-        self.lsqpe.compute_covariance_matrix()
-
-        self.lsqpe.show_results()
+        # There is not yet a covariance computation for BasicSystem
 
 
     def test_pe_exact_hessian(self):
 
         self.lsq_run_exact_hessian()
 
-        # self.comp_covmat_valid()
+        self.comp_covmat_valid()
 
 
     def test_covmat_invalid(self):
