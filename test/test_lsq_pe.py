@@ -8,6 +8,8 @@ import pecas
 
 import unittest
 
+from mock import patch
+
 class BSLsqPETest(object):
 
     def lsq_run_exact_hessian(self):
@@ -65,13 +67,6 @@ class BSLsqPETest(object):
         # There is not yet a covariance computation for BasicSystem
 
 
-    def test_pe_exact_hessian(self):
-
-        self.lsq_run_exact_hessian()
-
-        self.comp_covmat_valid()
-
-
     def test_covmat_invalid(self):
 
         self.lsqpe = pecas.LSq(system = self.bsys, \
@@ -82,11 +77,27 @@ class BSLsqPETest(object):
         self.assertRaises(AttributeError, self.lsqpe.compute_covariance_matrix)
 
 
+    @patch("matplotlib.pyplot.show")
+    def plot_ellipsoid(self, mock_show):
+
+        mock_show.return_value = None
+
+        # There is not yet a covariance computation for BasicSystem, 
+        # so no ellipsoids can be drawn as well
+
+
+    def test_pe_exact_hessian(self):
+
+        self.lsq_run_exact_hessian()
+
+        self.comp_covmat_valid()
+
+
     def test_pe_gauss_newton(self):
 
         self.lsq_run_gauss_newton()
 
-        # self.comp_covmat_valid()
+        self.comp_covmat_valid()
 
 
     def test_pe_invalid_method(self):
@@ -177,11 +188,36 @@ class ODELsqPETest(object):
         self.assertRaises(AttributeError, self.lsqpe.compute_covariance_matrix)
 
 
+    @patch("matplotlib.pyplot.show")
+    def plot_ellipsoid(self, mock_show):
+
+        mock_show.return_value = None
+
+        if self.phat.size == 1:
+
+            self.assertRaises(ValueError, \
+                self.lsqpe.plot_confidence_ellipsoids)
+
+        else:
+
+            self.lsqpe.plot_confidence_ellipsoids()
+
+            self.assertRaises(TypeError, \
+                self.lsqpe.plot_confidence_ellipsoids, \
+                indices = "dummy")
+
+            self.assertRaises(TypeError, \
+                self.lsqpe.plot_confidence_ellipsoids, \
+                indices = ["1", "2"])
+
+
     def test_pe_exact_hessian(self):
 
         self.lsq_run_exact_hessian()
 
         self.comp_covmat_valid()
+
+        self.plot_ellipsoid()
 
     
     def test_pe_gauss_newton(self):
@@ -189,6 +225,8 @@ class ODELsqPETest(object):
         self.lsq_run_gauss_newton()
 
         self.comp_covmat_valid()
+
+        self.plot_ellipsoid()
 
 
     def test_pe_invalid_method(self):
@@ -202,3 +240,16 @@ class ODELsqPETest(object):
 
         self.assertRaises(NotImplementedError, \
             self.lsqpe.run_parameter_estimation, hessian = "dummy")
+
+
+    def test_plot_ellipsoid_invalid_call(self):
+
+        self.lsqpe = pecas.LSq(system = self.odesys, \
+            tu = self.tu, uN = self.uN, \
+            pinit = self.pinit, \
+            xinit = self.xinit, \
+            yN = self.yN, \
+            wv = self.wv, weps_e = self.weps_e, weps_u = self.weps_u)
+
+        self.assertRaises(AttributeError, \
+            self.lsqpe.plot_confidence_ellipsoids)

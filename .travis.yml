@@ -17,7 +17,7 @@ before_install:
 
 install:
  - conda install --yes numpy=$NUMPY scipy=$SCIPY matplotlib nose
- - pip install coverage==3.7.1 coveralls python-coveralls nose-cov
+ - pip install coverage==3.7.1 coveralls python-coveralls nose-cov mock
 
  - wget http://sourceforge.net/projects/casadi/files/CasADi/$CASADIVERSION/linux/casadi-py27-np1.9.1-v$CASADIVERSION.tar.gz/download -O casadi-py27-np1.9.1-v$CASADIVERSION.tar.gz
  - mkdir $HOME/casadi-py27-np1.9.1-v$CASADIVERSION

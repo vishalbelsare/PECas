@@ -148,10 +148,8 @@ match the dimensions of the equation errors given in eps_e.''')
 
                 try:
 
-                    # if self.ww is not None:
-
-                        self.weps_e = np.squeeze(ca.repmat(weps_e, self.pesetup.nsteps * \
-                            (len(self.pesetup.tauroot)-1), 1))
+                    self.weps_e = np.squeeze(ca.repmat(weps_e, self.pesetup.nsteps * \
+                        (len(self.pesetup.tauroot)-1), 1))
 
                 except AttributeError:
 
@@ -190,10 +188,8 @@ match the dimensions of the input errors given in eps_u.''')
 
                 try:
 
-                    # if self.ww is not None:
-
-                        self.weps_u = np.squeeze(ca.repmat(weps_u, self.pesetup.nsteps * \
-                            (len(self.pesetup.tauroot)-1), 1))
+                    self.weps_u = np.squeeze(ca.repmat(weps_u, self.pesetup.nsteps * \
+                        (len(self.pesetup.tauroot)-1), 1))
 
                 except AttributeError:
 
@@ -894,7 +890,7 @@ and compute_covariance_matrix() before all results can be displayed.
         inside of one plot window.
         '''
 
-        if not hasattr(self, Covp):
+        if not hasattr(self, "Covp"):
 
             raise AttributeError('''
 You must execute both run_parameter_estimation() and
