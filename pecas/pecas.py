@@ -10,7 +10,7 @@ from operator import itemgetter
 from scipy.misc import comb
 
 import time
-import ipdb
+# import ipdb
 
 import systems
 import setups
@@ -315,13 +315,13 @@ class LSq(PECasBaseClass):
         :param weps_e: weightings for equation errors
                    :math:`w_{\epsilon_e} \in \mathbb{R}^{n_{\epsilon_e}}`
                    (only necessary 
-                   if equation errors are used within `system`)
+                   if equation errors are used within ``system``)
         :type weps_e: numpy.ndarray, casadi.DMatrix    
 
         :param weps_u: weightings for the input errors
                    :math:`w_{\epsilon_u} \in \mathbb{R}^{n_{\epsilon_u}}`
                    (only necessary
-                   if input errors are used within `system`)
+                   if input errors are used within ``system``)
         :type weps_u: numpy.ndarray, casadi.DMatrix    
 
         :param pinit: optional, initial guess for the values of the
@@ -379,8 +379,8 @@ class LSq(PECasBaseClass):
         .. math::
 
             \begin{aligned}
-                & \text{arg}\,\underset{x, p, v, w_e, w_u}{\text{min}} & & \frac{1}{2} \| R \|_2^2 \\
-                & \text{subject to:} & & R = w^{^\mathbb{1}/_\mathbb{2}} \begin{pmatrix} {v} \\ {\epsilon_e} \\ {\epsilon_u} \end{pmatrix} \\
+                & \text{arg}\,\underset{x, p, v, \epsilon_e, \epsilon_u}{\text{min}} & & \frac{1}{2} \| R(w, v, \epsilon_e, \epsilon_u) \|_2^2 \\
+                & \text{subject to:} & & R(w, v, \epsilon_e, \epsilon_u) = w^{^\mathbb{1}/_\mathbb{2}} \begin{pmatrix} {v} \\ {\epsilon_e} \\ {\epsilon_u} \end{pmatrix} \\
                 & & & w = \begin{pmatrix} {w_{v}}^T & {w_{\epsilon_{e}}}^T & {w_{\epsilon_{u}}}^T \end{pmatrix} \\
                 & & & v_{l} + y_{l} - \phi(t_{l}, u_{l}, x_{l}, p) = 0 \\
                 & & & (t_{k+1} - t_{k}) f(t_{k,j}, u_{k,j}, x_{k,j}, p, \epsilon_{e,k,j}, \epsilon_{u,k,j}) - \sum_{r=0}^{d} \dot{L}_r(\tau_j) x_{k,r} = 0 \\
@@ -684,19 +684,15 @@ method-argument of the function.
 
         r'''
         This function computes the covariance matrix of the estimated
-        parameters from the inverse of the KKT matrix of the
-        parameter estimation problem
+        parameters from the inverse of the KKT matrix for the
+        parameter estimation problem. This allows then for statements on the
+        quality of the values of the estimated parameters.
 
-        .. math::
+        For efficiency, only the inverse of the relevant part of the matrix
+        is computed using the Schur complement.
 
-            \begin{pmatrix} allgform \end{pmatrix} = \begin{pmatrix} spezform \end{pmatrix}.
-
-        For efficiency, the only the inverse of
-        the relevant part of the matrix is computed using the Schur complement.
-
-        .. math::
-
-            \begin{pmatrix} {schurkomplement} \end{pmatrix}
+        A more detailed description of this function will follow in future
+        versions.
 
         '''
 
