@@ -15,12 +15,12 @@ before_install:
  - export PATH=/home/travis/miniconda/bin:$PATH
  - conda update --yes conda
 
- - pip install --upgrade pip
- - pip install setuptools --no-use-wheel --upgrade
+ # - pip install --upgrade pip
+ # - pip install setuptools --no-use-wheel --upgrade
 
 install:
  - conda install --yes numpy=$NUMPY scipy=$SCIPY matplotlib nose
- - pip install coverage==3.7.1 coveralls python-coveralls nose-cov mock
+ - pip install coverage==3.7.1 coveralls python-coveralls nose-cov
 
  - wget http://sourceforge.net/projects/casadi/files/CasADi/$CASADIVERSION/linux/casadi-py27-np1.9.1-v$CASADIVERSION.tar.gz/download -O casadi-py27-np1.9.1-v$CASADIVERSION.tar.gz
  - mkdir $HOME/casadi-py27-np1.9.1-v$CASADIVERSION
