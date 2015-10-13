@@ -9,3 +9,4 @@ omit =
     */unittest2/*
     */matplotlib*/*.py
     */casadi/*.py
+    */pyshared/*.py

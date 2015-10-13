@@ -80,11 +80,12 @@ class BSLsqPETest(object):
     @patch("matplotlib.pyplot.show")
     def plot_ellipsoid(self, mock_show):
 
-        mock_show.return_value = None
+        # mock_show.return_value = None
 
         # There is not yet a covariance computation for BasicSystem, 
         # so no ellipsoids can be drawn as well
 
+        pass
 
     def test_pe_exact_hessian(self):
 
@@ -92,12 +93,16 @@ class BSLsqPETest(object):
 
         self.comp_covmat_valid()
 
+        self.plot_ellipsoid()
+
 
     def test_pe_gauss_newton(self):
 
         self.lsq_run_gauss_newton()
 
         self.comp_covmat_valid()
+
+        self.plot_ellipsoid()
 
 
     def test_pe_invalid_method(self):
