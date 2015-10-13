@@ -15,6 +15,18 @@
 import sys
 import os
 
+from mock import Mock as MagicMock
+
+class Mock(MagicMock):
+
+    @classmethod
+    def __getattr__(cls, name):
+            return Mock()
+
+MOCK_MODULES = ['numpy', 'scipy.misc', 'matplotlib.pyplot', 'casadi']
+
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -188,7 +200,7 @@ htmlhelp_basename = 'PECasdoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
-latex_elements = {
+# latex_elements = {
 # The paper size ('letterpaper' or 'a4paper').
 #'papersize': 'letterpaper',
 
@@ -197,15 +209,15 @@ latex_elements = {
 
 # Additional stuff for the LaTeX preamble.
 #'preamble': '',
-}
+# }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-latex_documents = [
-  ('index', 'PECas.tex', u'PECas Documentation',
-   u'Adrian Buerger', 'manual'),
-]
+# latex_documents = [
+#   ('index', 'PECas.tex', u'PECas Documentation',
+#    u'Adrian Buerger', 'manual'),
+# ]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
@@ -246,11 +258,11 @@ man_pages = [
 # Grouping the document tree into Texinfo files. List of tuples
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
-texinfo_documents = [
-  ('index', 'PECas', u'PECas Documentation',
-   u'Adrian Buerger', 'PECas', 'One line description of project.',
-   'Miscellaneous'),
-]
+# texinfo_documents = [
+#   ('index', 'PECas', u'PECas Documentation',
+#    u'Adrian Buerger', 'PECas', 'One line description of project.',
+#    'Miscellaneous'),
+# ]
 
 # Documents to append as an appendix to all manuals.
 #texinfo_appendices = []

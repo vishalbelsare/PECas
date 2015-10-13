@@ -258,3 +258,4 @@ class ODELsqPETest(object):
 
         self.assertRaises(AttributeError, \
             self.lsqpe.plot_confidence_ellipsoids)
+        
