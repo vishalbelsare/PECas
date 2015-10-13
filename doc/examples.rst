@@ -86,13 +86,13 @@ The results for the system simulation using the estimated parameter in compariso
 Parameter estimation for a model race car
 -----------------------------------------
 
-The aim of the application ``2d_vehicle.py`` is to estimate the unknown parameters of a 2D race car model for experimentally received measurement data [#f3]_. The race car and the interpretation of the model states are shown in the figure below.
+The aim of the application ``2d_vehicle.py`` is to estimate the unknown parameters of a 2D race car model for experimentally received measurement data [#f3]_. The race car and the interpretation of the model states are shown in the figure below [#f4]_.
 
 .. figure:: rc.png
     :scale: 60%
     :align: center
 
-    Figure: Depiction of the race car showing the models states [#f4]_
+    Figure: Depiction of the race car showing the models states
 
 The 2D model of the race car is an ODE of the form :math:`\dot{x} = f(x,u,p)`, given by
 
