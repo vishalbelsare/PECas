@@ -15,18 +15,24 @@
 import sys
 import os
 
-from mock import Mock as MagicMock
+import sphinx_rtd_theme
 
-class Mock(MagicMock):
 
-    @classmethod
-    def __getattr__(cls, name):
-            return Mock()
+if False:
 
-MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'scipy.misc', \
-    'matplotlib.pyplot', 'casadi']
+    from mock import Mock as MagicMock
 
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+    class Mock(MagicMock):
+
+        @classmethod
+        def __getattr__(cls, name):
+                return Mock()
+
+    MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'scipy.misc', \
+        'matplotlib.pyplot']
+        # 'matplotlib.pyplot', 'casadi']
+
+    sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -117,8 +123,10 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
-# html_theme = 'bizstyle'
+# html_theme = 'default'
+# html_style = = '/default.css'
+html_theme = 'sphinx_rtd_theme'
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
