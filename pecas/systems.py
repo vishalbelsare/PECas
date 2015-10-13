@@ -21,7 +21,6 @@ For more information on the several classes, see their descriptions below.
 '''
 
 import casadi as ca
-import casadi.tools as cat
 
 import intro
 

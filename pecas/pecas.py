@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import casadi as ca
-# import casadi.tools as cat
 
 import numpy as np
 import matplotlib.pyplot as plt
