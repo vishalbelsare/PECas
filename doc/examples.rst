@@ -8,7 +8,7 @@ The following example applications give hands-on impressions on how to use PEcas
 Parameter estimation for a Lotka-Volterra predator-prey-model
 -------------------------------------------------------------
 
-The aim of the application ``lotka_volterra.py`` is to estimate the unknown parameters of a Lotka-Volterra predator-prey-model for experimentally received measurement data and given standard deviations for the measurements [#f1]_. The predator-prey-model is an ODE of the form :math:`\dot{x} = f(x,p)`, given by
+The aim of the application `lotka_volterra.py <https://github.com/adbuerger/PECas/blob/master/examples/lotka_volterra.py>`_ is to estimate the unknown parameters of a Lotka-Volterra predator-prey-model for experimentally received measurement data and given standard deviations for the measurements [#f1]_. The predator-prey-model is an ODE of the form :math:`\dot{x} = f(x,p)`, given by
 
 .. math::
 
@@ -47,7 +47,7 @@ The results for the system simulation using the estimated parameters in comparis
 Parameter estimation for a pendulum model
 -----------------------------------------
 
-The aim of the application ``pendulum.py`` is to estimate the spring constant :math:`k` of a pendulum model for experimentally received measurement data [#f2]_. The pendulum model is an ODE of the form :math:`\dot{x} = f(x,u,p)`, given by
+The aim of the application `pendulum.py <https://github.com/adbuerger/PECas/blob/master/examples/pendulum.py>`_ is to estimate the spring constant :math:`k` of a pendulum model for experimentally received measurement data [#f2]_. The pendulum model is an ODE of the form :math:`\dot{x} = f(x,u,p)`, given by
 
 .. math::
 
@@ -86,7 +86,7 @@ The results for the system simulation using the estimated parameter in compariso
 Parameter estimation for a model race car
 -----------------------------------------
 
-The aim of the application ``2d_vehicle.py`` is to estimate the unknown parameters of a 2D race car model for experimentally received measurement data [#f3]_. The race car and the interpretation of the model states are shown in the figure below [#f4]_.
+The aim of the application `2d_vehicle.py <https://github.com/adbuerger/PECas/blob/master/examples/2d_vehicle.py>`_ is to estimate the unknown parameters of a 2D race car model for experimentally received measurement data [#f3]_. The race car and the interpretation of the model states are shown in the figure below [#f4]_.
 
 .. figure:: rc.png
     :scale: 60%

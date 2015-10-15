@@ -17,6 +17,23 @@ import os
 
 import sphinx_rtd_theme
 
+import subprocess
+import ctypes
+
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+
+if on_rtd:
+
+    subprocess.Popen( \
+        "wget http://sourceforge.net/projects/casadi/files/CasADi/2.4.0-rc2/linux/casadi-py27-np1.9.1-v2.4.0-rc2.tar.gz/download -O casadi-py27-np1.9.1-v2.4.0-rc2.tar.gz",shell=True).wait()
+
+    subprocess.Popen( \
+        "tar -zxvf casadi-py27-np1.9.1-v2.4.0-rc2.tar.gz -C $HOME/casadi-py27-np1.9.1-v2.4.0-rc2",shell=True).wait()
+        # "tar -xvf python-casadi-2.2.0.tar.gz",shell=True).wait()
+
+    ctypes.cdll.LoadLibrary( \
+        '/home/docs/checkouts/readthedocs.org/user_builds/pecas/checkouts/latest/docs/source/casadi/libcasadi.so')
+
 
 if False:
 
