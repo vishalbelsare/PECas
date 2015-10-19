@@ -674,7 +674,6 @@ method-argument of the function.
 '''System simulation finished.''')
 
 
-
     def compute_covariance_matrix(self):
 
         r'''
@@ -759,11 +758,14 @@ You must execute run_parameter_estimation() first before the covariance
 matrix for the estimated parameters can be computed.
 '''
 
+            raise AttributeError(errmsg)
+
+
+        finally:
+
             self.tend_cov_computation = time.time()
             self.duration_cov_computation = self.tend_cov_computation - \
                 self.tstart_cov_computation
-
-            raise AttributeError(errmsg)
 
 
     def show_results(self):

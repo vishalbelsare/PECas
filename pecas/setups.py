@@ -32,7 +32,7 @@ class SetupsBaseClass(object):
         print('\nStart system initialization ...')
 
     # @profile
-    def check_and_set_bounds_and_initials(self, \
+    def check_and_set_initials(self, \
         uN = None, \
         pinit = None, \
         xinit = None):
@@ -41,11 +41,11 @@ class SetupsBaseClass(object):
         :param tbd: tbd
         :type tbd: tbd
 
-        Define structures for minimum, maximum and initial values for the
-        several variables that build up the optimization problem,
+        Define structures for the initial values for the
+        several variables that build up the parameter estimation problem,
         and prepare the values provided with the arguments properly.
-        Afterwards, the values are stored inside the class variables
-        ``Varsmin``, ``Varsmax`` and ``Varsinit``, respectively.
+        Afterwards, the values are stored inside the class variable
+        `Varsinit``.
         '''
 
         # Define structures for initial values from the original
@@ -123,14 +123,14 @@ class SetupsBaseClass(object):
 
 class BSsetup(SetupsBaseClass):
 
-    def check_and_set_bounds_and_initials(self, \
+    def check_and_set_initials(self, \
         uN = None,
         pinit = None, \
         xinit = None):
 
         self.tstart_setup = time.time()
 
-        super(BSsetup, self).check_and_set_bounds_and_initials( \
+        super(BSsetup, self).check_and_set_initials( \
             uN = uN,
             pinit = pinit, \
             xinit = xinit)
@@ -182,7 +182,7 @@ class BSsetup(SetupsBaseClass):
 
         # Set bounds and initial values
 
-        self.check_and_set_bounds_and_initials( \
+        self.check_and_set_initials( \
             uN = uN,
             pinit = pinit)
 
@@ -218,12 +218,12 @@ class BSsetup(SetupsBaseClass):
 
 class ODEsetup(SetupsBaseClass):
 
-    def check_and_set_bounds_and_initials(self, \
+    def check_and_set_initials(self, \
         uN = None, \
         pinit = None, \
         xinit = None):
 
-        super(ODEsetup, self).check_and_set_bounds_and_initials( \
+        super(ODEsetup, self).check_and_set_initials( \
             uN = uN, \
             pinit = pinit, \
             xinit = xinit)
@@ -270,8 +270,6 @@ class ODEsetup(SetupsBaseClass):
 
             raise ValueError("Invalid dimension for argument tu.")
 
-
-        # pdb.set_trace()
 
         if ty == None:
 
@@ -328,7 +326,7 @@ class ODEsetup(SetupsBaseClass):
 
         # Define bounds and initial values
 
-        self.check_and_set_bounds_and_initials( \
+        self.check_and_set_initials( \
             uN = uN, \
             pinit = pinit, \
             xinit = xinit)
