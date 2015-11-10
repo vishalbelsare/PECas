@@ -54,7 +54,7 @@ Python interface for your system.
 CasADi is distributed under the LGPL license, meaning the code can be used
 royalty-free even in commercial applications.
 '''
-            raise ImportError(errmsg)
+            raise RuntimeError(errmsg)
 
         casadi_version = casadi.CasadiMeta.getVersion()
 
@@ -77,7 +77,7 @@ and how to handle these problems.
         print("--> Compatible CasADi installation found (version {0})."\
             .format(casadi_version))
 
-        install.do_egg_install(self)
+        install.run(self)
 
 
 # Get the long description from the README file, see:
