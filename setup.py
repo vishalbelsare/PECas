@@ -21,7 +21,7 @@
 from setuptools import setup
 
 from codecs import open
-from os import path
+from os import path, environ
 
 from subprocess import call
 from setuptools.command.install import install
@@ -89,6 +89,18 @@ with open(path.join(path.abspath(path.dirname(__file__)), 'README.rst'), \
     encoding='utf-8') as f:
         long_description = f.read()
 
+
+on_rtd = environ.get('READTHEDOCS', None) == 'True'
+
+if on_rtd:
+
+    install_routine = install
+
+else:
+
+    install_routine = CustomInstall
+
+
 setup(
     name='pecas',
     version='0.5',
@@ -120,6 +132,6 @@ setup(
     platforms = ["Linux", "Windows"], 
     use_2to3=True,
 
-    cmdclass={"install" : CustomInstall},
+    cmdclass={"install" : install_routine},
 
 )
