@@ -36,8 +36,6 @@ class CustomInstall(install):
 
     def run(self):
 
-        call(["pip install -r requirements.txt"], shell=True)
-
         print("Checking for compatible CasADi installation ...")
 
         try:
@@ -92,46 +90,63 @@ with open(path.join(path.abspath(path.dirname(__file__)), 'README.rst'), \
 
 on_rtd = environ.get('READTHEDOCS', None) == 'True'
 
+
 if on_rtd:
 
-    install_routine = install
+    setup(
+
+        name='pecas',
+        version='0.5',
+
+        author='Adrian Buerger',
+        author_email='adrian.buerger@hs-karlsruhe.de',
+
+        packages=['pecas'],
+        package_dir={'pecas': 'pecas'},
+        url='http://github.com/adbuerger/PECas/',
+
+        license='LGPL',
+        zip_safe=False,
+
+        description='Parameter estimation using CasADi',
+        long_description = long_description,
+
+        platforms = ["Linux", "Windows"], 
+        use_2to3=True,
+
+    )
+
 
 else:
 
-    install_routine = CustomInstall
+    setup(
+        name='pecas',
+        version='0.5',
 
+        author='Adrian Buerger',
+        author_email='adrian.buerger@hs-karlsruhe.de',
 
-setup(
-    name='pecas',
-    version='0.5',
+        packages=['pecas'],
+        package_dir={'pecas': 'pecas'},
+        url='http://github.com/adbuerger/PECas/',
 
-    author='Adrian Buerger',
-    author_email='adrian.buerger@hs-karlsruhe.de',
+        license='LGPL',
+        zip_safe=False,
 
-    packages=['pecas'],
-    package_dir={'pecas': 'pecas'},
-    url='http://github.com/adbuerger/PECas/',
+        description='Parameter estimation using CasADi',
+        long_description = long_description,
 
-    license='LGPL',
-    zip_safe=False,
+        install_requires=[ 
 
-    description='Parameter estimation using CasADi',
-    long_description = long_description,
+                "numpy>=1.8.2",
+                "scipy", 
+                "matplotlib",
 
-    # install_requires=[ 
+            ],
 
-    #         "numpy>=1.8.2",
-    #         "scipy", 
-    #         "matplotlib",
-    #         # "casadi?",
+        platforms = ["Linux", "Windows"], 
+        use_2to3=True,
 
-    #     ],
+        cmdclass={"install" : CustomInstall},
 
-    # scripts = ["check_casadi_installed.py"],
-
-    platforms = ["Linux", "Windows"], 
-    use_2to3=True,
-
-    cmdclass={"install" : install_routine},
-
-)
+    )
