@@ -1,4 +1,4 @@
-PECas 0.4
+PECas 0.5
 =========
 
 Parameter estimation using CasADi
