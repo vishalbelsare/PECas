@@ -74,7 +74,7 @@ and how to handle these problems.
 
             raise RuntimeError(errmsg)
 
-        print("--> Compatible CasADi installation found (Version {0})."\
+        print("--> Compatible CasADi installation found (version {0})."\
             .format(casadi_version))
 
         install.do_egg_install(self)
