@@ -30,11 +30,14 @@ install:
  - mkdir $HOME/casadi-py27-np1.9.1-v$CASADIVERSION
  - tar -zxvf casadi-py27-np1.9.1-v$CASADIVERSION.tar.gz -C $HOME/casadi-py27-np1.9.1-v$CASADIVERSION
 
+ - export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages:/usr/lib/pymodules/python2.7
+ - export PYTHONPATH=$PYTHONPATH:$HOME/casadi-py27-np1.9.1-v$CASADIVERSION
+
  - python setup.py install
 
 before_script:
- - export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages:/usr/lib/pymodules/python2.7
- - export PYTHONPATH=$PYTHONPATH:$HOME/casadi-py27-np1.9.1-v$CASADIVERSION
+ # - export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages:/usr/lib/pymodules/python2.7
+ # - export PYTHONPATH=$PYTHONPATH:$HOME/casadi-py27-np1.9.1-v$CASADIVERSION
 
 # Fake display for testing the plotting features
 # http://docs.travis-ci.com/user/gui-and-headless-browsers/#Using-xvfb-to-Run-Tests-That-Require-a-GUI
