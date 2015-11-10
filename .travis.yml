@@ -53,4 +53,5 @@ after_success:
 deploy:
   provider: pypi
   user: "adbuerger"
-  password: "MightyPyth0n!"
+  password:
+    secure: DJNaSFmggRNyoy863oEpCWKAP9zqRwo/D/kg6X3LykuToyua7HhKr6k7m1nVkU811S1+c5OBvN6cn7GEbL8bIVVxSpRh3RnSAmzxEPv0ljz4y00LYmj3CG6stlPGLdWmdQTrvWT9mDrpwG9LY1M5nMywC9y0OKUJM0RrZRVWSQQ=
