@@ -51,6 +51,6 @@ after_success:
  - coveralls --config_file .coveragerc
 
 deploy:
- - provider: pypi
- - user: "adbuerger"
- - password: "MightyPyth0n!"
+  provider: pypi
+  user: "adbuerger"
+  password: "MightyPyth0n!"
