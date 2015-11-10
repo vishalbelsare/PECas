@@ -1,12 +1,30 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Copyright 2014-2015 Adrian Bürger
+#
+# This file is part of PECas.
+#
+# PECas is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# PECas is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with PECas. If not, see <http://www.gnu.org/licenses/>.
+
+# Model and data taken from: Bock, Sager et al.: Uebungen zur Numerischen
+# Mathematik II, sheet 9, IWR, Heidelberg university, 2006
 
 import pylab as pl
 import casadi as ca
 
 import pecas
-
-# (Model and data taken from: Bock, Sager et al.: Uebungen zur Numerischen
-# Mathematik II, sheet 9, IWR, Heidelberg university, 2006)
 
 T = pl.linspace(0, 10, 11)
 
