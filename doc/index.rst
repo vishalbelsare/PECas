@@ -29,8 +29,8 @@ As it's name suggests, PECas makes use of the optimization framework
 `CasADi <http://casadi.org>`_ to solve parameter estimation problems.
 
 In the following sections, you will receive the information necessary to obtain,
-install and use PECas. If you encounter any errors using this software, please feel free
-to submit your error with a description of how it occurred to adrian.buerger@hs-karlsruhe.de.
+install and use PECas. If you encounter any problems using this software, please feel free
+to submit your errors with a description of how it occurred to adrian.buerger@hs-karlsruhe.de.
 
 **Please note:** PECas is still in it's testing state, and does not yet contain all the features it will provide in future versions. Therefore, you should check for updates on a regular basis.
 

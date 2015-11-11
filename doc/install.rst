@@ -18,54 +18,137 @@
 Get and install PECas
 =====================
 
-Within the next sections, you will get to know how to obtain and install PECas,
-and what prerequisites have to be met in order to get PECas to work correctly.
+Within the next sections, you will get to know how to obtain and install PECas, and what prerequisites have to be met to get PECas working correctly.
 
-Linux installation
-------------------
+Installation on Ubuntu 14.04
+----------------------------
+
+The following instructions show the installation on Ubuntu 14.04. If you are planning to install PECas on Linux systems different from Ubuntu 14.04, this commands need to be adapted accordingly.
 
 Prerequesites
 ~~~~~~~~~~~~~
 
+Python
+^^^^^^
+
 In order to use PECas, please make sure that
 `Python <https://www.python.org/>`_ (currently supported version is Python 2.7) as well as
 `Python Numpy <http://www.numpy.org/>`_ (>= 1.8), 
-`PyLab <http://wiki.scipy.org/PyLab>`_ and `Python Setuptools <http://wiki.ubuntuusers.de/Python_setuptools>`_ are installed on your system. On Ubuntu 14.04, this can easily be ensured by running
+`PyLab <http://wiki.scipy.org/PyLab>`_ and `Python Setuptools <http://wiki.ubuntuusers.de/Python_setuptools>`_ are installed on your system. This can easily be ensured by running
 
 .. code:: bash
 
     sudo apt-get update
-    sudo apt-get install python python-numpy python-scipy python-matplotlib python-setuptools
+    sudo apt-get install python python-numpy python-scipy python-matplotlib python-setuptools --install-recommends
 
-Note that you need root privileges to do this. Also, a recent version of `CasADi <http://casadi.org>`_ (>= 2.4.0-rc2) needs to be installed on your system. You can obtain a recent version from the `CasADi web page <http://casadi.org>`_, and follow the installation instructions there.
+If you want to install PECas using `pip <https://wiki.ubuntuusers.de/pip>`_, which is the recommended and easiest way, you also need to install pip by running
 
-Get PECas
-~~~~~~~~~
+.. code:: bash
 
-The preferred way to obtain PECas is `directly from its
-git repository <https://github.com/adbuerger/PECas>`_. You can then either clone the repository, or download the current files within a zip-archive. To obtain the zip-file you do not need to have `git <http://git-scm.com/>`_ installed, but cloning the repository provides an easy way to receive updates on PECas by pulling from the repository in regular intervals.
+    sudo apt-get install python-pip
 
-On Ubuntu 14.04 again, you can install git and obatin PECas using the following commands
+Also, you might want to install the `Spyder IDE <https://pythonhosted.org/spyder/>`_ for working with Python. You can install it by running
+
+.. code:: bash
+
+    sudo apt-get install spyder
+
+.. note:: These commands require root privileges. In case you do not have root privileges on your system, consider using `Miniconda <http://conda.pydata.org/docs/install/quick.html>`_ to install Python and the necessary modules into a user-writeable directory.
+
+CasADi
+^^^^^^
+
+For PECas to work correctly, a recent version of `CasADi <http://casadi.org>`_ (>= 2.4.0-rc2) needs to be installed on your system. Installation instructions for CasADi can be found  `here <https://github.com/casadi/casadi/wiki/InstallationInstructions>`_. You can simpy use `"Option 1: Download a binary installation" <https://github.com/casadi/casadi/wiki/InstallationInstructions#option-1-download-a-binary-installation-recommended>`_ and download and unpack e. g. `this archive <http://sourceforge.net/projects/casadi/files/CasADi/2.4.1/linux/casadi-py27-np1.9.1-v2.4.1.tar.gz/download>`_.
+
+.. note:: Some plugins for CasADi require extra prerequisites to work on Linux. For a list of the required libraries and installation instructions, see `the corresponding section in the CasADi installation guide <https://github.com/casadi/casadi/wiki/linuxplugins>`_. If something goes wrong with executing CasADi and/or PECas, missing one or more of these libraries might be the reason.
+
+In addition to unpacking the archive you just obtained, please make sure that the unpacked folder that contains CasADi can be found by Python permanently. As mentioned in the CasADi installation instructions, this can e. g. be ensured by adding the CasADi directory to the :code:`PYTHONPATH` variable permanently. Just open the file :code:`~/.bashrc` on your system with your favorite text editor, and add the line
+
+.. code:: bash
+
+    export PYTHONPATH=$PYTHONPATH:/<path>/<to>/<casadi>/<folder>
+
+while :code:`/<path>/<to>/<casadi>/<folder>` needs to be adapted to the path of your unpacked archive. Afterwards, save these changes and close all open terminals. Now open a new terminal, and have a look at the value of :code:`PYTHONPATH` by typing
+
+.. code:: bash
+
+    echo $PYTHONPATH
+
+It should now contain at least the path your just inserted. If everything went well, you should be able to open a Python console, and execute the following commands
+
+.. code::
+
+    >>> from casadi import *
+    >>> x = MX.sym("x")
+    >>> print jacobian(sin(x),x)
+
+without recieving error messages.
+
+.. _option1:
+
+Option 1: Get PECas using pip (recommended)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Installation
+^^^^^^^^^^^^
+
+PECas is listed on the `Python Package Index <https://pypi.python.org/pypi?name=pecas&version=0.5&:action=display>`_. You can obtain it from there by simply running
+
+.. code:: bash
+
+    sudo pip install pecas
+
+.. note:: These commands require root privileges. In case you do not have root privileges ony your system, consider :ref:`Option 2: Get PECas from GitHub <option2>`.
+
+Upgrades
+^^^^^^^^
+
+Upgrades to new releases of PECas can simply be obtained by running
+
+.. code:: bash
+
+    sudo pip install pecas --upgrade
+
+.. note:: You need root privileges to do this!
+
+.. _option2:
+
+Option 2: Get PECas from GitHub
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Installation
+^^^^^^^^^^^^
+
+You can also obtain the PECas module `directly from its
+GitHub repository <https://github.com/adbuerger/PECas>`_. You can either clone the repository, or download the contained files within a compressed archive. To just obtain an archive, you do not need to have `git <http://git-scm.com/>`_ installed, but cloning the repository provides an easy way to receive updates on PECas by pulling from the repository.
+
+You can install git by running
 
 .. code:: bash
 
     sudo apt-get update
     sudo apt-get install git
+
+.. note:: These commands require root privileges. In case you do not have root priviliges and git ist not installed on you system, consider downloading the archive from the `GitHub page <https://github.com/adbuerger/PECas>`_ using your favorite web browser instead of cloning the git repository.
+
+Afterwards, you can clone the repository using the following commands
+
+.. code:: bash
+
     git clone git@github.com:adbuerger/PECas.git
 
-Install PECas
-~~~~~~~~~~~~~
-
-You can install PECas on Ubuntu by running the command
+and install PECas by running
 
 .. code:: bash
     
     sudo python setup.py install
 
-from within the PECas directory. Note that you need root privileges to be able to do this. If you are planning to install PECas on systems different from Ubuntu, this command might need to be adapted.
+from within the PECas directory.
 
-Update PECas
-~~~~~~~~~~~~
+.. note:: This command requires root privileges. In case you do not have root priviliges, consider adding the PECas directory to :code:`PYTHONPATH`, as described above for CasADi.
+
+Upgrades
+^^^^^^^^
 
 If you recieved PECas by cloning the git repository, you can update the contents of your local copy by running
 
@@ -73,43 +156,102 @@ If you recieved PECas by cloning the git repository, you can update the contents
     
     git pull
 
-from within the PECas directory. Afterwards, you need to install the recent version by running
+from within the PECas directory. In case you did not clone the repository, you would again need to download a compressed archive.
+
+Afterwards, you need to install the recent version again by running
 
 .. code:: bash
     
     sudo python setup.py install
 
-again. Note that due to the fact that PECas is still in a very early state, an update might lead to changes e. g. in syntax and functionalities, causing that some code that was written for older versions of PECas might not work anymore with future version, and will then need to be adjusted accordingly.
+.. note:: This command requires root privileges.
+
+.. warning:: If you installed PECas by adding the directory to :code:`PYTHONPATH`, just place the newly obtained files in the previously defined path to upgrade to a new version of PECas. You do not not need to add the directory again to :code:`PYTHONPATH` then. Also, make sure not to add multiple versions of PECas to :code:`PYTHONPATH`, since this might lead to conflicts.
 
 
-Windows installation
---------------------
+Installation on Windows
+-----------------------
+
+The following instructions have been tested on Windows 7 64 bit.
+
+.. note:: You need to have administrator rights on your system to be able to follow the instructions below.
 
 Prerequesites
 ~~~~~~~~~~~~~
 
-The easiest way to meet the prerequesites to use PECas and CasADi on a Windows system might be to install a recent version of `Python(x,y) <http://python-xy.github.io/>`_, which is also recommended by the CasADi developers. After installation of Python(x,y), obtain a recent version of CasADi (>= 2.4.0-rc2) from the `CasADi web page <http://casadi.org>`_, and follow the installation instructions there.
+Python
+^^^^^^
 
-Get and install PECas
-~~~~~~~~~~~~~~~~~~~~~
+The easiest way to meet the prerequesites for PECas and CasADi on a Windows system might be to install a recent version of `Python(x,y) <http://python-xy.github.io/>`_, which is also the procedure recommended by the CasADi developers. It is recommended to do a "Full" installation. In the following, the instructions also assume that you are installing Python(x,y) and all components with their default paths.
 
-More expereinced users can follow the guide from the Linux section to install PECas. For less experienced users, it is recommended to visit the `PECas GitHub page <https://github.com/adbuerger/PECas>`_ and download PECas as a zip archive. Just unpack the archive, start your Python interpreter or develpment environment (which with Python(x,y) would preferrably be Spyder), and add the contained PECas folder to your path, which works similar to the installation of CasADi with:
+CasADi
+^^^^^^
 
-.. code:: python
+After installing Python(x,y), a recent version of `CasADi <http://casadi.org>`_ (>= 2.4.0-rc2) needs to be installed on your system. Installation instructions for CasADi can be found  `here <https://github.com/casadi/casadi/wiki/InstallationInstructions>`_. You can simpy use `"Option 1: Download a binary installation" <https://github.com/casadi/casadi/wiki/InstallationInstructions#option-1-download-a-binary-installation-recommended>`_ and download and unpack e. g. `this archive <http://sourceforge.net/projects/casadi/files/CasADi/2.4.1/windows/casadi-py27-np1.9.1-v2.4.1.zip/download>`_, which is compatible with the previous Python(x,y) installation.
 
-    >>> import sys
-    >>> sys.path.append("pecasdirectory")
+After unpacking the archive, go to :code:`My Computer > Properties > Advanced System Settings > Environment Variables`. If a variable :code:`PYTHONPATH` already exists, apply the full path to the CasADi folder to the end of the variable value, and separate this new path from the ones already contained by :code:`;`. If :code:`PYTHONPATH` does not yet exist on the system, create a new environmental variable with this name, and fill in the path to the unpacked CasADi folder.
+
+.. _option1win:
+
+Option 1: Get PECas using pip (recommended)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Installation
+^^^^^^^^^^^^
+
+PECas is listed on the `Python Package Index <https://pypi.python.org/pypi?name=pecas&version=0.5&:action=display>`_. Since you installed `pip <https://wiki.ubuntuusers.de/pip>`_ with Python(x,y), you can obtain PECas by opening a command line and running
+
+.. code:: bash
+
+    pip install pecas
+
+.. note:: If you have problems obtaining PECas with pip (which can e. g. be caused by a company's proxy server) consider :ref:`Option 2: Get PECas from GitHub <option2win>`.
+
+Upgrades
+^^^^^^^^
+
+Upgrades to new releases of PECas can simply be obtained by running
+
+.. code:: bash
+
+    pip install pecas --upgrade
 
 
-Update PECas
-~~~~~~~~~~~~
+.. _option2win:
 
-If you obtained PECas via git, please refer to the Linux section above on how to update PECas. If you installed PECas by adding it to your path, you can simply obtain the newest version in a zip archive again, and add the new, unpacked folder to your path as described above.
+Option 2: Get PECas from GitHub
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Note that due to the fact that PECas is still in a very early state, an update might lead to changes e. g. in syntax and functionalities, causing that some code that was written for older versions of PECas might not work anymore with future version, and will then need to be adjusted accordingly.
+Installation
+^^^^^^^^^^^^
 
+You can also obtain the PECas module `directly from its
+GitHub repository <https://github.com/adbuerger/PECas>`_. Since installing git is more time-consuming on Windows then it is on most Linux systems, it is recommended (at least for less experienced users) to just download the contained files for PECas within a compressed archive.
+
+Afterwards, unpack the archive, and install PECas by running
+
+.. code:: bash
+    
+    python setup.py install
+
+from the command line, within the unzipped folder.
+
+.. note:: If this procedure is for some reason not applicable for you, you can consider adding the PECas directory to :code:`PYTHONPATH` instead, as described above for CasADi.
+
+Upgrades
+^^^^^^^^
+
+For upgrading PECas, you would again need to download a compressed archive.
+
+Afterwards, you need to install the recent version by again running
+
+.. code:: bash
+    
+    python setup.py install
+
+.. warning:: If you installed PECas by adding the directory to :code:`PYTHONPATH`, just place the newly obtained files in the previously defined path to upgrade to a new version of PECas. You do not not need to add the directory again to :code:`PYTHONPATH` then. Also, make sure not to add multiple versions of PECas to :code:`PYTHONPATH`, since this might lead to conflicts.
 
 Recommendations
 ---------------
 
-To speed up computations in PECas, it is recommended to install `HSL for IPOPT <http://www.hsl.rl.ac.uk/ipopt/>`_. On how to install the solvers and further information, see the page `Obtaining HSL <https://github.com/casadi/casadi/wiki/Obtaining-HSL>`_ in the CasADi wiki.
+To speed up computations in PECas, it is recommended to install `HSL for IPOPT <http://www.hsl.rl.ac.uk/ipopt/>`_. On how to install the solvers and for further information, see the page `Obtaining HSL <https://github.com/casadi/casadi/wiki/Obtaining-HSL>`_ in the CasADi wiki.
