@@ -96,7 +96,7 @@ if on_rtd:
     setup(
 
         name='pecas',
-        version='0.5',
+        version='0.5.1',
 
         author='Adrian Buerger',
         author_email='adrian.buerger@hs-karlsruhe.de',
@@ -121,7 +121,7 @@ else:
 
     setup(
         name='pecas',
-        version='0.5',
+        version='0.5.1',
 
         author='Adrian Buerger',
         author_email='adrian.buerger@hs-karlsruhe.de',

@@ -31,7 +31,7 @@ def pecas_intro():
         os.environ["PECAS_INTRO_SHOWN"] = "1"
 
         # print('\n' + 78 * '-')
-        print('\n' + 30 * '-' + ' Welcome at PECas ' + 30 * '-')
+        print('\n' + 27 * '-' + ' Welcome to PECas 0.5.1' + 28 * '-')
         print('\n' + 35 * ' ' + ' PECas ' + 36 * ' ')
         print(21 * ' ' + ' Parameter estimation using CasADi ' + 22 * ' ')
         print(14 * ' ' + \
