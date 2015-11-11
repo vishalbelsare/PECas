@@ -20,7 +20,7 @@
 Example applications
 ====================
 
-The following example applications give hands-on impressions on how to use PEcas in practice. They all (and some more) are contained within the `examples directory <https://github.com/adbuerger/PECas/tree/master/examples>`_ of the PECas sources.
+The following example applications give hands-on impressions on how to use PECas in practice. They all (and some more) are contained within the `examples directory <https://github.com/adbuerger/PECas/tree/master/examples>`_ of the PECas sources.
 
 Parameter estimation for a Lotka-Volterra predator-prey-model
 -------------------------------------------------------------
