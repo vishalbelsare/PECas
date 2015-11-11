@@ -109,7 +109,7 @@ Upgrades to new releases of PECas can simply be obtained by running
 
     sudo pip install pecas --upgrade
 
-.. note:: You need root privileges to do this!
+.. note:: This command requires root privileges.
 
 .. _option2:
 
