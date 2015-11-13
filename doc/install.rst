@@ -158,9 +158,13 @@ and install PECas by running
     
     sudo python setup.py install
 
-from within the PECas directory.
+from within the PECas directory. If this command fails with a message that CasADi cannot be found on your system, and you installed CasADi by appending it's directory to :code:`PYTHONPATH` via :code:`~/.bashrc`, it's most likely that your users :code:`PYTHONPATH` variable is not available when using :code:`sudo`. In this case, try
 
-.. note:: This command requires root privileges. In case you do not have root priviliges, consider adding the PECas directory to :code:`PYTHONPATH`, as described above for CasADi.
+.. code:: bash
+
+    sudo env PYTHONPATH=$PYTHONPATH python setup.py install
+
+.. note:: These commands require root privileges. In case you do not have root priviliges, consider adding the PECas directory to :code:`PYTHONPATH`, as described above for CasADi.
 
 Upgrades
 ^^^^^^^^
@@ -179,7 +183,15 @@ Afterwards, you need to install the recent version again by running
     
     sudo python setup.py install
 
-.. note:: This command requires root privileges.
+or
+
+.. code::
+
+    sudo env PYTHONPATH=$PYTHONPATH python setup.py install
+
+respectively.
+
+.. note:: These commands require root privileges.
 
 .. warning:: If you installed PECas by adding the directory to :code:`PYTHONPATH`, just place the newly obtained files in the previously defined path to upgrade to a new version of PECas. You do not not need to add the directory again to :code:`PYTHONPATH` then. Also, make sure not to add multiple versions of PECas to :code:`PYTHONPATH`, since this might lead to conflicts.
 
