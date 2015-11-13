@@ -92,11 +92,17 @@ Option 1: Get PECas using pip (recommended)
 Installation
 ^^^^^^^^^^^^
 
-PECas is listed on the `Python Package Index <https://pypi.python.org/pypi?name=pecas&version=0.5&:action=display>`_. You can obtain it from there by simply running
+PECas is listed on the `Python Package Index <https://pypi.python.org/pypi?name=pecas&version=0.5&:action=display>`_. You can obtain it from there by running
 
 .. code:: bash
 
     sudo pip install pecas
+
+If this command fails with a message that CasADi cannot be found on your system, and you installed CasADi by appending it's directory to :code:`PYTHONPATH` via :code:`~/.bashrc`, it's most likely that your users :code:`PYTHONPATH` variable is not available when using :code:`sudo`. In this case, try
+
+.. code:: bash
+
+    sudo env PYTHONPATH=$PYTHONPATH pip install pecas
 
 .. note:: These commands require root privileges. In case you do not have root privileges ony your system, consider :ref:`Option 2: Get PECas from GitHub <option2>`.
 
@@ -109,7 +115,16 @@ Upgrades to new releases of PECas can simply be obtained by running
 
     sudo pip install pecas --upgrade
 
-.. note:: This command requires root privileges.
+or
+
+.. code:: bash
+
+    sudo env PYTHONPATH=$PYTHONPATH pip install pecas --upgrade
+
+respectively.
+
+
+.. note:: These commands require root privileges.
 
 .. _option2:
 

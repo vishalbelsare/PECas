@@ -50,7 +50,7 @@ odesys = pecas.systems.ExplODE( \
     x = x, u = u, p = p, f = f, phi = phi)
 
 dt = 1.0 / fs
-t = pl.linspace(0, N, N+1) * dt
+ty = pl.linspace(0, N, N+1) * dt
 
 u_data = ca.DMatrix(0.1*pl.random(N))
 
@@ -59,7 +59,7 @@ wv_dummy = y_data_dummy
 
 lsqpe_dummy = pecas.LSq( \
     system = odesys, \
-    tu = t, \
+    tu = ty, \
     uN = u_data, \
     yN = y_data_dummy, \
     wv = wv_dummy)
@@ -73,7 +73,7 @@ wv = pl.ones(y_data.shape)
 
 lsqpe = pecas.LSq( \
     system = odesys, \
-    tu = t, \
+    tu = ty, \
     uN = u_data, \
     yN = y_data, \
     pinit = p_guess, \
@@ -87,10 +87,10 @@ lsqpe.run_simulation(x0 = [0.0, 0.0])
 pl.close("all")
 pl.figure()
 
-pl.scatter(t, pl.squeeze(y_data[0,:]))
-pl.plot(t, lsqpe.Xsim[0,:].T)
+pl.scatter(ty, pl.squeeze(y_data[0,:]))
+pl.plot(ty, lsqpe.Xsim[0,:].T)
 
-pl.scatter(t, pl.squeeze(y_data[1,:]))
-pl.plot(t, lsqpe.Xsim[1,:].T)
+pl.scatter(ty, pl.squeeze(y_data[1,:]))
+pl.plot(ty, lsqpe.Xsim[1,:].T)
 
 pl.show()
