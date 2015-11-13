@@ -23,7 +23,7 @@ Within the next sections, you will get to know how to obtain and install PECas, 
 Installation on Ubuntu 14.04
 ----------------------------
 
-The following instructions show the installation on Ubuntu 14.04. If you are planning to install PECas on Linux systems different from Ubuntu 14.04, this commands need to be adapted accordingly.
+The following instructions show the installation on Ubuntu 14.04. If you are planning to install PECas on Linux systems different from Ubuntu 14.04, these commands need to be adapted accordingly.
 
 Prerequesites
 ~~~~~~~~~~~~~
