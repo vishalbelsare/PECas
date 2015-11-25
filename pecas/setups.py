@@ -109,7 +109,7 @@ class SetupsBaseClass(object):
 
         # If it's a dynamic problem, set initials and bounds for the states
 
-        if type(self.system) is not systems.BasicSystem:
+        if type(self.system) is not systems.NonDyn:
 
             if xinit is None:
                 xinit = np.zeros((self.nx, self.nsteps + 1))
@@ -138,7 +138,7 @@ class SetupsBaseClass(object):
         self.EPS_Uinit = np.zeros(self.EPS_U.shape)
 
 
-class BSsetup(SetupsBaseClass):
+class NDSetup(SetupsBaseClass):
 
     def check_and_set_initials(self, \
         uN = None,
@@ -147,7 +147,7 @@ class BSsetup(SetupsBaseClass):
 
         self.tstart_setup = time.time()
 
-        super(BSsetup, self).check_and_set_initials( \
+        super(NDSetup, self).check_and_set_initials( \
             uN = uN,
             pinit = pinit, \
             xinit = xinit)
@@ -159,7 +159,7 @@ class BSsetup(SetupsBaseClass):
 
         SetupsBaseClass.__init__(self)
 
-        if not type(system) is systems.BasicSystem:
+        if not type(system) is systems.NonDyn:
 
             raise TypeError("Setup-method " + self.__class__.__name__ + \
                 " not allowed for system of type " + str(type(system)) + ".")
@@ -230,17 +230,17 @@ class BSsetup(SetupsBaseClass):
         self.tend_setup = time.time()
         self.duration_setup = self.tend_setup - self.tstart_setup
 
-        print('Initialization of BasicSystem system sucessful.')
+        print('Initialization of NonDyn system sucessful.')
 
 
-class ODEsetup(SetupsBaseClass):
+class ODESetup(SetupsBaseClass):
 
     def check_and_set_initials(self, \
         uN = None, \
         pinit = None, \
         xinit = None):
 
-        super(ODEsetup, self).check_and_set_initials( \
+        super(ODESetup, self).check_and_set_initials( \
             uN = uN, \
             pinit = pinit, \
             xinit = xinit)

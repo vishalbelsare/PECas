@@ -27,13 +27,13 @@ import unittest
 
 from mock import patch
 
-class BSLsqPETest(object):
+class NDLsqPETest(object):
 
     def lsq_run_exact_hessian(self):
 
         # Run parameter estimation and assure that the results is correct
 
-        self.lsqpe = pecas.LSq(system = self.bsys, \
+        self.lsqpe = pecas.LSq(system = self.ndsys, \
             tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             yN = self.yN, wv = self.wv)
@@ -56,7 +56,7 @@ class BSLsqPETest(object):
 
         # Run parameter estimation and assure that the results is correct
 
-        self.lsqpe = pecas.LSq(system = self.bsys, \
+        self.lsqpe = pecas.LSq(system = self.ndsys, \
             tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             yN = self.yN, wv = self.wv)
@@ -86,7 +86,7 @@ class BSLsqPETest(object):
 
     def test_covmat_invalid(self):
 
-        self.lsqpe = pecas.LSq(system = self.bsys, \
+        self.lsqpe = pecas.LSq(system = self.ndsys, \
             tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             yN = self.yN, wv = self.wv)
@@ -124,7 +124,7 @@ class BSLsqPETest(object):
 
     def test_pe_invalid_method(self):
 
-        self.lsqpe = pecas.LSq(system = self.bsys, \
+        self.lsqpe = pecas.LSq(system = self.ndsys, \
             tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             yN = self.yN, wv = self.wv)

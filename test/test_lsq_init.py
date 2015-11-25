@@ -24,28 +24,28 @@ import pecas
 
 import unittest
 
-class BSLsqInitTest(object):
+class NDLsqInitTest(object):
 
     def test_valid_lsq_init(self):
 
         # Test valid setup cases
 
-        pecas.LSq(system = self.bsys, \
+        pecas.LSq(system = self.ndsys, \
             tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             yN = self.yN, wv = self.wv)
 
-        pecas.LSq(system = self.bsys, \
+        pecas.LSq(system = self.ndsys, \
             tu = np.atleast_2d(self.tu).T, uN = self.uN, \
             pinit = self.pinit, \
             yN = self.yN, wv = self.wv)
 
-        pecas.LSq(system = self.bsys, \
+        pecas.LSq(system = self.ndsys, \
             tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             yN = self.yN.T, wv = self.wv)
 
-        pecas.LSq(system = self.bsys, \
+        pecas.LSq(system = self.ndsys, \
             tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             yN = self.yN, wv = self.wv.T)
@@ -53,22 +53,22 @@ class BSLsqInitTest(object):
 
     def test_invalid_lsq_init(self):
 
-        self.assertRaises(ValueError, pecas.LSq, system = self.bsys, \
+        self.assertRaises(ValueError, pecas.LSq, system = self.ndsys, \
             tu = np.zeros((self.tu.shape[0] - 1, self.tu.shape[0] - 1)) , \
             pinit = self.pinit, \
             yN = self.yN, wv = self.wv)
 
-        self.assertRaises(ValueError, pecas.LSq, system = self.bsys, \
+        self.assertRaises(ValueError, pecas.LSq, system = self.ndsys, \
             tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             yN = np.atleast_2d(self.yN)[:, :-1], wv = self.wv)
 
-        self.assertRaises(ValueError, pecas.LSq, system = self.bsys, \
+        self.assertRaises(ValueError, pecas.LSq, system = self.ndsys, \
             tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             yN = self.yN, wv = np.atleast_2d(self.wv)[:-1])
 
-        self.assertRaises(ValueError, pecas.LSq, system = self.bsys, \
+        self.assertRaises(ValueError, pecas.LSq, system = self.ndsys, \
             tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             yN = self.yN, wv = np.atleast_2d(self.wv)[:-1])

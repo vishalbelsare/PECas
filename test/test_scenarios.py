@@ -28,11 +28,11 @@ import test_lsq_init
 import test_lsq_sim
 import test_lsq_pe
 
-class TestBasicSystemNoConstraints(unittest.TestCase, \
-    test_set_initials.BSSetInitialsTest, \
-    test_lsq_init.BSLsqInitTest, \
-    test_lsq_sim.BSLsqSimTest, \
-    test_lsq_pe.BSLsqPETest):
+class TestNonDynNoConstraints(unittest.TestCase, \
+    test_set_initials.NDSetupTest, \
+    test_lsq_init.NDLsqInitTest, \
+    test_lsq_sim.NDLsqSimTest, \
+    test_lsq_pe.NDLsqPETest):
 
     _multiprocess_can_split_ = True
 
@@ -45,7 +45,7 @@ class TestBasicSystemNoConstraints(unittest.TestCase, \
 
         self.phi = self.u * self.p
 
-        self.bsys = pecas.systems.BasicSystem(u = self.u, p = self.p, \
+        self.ndsys = pecas.systems.NonDyn(u = self.u, p = self.p, \
             phi = self.phi)
 
         # Inputs
@@ -73,11 +73,11 @@ class TestBasicSystemNoConstraints(unittest.TestCase, \
         self.phat = np.atleast_2d([6.24])
 
 
-class TestBasicSystemConstraints(unittest.TestCase, \
-    test_set_initials.BSSetInitialsTest, \
-    test_lsq_init.BSLsqInitTest, \
-    test_lsq_sim.BSLsqSimTest, \
-    test_lsq_pe.BSLsqPETest):
+class TestNonDynConstraints(unittest.TestCase, \
+    test_set_initials.NDSetupTest, \
+    test_lsq_init.NDLsqInitTest, \
+    test_lsq_sim.NDLsqSimTest, \
+    test_lsq_pe.NDLsqPETest):
 
     def setUp(self):
 
@@ -89,7 +89,7 @@ class TestBasicSystemConstraints(unittest.TestCase, \
         self.phi = self.u[0] * self.p[0] + self.u[1] * self.p[1]**2
         self.g = (2 - ca.mul(self.p.T, self.p))
 
-        self.bsys = pecas.systems.BasicSystem(u = self.u, p = self.p, \
+        self.ndsys = pecas.systems.NonDyn(u = self.u, p = self.p, \
             phi = self.phi, g = self.g)
 
         # Inputs
@@ -118,7 +118,7 @@ class TestBasicSystemConstraints(unittest.TestCase, \
 
 
 class TestLotkaVolterra(unittest.TestCase, \
-    test_set_initials.ODESetInitialsTest, \
+    test_set_initials.ODESetupTest, \
     test_lsq_init.ODELsqInitTest, \
     test_lsq_sim.ODELsqSimTest, \
     test_lsq_pe.ODELsqPETest):
@@ -188,7 +188,7 @@ class TestLotkaVolterra(unittest.TestCase, \
 
 
 class Test1DVehicle(unittest.TestCase, \
-    test_set_initials.ODESetInitialsTest, \
+    test_set_initials.ODESetupTest, \
     test_lsq_init.ODELsqInitTest, \
     test_lsq_sim.ODELsqSimTest, \
     test_lsq_pe.ODELsqPETest, \
@@ -249,7 +249,7 @@ class Test1DVehicle(unittest.TestCase, \
 
 
 class Test2DVehicle(unittest.TestCase, \
-    test_set_initials.ODESetInitialsTest, \
+    test_set_initials.ODESetupTest, \
     test_lsq_init.ODELsqInitTest, \
     test_lsq_sim.ODELsqSimTest, \
     test_lsq_pe.ODELsqPETest, \
@@ -333,7 +333,7 @@ class Test2DVehicle(unittest.TestCase, \
 
 
 class PedulumBar(unittest.TestCase, \
-    test_set_initials.ODESetInitialsTest, \
+    test_set_initials.ODESetupTest, \
     test_lsq_init.ODELsqInitTest, \
     test_lsq_sim.ODELsqSimTest, \
     test_lsq_pe.ODELsqPETest, \

@@ -18,16 +18,16 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with PECas. If not, see <http://www.gnu.org/licenses/>.
 
-# Test the classes fo system definitions
+# Test the classes for system definitions
 
-import pecas
 import casadi as ca
+import pecas
 
 import unittest
 
-class TestSystemsInit(unittest.TestCase):
+class TestNonDyn(unittest.TestCase):
 
-    def test_basic_system_init(self):
+    def setUp(self):
 
         self.t = ca.MX.sym("t", 1)
         self.u = ca.MX.sym("u", 1)
@@ -35,26 +35,52 @@ class TestSystemsInit(unittest.TestCase):
         self.phi = ca.MX.sym("phi", 1)
         self.g = ca.MX.sym("g", 1)
 
-        sys = pecas.systems.BasicSystem(p = self.p, phi = self.phi)
+
+    def test_basic_system_init_p_phi(self):
+
+        sys = pecas.systems.NonDyn(p = self.p, phi = self.phi)
+        sys.show_system_information(showEquations = True)
+
+
+    def test_basic_system_init_t_p_phi(self):
+        
+        sys = pecas.systems.NonDyn(t = self.t, p = self.p, phi = self.phi)
         sys.show_system_information(showEquations = True)
         
-        sys = pecas.systems.BasicSystem(t = self.t, p = self.p, phi = self.phi)
-        sys.show_system_information(showEquations = True)
-        
-        sys = pecas.systems.BasicSystem(t = self.t, u = self.u, p = self.p, \
+
+    def test_basic_system_init_t_u_p_phi(self):
+
+        sys = pecas.systems.NonDyn(t = self.t, u = self.u, p = self.p, \
             phi = self.phi)
         sys.show_system_information(showEquations = True)
-        
-        sys = pecas.systems.BasicSystem(t = self.t, u = self.u, p = self.p, \
+
+    def test_basic_system_init_t_u_p_phi_g(self):
+
+        sys = pecas.systems.NonDyn(t = self.t, u = self.u, p = self.p, \
             phi = self.phi, g = self.g)
         sys.show_system_information(showEquations = True)
 
-        self.assertRaises(TypeError, pecas.systems.BasicSystem)
-        self.assertRaises(TypeError, pecas.systems.BasicSystem, p = None)
-        self.assertRaises(TypeError, pecas.systems.BasicSystem, phi = None)
+
+    def test_basic_system_init_no_args(self):
+
+        self.assertRaises(TypeError, pecas.systems.NonDyn)
 
 
-    def test_explode_system_init(self):
+    def test_basic_system_init_no_phi(self):
+
+        self.assertRaises(TypeError, pecas.systems.NonDyn, p = None, \
+            phi = self.phi)
+
+
+    def test_basic_system_init_no_p(self):
+
+        self.assertRaises(TypeError, pecas.systems.NonDyn, p = self.p, \
+            phi = None)
+
+
+class TestExplODE(unittest.TestCase):
+
+    def setUp(self):
 
         self.t = ca.MX.sym("t", 1)
         self.u = ca.MX.sym("u", 1)
@@ -65,38 +91,80 @@ class TestSystemsInit(unittest.TestCase):
         self.phi = ca.MX.sym("phi", 1)
         self.f = ca.MX.sym("f", 1)
 
+
+    def test_explode_system_init_x_p_epse_phi_f(self):
+
         sys = pecas.systems.ExplODE(x = self.x, p = self.p, \
             eps_e = self.eps_e, phi = self.phi, f = self.f)
         sys.show_system_information(showEquations = True)
+
+
+    def test_explode_system_init_t_x_p_epse_phi_f(self):
 
         sys = pecas.systems.ExplODE(t = self.t, x = self.x, p = self.p, \
             eps_e = self.eps_e, phi = self.phi, f = self.f)
         sys.show_system_information(showEquations = True)
 
+
+    def test_explode_system_init_t_u_x_p_epse_phi_f(self):
+
         sys = pecas.systems.ExplODE(t = self.t, u = self.u, x = self.x, \
             p = self.p, eps_e = self.eps_e, phi = self.phi, f = self.f)
         sys.show_system_information(showEquations = True)
+
+
+    def test_explode_system_init_t_u_x_p_epse_epsu_phi_f(self):
 
         sys = pecas.systems.ExplODE(t = self.t, u = self.u, x = self.x,\
             p = self.p, eps_e = self.eps_e, eps_u = self.eps_u, \
             phi = self.phi, f = self.f)
         sys.show_system_information(showEquations = True)
 
-        self.assertRaises(TypeError, pecas.systems.ExplODE)
-        self.assertRaises(TypeError, pecas.systems.ExplODE, x = None)
-        self.assertRaises(TypeError, pecas.systems.ExplODE, p = None)
-        self.assertRaises(TypeError, pecas.systems.ExplODE, w = None)
-        self.assertRaises(TypeError, pecas.systems.ExplODE, phi = None)
-        self.assertRaises(TypeError, pecas.systems.ExplODE, f = None)
 
-        # while explicit time dependecy is not allowed:
+    def test_explode_system_init_no_args(self):
+
+        self.assertRaises(TypeError, pecas.systems.ExplODE)
+
+
+    def test_explode_system_init_no_x(self):
+
+        self.assertRaises(TypeError, pecas.systems.ExplODE, x = None, \
+            p = self.p, phi = self.phi, f = self.f)
+
+
+    def test_explode_system_init_no_p(self):
+
+        self.assertRaises(TypeError, pecas.systems.ExplODE, x = self.x, \
+            p = None, phi = self.phi, f = self.f)
+
+
+    def test_explode_system_init_no_phi(self):
+
+        self.assertRaises(TypeError, pecas.systems.ExplODE, x = self.x, \
+            p = self.p, phi = None, f = self.f)
+
+
+    def test_explode_system_init_no_f(self):
+
+        self.assertRaises(TypeError, pecas.systems.ExplODE, x = self.x, \
+            p = self.p, phi = self.phi, f = None)
+
+
+    def test_assure_no_explicit_time_dependecy(self):
+
+        # Assure as long as explicit time dependecy is not allowed
 
         self.assertRaises(NotImplementedError, pecas.systems.ExplODE, \
             t = self.t, u = self.u, x = self.x, \
             p = self.p, eps_e = self.eps_e, phi = self.phi, f = self.t)
 
 
-    def test_implade_system_init(self):
+class TestImplDAE(unittest.TestCase):
+
+
+    def test_impldae_system_init(self):
+
+        # Assure as long as not implemented
 
         self.assertRaises(NotImplementedError, pecas.systems.ImplDAE)
     

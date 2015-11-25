@@ -58,15 +58,15 @@ class PECasBaseClass:
         self.linear_solver = linear_solver
 
 
-        if type(system) is systems.BasicSystem:
+        if type(system) is systems.NonDyn:
 
-            self.pesetup = setups.BSsetup(system = system, \
+            self.pesetup = setups.NDSetup(system = system, \
                 tu = tu, uN = uN, \
                 pinit = pinit)
 
         elif type(system) is systems.ExplODE:
 
-            self.pesetup = setups.ODEsetup(system = system, \
+            self.pesetup = setups.ODESetup(system = system, \
                 tu = tu, uN = uN, \
                 ty = ty, yN = yN, \
                 pinit = pinit, \

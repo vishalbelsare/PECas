@@ -25,13 +25,13 @@ import pecas
 
 import unittest
 
-class BSLsqSimTest(object):
+class NDLsqSimTest(object):
 
     def test_sim(self):
 
         # There is no simulation for BasicSystem
 
-        self.lsqpe = pecas.LSq(system = self.bsys, \
+        self.lsqpe = pecas.LSq(system = self.ndsys, \
             tu = self.tu, uN = self.uN, \
             pinit = self.pinit, \
             yN = self.yN, wv = self.wv)

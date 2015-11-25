@@ -23,7 +23,7 @@ PECas provides different classes for defining systems for parameter estimation
 problems that can be solved within PECas. According to a
 system\'s properties, a suitable class needs to be used:
 
-* :class:`BasicSystem`: non-dynamic, contains an output function and possibly
+* :class:`NonDyn`: non-dynamic, contains an output function and possibly
   equality constraints, possibly dependent on time and/or controls.
 
 * :class:`ExplODE`: dynamic system of explicit ODEs, contains an output
@@ -43,89 +43,39 @@ import intro
 
 from abc import ABCMeta, abstractmethod
 
-class PECasSystem:
+class SystemBaseClass:
 
     __metaclass__ = ABCMeta
 
+    @abstractmethod
+    def __init__(self):
+
+        intro.pecas_intro()
+        
+        print('\n' + 26 * '-' + \
+            ' PECas system definition ' + 27 * '-')
+
+
     def show_system_information(self, showEquations = False):
-
-        r'''
-        :param showEquations: show model equations and measurement functions
-        :type showEquations: bool
-
-        This function shows the system type and the dimension of the system
-        components. If `showEquations` is set to `True`, also the model
-        equations and measurement functions are shown.
-        '''
         
         intro.pecas_intro()
 
         print('\n' + 26 * '-' + \
             ' PECas system information ' + 26 * '-')
 
-        if isinstance(self, BasicSystem):
-            
-            print('''\The system is a non-dynamic systems with the general 
-input-output structure and contrain equations: ''')
-            
-            print("y = phi(t, u, p), g(t, u, p) = 0 ")
-            
-            print('''\nWith {0} inputs u, {1} parameters p and {2} outputs phi
-            '''.format(self.u.size(),self.p.size(), \
-                self.phi.size()))
+
+    def check_all_system_parts_are_casadi_symbolics(self):
+
+        for arg in self.__init__.__code__.co_varnames[1:]:
+
+                if not isinstance(getattr(self, arg), ca.casadi.MX):
+
+                    raise TypeError('''
+Missing input argument for system definition or wrong variable type for an
+input argument. Input arguments must be CasADi symbolic types.''')
 
 
-            if showEquations:
-                
-                print("\nAnd where phi is defined by: ")
-                for i, yi in enumerate(self.phi):         
-                    print("y[{0}] = {1}".format(\
-                         i, yi))
-                         
-                print("\nAnd where g is defined by: ")
-                for i, gi in enumerate(self.g):              
-                    print("g[{0}] = {1}".format(\
-                         i, gi))
-
-        elif isinstance(self, ExplODE):
-
-            print('''\nThe system is a dynamic system defined by a set of
-explicit ODEs xdot which establish the system state x:
-    xdot = f(t, u, x, p, eps_e, eps_u)
-and by an output function phi which sets the system measurements:
-    y = phi(t, x, p).
-''')
-            
-            
-            print('''Particularly, the system has:
-    {0} inputs u
-    {1} parameters p
-    {2} states x
-    {3} outputs phi'''.format(self.u.size(),self.p.size(),\
-                                self.x.size(), \
-                                self.phi.size()))
-
-            if showEquations:
-                
-                print("\nWhere xdot is defined by: ")
-                for i, xi in enumerate(self.f):         
-                    print("xdot[{0}] = {1}".format(\
-                         i, xi))
-                         
-                print("\nAnd where phi is defined by: ")
-                for i, yi in enumerate(self.phi):              
-                    print("y[{0}] = {1}".format(\
-                         i, yi))
-
-        else:
-            
-            raise NotImplementedError('''
-This feature of PECas is currently disabled, but will be 
-available when the DAE systems are implemented.
-''')
-
-
-class BasicSystem(PECasSystem):
+class NonDyn(SystemBaseClass):
 
     '''
     :param t: time :math:`t \in \mathbb{R}` (optional)
@@ -147,7 +97,7 @@ class BasicSystem(PECasSystem):
     :raises: TypeError
 
 
-    The class :class:`BasicSystem` is used to define non-dynamic
+    The class :class:`NonDyn` is used to define non-dynamic
     systems for parameter estimation of the following structure:
 
     .. math::
@@ -165,17 +115,9 @@ class BasicSystem(PECasSystem):
                  phi = None, \
                  g = ca.MX.sym("g", 0)):
 
-        intro.pecas_intro()
-        print('\n' + 26 * '-' + \
-            ' PECas system definition ' + 27 * '-')
-        print('\nStarting definition of BasicSystem system ...')
+        super(NonDyn, self).__init__()
 
-        if not all(isinstance(arg, ca.casadi.MX) for \
-            arg in [t, u, p, phi, g]):
-
-            raise TypeError('''
-Missing input argument for system definition or wrong variable type for an
-input argument. Input arguments must be CasADi symbolic types.''')
+        print('\nStarting definition of NonDyn system ...')
 
         self.t = t
         self.u = u
@@ -184,10 +126,48 @@ input argument. Input arguments must be CasADi symbolic types.''')
         self.phi = phi
         self.g = g
 
-        print('\nDefinition of BasicSystem system sucessful.')
+        super(NonDyn, self).check_all_system_parts_are_casadi_symbolics()
+
+        print('\nDefinition of NonDyn system sucessful.')
 
 
-class ExplODE(PECasSystem):
+    def show_system_information(self, showEquations = False):
+
+        r'''
+        :param showEquations: show model equations and measurement functions
+        :type showEquations: bool
+
+        This function shows the system type and the dimension of the system
+        components. If `showEquations` is set to `True`, also the model
+        equations and measurement functions are shown.
+        '''
+
+        super(NonDyn, self).show_system_information( \
+            showEquations = showEquations)
+
+        print('''\The system is a non-dynamic systems with the general 
+input-output structure and contrain equations: ''')
+        
+        print("y = phi(t, u, p), g(t, u, p) = 0 ")
+        
+        print('''\nWith {0} inputs u, {1} parameters p and {2} outputs phi
+        '''.format(self.u.size(),self.p.size(), \
+            self.phi.size()))
+
+        if showEquations:
+            
+            print("\nAnd where phi is defined by: ")
+            for i, yi in enumerate(self.phi):         
+                print("y[{0}] = {1}".format(\
+                     i, yi))
+                     
+            print("\nAnd where g is defined by: ")
+            for i, gi in enumerate(self.g):              
+                print("g[{0}] = {1}".format(\
+                     i, gi))
+
+
+class ExplODE(SystemBaseClass):
 
     r'''
     :param t: time :math:`t \in \mathbb{R}` (optional)
@@ -238,23 +218,9 @@ class ExplODE(PECasSystem):
                  phi = None, \
                  f = None):
 
-        intro.pecas_intro()
-        print('\n' + 26 * '-' + \
-            ' PECas system definition ' + 27 * '-')
+        super(ExplODE, self).__init__()
+
         print('\nStarting definition of ExplODE system ...')
-
-        if not all(isinstance(arg, ca.casadi.MX) for \
-            arg in [t, u, x, p, eps_e, eps_u, phi, f]):
-
-            raise TypeError('''
-Missing input argument for system definition or wrong variable type for an
-input argument. Input arguments must be CasADi symbolic types.''')
-
-        if ca.dependsOn(f, t):
-
-            raise NotImplementedError('''
-Explicit time dependecies of the ODE right hand side are not yet supported in
-PECas, but probably will be in future versions.''')
 
         self.t = t
         self.u = u
@@ -266,10 +232,61 @@ PECas, but probably will be in future versions.''')
         self.phi = phi
         self.f = f
 
+        super(ExplODE, self).check_all_system_parts_are_casadi_symbolics()
+
+        if ca.dependsOn(f, t):
+
+            raise NotImplementedError('''
+Explicit time dependecies of the ODE right hand side are not yet supported in
+PECas, but probably will be in future versions.''')
+
         print('Definition of ExplODE system sucessful.')
 
 
-class ImplDAE(PECasSystem):
+    def show_system_information(self, showEquations = False):
+
+        r'''
+        :param showEquations: show model equations and measurement functions
+        :type showEquations: bool
+
+        This function shows the system type and the dimension of the system
+        components. If `showEquations` is set to `True`, also the model
+        equations and measurement functions are shown.
+        '''
+        
+        super(ExplODE, self).show_system_information( \
+            showEquations = showEquations)
+
+        print('''\nThe system is a dynamic system defined by a set of
+explicit ODEs xdot which establish the system state x:
+xdot = f(t, u, x, p, eps_e, eps_u)
+and by an output function phi which sets the system measurements:
+y = phi(t, x, p).
+''')
+        
+        
+        print('''Particularly, the system has:
+{0} inputs u
+{1} parameters p
+{2} states x
+{3} outputs phi'''.format(self.u.size(),self.p.size(),\
+                            self.x.size(), \
+                            self.phi.size()))
+
+        if showEquations:
+            
+            print("\nWhere xdot is defined by: ")
+            for i, xi in enumerate(self.f):         
+                print("xdot[{0}] = {1}".format(\
+                     i, xi))
+                     
+            print("\nAnd where phi is defined by: ")
+            for i, yi in enumerate(self.phi):              
+                print("y[{0}] = {1}".format(\
+                     i, yi))
+
+
+class ImplDAE(SystemBaseClass):
 
     '''
     :raises: NotImplementedError
@@ -293,3 +310,23 @@ class ImplDAE(PECasSystem):
 
         raise NotImplementedError( \
             "Support of implicit DAEs is not implemented yet.")
+
+
+    def show_system_information(self, showEquations = False):
+
+        r'''
+        :param showEquations: show model equations and measurement functions
+        :type showEquations: bool
+
+        This function shows the system type and the dimension of the system
+        components. If `showEquations` is set to `True`, also the model
+        equations and measurement functions are shown.
+        '''
+
+        super(ImplDAE, self).show_system_information( \
+            showEquations = showEquations)
+
+        raise NotImplementedError('''
+This feature of PECas is currently disabled, but will be 
+available when the DAE systems are implemented.
+''')
