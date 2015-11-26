@@ -38,16 +38,20 @@ class PECasBaseClass:
 
     __metaclass__ = ABCMeta
 
+    # @abstractmethod
+    # def __init__(self, system = None, \
+    #     tu = None, uN = None, \
+    #     ty = None, yN = None, \
+    #     wv = None, weps_e = None, weps_u = None, \
+    #     pinit = None, \
+    #     xinit = None, \
+    #     linear_solver = None, \
+    #     scheme = None, \
+    #     order = None):
+
     @abstractmethod
-    def __init__(self, system = None, \
-        tu = None, uN = None, \
-        ty = None, yN = None, \
-        wv = None, weps_e = None, weps_u = None, \
-        pinit = None, \
-        xinit = None, \
-        linear_solver = None, \
-        scheme = None, \
-        order = None):
+    def __init__(self, system, controls, measurements, \
+        weightings, initials, solver_settings, collocation_settings):
 
         intro.pecas_intro()
         print('\n' + 22 * '-' + \
@@ -55,24 +59,23 @@ class PECasBaseClass:
         print('\nStarting parameter estimation problem setup ...') 
 
 
-        self.linear_solver = linear_solver
+        self.solver_settings = solver_settings
 
 
         if type(system) is systems.NonDyn:
 
-            self.pesetup = setups.NDSetup(system = system, \
-                tu = tu, uN = uN, \
-                pinit = pinit)
+            self.pesetup = setups.NDSetup( \
+                system = system, controls = controls, \
+                measurements = measurements, \
+                weightings = weightings, initials = initials)
 
         elif type(system) is systems.ExplODE:
 
-            self.pesetup = setups.ODESetup(system = system, \
-                tu = tu, uN = uN, \
-                ty = ty, yN = yN, \
-                pinit = pinit, \
-                xinit = xinit, \
-                scheme = scheme, \
-                order = order)
+            self.pesetup = setups.ODESetup( \
+                system = system, controls = controls, \
+                measurements = measurements, \
+                weightings = weightings, initials = initials, \
+                collocation_settings = collocation_settings)
 
         else:
 
@@ -288,7 +291,7 @@ class LSq(PECasBaseClass):
         xinit = None, \
         linear_solver = "mumps", \
         scheme = "radau", \
-        order = 3):
+        poly_order = 3):
 
         r'''
         :param system: system considered for parameter estimation, specified
@@ -358,21 +361,32 @@ class LSq(PECasBaseClass):
                        `radau`
         :type scheme: str
 
-        :param order: order of collocation polynominals
+        :param poly:order: order of collocation polynominals
                       :math:`d \in \mathbb{Z}`
-        :type order: int
+        :type poly_order: int
 
         '''
 
-        super(LSq, self).__init__(system = system, \
-            tu = tu, uN = uN, \
-            ty = ty, yN = yN, \
-            wv = wv, weps_e = weps_e, weps_u = weps_u, \
-            pinit = pinit, \
-            xinit = xinit, \
-            linear_solver = linear_solver, \
-            scheme = scheme, \
-            order = order)
+        controls = {"tu" : tu, "uN" : uN}
+
+        measurements = {"ty" : ty, "yN" : yN}
+
+        weightings = {"wv" : wv, "weps_e" : weps_e, "weps_u" : weps_u}
+
+        initials = {"xinit" : xinit, "pinit" : pinit}
+
+        collocation_settings = {"scheme" : scheme, "poly_order" : poly_order}
+
+        solver_settings = {"linear_solver" : linear_solver}
+
+        super(LSq, self).__init__( \
+            system = system, \
+            controls = controls, \
+            measurements = measurements, \
+            weightings = weightings, \
+            initials = initials, \
+            solver_settings = solver_settings, \
+            collocation_settings = collocation_settings)
 
 
     def run_parameter_estimation(self, hessian = "gauss-newton"):

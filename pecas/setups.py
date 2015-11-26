@@ -26,6 +26,7 @@ import time
 
 import systems
 import intro
+import ipdb
 
 import time
 
@@ -37,51 +38,74 @@ class SetupsBaseClass(object):
     __metaclass__ = ABCMeta
 
 
-    @abstractmethod
-    def __init__(self):
+    def check_and_set_time_points_input(self, tp):
 
-        '''Placeholder-function for the according __init__()-methods of the
-        classes that inherit from :class:`SetupsBaseClass`.'''
+        if np.atleast_2d(tp).shape[0] == 1:
 
-        intro.pecas_intro()
-        print('\n' + 24 * '-' + \
-            ' PECas system initialization ' + 25 * '-')
-        print('\nStart system initialization ...')
+            tp = np.asarray(tp)
 
-    # @profile
-    def check_and_set_initials(self, \
-        uN = None, \
-        pinit = None, \
-        xinit = None):
+        elif np.atleast_2d(tp).shape[1] == 1:
 
-        '''
-        :param tbd: tbd
-        :type tbd: tbd
+            tp = np.squeeze(np.atleast_2d(tp).T)
 
-        Define structures for the initial values for the
-        several variables that build up the parameter estimation problem,
-        and prepare the values provided with the arguments properly.
-        Afterwards, the values are stored inside the class variable
-        `Varsinit``.
-        '''
+        else:
 
-        # Define structures for initial values from the original
-        # variable struct of the problem
+            raise ValueError("Invalid dimension for tp.")
 
-        # Set controls values
-        # (only if the number of controls is not 0, else set them nothing)
+        return tp       
+
+
+    def check_and_set_control_time_points_input(self, tu):
+
+        try:
+
+            self.tu = self.check_and_set_time_points_input(tu)
+
+        except ValueError:
+
+            raise ValueError("Invalid dimension for tu.")
+
+
+    def check_and_set_measurement_time_points_input(self, ty):
+
+        if ty is not None:
+
+            try:
+
+                self.ty = self.check_and_set_time_points_input(ty)
+
+            except ValueError:
+
+                raise ValueError("Invalid dimension for ty.")
+
+        else:
+
+            self.ty = self.tu
+
+
+    def check_and_set_controls_input(self, uN):
+
+        reflen_uN = self.nsteps
+
+        if type(self.system) is systems.NonDyn:
+
+            # For system of type NonDyn, we also need a control value for the
+            # end of the last interval; in dynamic systems, this value would
+            # never be used an is therefor neither asked for nor allowed 
+
+            reflen_uN += 1
 
         if not self.nu == 0:
 
             if uN is None:
-                uN = np.zeros((self.nu, self.nsteps))
+                uN = np.zeros((self.nu, reflen_uN))
 
             uN = np.atleast_2d(uN)
 
-            if uN.shape == (self.nsteps, self.nu):
+            if uN.shape == (reflen_uN, self.nu):
                 uN = uN.T
 
-            if not uN.shape == (self.nu, self.nsteps):
+            if not uN.shape == (self.nu, reflen_uN):
 
                 raise ValueError( \
                     "Wrong dimension for control values uN.")
@@ -92,7 +116,8 @@ class SetupsBaseClass(object):
 
             self.uN = ca.DMatrix(0, self.nsteps)
 
-        # Set initials for the parameters
+
+    def check_and_set_parameter_initials(self, pinit):
 
         if pinit is None:
             pinit = np.zeros(self.np)
@@ -107,7 +132,7 @@ class SetupsBaseClass(object):
         self.Pinit = pinit
 
 
-        # If it's a dynamic problem, set initials and bounds for the states
+    def check_and_set_states_initials(self, xinit):
 
         if type(self.system) is not systems.NonDyn:
 
@@ -133,196 +158,60 @@ class SetupsBaseClass(object):
             self.Xinit = ca.DMatrix(0, 0)
             self.XFinit = ca.DMatrix(0, 0)
 
+
+    def set_error_initials_to_zero(self):
+
         self.Vinit = np.zeros(self.V.shape)
         self.EPS_Einit = np.zeros(self.EPS_E.shape)
         self.EPS_Uinit = np.zeros(self.EPS_U.shape)
 
 
-class NDSetup(SetupsBaseClass):
-
-    def check_and_set_initials(self, \
-        uN = None,
-        pinit = None, \
-        xinit = None):
-
-        self.tstart_setup = time.time()
-
-        super(NDSetup, self).check_and_set_initials( \
-            uN = uN,
-            pinit = pinit, \
-            xinit = xinit)
-
-
-    def __init__(self, system = None, \
-        tu = None, uN = None, \
-        pinit = None):
-
-        SetupsBaseClass.__init__(self)
-
-        if not type(system) is systems.NonDyn:
-
-            raise TypeError("Setup-method " + self.__class__.__name__ + \
-                " not allowed for system of type " + str(type(system)) + ".")
-
-        self.system = system
-
-        # Dimensions
-
-        self.nu = system.u.shape[0]
-        self.np = system.p.shape[0]
-        self.nphi = system.phi.shape[0]
-
-        if np.atleast_2d(tu).shape[0] == 1:
-
-            self.tu = np.asarray(tu)
-
-        elif np.atleast_2d(tu).shape[1] == 1:
-
-                self.tu = np.squeeze(np.atleast_2d(tu).T)
-
-        else:
-
-            raise ValueError("Invalid dimension for argument tu.")
-
-        self.nsteps = tu.shape[0]
-
-        # Define the struct holding the variables
-
-        self.P = ca.MX.sym("P", self.np)
-        self.X = ca.DMatrix(0, self.nsteps)
-        self.XF = ca.DMatrix(0, self.nsteps)
-        
-        self.V = ca.MX.sym("V", self.nphi, self.nsteps)
-
-        self.EPS_E = ca.DMatrix(0, self.nsteps)
-        self.EPS_U = ca.DMatrix(0, self.nsteps)
-
-        # Set bounds and initial values
-
-        self.check_and_set_initials( \
-            uN = uN,
-            pinit = pinit)
-
-        # Set up phiN
-
-        self.phiN = []
-
-        phifcn = ca.MXFunction("phifcn", \
-            [system.t, system.u, system.p], [system.phi])
-
-        for k in range(self.nsteps):
-
-            self.phiN.append(phifcn([self.tu[k], \
-                self.uN[:, k], self.P])[0])
-
-        self.phiN = ca.vertcat(self.phiN)
-
-        # self.phiNfcn = ca.MXFunction("phiNfcn", [self.Vars], [self.phiN])
-
-        # Set up g
-
-        # TODO! Can/should/must gfcn depend on uN and/or t?
-
-        gfcn = ca.MXFunction("gfcn", [system.p], [system.g])
-
-        self.g = gfcn.call([self.P])[0]
-
-        self.tend_setup = time.time()
-        self.duration_setup = self.tend_setup - self.tstart_setup
-
-        print('Initialization of NonDyn system sucessful.')
-
-
-class ODESetup(SetupsBaseClass):
-
-    def check_and_set_initials(self, \
-        uN = None, \
-        pinit = None, \
-        xinit = None):
-
-        super(ODESetup, self).check_and_set_initials( \
-            uN = uN, \
-            pinit = pinit, \
-            xinit = xinit)
-
-
     # @profile
-    def __init__(self, system = None, \
-        tu = None, uN = None, \
-        ty = None, yN = None,
-        pinit = None, \
-        xinit = None, \
-        scheme = "radau", \
-        order = 3):
+    def check_and_set_all_inputs_and_initials(self, \
+        controls, initials):
 
-        self.tstart_setup = time.time()
+        self.check_and_set_controls_input(controls["uN"])
+        self.check_and_set_parameter_initials(initials["pinit"])
+        self.check_and_set_states_initials(initials["xinit"])
 
-        SetupsBaseClass.__init__(self)
-
-        if not type(system) is systems.ExplODE:
-
-            raise TypeError("Setup-method " + self.__class__.__name__ + \
-                " not allowed for system of type " + str(type(system)) + ".")
-
-        self.system = system
-
-        # Dimensions
-
-        self.nx = system.x.shape[0]
-        self.nu = system.u.shape[0]
-        self.np = system.p.shape[0]
-        self.neps_e = system.eps_e.shape[0]
-        self.neps_u = system.eps_u.shape[0]        
-        self.nphi = system.phi.shape[0]
-
-        if np.atleast_2d(tu).shape[0] == 1:
-
-            self.tu = np.asarray(tu)
-
-        elif np.atleast_2d(tu).shape[1] == 1:
-
-                self.tu = np.squeeze(np.atleast_2d(tu).T)
-
-        else:
-
-            raise ValueError("Invalid dimension for argument tu.")
+        self.set_error_initials_to_zero()
 
 
-        if ty == None:
+    def set_problem_dimensions_from_system_information(self):
 
-            self.ty = self.tu
+        self.nu = self.system.u.shape[0]
+        self.np = self.system.p.shape[0]
+        self.nphi = self.system.phi.shape[0]
 
-        elif np.atleast_2d(ty).shape[0] == 1:
+        try:
 
-            self.ty = np.asarray(ty)
+            self.nx = self.system.x.shape[0]
+            self.neps_e = self.system.eps_e.shape[0]
+            self.neps_u = self.system.eps_u.shape[0]
 
-        elif np.atleast_2d(ty).shape[1] == 1:
+        except AttributeError:
 
-            self.ty = np.squeeze(np.atleast_2d(ty).T)
-
-        else:
-
-            raise ValueError("Invalid dimension for argument ty.")
+            self.nx = 0
+            self.neps_e = 0
+            self.neps_u = 0
 
 
-        self.nsteps = self.tu.shape[0] - 1
-
-        self.scheme = scheme
-        self.order = order
-        self.tauroot = ca.collocationPoints(order, scheme)
-
-        # Degree of interpolating polynomial
-
-        self.ntauroot = len(self.tauroot) - 1
-
-        # Define the optimization variables
+    def set_optimization_variables(self):
 
         self.P = ca.MX.sym("P", self.np)
-        self.X = ca.MX.sym("X", (self.nx * (self.ntauroot+1)), self.nsteps)
-        self.XF = ca.MX.sym("XF", self.nx)
 
         self.V = ca.MX.sym("V", self.nphi, self.nsteps+1)
 
+        if self.nx != 0:
+
+            self.X = ca.MX.sym("X", (self.nx * (self.ntauroot+1)), self.nsteps)
+            self.XF = ca.MX.sym("XF", self.nx)
+
+        else:
+
+            self.X = ca.DMatrix(0, self.nsteps)
+            self.XF = ca.DMatrix(0, self.nsteps)
+        
         if self.neps_e != 0:
 
             self.EPS_E = ca.MX.sym("EPS_E", \
@@ -341,12 +230,105 @@ class ODESetup(SetupsBaseClass):
 
             self.EPS_U = ca.DMatrix(0, self.nsteps)
 
-        # Define bounds and initial values
 
-        self.check_and_set_initials( \
-            uN = uN, \
-            pinit = pinit, \
-            xinit = xinit)
+    @abstractmethod
+    def __init__(self, system, controls, measurements):
+
+        intro.pecas_intro()
+        print('\n' + 24 * '-' + \
+            ' PECas system initialization ' + 25 * '-')
+        print('\nStart system initialization ...')
+
+        self.system = system
+
+        self.set_problem_dimensions_from_system_information()
+
+        self.check_and_set_control_time_points_input(controls["tu"])
+        self.check_and_set_measurement_time_points_input(measurements["ty"])
+
+
+class NDSetup(SetupsBaseClass):
+
+    def __init__(self, system, controls, measurements, weightings, initials):
+
+        self.tstart_setup = time.time()
+
+        SetupsBaseClass.__init__(self, system = system, \
+            controls = controls, measurements = measurements)
+
+        # self.set_problem_dimensions_from_system_information()
+
+        # self.check_and_set_control_time_points_input(tu)
+        self.nsteps = controls["tu"].shape[0] - 1
+
+        self.set_optimization_variables()
+        self.check_and_set_all_inputs_and_initials( \
+            controls = controls, initials = initials)
+
+        # set_up_measurement_function()
+
+        # Set up phiN
+
+        self.phiN = []
+
+        phifcn = ca.MXFunction("phifcn", \
+            [self.system.t, self.system.u, self.system.p], [self.system.phi])
+
+        for k in range(self.nsteps+1):
+
+            self.phiN.append(phifcn([self.tu[k], \
+                self.uN[:, k], self.P])[0])
+
+        self.phiN = ca.vertcat(self.phiN)
+
+        # self.phiNfcn = ca.MXFunction("phiNfcn", [self.Vars], [self.phiN])
+
+        # Set up g
+
+        # TODO! Can/should/must gfcn depend on uN and/or t?
+
+        gfcn = ca.MXFunction("gfcn", [self.system.p], [self.system.g])
+
+        self.g = gfcn.call([self.P])[0]
+
+        self.tend_setup = time.time()
+        self.duration_setup = self.tend_setup - self.tstart_setup
+
+        print('Initialization of NonDyn system sucessful.')
+
+
+class ODESetup(SetupsBaseClass):
+
+    def __init__(self, system, controls, measurements, weightings, \
+        initials, collocation_settings):
+
+        self.tstart_setup = time.time()
+
+        SetupsBaseClass.__init__(self, system = system, \
+            controls = controls, measurements = measurements)
+
+        # self.assure_correct_system_type_for_setup_method( \
+        #     system, systems.ExplODE)
+        # self.set_problem_dimensions_from_system_information()
+
+        # self.check_and_set_control_time_points_input(tu)
+        # self.check_and_set_measurement_time_points_input(ty)
+
+        self.nsteps = controls["tu"].shape[0] - 1
+
+        self.collocation_settings = collocation_settings
+        self.tauroot = ca.collocationPoints( \
+            self.collocation_esttings["order"], \
+            self.collocation_settings["scheme"])
+
+        # Degree of interpolating polynomial
+
+        self.ntauroot = len(self.tauroot) - 1
+
+        self.set_optimization_variables()
+
+        self.check_and_set_all_inputs_and_initials( \
+            controls = controls, initials = initials)
 
         # Set tp the collocation coefficients
 
@@ -420,8 +402,8 @@ class ODESetup(SetupsBaseClass):
         # Initialize measurement function
 
         phifcn = ca.MXFunction("phifcn", \
-            [system.t, system.u, system.x, system.eps_u, system.p], \
-            [system.phi])
+            [self.system.t, self.system.u, self.system.x, self.system.eps_u, self.system.p], \
+            [self.system.phi])
 
         # Initialzie setup of g
 
@@ -430,8 +412,8 @@ class ODESetup(SetupsBaseClass):
         # Initialize ODE right-hand-side
 
         ffcn = ca.MXFunction("ffcn", \
-            [system.t, system.u, system.x, system.eps_e, system.eps_u, \
-            system.p], [system.f])
+            [self.system.t, self.system.u, self.system.x, self.system.eps_e, self.system.eps_u, \
+            self.system.p], [self.system.f])
 
         # Collect information for measurement function
 
@@ -493,11 +475,11 @@ class ODESetup(SetupsBaseClass):
         coleqn = ca.vertcat([ \
 
             hc * ffcn([tc[j-1], \
-                system.u, \
+                self.system.u, \
                 xc[j*self.nx : (j+1)*self.nx], \
                 eps_ec[(j-1)*self.neps_e : j*self.neps_e], \
                 eps_uc[(j-1)*self.neps_u : j*self.neps_u], \
-                system.p])[0] - \
+                self.system.p])[0] - \
 
             sum([self.C[r,j] * xc[r*self.nx : (r+1)*self.nx] \
 
@@ -506,7 +488,7 @@ class ODESetup(SetupsBaseClass):
                     for j in range(1, self.ntauroot + 1)])
 
         coleqnfcn = ca.MXFunction("coleqnfcn", \
-            [hc, tc, system.u, xc, eps_ec, eps_uc, system.p], [coleqn])
+            [hc, tc, self.system.u, xc, eps_ec, eps_uc, self.system.p], [coleqn])
         coleqnfcn = coleqnfcn.expand()
 
         [gcol] = coleqnfcn.map([ \

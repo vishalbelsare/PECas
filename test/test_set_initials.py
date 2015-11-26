@@ -26,7 +26,7 @@ import unittest
 
 class NDSetupTest(object):
 
-    def test_NDSetup_valid_timegrid_inputs(self):
+    def test_ndsetup_valid_timegrid_inputs(self):
 
         # Test valid input dimensions for tu
 
@@ -37,7 +37,7 @@ class NDSetupTest(object):
             self.tu.T)
 
 
-    def test_NDSetup_invalid_system_type(self):
+    def test_ndsetup_invalid_system_type(self):
 
         # Support an invalid systems-type
 
@@ -48,7 +48,7 @@ class NDSetupTest(object):
             system = odesys, tu = self.tu)
 
 
-    def test_NDSetup_invalid_parameter_initials(self):
+    def test_ndsetup_invalid_parameter_initials(self):
 
         # Test some invalid values for p-arguments
 
@@ -58,7 +58,7 @@ class NDSetupTest(object):
                 system = self.ndsys, tu = self.tu, pinit = parg)
 
 
-    def test_NDSetup_valid_parameter_initials(self):
+    def test_ndsetup_valid_parameter_initials(self):
 
         # Test some valid values for p-arguments
 
@@ -68,7 +68,7 @@ class NDSetupTest(object):
                 system = self.ndsys, tu = self.tu, pinit = parg)
 
 
-    def test_NDSetup_invalid_control_inputs(self):
+    def test_ndsetup_invalid_control_inputs(self):
 
         # Test some invalid values for uN-arguments       
 
@@ -78,7 +78,7 @@ class NDSetupTest(object):
                 system = self.ndsys, tu = self.tu, uN = uarg)
     
 
-    def test_NDSetup_valid_control_inputs(self):
+    def test_ndsetup_valid_control_inputs(self):
 
         # Test some valid values for uN-arguments
 

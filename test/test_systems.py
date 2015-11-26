@@ -36,43 +36,43 @@ class TestNonDyn(unittest.TestCase):
         self.g = ca.MX.sym("g", 1)
 
 
-    def test_basic_system_init_p_phi(self):
+    def test_nondyn_init_p_phi(self):
 
         sys = pecas.systems.NonDyn(p = self.p, phi = self.phi)
         sys.show_system_information(showEquations = True)
 
 
-    def test_basic_system_init_t_p_phi(self):
+    def test_nondyn_init_t_p_phi(self):
         
         sys = pecas.systems.NonDyn(t = self.t, p = self.p, phi = self.phi)
         sys.show_system_information(showEquations = True)
         
 
-    def test_basic_system_init_t_u_p_phi(self):
+    def test_nondyn_init_t_u_p_phi(self):
 
         sys = pecas.systems.NonDyn(t = self.t, u = self.u, p = self.p, \
             phi = self.phi)
         sys.show_system_information(showEquations = True)
 
-    def test_basic_system_init_t_u_p_phi_g(self):
+    def test_nondyn_init_t_u_p_phi_g(self):
 
         sys = pecas.systems.NonDyn(t = self.t, u = self.u, p = self.p, \
             phi = self.phi, g = self.g)
         sys.show_system_information(showEquations = True)
 
 
-    def test_basic_system_init_no_args(self):
+    def test_nondyn_init_no_args(self):
 
         self.assertRaises(TypeError, pecas.systems.NonDyn)
 
 
-    def test_basic_system_init_no_phi(self):
+    def test_nondyn_init_no_phi(self):
 
         self.assertRaises(TypeError, pecas.systems.NonDyn, p = None, \
             phi = self.phi)
 
 
-    def test_basic_system_init_no_p(self):
+    def test_nondyn_init_no_p(self):
 
         self.assertRaises(TypeError, pecas.systems.NonDyn, p = self.p, \
             phi = None)
@@ -92,28 +92,28 @@ class TestExplODE(unittest.TestCase):
         self.f = ca.MX.sym("f", 1)
 
 
-    def test_explode_system_init_x_p_epse_phi_f(self):
+    def test_explode_init_x_p_epse_phi_f(self):
 
         sys = pecas.systems.ExplODE(x = self.x, p = self.p, \
             eps_e = self.eps_e, phi = self.phi, f = self.f)
         sys.show_system_information(showEquations = True)
 
 
-    def test_explode_system_init_t_x_p_epse_phi_f(self):
+    def test_explode_init_t_x_p_epse_phi_f(self):
 
         sys = pecas.systems.ExplODE(t = self.t, x = self.x, p = self.p, \
             eps_e = self.eps_e, phi = self.phi, f = self.f)
         sys.show_system_information(showEquations = True)
 
 
-    def test_explode_system_init_t_u_x_p_epse_phi_f(self):
+    def test_explode_init_t_u_x_p_epse_phi_f(self):
 
         sys = pecas.systems.ExplODE(t = self.t, u = self.u, x = self.x, \
             p = self.p, eps_e = self.eps_e, phi = self.phi, f = self.f)
         sys.show_system_information(showEquations = True)
 
 
-    def test_explode_system_init_t_u_x_p_epse_epsu_phi_f(self):
+    def test_explode_init_t_u_x_p_epse_epsu_phi_f(self):
 
         sys = pecas.systems.ExplODE(t = self.t, u = self.u, x = self.x,\
             p = self.p, eps_e = self.eps_e, eps_u = self.eps_u, \
@@ -121,30 +121,30 @@ class TestExplODE(unittest.TestCase):
         sys.show_system_information(showEquations = True)
 
 
-    def test_explode_system_init_no_args(self):
+    def test_explode_init_no_args(self):
 
         self.assertRaises(TypeError, pecas.systems.ExplODE)
 
 
-    def test_explode_system_init_no_x(self):
+    def test_explode_init_no_x(self):
 
         self.assertRaises(TypeError, pecas.systems.ExplODE, x = None, \
             p = self.p, phi = self.phi, f = self.f)
 
 
-    def test_explode_system_init_no_p(self):
+    def test_explode_init_no_p(self):
 
         self.assertRaises(TypeError, pecas.systems.ExplODE, x = self.x, \
             p = None, phi = self.phi, f = self.f)
 
 
-    def test_explode_system_init_no_phi(self):
+    def test_explode_init_no_phi(self):
 
         self.assertRaises(TypeError, pecas.systems.ExplODE, x = self.x, \
             p = self.p, phi = None, f = self.f)
 
 
-    def test_explode_system_init_no_f(self):
+    def test_explode_init_no_f(self):
 
         self.assertRaises(TypeError, pecas.systems.ExplODE, x = self.x, \
             p = self.p, phi = self.phi, f = None)
