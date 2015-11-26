@@ -42,7 +42,7 @@ class SetupsBaseClass(object):
 
         if np.atleast_2d(tp).shape[0] == 1:
 
-            tp = np.asarray(tp)
+            tp = np.squeeze(np.asarray(tp))
 
         elif np.atleast_2d(tp).shape[1] == 1:
 
@@ -83,9 +83,9 @@ class SetupsBaseClass(object):
             self.ty = self.tu
 
 
-    def check_and_set_controls_input(self, uN):
+    def check_and_set_controls_data(self, udata):
 
-        reflen_uN = self.nsteps
+        reflen_udata = self.nsteps
 
         if type(self.system) is systems.NonDyn:
 
@@ -93,31 +93,31 @@ class SetupsBaseClass(object):
             # end of the last interval; in dynamic systems, this value would
             # never be used an is therefor neither asked for nor allowed 
 
-            reflen_uN += 1
+            reflen_udata += 1
 
         if not self.nu == 0:
 
-            if uN is None:
-                uN = np.zeros((self.nu, reflen_uN))
+            if udata is None:
+                udata = np.zeros((self.nu, reflen_udata))
 
-            uN = np.atleast_2d(uN)
+            udata = np.atleast_2d(udata)
 
-            if uN.shape == (reflen_uN, self.nu):
-                uN = uN.T
+            if udata.shape == (reflen_udata, self.nu):
+                udata = udata.T
 
-            if not uN.shape == (self.nu, reflen_uN):
+            if not udata.shape == (self.nu, reflen_udata):
 
                 raise ValueError( \
-                    "Wrong dimension for control values uN.")
+                    "Control values prvoided by user have wrong dimension.")
 
-            self.uN = uN
+            self.udata = udata
 
         else:
 
-            self.uN = ca.DMatrix(0, self.nsteps)
+            self.udata = ca.DMatrix(0, self.nsteps)
 
 
-    def check_and_set_parameter_initials(self, pinit):
+    def check_and_set_parameter_initials(self, pinit): # RENAME!
 
         if pinit is None:
             pinit = np.zeros(self.np)
@@ -132,7 +132,7 @@ class SetupsBaseClass(object):
         self.Pinit = pinit
 
 
-    def check_and_set_states_initials(self, xinit):
+    def check_and_set_states_initials(self, xinit): # RENAME!
 
         if type(self.system) is not systems.NonDyn:
 
@@ -170,7 +170,7 @@ class SetupsBaseClass(object):
     def check_and_set_all_inputs_and_initials(self, \
         controls, initials):
 
-        self.check_and_set_controls_input(controls["uN"])
+        self.check_and_set_controls_data(controls["uN"])
         self.check_and_set_parameter_initials(initials["pinit"])
         self.check_and_set_states_initials(initials["xinit"])
 
