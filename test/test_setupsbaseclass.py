@@ -30,6 +30,9 @@ import mock
 
 class FakeSetupsBaseClass(pecas.setups.SetupsBaseClass):
 
+    # Cf.: http://stackoverflow.com/questions/27105491/
+    # how-can-i-unit-test-a-method-without-instantiating-the-class 
+
     def __init__(self, *args, **kwargs):
 
         pass
@@ -88,6 +91,7 @@ class CheckAndSetControlTimepoints(unittest.TestCase):
     def setUp(self):
 
         self.fakesbc = FakeSetupsBaseClass()
+        # Cf. https://docs.python.org/3/library/unittest.mock.html#quick-guide        
         self.fakesbc.check_and_set_time_points_input = mock.MagicMock()
 
         self.tu_ref = np.linspace(0, 49, 50)
@@ -145,14 +149,17 @@ class CheckAndSetMeasurementsTimepoints(unittest.TestCase):
             self.ty_ref)
 
 
-class CheckAndSetMeasurementsTimepointsExplODE(unittest.TestCase):
+class CheckAndSetControls(unittest.TestCase):
 
     def setUp(self):
 
         self.fakesbc = FakeSetupsBaseClass()
-        self.fakesbc.system = mock.MagicMock(spec=pecas.systems.ExplODE)
+        self.fakesbc.system = mock.MagicMock(spec = pecas.systems.ExplODE)
 
         self.fakesbc.nsteps = 20
+        # self.fakesbc.ncontrols = self.fakesbc.nsteps + 1 for NonDyn,
+        # but makes no difference for testing the function itself
+        self.fakesbc.ncontrols = self.fakesbc.nsteps
 
     def test_input_rows(self):
 
@@ -218,14 +225,3 @@ class CheckAndSetMeasurementsTimepointsExplODE(unittest.TestCase):
         self.assertRaises(ValueError, \
             self.fakesbc.check_and_set_controls_data, udata_ref)
 
-
-class CheckAndSetMeasurementsTimepointsNonDyn(unittest.TestCase):
-
-    def setUp(self):
-
-        self.fakesbc = FakeSetupsBaseClass()
-        self.fakesbc.system = mock.MagicMock(spec=pecas.systems.NonDyn)
-
-        self.fakesbc.nsteps = 20
-
-        ... tdb ...

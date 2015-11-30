@@ -85,27 +85,17 @@ class SetupsBaseClass(object):
 
     def check_and_set_controls_data(self, udata):
 
-        reflen_udata = self.nsteps
-
-        if type(self.system) is systems.NonDyn:
-
-            # For system of type NonDyn, we also need a control value for the
-            # end of the last interval; in dynamic systems, this value would
-            # never be used an is therefor neither asked for nor allowed 
-
-            reflen_udata += 1
-
         if not self.nu == 0:
 
             if udata is None:
-                udata = np.zeros((self.nu, reflen_udata))
+                udata = np.zeros((self.nu, self.ncontrols))
 
             udata = np.atleast_2d(udata)
 
-            if udata.shape == (reflen_udata, self.nu):
+            if udata.shape == (self.ncontrols, self.nu):
                 udata = udata.T
 
-            if not udata.shape == (self.nu, reflen_udata):
+            if not udata.shape == (self.nu, self.ncontrols):
 
                 raise ValueError( \
                     "Control values prvoided by user have wrong dimension.")
@@ -260,6 +250,7 @@ class NDSetup(SetupsBaseClass):
 
         # self.check_and_set_control_time_points_input(tu)
         self.nsteps = controls["tu"].shape[0] - 1
+        self.ncontrols = self.nsteps + 1
 
         self.set_optimization_variables()
         self.check_and_set_all_inputs_and_initials( \
@@ -315,6 +306,7 @@ class ODESetup(SetupsBaseClass):
         # self.check_and_set_measurement_time_points_input(ty)
 
         self.nsteps = controls["tu"].shape[0] - 1
+        self.ncontrols = self.nsteps
 
         self.collocation_settings = collocation_settings
         self.tauroot = ca.collocationPoints( \
