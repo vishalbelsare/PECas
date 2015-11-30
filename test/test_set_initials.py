@@ -24,21 +24,23 @@ import pecas
 
 import unittest
 
-class NDSetupTest(object):
+# class NDSetupTest(object):
 
-    class FakeNDSetupClass(pecas.setups.NDSetup):
+#     class FakeNDSetupClass(pecas.setups.NDSetup):
 
-        def __init__(self, *args, **kwargs):
+#         def __init__(self, *args, **kwargs):
 
-            pass
+#             pass
 
     
 
-    def test_ndsetup_valid_timegrid_inputs(self):
+#     def test_ndsetup_valid_timegrid_inputs(self):
 
-        fakendobj = self.FakeNDSetupClass()
+#         # fakendobj = self.FakeNDSetupClass()
 
-        fakendobj.check_and_set_time_points_input(self.tu)
+#         # fakendobj.check_and_set_time_points_input(self.tu)
+
+#         pass
 
         # Test valid input dimensions for tu
 
@@ -100,13 +102,13 @@ class NDSetupTest(object):
     #             system = self.ndsys, tu = self.tu, uN = uarg)
 
 
-class ODESetupTest(object):
+# class ODESetupTest(object):
 
-    def test_odesetup_valid_timegrid_inputs(self):
+#     def test_odesetup_valid_timegrid_inputs(self):
 
-        # Test valid input dimensions for tu
+#         # Test valid input dimensions for tu
 
-        pass
+#         pass
 
         # pecas.setups.ODESetup(system = self.odesys, \
         #     tu = self.tu)

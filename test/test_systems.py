@@ -21,7 +21,7 @@
 # Test the classes for system definitions
 
 import casadi as ca
-import pecas
+import pecas.systems
 
 import unittest
 

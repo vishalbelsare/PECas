@@ -23,13 +23,12 @@ import numpy as np
 from numpy.testing import assert_array_equal
 
 import casadi as ca
-import pecas
-import ipdb
+from pecas.setups.setupsbaseclass import SetupsBaseClass
 
 import unittest
 import mock
 
-class FakeSetupsBaseClass(pecas.setups.SetupsBaseClass):
+class FakeSetupsBaseClass(SetupsBaseClass):
 
     # Cf.: http://stackoverflow.com/questions/27105491/
     # how-can-i-unit-test-a-method-without-instantiating-the-class 
@@ -164,12 +163,7 @@ class CheckAndSetControlsData(unittest.TestCase):
     def test_input_rows(self):
 
         self.fakesbc.nu = 3
-
-        udata_ref = \
-            np.reshape(np.linspace(0, \
-                (self.fakesbc.nu * self.fakesbc.nsteps) - 1, \
-                (self.fakesbc.nu * self.fakesbc.nsteps)), \
-            (self.fakesbc.nu, -1))
+        udata_ref = np.random.rand(self.fakesbc.nu, self.fakesbc.nsteps)
 
         self.fakesbc.check_and_set_controls_data(udata_ref)
         assert_array_equal(self.fakesbc.udata, udata_ref)
@@ -178,12 +172,7 @@ class CheckAndSetControlsData(unittest.TestCase):
     def test_input_columns(self):
 
         self.fakesbc.nu = 3
-
-        udata_ref = \
-            np.reshape(np.linspace(0, \
-                (self.fakesbc.nu * self.fakesbc.nsteps) - 1, \
-                (self.fakesbc.nu * self.fakesbc.nsteps)), \
-            (self.fakesbc.nu, -1))
+        udata_ref = np.random.rand(self.fakesbc.nu, self.fakesbc.nsteps)
 
         self.fakesbc.check_and_set_controls_data(udata_ref.T)
         assert_array_equal(self.fakesbc.udata, udata_ref)
@@ -215,12 +204,7 @@ class CheckAndSetControlsData(unittest.TestCase):
     def test_input_invalid(self):
 
         self.fakesbc.nu = 3
-
-        udata_ref = \
-            np.reshape(np.linspace(0, \
-                (self.fakesbc.nu * self.fakesbc.nsteps) - 1, \
-                (self.fakesbc.nu * self.fakesbc.nsteps)), \
-            (self.fakesbc.nu + 1, -1))
+        udata_ref = np.random.rand(self.fakesbc.nu + 1, self.fakesbc.nsteps)
 
         self.assertRaises(ValueError, \
             self.fakesbc.check_and_set_controls_data, udata_ref)
@@ -268,11 +252,7 @@ class CheckAndSetParameterData(unittest.TestCase):
 
     def test_input_invalid_twodim(self):
 
-        pdata_ref = \
-            np.reshape(np.linspace(0, \
-                (self.fakesbc.np * 2) - 1, \
-                (self.fakesbc.np * 2)), \
-            (self.fakesbc.np, -1))
+        pdata_ref = np.random.rand(self.fakesbc.np, 2)
 
         self.assertRaises(ValueError, \
             self.fakesbc.check_and_set_parameter_data, pdata_ref)   
@@ -290,12 +270,7 @@ class CheckAndSetStatesData(unittest.TestCase):
     def test_input_rows(self):
 
         self.fakesbc.nx = 4
-
-        xdata_ref = \
-            np.reshape(np.linspace(0, \
-                (self.fakesbc.nx * (self.fakesbc.nsteps + 1)) - 1, \
-                (self.fakesbc.nx * (self.fakesbc.nsteps + 1))), \
-            (self.fakesbc.nx, -1))
+        xdata_ref = np.random.rand(self.fakesbc.nx, self.fakesbc.nsteps + 1)
 
         self.fakesbc.check_and_set_states_data(xdata_ref)
         assert_array_equal(self.fakesbc.xdata, xdata_ref)
@@ -304,12 +279,7 @@ class CheckAndSetStatesData(unittest.TestCase):
     def test_input_columns(self):
 
         self.fakesbc.nx = 4
-        
-        xdata_ref = \
-            np.reshape(np.linspace(0, \
-                (self.fakesbc.nx * (self.fakesbc.nsteps + 1)) - 1, \
-                (self.fakesbc.nx * (self.fakesbc.nsteps + 1))), \
-            (self.fakesbc.nx, -1))
+        xdata_ref = np.random.rand(self.fakesbc.nx, self.fakesbc.nsteps + 1)
 
         self.fakesbc.check_and_set_states_data(xdata_ref.T)
         assert_array_equal(self.fakesbc.xdata, xdata_ref)
@@ -341,12 +311,193 @@ class CheckAndSetStatesData(unittest.TestCase):
     def test_input_invalid(self):
 
         self.fakesbc.nx = 4
-
-        xdata_ref = \
-            np.reshape(np.linspace(0, \
-                (self.fakesbc.nx * (self.fakesbc.nsteps + 1)) - 1, \
-                (self.fakesbc.nx * (self.fakesbc.nsteps + 1))), \
-            (self.fakesbc.nx / 2, -1))
+        xdata_ref = np.random.rand(self.fakesbc.nx, self.fakesbc.nsteps)
 
         self.assertRaises(ValueError, \
             self.fakesbc.check_and_set_states_data, xdata_ref)
+
+
+class CheckAndSetMeasurementData(unittest.TestCase):
+
+    def setUp(self):
+
+        self.fakesbc = FakeSetupsBaseClass()
+
+        self.fakesbc.ty = np.linspace(0, 19, 20)
+        self.fakesbc.nphi = 2
+
+
+    def test_input_rows(self):
+
+        ydata_ref = np.random.rand(self.fakesbc.nphi, self.fakesbc.ty.size)
+
+        self.fakesbc.check_and_set_measurement_data(ydata_ref)
+        assert_array_equal(self.fakesbc.ydata, ydata_ref)
+
+
+    def test_input_columns(self):
+
+        ydata_ref = np.random.rand(self.fakesbc.nphi, self.fakesbc.ty.size)
+
+        self.fakesbc.check_and_set_measurement_data(ydata_ref.T)
+        assert_array_equal(self.fakesbc.ydata, ydata_ref)
+
+
+    def test_input_none(self):
+
+        ydata_ref = np.zeros((self.fakesbc.nphi, self.fakesbc.ty.size))
+
+        self.fakesbc.check_and_set_measurement_data(None)
+        assert_array_equal(self.fakesbc.ydata, ydata_ref)
+
+
+    def test_input_invalid(self):
+
+        ydata_ref = np.random.rand(self.fakesbc.nphi + 1, self.fakesbc.ty.size)
+
+        self.assertRaises(ValueError, \
+            self.fakesbc.check_and_set_measurement_data, ydata_ref)
+
+
+class CheckAndSetMeasurementWeightings(unittest.TestCase):
+
+    def setUp(self):
+
+        self.fakesbc = FakeSetupsBaseClass()
+
+        self.fakesbc.ydata = np.random.rand(4, 3)
+
+
+    def test_input_rows(self):
+
+        wv_ref = np.random.rand(*self.fakesbc.ydata.shape)
+
+        self.fakesbc.check_and_set_measurement_weightings(wv_ref)
+        assert_array_equal(self.fakesbc.wv, wv_ref)
+
+
+    def test_input_columns(self):
+
+        wv_ref = np.random.rand(*self.fakesbc.ydata.shape)
+
+        self.fakesbc.check_and_set_measurement_weightings(wv_ref.T)
+        assert_array_equal(self.fakesbc.wv, wv_ref)
+
+
+    def test_input_none(self):
+
+        wv_ref = np.ones((self.fakesbc.ydata.shape))
+
+        self.fakesbc.check_and_set_measurement_weightings(wv_ref)
+        assert_array_equal(self.fakesbc.wv, wv_ref)
+
+
+    def test_input_invalid(self):
+
+        wv_ref = np.random.rand(self.fakesbc.ydata.shape[0] + 1, \
+            self.fakesbc.ydata.shape[1])
+
+        self.assertRaises(ValueError, \
+            self.fakesbc.check_and_set_measurement_weightings, wv_ref)
+
+
+class CheckAndSetEquationErrorWeightings(unittest.TestCase):
+
+    def setUp(self):
+
+        self.fakesbc = FakeSetupsBaseClass()
+
+        self.fakesbc.neps_e = 3
+
+
+    def test_input_rows(self):
+
+        weps_e_ref = \
+            np.linspace(0, self.fakesbc.neps_e - 1, self.fakesbc.neps_e)
+
+        self.fakesbc.check_and_set_equation_error_weightings(weps_e_ref)
+        assert_array_equal(self.fakesbc.weps_e, weps_e_ref)
+
+
+    def test_input_columns(self):
+
+        weps_e_ref = \
+            np.linspace(0, self.fakesbc.neps_e - 1, self.fakesbc.neps_e)
+
+        self.fakesbc.check_and_set_equation_error_weightings(weps_e_ref.T)
+        assert_array_equal(self.fakesbc.weps_e, weps_e_ref)
+
+    def test_input_none(self):
+
+        weps_e_ref = np.ones(self.fakesbc.neps_e)
+
+        self.fakesbc.check_and_set_equation_error_weightings(None)
+        assert_array_equal(self.fakesbc.weps_e, weps_e_ref)
+
+
+    def test_input_invalid_onedim(self):
+
+        weps_e_ref = \
+            np.linspace(0, self.fakesbc.neps_e, self.fakesbc.neps_e + 1)
+
+        self.assertRaises(ValueError, \
+            self.fakesbc.check_and_set_equation_error_weightings, weps_e_ref)
+
+
+    def test_input_invalid_twodim(self):
+
+        weps_e_ref = np.random.rand(self.fakesbc.neps_e, 2)
+
+        self.assertRaises(ValueError, \
+            self.fakesbc.check_and_set_equation_error_weightings, weps_e_ref)
+
+
+class CheckAndSetInputErrorWeightings(unittest.TestCase):
+
+    def setUp(self):
+
+        self.fakesbc = FakeSetupsBaseClass()
+
+        self.fakesbc.neps_u = 3
+
+
+    def test_input_rows(self):
+
+        weps_u_ref = \
+            np.linspace(0, self.fakesbc.neps_u - 1, self.fakesbc.neps_u)
+
+        self.fakesbc.check_and_set_input_error_weightings(weps_u_ref)
+        assert_array_equal(self.fakesbc.weps_u, weps_u_ref)
+
+
+    def test_input_columns(self):
+
+        weps_u_ref = \
+            np.linspace(0, self.fakesbc.neps_u - 1, self.fakesbc.neps_u)
+
+        self.fakesbc.check_and_set_input_error_weightings(weps_u_ref)
+        assert_array_equal(self.fakesbc.weps_u, weps_u_ref)
+
+    def test_input_none(self):
+
+        weps_u_ref = np.ones(self.fakesbc.neps_u)
+
+        self.fakesbc.check_and_set_input_error_weightings(None)
+        assert_array_equal(self.fakesbc.weps_u, weps_u_ref)
+
+
+    def test_input_invalid_onedim(self):
+
+        weps_u_ref = \
+            np.linspace(0, self.fakesbc.neps_u, self.fakesbc.neps_u + 1)
+
+        self.assertRaises(ValueError, \
+            self.fakesbc.check_and_set_input_error_weightings, weps_u_ref)
+
+
+    def test_input_invalid_twodim(self):
+
+        weps_u_ref = np.random.rand(self.fakesbc.neps_u, 2)
+
+        self.assertRaises(ValueError, \
+            self.fakesbc.check_and_set_input_error_weightings, weps_u_ref)

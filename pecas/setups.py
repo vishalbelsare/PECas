@@ -30,214 +30,215 @@ import ipdb
 
 import time
 
-class SetupsBaseClass(object):
+# class SetupsBaseClass(object):
 
-    '''The abstract class :class:`SetupsBaseClass` contains the basic
-    functionalities of all other classes.'''
+#     '''The abstract class :class:`SetupsBaseClass` contains the basic
+#     functionalities of all other classes.'''
 
-    __metaclass__ = ABCMeta
-
-
-    def check_and_set_time_points_input(self, tp):
-
-        if np.atleast_2d(tp).shape[0] == 1:
-
-            tp = np.squeeze(np.asarray(tp))
-
-        elif np.atleast_2d(tp).shape[1] == 1:
-
-            tp = np.squeeze(np.atleast_2d(tp).T)
-
-        else:
-
-            raise ValueError("Invalid dimension for tp.")
-
-        return tp       
+#     __metaclass__ = ABCMeta
 
 
-    def check_and_set_control_time_points_input(self, tu):
+#     def check_and_set_time_points_input(self, tp):
 
-        try:
+#         if np.atleast_2d(tp).shape[0] == 1:
 
-            self.tu = self.check_and_set_time_points_input(tu)
+#             tp = np.squeeze(np.asarray(tp))
 
-        except ValueError:
+#         elif np.atleast_2d(tp).shape[1] == 1:
 
-            raise ValueError("Invalid dimension for tu.")
+#             tp = np.squeeze(np.atleast_2d(tp).T)
 
+#         else:
 
-    def check_and_set_measurement_time_points_input(self, ty):
+#             raise ValueError("Invalid dimension for tp.")
 
-        if ty is not None:
-
-            try:
-
-                self.ty = self.check_and_set_time_points_input(ty)
-
-            except ValueError:
-
-                raise ValueError("Invalid dimension for ty.")
-
-        else:
-
-            self.ty = self.tu
+#         return tp       
 
 
-    def check_and_set_controls_data(self, udata):
+#     def check_and_set_control_time_points_input(self, tu):
 
-        if not self.nu == 0:
+#         try:
 
-            if udata is None:
-                udata = np.zeros((self.nu, self.ncontrols))
+#             self.tu = self.check_and_set_time_points_input(tu)
 
-            udata = np.atleast_2d(udata)
+#         except ValueError:
 
-            if udata.shape == (self.ncontrols, self.nu):
-                udata = udata.T
-
-            if not udata.shape == (self.nu, self.ncontrols):
-
-                raise ValueError( \
-                    "Control values provided by user have wrong dimension.")
-
-            self.udata = udata
-
-        else:
-
-            self.udata = ca.DMatrix(0, self.nsteps)
+#             raise ValueError("Invalid dimension for tu.")
 
 
-    def check_and_set_parameter_data(self, pdata):
+#     def check_and_set_measurement_time_points_input(self, ty):
 
-        if pdata is None:
-            pdata = np.zeros(self.np)
+#         if ty is not None:
 
-        pdata = np.atleast_1d(np.squeeze(pdata))
+#             try:
 
-        if not pdata.shape == (self.np,):
+#                 self.ty = self.check_and_set_time_points_input(ty)
 
-            raise ValueError( \
-                "Parameter values provided by user have wrong dimension.")
+#             except ValueError:
 
-        self.pdata = pdata
+#                 raise ValueError("Invalid dimension for ty.")
+
+#         else:
+
+#             self.ty = self.tu
 
 
-    def check_and_set_states_data(self, xdata):
+#     def check_and_set_controls_data(self, udata):
 
-        if not self.nx == 0:
+#         if not self.nu == 0:
 
-            if xdata is None:
-                xdata = np.zeros((self.nx, self.nsteps + 1))
+#             if udata is None:
+#                 udata = np.zeros((self.nu, self.ncontrols))
 
-            xdata = np.atleast_2d(xdata)
+#             udata = np.atleast_2d(udata)
 
-            if xdata.shape == (self.nsteps + 1, self.nx):
-                xdata = xdata.T
+#             if udata.shape == (self.ncontrols, self.nu):
+#                 udata = udata.T
 
-            if not xdata.shape == (self.nx, self.nsteps + 1):
+#             if not udata.shape == (self.nu, self.ncontrols):
 
-                raise ValueError( \
-                    "State values provided by user have wrong dimension.")
+#                 raise ValueError( \
+#                     "Control values provided by user have wrong dimension.")
 
-            self.xdata = xdata
-            # self.Xinit = ca.repmat(xinit[:,:-1], self.ntauroot+1, 1)
-            # self.XFinit = xinit[:,-1]
+#             self.udata = udata
+
+#         else:
+
+#             self.udata = ca.DMatrix(0, self.nsteps)
+
+
+#     def check_and_set_parameter_data(self, pdata):
+
+#         if pdata is None:
+#             pdata = np.zeros(self.np)
+
+#         pdata = np.atleast_1d(np.squeeze(pdata))
+
+#         if not pdata.shape == (self.np,):
+
+#             raise ValueError( \
+#                 "Parameter values provided by user have wrong dimension.")
+
+#         self.pdata = pdata
+
+
+#     def check_and_set_states_data(self, xdata):
+
+#         if not self.nx == 0:
+
+#             if xdata is None:
+#                 xdata = np.zeros((self.nx, self.nsteps + 1))
+
+#             xdata = np.atleast_2d(xdata)
+
+#             if xdata.shape == (self.nsteps + 1, self.nx):
+#                 xdata = xdata.T
+
+#             if not xdata.shape == (self.nx, self.nsteps + 1):
+
+#                 raise ValueError( \
+#                     "State values provided by user have wrong dimension.")
+
+#             self.xdata = xdata
+#             # self.Xinit = ca.repmat(xinit[:,:-1], self.ntauroot+1, 1)
+#             # self.XFinit = xinit[:,-1]
     
-        else:
+#         else:
 
-            self.xdata = ca.DMatrix(0,0)
-            # self.Xinit = ca.DMatrix(0, 0)
-            # self.XFinit = ca.DMatrix(0, 0)
-
-
-
-    def set_error_initials_to_zero(self):
-
-        self.Vinit = np.zeros(self.V.shape)
-        self.EPS_Einit = np.zeros(self.EPS_E.shape)
-        self.EPS_Uinit = np.zeros(self.EPS_U.shape)
+#             self.xdata = ca.DMatrix(0,0)
+#             # self.Xinit = ca.DMatrix(0, 0)
+#             # self.XFinit = ca.DMatrix(0, 0)
 
 
-    # @profile
-    def check_and_set_all_inputs_and_initials(self, \
-        controls, initials):
 
-        self.check_and_set_controls_data(controls["uN"])
-        self.check_and_set_parameter_data(initials["pinit"])
-        self.check_and_set_states_data(initials["xinit"])
+#     def set_error_initials_to_zero(self):
 
-        self.set_error_initials_to_zero()
+#         self.Vinit = np.zeros(self.V.shape)
+#         self.EPS_Einit = np.zeros(self.EPS_E.shape)
+#         self.EPS_Uinit = np.zeros(self.EPS_U.shape)
 
 
-    def set_problem_dimensions_from_system_information(self):
+#     # @profile
+#     def check_and_set_all_inputs_and_initials(self, \
+#         controls, initials):
 
-        self.nu = self.system.u.shape[0]
-        self.np = self.system.p.shape[0]
-        self.nphi = self.system.phi.shape[0]
+#         self.check_and_set_controls_data(controls["uN"])
+#         self.check_and_set_parameter_data(initials["pinit"])
+#         self.check_and_set_states_data(initials["xinit"])
 
-        try:
-
-            self.nx = self.system.x.shape[0]
-            self.neps_e = self.system.eps_e.shape[0]
-            self.neps_u = self.system.eps_u.shape[0]
-
-        except AttributeError:
-
-            self.nx = 0
-            self.neps_e = 0
-            self.neps_u = 0
+#         self.set_error_initials_to_zero()
 
 
-    def set_optimization_variables(self):
+#     def set_problem_dimensions_from_system_information(self):
 
-        self.P = ca.MX.sym("P", self.np)
+#         self.nu = self.system.u.shape[0]
+#         self.np = self.system.p.shape[0]
+#         self.nphi = self.system.phi.shape[0]
 
-        self.V = ca.MX.sym("V", self.nphi, self.nsteps+1)
+#         try:
 
-        if self.nx != 0:
+#             self.nx = self.system.x.shape[0]
+#             self.neps_e = self.system.eps_e.shape[0]
+#             self.neps_u = self.system.eps_u.shape[0]
 
-            self.X = ca.MX.sym("X", (self.nx * (self.ntauroot+1)), self.nsteps)
-            self.XF = ca.MX.sym("XF", self.nx)
+#         except AttributeError:
 
-        else:
+#             self.nx = 0
+#             self.neps_e = 0
+#             self.neps_u = 0
 
-            self.X = ca.DMatrix(0, self.nsteps)
-            self.XF = ca.DMatrix(0, self.nsteps)
+
+#     def set_optimization_variables(self):
+
+#         self.P = ca.MX.sym("P", self.np)
+
+#         self.V = ca.MX.sym("V", self.nphi, self.nsteps+1)
+
+#         if self.nx != 0:
+
+#             self.X = ca.MX.sym("X", (self.nx * (self.ntauroot+1)), self.nsteps)
+#             self.XF = ca.MX.sym("XF", self.nx)
+
+#         else:
+
+#             self.X = ca.DMatrix(0, self.nsteps)
+#             self.XF = ca.DMatrix(0, self.nsteps)
         
-        if self.neps_e != 0:
+#         if self.neps_e != 0:
 
-            self.EPS_E = ca.MX.sym("EPS_E", \
-                (self.neps_e * self.ntauroot), self.nsteps)
+#             self.EPS_E = ca.MX.sym("EPS_E", \
+#                 (self.neps_e * self.ntauroot), self.nsteps)
 
-        else:
+#         else:
 
-            self.EPS_E = ca.DMatrix(0, self.nsteps)
+#             self.EPS_E = ca.DMatrix(0, self.nsteps)
 
-        if self.neps_u != 0:
+#         if self.neps_u != 0:
                 
-            self.EPS_U = ca.MX.sym("EPS_U", \
-                (self.neps_u * self.ntauroot), self.nsteps)
+#             self.EPS_U = ca.MX.sym("EPS_U", \
+#                 (self.neps_u * self.ntauroot), self.nsteps)
 
-        else:
+#         else:
 
-            self.EPS_U = ca.DMatrix(0, self.nsteps)
+#             self.EPS_U = ca.DMatrix(0, self.nsteps)
 
 
-    @abstractmethod
-    def __init__(self, system, controls, measurements):
+#     @abstractmethod
+#     def __init__(self, system, controls, measurements):
 
-        intro.pecas_intro()
-        print('\n' + 24 * '-' + \
-            ' PECas system initialization ' + 25 * '-')
-        print('\nStart system initialization ...')
+#         intro.pecas_intro()
+#         print('\n' + 24 * '-' + \
+#             ' PECas system initialization ' + 25 * '-')
+#         print('\nStart system initialization ...')
 
-        self.system = system
+#         self.system = system
 
-        self.set_problem_dimensions_from_system_information()
+#         self.set_problem_dimensions_from_system_information()
 
-        self.check_and_set_control_time_points_input(controls["tu"])
-        self.check_and_set_measurement_time_points_input(measurements["ty"])
+#         self.check_and_set_control_time_points_input(controls["tu"])
+#         self.check_and_set_measurement_time_points_input(measurements["ty"])
 
+from setupsbaseclass import SetupsBaseClass
 
 class NDSetup(SetupsBaseClass):
 

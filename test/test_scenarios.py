@@ -29,7 +29,7 @@ import test_lsq_sim
 import test_lsq_pe
 
 class TestNonDynNoConstraints(unittest.TestCase, \
-    test_set_initials.NDSetupTest, \
+    # test_set_initials.NDSetupTest, \
     ):
     # test_lsq_init.NDLsqInitTest, \
     # test_lsq_sim.NDLsqSimTest, \
@@ -75,7 +75,7 @@ class TestNonDynNoConstraints(unittest.TestCase, \
 
 
 class TestNonDynConstraints(unittest.TestCase, \
-    test_set_initials.NDSetupTest, \
+    # test_set_initials.NDSetupTest, \
     ):
     # test_lsq_init.NDLsqInitTest, \
     # test_lsq_sim.NDLsqSimTest, \
@@ -120,7 +120,7 @@ class TestNonDynConstraints(unittest.TestCase, \
 
 
 class TestLotkaVolterra(unittest.TestCase, \
-    test_set_initials.ODESetupTest, \
+    # test_set_initials.ODESetupTest, \
     ):
     # test_lsq_init.ODELsqInitTest, \
     # test_lsq_sim.ODELsqSimTest, \
@@ -191,7 +191,7 @@ class TestLotkaVolterra(unittest.TestCase, \
 
 
 class Test1DVehicle(unittest.TestCase, \
-    test_set_initials.ODESetupTest, \
+    # test_set_initials.ODESetupTest, \
     ):
     # test_lsq_init.ODELsqInitTest, \
     # test_lsq_sim.ODELsqSimTest, \
@@ -252,7 +252,7 @@ class Test1DVehicle(unittest.TestCase, \
 
 
 class Test2DVehicle(unittest.TestCase, \
-    test_set_initials.ODESetupTest, \
+    # test_set_initials.ODESetupTest, \
     ):
     # test_lsq_init.ODELsqInitTest, \
     # test_lsq_sim.ODELsqSimTest, \
@@ -336,7 +336,7 @@ class Test2DVehicle(unittest.TestCase, \
 
 
 class PedulumBar(unittest.TestCase, \
-    test_set_initials.ODESetupTest, \
+    # test_set_initials.ODESetupTest, \
     ):
     # test_lsq_init.ODELsqInitTest, \
     # test_lsq_sim.ODELsqSimTest, \

@@ -310,23 +310,3 @@ class ImplDAE(SystemBaseClass):
 
         raise NotImplementedError( \
             "Support of implicit DAEs is not implemented yet.")
-
-
-    def show_system_information(self, showEquations = False):
-
-        r'''
-        :param showEquations: show model equations and measurement functions
-        :type showEquations: bool
-
-        This function shows the system type and the dimension of the system
-        components. If `showEquations` is set to `True`, also the model
-        equations and measurement functions are shown.
-        '''
-
-        super(ImplDAE, self).show_system_information( \
-            showEquations = showEquations)
-
-        raise NotImplementedError('''
-This feature of PECas is currently disabled, but will be 
-available when the DAE systems are implemented.
-''')
