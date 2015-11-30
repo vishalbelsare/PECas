@@ -98,7 +98,7 @@ class SetupsBaseClass(object):
             if not udata.shape == (self.nu, self.ncontrols):
 
                 raise ValueError( \
-                    "Control values prvoided by user have wrong dimension.")
+                    "Control values provided by user have wrong dimension.")
 
             self.udata = udata
 
@@ -107,46 +107,48 @@ class SetupsBaseClass(object):
             self.udata = ca.DMatrix(0, self.nsteps)
 
 
-    def check_and_set_parameter_initials(self, pinit): # RENAME!
+    def check_and_set_parameter_data(self, pdata):
 
-        if pinit is None:
-            pinit = np.zeros(self.np)
+        if pdata is None:
+            pdata = np.zeros(self.np)
 
-        pinit = np.atleast_1d(np.squeeze(pinit))
+        pdata = np.atleast_1d(np.squeeze(pdata))
 
-        if not pinit.shape == (self.np,):
+        if not pdata.shape == (self.np,):
 
             raise ValueError( \
-                "Wrong dimension for argument pinit.")
+                "Parameter values provided by user have wrong dimension.")
 
-        self.Pinit = pinit
+        self.pdata = pdata
 
 
-    def check_and_set_states_initials(self, xinit): # RENAME!
+    def check_and_set_states_data(self, xdata):
 
-        if type(self.system) is not systems.NonDyn:
+        if not self.nx == 0:
 
-            if xinit is None:
-                xinit = np.zeros((self.nx, self.nsteps + 1))
+            if xdata is None:
+                xdata = np.zeros((self.nx, self.nsteps + 1))
 
-            xinit = np.atleast_2d(xinit)
+            xdata = np.atleast_2d(xdata)
 
-            if xinit.shape == (self.nsteps + 1, self.nx):
-                xinit = xinit.T
+            if xdata.shape == (self.nsteps + 1, self.nx):
+                xdata = xdata.T
 
-            if not xinit.shape == (self.nx, self.nsteps + 1):
+            if not xdata.shape == (self.nx, self.nsteps + 1):
 
                 raise ValueError( \
-                    "Wrong dimension for argument xinit.")
+                    "State values provided by user have wrong dimension.")
 
-
-            self.Xinit = ca.repmat(xinit[:,:-1], self.ntauroot+1, 1)
-            self.XFinit = xinit[:,-1]
-
+            self.xdata = xdata
+            # self.Xinit = ca.repmat(xinit[:,:-1], self.ntauroot+1, 1)
+            # self.XFinit = xinit[:,-1]
+    
         else:
 
-            self.Xinit = ca.DMatrix(0, 0)
-            self.XFinit = ca.DMatrix(0, 0)
+            self.xdata = ca.DMatrix(0,0)
+            # self.Xinit = ca.DMatrix(0, 0)
+            # self.XFinit = ca.DMatrix(0, 0)
+
 
 
     def set_error_initials_to_zero(self):
@@ -161,8 +163,8 @@ class SetupsBaseClass(object):
         controls, initials):
 
         self.check_and_set_controls_data(controls["uN"])
-        self.check_and_set_parameter_initials(initials["pinit"])
-        self.check_and_set_states_initials(initials["xinit"])
+        self.check_and_set_parameter_data(initials["pinit"])
+        self.check_and_set_states_data(initials["xinit"])
 
         self.set_error_initials_to_zero()
 

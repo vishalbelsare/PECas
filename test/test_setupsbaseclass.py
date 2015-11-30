@@ -24,6 +24,7 @@ from numpy.testing import assert_array_equal
 
 import casadi as ca
 import pecas
+import ipdb
 
 import unittest
 import mock
@@ -149,12 +150,11 @@ class CheckAndSetMeasurementsTimepoints(unittest.TestCase):
             self.ty_ref)
 
 
-class CheckAndSetControls(unittest.TestCase):
+class CheckAndSetControlsData(unittest.TestCase):
 
     def setUp(self):
 
         self.fakesbc = FakeSetupsBaseClass()
-        self.fakesbc.system = mock.MagicMock(spec = pecas.systems.ExplODE)
 
         self.fakesbc.nsteps = 20
         # self.fakesbc.ncontrols = self.fakesbc.nsteps + 1 for NonDyn,
@@ -199,7 +199,7 @@ class CheckAndSetControls(unittest.TestCase):
         assert_array_equal(self.fakesbc.udata, udata_ref)
 
 
-    def test_input_zero(self):
+    def test_zero_controls(self):
 
         self.fakesbc.nu = 0
 
@@ -225,3 +225,128 @@ class CheckAndSetControls(unittest.TestCase):
         self.assertRaises(ValueError, \
             self.fakesbc.check_and_set_controls_data, udata_ref)
 
+
+class CheckAndSetParameterData(unittest.TestCase):
+
+    def setUp(self):
+
+        self.fakesbc = FakeSetupsBaseClass()
+        self.fakesbc.np = 5
+
+
+    def test_input_rows(self):
+
+        pdata_ref = np.linspace(0, self.fakesbc.np - 1, self.fakesbc.np)
+
+        self.fakesbc.check_and_set_parameter_data(pdata_ref)
+        assert_array_equal(self.fakesbc.pdata, pdata_ref)
+
+
+    def test_input_columns(self):
+
+        pdata_ref = np.linspace(0, self.fakesbc.np - 1, self.fakesbc.np)
+
+        self.fakesbc.check_and_set_parameter_data(pdata_ref)
+        assert_array_equal(self.fakesbc.pdata, pdata_ref)
+
+
+    def test_input_none(self):
+
+        pdata_ref = np.zeros(self.fakesbc.np)
+
+        self.fakesbc.check_and_set_parameter_data(None)
+        assert_array_equal(self.fakesbc.pdata, pdata_ref)
+
+
+    def test_input_invalid_onedim(self):
+
+        pdata_ref = np.linspace(0, self.fakesbc.np - 2, self.fakesbc.np - 1)
+
+        self.assertRaises(ValueError, \
+            self.fakesbc.check_and_set_parameter_data, pdata_ref)
+
+
+    def test_input_invalid_twodim(self):
+
+        pdata_ref = \
+            np.reshape(np.linspace(0, \
+                (self.fakesbc.np * 2) - 1, \
+                (self.fakesbc.np * 2)), \
+            (self.fakesbc.np, -1))
+
+        self.assertRaises(ValueError, \
+            self.fakesbc.check_and_set_parameter_data, pdata_ref)   
+
+
+class CheckAndSetStatesData(unittest.TestCase):
+
+    def setUp(self):
+
+        self.fakesbc = FakeSetupsBaseClass()
+
+        self.fakesbc.nsteps = 20
+
+
+    def test_input_rows(self):
+
+        self.fakesbc.nx = 4
+
+        xdata_ref = \
+            np.reshape(np.linspace(0, \
+                (self.fakesbc.nx * (self.fakesbc.nsteps + 1)) - 1, \
+                (self.fakesbc.nx * (self.fakesbc.nsteps + 1))), \
+            (self.fakesbc.nx, -1))
+
+        self.fakesbc.check_and_set_states_data(xdata_ref)
+        assert_array_equal(self.fakesbc.xdata, xdata_ref)
+
+
+    def test_input_columns(self):
+
+        self.fakesbc.nx = 4
+        
+        xdata_ref = \
+            np.reshape(np.linspace(0, \
+                (self.fakesbc.nx * (self.fakesbc.nsteps + 1)) - 1, \
+                (self.fakesbc.nx * (self.fakesbc.nsteps + 1))), \
+            (self.fakesbc.nx, -1))
+
+        self.fakesbc.check_and_set_states_data(xdata_ref.T)
+        assert_array_equal(self.fakesbc.xdata, xdata_ref)
+
+
+    def test_input_none(self):
+
+        self.fakesbc.nx = 4
+
+        xdata_ref = np.zeros((self.fakesbc.nx, self.fakesbc.nsteps + 1))
+
+        self.fakesbc.check_and_set_states_data(None)
+        assert_array_equal(self.fakesbc.xdata, xdata_ref)
+
+
+    def test_zero_controls(self):
+
+        self.fakesbc.nx = 0
+
+        xdata_ref = ca.DMatrix(0, 0)
+
+        # In this case, the input value is not used by the function, and
+        # therefor irrelevant at this point
+
+        self.fakesbc.check_and_set_states_data(None)
+        assert_array_equal(self.fakesbc.xdata, xdata_ref)
+
+
+    def test_input_invalid(self):
+
+        self.fakesbc.nx = 4
+
+        xdata_ref = \
+            np.reshape(np.linspace(0, \
+                (self.fakesbc.nx * (self.fakesbc.nsteps + 1)) - 1, \
+                (self.fakesbc.nx * (self.fakesbc.nsteps + 1))), \
+            (self.fakesbc.nx / 2, -1))
+
+        self.assertRaises(ValueError, \
+            self.fakesbc.check_and_set_states_data, xdata_ref)
