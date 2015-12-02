@@ -295,7 +295,7 @@ class CheckAndSetStatesData(unittest.TestCase):
         assert_array_equal(self.fakesbc.xdata, xdata_ref)
 
 
-    def test_zero_controls(self):
+    def test_zero_states(self):
 
         self.fakesbc.nx = 0
 
@@ -388,7 +388,7 @@ class CheckAndSetMeasurementWeightings(unittest.TestCase):
 
         wv_ref = np.ones((self.fakesbc.ydata.shape))
 
-        self.fakesbc.check_and_set_measurement_weightings(wv_ref)
+        self.fakesbc.check_and_set_measurement_weightings(None)
         assert_array_equal(self.fakesbc.wv, wv_ref)
 
 
@@ -430,6 +430,19 @@ class CheckAndSetEquationErrorWeightings(unittest.TestCase):
     def test_input_none(self):
 
         weps_e_ref = np.ones(self.fakesbc.neps_e)
+
+        self.fakesbc.check_and_set_equation_error_weightings(None)
+        assert_array_equal(self.fakesbc.weps_e, weps_e_ref)
+
+
+    def test_zero_equation_errors(self):
+
+        self.fakesbc.neps_e = 0
+
+        weps_e_ref = ca.DMatrix(0, 0)
+
+        # In this case, the input value is not used by the function, and
+        # therefor irrelevant at this point
 
         self.fakesbc.check_and_set_equation_error_weightings(None)
         assert_array_equal(self.fakesbc.weps_e, weps_e_ref)
@@ -486,6 +499,19 @@ class CheckAndSetInputErrorWeightings(unittest.TestCase):
         assert_array_equal(self.fakesbc.weps_u, weps_u_ref)
 
 
+    def test_zero_input_errors(self):
+
+        self.fakesbc.neps_u = 0
+
+        weps_u_ref = ca.DMatrix(0, 0)
+
+        # In this case, the input value is not used by the function, and
+        # therefor irrelevant at this point
+
+        self.fakesbc.check_and_set_input_error_weightings(None)
+        assert_array_equal(self.fakesbc.weps_u, weps_u_ref)
+
+
     def test_input_invalid_onedim(self):
 
         weps_u_ref = \
@@ -501,3 +527,83 @@ class CheckAndSetInputErrorWeightings(unittest.TestCase):
 
         self.assertRaises(ValueError, \
             self.fakesbc.check_and_set_input_error_weightings, weps_u_ref)
+
+
+class CheckSetProblemDimensionsFromSystemInformation(unittest.TestCase):
+
+    def setUp(self):
+
+        self.fakesbc = FakeSetupsBaseClass()
+
+        self.fakesbc.system = mock.MagicMock()
+
+        self.fakesbc.system.u.shape = (2, 1)
+        self.fakesbc.system.p.shape = (3, 1)
+        self.fakesbc.system.phi.shape = (4, 1)
+
+        self.fakesbc.system.x.shape = (5, 1)
+        self.fakesbc.system.eps_e.shape = (6, 1)
+        self.fakesbc.system.eps_u.shape = (7, 1)
+
+
+    def test_set_control_dimension(self):
+
+        self.fakesbc.set_problem_dimensions_from_system_information()
+        self.assertEqual(self.fakesbc.nu, self.fakesbc.system.u.shape[0])
+
+
+    def test_set_parameter_dimension(self):
+
+        self.fakesbc.set_problem_dimensions_from_system_information()
+        self.assertEqual(self.fakesbc.np, self.fakesbc.system.p.shape[0])
+
+
+    def test_set_measurement_function_dimension(self):
+
+        self.fakesbc.set_problem_dimensions_from_system_information()
+        self.assertEqual(self.fakesbc.nphi, self.fakesbc.system.phi.shape[0])
+
+
+    def test_set_states_dimension(self):
+
+        self.fakesbc.set_problem_dimensions_from_system_information()
+        self.assertEqual(self.fakesbc.nx, self.fakesbc.system.x.shape[0])
+
+
+    def test_set_equation_error_dimension(self):
+
+        self.fakesbc.set_problem_dimensions_from_system_information()
+        self.assertEqual(self.fakesbc.neps_e, \
+            self.fakesbc.system.eps_e.shape[0])
+
+
+    def test_set_input_error_dimension(self):
+
+        self.fakesbc.set_problem_dimensions_from_system_information()
+        self.assertEqual(self.fakesbc.neps_u, \
+            self.fakesbc.system.eps_u.shape[0])
+
+
+    def test_no_states(self):
+
+        self.fakesbc.system.x = None
+        self.fakesbc.set_problem_dimensions_from_system_information()
+
+        self.assertEqual(self.fakesbc.nx, 0)
+        
+
+    def test_no_equaiton_errors(self):
+
+        self.fakesbc.system.eps_e = None
+        self.fakesbc.set_problem_dimensions_from_system_information()
+
+        self.assertEqual(self.fakesbc.neps_e, 0)
+        
+
+    def test_no_input_errors(self):
+
+        self.fakesbc.system.eps_u = None
+        self.fakesbc.set_problem_dimensions_from_system_information()
+
+        self.assertEqual(self.fakesbc.neps_u, 0)
+        

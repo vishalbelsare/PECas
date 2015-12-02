@@ -224,6 +224,37 @@ class SetupsBaseClass(object):
             self.weps_u = ca.DMatrix(0, 0)
 
 
+    def set_problem_dimensions_from_system_information(self):
+
+        self.nu = self.system.u.shape[0]
+        self.np = self.system.p.shape[0]
+        self.nphi = self.system.phi.shape[0]
+
+        try:
+
+            self.nx = self.system.x.shape[0]
+
+        except AttributeError:
+
+            self.nx = 0
+
+        try:
+
+            self.neps_e = self.system.eps_e.shape[0]
+            
+        except AttributeError:
+
+            self.neps_e = 0
+
+        try:
+
+            self.neps_u = self.system.eps_u.shape[0]
+
+        except AttributeError:
+
+            self.neps_u = 0
+
+
     # def set_error_initials_to_zero(self):
 
     #     self.Vinit = np.zeros(self.V.shape)
@@ -240,26 +271,6 @@ class SetupsBaseClass(object):
     #     self.check_and_set_states_data(initials["xinit"])
 
     #     self.set_error_initials_to_zero()
-
-
-    def set_problem_dimensions_from_system_information(self):
-
-        self.nu = self.system.u.shape[0]
-        self.np = self.system.p.shape[0]
-        self.nphi = self.system.phi.shape[0]
-
-        try:
-
-            self.nx = self.system.x.shape[0]
-            self.neps_e = self.system.eps_e.shape[0]
-            self.neps_u = self.system.eps_u.shape[0]
-
-        except AttributeError:
-
-            self.nx = 0
-            self.neps_e = 0
-            self.neps_u = 0
-
 
     # def set_optimization_variables(self):
 
