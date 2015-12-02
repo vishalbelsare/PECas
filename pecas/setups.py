@@ -252,8 +252,8 @@ class NDSetup(SetupsBaseClass):
         # self.set_problem_dimensions_from_system_information()
 
         # self.check_and_set_control_time_points_input(tu)
-        self.nsteps = controls["tu"].shape[0] - 1
-        self.ncontrols = self.nsteps + 1
+        # self.nsteps = controls["tu"].shape[0] - 1
+        self.ncontrols = self.nintervals + 1
 
         self.set_optimization_variables()
         self.check_and_set_all_inputs_and_initials( \
@@ -308,8 +308,8 @@ class ODESetup(SetupsBaseClass):
         # self.check_and_set_control_time_points_input(tu)
         # self.check_and_set_measurement_time_points_input(ty)
 
-        self.nsteps = controls["tu"].shape[0] - 1
-        self.ncontrols = self.nsteps
+        # self.nsteps = controls["tu"].shape[0] - 1
+        self.ncontrols = self.nintervals
 
         self.collocation_settings = collocation_settings
         self.tauroot = ca.collocationPoints( \

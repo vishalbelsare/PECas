@@ -18,12 +18,12 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with PECas. If not, see <http://www.gnu.org/licenses/>.
 
-import casadi as ca
 import numpy as np
 from abc import ABCMeta, abstractmethod
 
 import time
 
+from ..interfaces import casadi_interface as ci
 from .. import intro
 import ipdb
 
@@ -32,6 +32,41 @@ import time
 class SetupsBaseClass(object):
 
     __metaclass__ = ABCMeta
+
+    def set_system(self, system):
+
+        self.system = system
+
+
+    def set_problem_dimensions_from_system_information(self):
+
+        self.nu = self.system.u.shape[0]
+        self.np = self.system.p.shape[0]
+        self.nphi = self.system.phi.shape[0]
+
+        try:
+
+            self.nx = self.system.x.shape[0]
+
+        except AttributeError:
+
+            self.nx = 0
+
+        try:
+
+            self.neps_e = self.system.eps_e.shape[0]
+            
+        except AttributeError:
+
+            self.neps_e = 0
+
+        try:
+
+            self.neps_u = self.system.eps_u.shape[0]
+
+        except AttributeError:
+
+            self.neps_u = 0
 
 
     def check_and_set_time_points_input(self, tp):
@@ -79,6 +114,21 @@ class SetupsBaseClass(object):
             self.ty = self.tu
 
 
+    def set_number_of_control_intervals(self):
+
+        self.nintervals = self.nu - 1
+
+
+    def check_and_set_time_points(self, controls, measurements):
+
+        tu = controls["tu"]
+        ty = measurements["ty"]
+
+        self.check_and_set_control_time_points_input(tu)
+        self.check_and_set_measurement_time_points_input(ty)
+        self.set_number_of_control_intervals()
+
+
     def check_and_set_controls_data(self, udata):
 
         if not self.nu == 0:
@@ -100,7 +150,7 @@ class SetupsBaseClass(object):
 
         else:
 
-            self.udata = ca.DMatrix(0, self.nsteps)
+            self.udata = ci.dmatrix(0, self.nintervals)
 
 
     def check_and_set_parameter_data(self, pdata):
@@ -123,14 +173,14 @@ class SetupsBaseClass(object):
         if not self.nx == 0:
 
             if xdata is None:
-                xdata = np.zeros((self.nx, self.nsteps + 1))
+                xdata = np.zeros((self.nx, self.nintervals + 1))
 
             xdata = np.atleast_2d(xdata)
 
-            if xdata.shape == (self.nsteps + 1, self.nx):
+            if xdata.shape == (self.nintervals + 1, self.nx):
                 xdata = xdata.T
 
-            if not xdata.shape == (self.nx, self.nsteps + 1):
+            if not xdata.shape == (self.nx, self.nintervals + 1):
 
                 raise ValueError( \
                     "State values provided by user have wrong dimension.")
@@ -141,9 +191,9 @@ class SetupsBaseClass(object):
     
         else:
 
-            self.xdata = ca.DMatrix(0,0)
-            # self.Xinit = ca.DMatrix(0, 0)
-            # self.XFinit = ca.DMatrix(0, 0)
+            self.xdata = ci.dmatrix(0,0)
+            # self.Xinit = ci.dmatrix(0, 0)
+            # self.XFinit = ci.dmatrix(0, 0)
 
 
     def check_and_set_measurement_data(self, ydata):
@@ -200,7 +250,7 @@ class SetupsBaseClass(object):
 
         else:
 
-            self.weps_e = ca.DMatrix(0, 0)
+            self.weps_e = ci.dmatrix(0, 0)
 
 
     def check_and_set_input_error_weightings(self, weps_u):
@@ -221,39 +271,7 @@ class SetupsBaseClass(object):
 
         else:
 
-            self.weps_u = ca.DMatrix(0, 0)
-
-
-    def set_problem_dimensions_from_system_information(self):
-
-        self.nu = self.system.u.shape[0]
-        self.np = self.system.p.shape[0]
-        self.nphi = self.system.phi.shape[0]
-
-        try:
-
-            self.nx = self.system.x.shape[0]
-
-        except AttributeError:
-
-            self.nx = 0
-
-        try:
-
-            self.neps_e = self.system.eps_e.shape[0]
-            
-        except AttributeError:
-
-            self.neps_e = 0
-
-        try:
-
-            self.neps_u = self.system.eps_u.shape[0]
-
-        except AttributeError:
-
-            self.neps_u = 0
-
+            self.weps_u = ci.dmatrix(0, 0)
 
     # def set_error_initials_to_zero(self):
 
@@ -272,39 +290,50 @@ class SetupsBaseClass(object):
 
     #     self.set_error_initials_to_zero()
 
-    # def set_optimization_variables(self):
+    def set_optimization_variables(self):
 
-    #     self.P = ca.MX.sym("P", self.np)
+        self.P = ci.mx_sym("P", self.np)
 
-    #     self.V = ca.MX.sym("V", self.nphi, self.nsteps+1)
+        self.V = ci.mx_sym("V", self.nphi, self.nintervals+1)
 
-    #     if self.nx != 0:
+        if self.nx != 0:
 
-    #         self.X = ca.MX.sym("X", (self.nx * (self.ntauroot+1)), self.nsteps)
-    #         self.XF = ca.MX.sym("XF", self.nx)
+            self.X = ci.mx_sym("X", \
+                (self.nx * (self.ntauroot+1)), self.nintervals)
+            self.XF = ci.mx_sym("XF", self.nx)
 
-    #     else:
+        else:
 
-    #         self.X = ca.DMatrix(0, self.nsteps)
-    #         self.XF = ca.DMatrix(0, self.nsteps)
+            self.X = ci.dmatrix(0, self.nintervals)
+            self.XF = ci.dmatrix(0, self.nintervals)
         
-    #     if self.neps_e != 0:
+        if self.neps_e != 0:
 
-    #         self.EPS_E = ca.MX.sym("EPS_E", \
-    #             (self.neps_e * self.ntauroot), self.nsteps)
+            self.EPS_E = ci.mx_sym("EPS_E", \
+                (self.neps_e * self.ntauroot), self.nintervals)
 
-    #     else:
+        else:
 
-    #         self.EPS_E = ca.DMatrix(0, self.nsteps)
+            self.EPS_E = ci.dmatrix(0, self.nintervals)
 
-    #     if self.neps_u != 0:
+        if self.neps_u != 0:
                 
-    #         self.EPS_U = ca.MX.sym("EPS_U", \
-    #             (self.neps_u * self.ntauroot), self.nsteps)
+            self.EPS_U = ci.mx_sym("EPS_U", \
+                (self.neps_u * self.ntauroot), self.nintervals)
 
-    #     else:
+        else:
 
-    #         self.EPS_U = ca.DMatrix(0, self.nsteps)
+            self.EPS_U = ci.dmatrix(0, self.nintervals)
+
+
+        if self.nu != 0:
+
+            self.U = ci.mx_sym("U", \
+                (self.nu * self.ntauroot), self.nintervals)
+
+        else:
+
+            self.U = ci.dmatrix(0, self.nintervals)
 
 
     @abstractmethod
@@ -315,10 +344,10 @@ class SetupsBaseClass(object):
             ' PECas system initialization ' + 25 * '-')
         print('\nStart system initialization ...')
 
-        self.system = system
+        self.set_system
 
         self.set_problem_dimensions_from_system_information()
 
-        self.check_and_set_control_time_points_input(controls["tu"])
-        self.check_and_set_measurement_time_points_input(measurements["ty"])
+        self.check_and_set_time_points(controls = controls, \
+            measurements = measurements)
         

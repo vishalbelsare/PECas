@@ -22,7 +22,7 @@
 import numpy as np
 from numpy.testing import assert_array_equal
 
-import casadi as ca
+import pecas.interfaces.casadi_interface as ci
 from pecas.setups.setupsbaseclass import SetupsBaseClass
 
 import unittest
@@ -37,8 +37,25 @@ class FakeSetupsBaseClass(SetupsBaseClass):
 
         pass
 
+class SetSystem(unittest.TestCase):
 
-class CheckAndSetTimepoints(unittest.TestCase):
+    def setUp(self):
+
+        self.fakesbc = FakeSetupsBaseClass()
+
+
+    def test_set_system(self):
+
+        system = "system"
+
+        # A better test would be needed here also to make sure that system is
+        # subclass of systems.SystemBaseClass, but this is yet problematic
+
+        self.fakesbc.set_system(system)
+        self.assertEqual(self.fakesbc.system, system)
+
+
+class CheckAndSetTimepointsInput(unittest.TestCase):
 
     def setUp(self):
 
@@ -96,6 +113,7 @@ class CheckAndSetControlTimepoints(unittest.TestCase):
 
         self.tu_ref = np.linspace(0, 49, 50)
 
+
     def test_input_valid(self):
 
         # check_and_set_control_time_points_input passes it's input values to
@@ -106,6 +124,7 @@ class CheckAndSetControlTimepoints(unittest.TestCase):
         self.fakesbc.check_and_set_time_points_input.return_value = self.tu_ref
         self.fakesbc.check_and_set_control_time_points_input(None)
         assert_array_equal(self.fakesbc.tu, self.tu_ref)
+
 
     def test_input_invalid(self):
 
@@ -149,21 +168,35 @@ class CheckAndSetMeasurementsTimepoints(unittest.TestCase):
             self.ty_ref)
 
 
+class SetNumberOfControlIntervals(unittest.TestCase):
+
+    def setUp(self):
+
+        self.fakesbc = FakeSetupsBaseClass()
+
+        self.fakesbc.nu = 3
+
+    def test_set_number_of_control_intervals(self):
+
+        self.fakesbc.set_number_of_control_intervals()
+        self.assertEqual(self.fakesbc.nintervals, self.fakesbc.nu - 1)
+
+
 class CheckAndSetControlsData(unittest.TestCase):
 
     def setUp(self):
 
         self.fakesbc = FakeSetupsBaseClass()
 
-        self.fakesbc.nsteps = 20
-        # self.fakesbc.ncontrols = self.fakesbc.nsteps + 1 for NonDyn,
+        self.fakesbc.nintervals = 20
+        # self.fakesbc.ncontrols = self.fakesbc.nintervals + 1 for NonDyn,
         # but makes no difference for testing the function itself
-        self.fakesbc.ncontrols = self.fakesbc.nsteps
+        self.fakesbc.ncontrols = self.fakesbc.nintervals
 
     def test_input_rows(self):
 
         self.fakesbc.nu = 3
-        udata_ref = np.random.rand(self.fakesbc.nu, self.fakesbc.nsteps)
+        udata_ref = np.random.rand(self.fakesbc.nu, self.fakesbc.nintervals)
 
         self.fakesbc.check_and_set_controls_data(udata_ref)
         assert_array_equal(self.fakesbc.udata, udata_ref)
@@ -172,7 +205,7 @@ class CheckAndSetControlsData(unittest.TestCase):
     def test_input_columns(self):
 
         self.fakesbc.nu = 3
-        udata_ref = np.random.rand(self.fakesbc.nu, self.fakesbc.nsteps)
+        udata_ref = np.random.rand(self.fakesbc.nu, self.fakesbc.nintervals)
 
         self.fakesbc.check_and_set_controls_data(udata_ref.T)
         assert_array_equal(self.fakesbc.udata, udata_ref)
@@ -182,7 +215,7 @@ class CheckAndSetControlsData(unittest.TestCase):
 
         self.fakesbc.nu = 3
 
-        udata_ref = np.zeros((self.fakesbc.nu, self.fakesbc.nsteps))
+        udata_ref = np.zeros((self.fakesbc.nu, self.fakesbc.nintervals))
 
         self.fakesbc.check_and_set_controls_data(None)
         assert_array_equal(self.fakesbc.udata, udata_ref)
@@ -192,7 +225,7 @@ class CheckAndSetControlsData(unittest.TestCase):
 
         self.fakesbc.nu = 0
 
-        udata_ref = ca.DMatrix(0, self.fakesbc.nsteps)
+        udata_ref = ci.dmatrix(0, self.fakesbc.nintervals)
 
         # In this case, the input value is not used by the function, and
         # therefor irrelevant at this point
@@ -204,7 +237,7 @@ class CheckAndSetControlsData(unittest.TestCase):
     def test_input_invalid(self):
 
         self.fakesbc.nu = 3
-        udata_ref = np.random.rand(self.fakesbc.nu + 1, self.fakesbc.nsteps)
+        udata_ref = np.random.rand(self.fakesbc.nu + 1, self.fakesbc.nintervals)
 
         self.assertRaises(ValueError, \
             self.fakesbc.check_and_set_controls_data, udata_ref)
@@ -264,13 +297,13 @@ class CheckAndSetStatesData(unittest.TestCase):
 
         self.fakesbc = FakeSetupsBaseClass()
 
-        self.fakesbc.nsteps = 20
+        self.fakesbc.nintervals = 20
 
 
     def test_input_rows(self):
 
         self.fakesbc.nx = 4
-        xdata_ref = np.random.rand(self.fakesbc.nx, self.fakesbc.nsteps + 1)
+        xdata_ref = np.random.rand(self.fakesbc.nx, self.fakesbc.nintervals + 1)
 
         self.fakesbc.check_and_set_states_data(xdata_ref)
         assert_array_equal(self.fakesbc.xdata, xdata_ref)
@@ -279,7 +312,7 @@ class CheckAndSetStatesData(unittest.TestCase):
     def test_input_columns(self):
 
         self.fakesbc.nx = 4
-        xdata_ref = np.random.rand(self.fakesbc.nx, self.fakesbc.nsteps + 1)
+        xdata_ref = np.random.rand(self.fakesbc.nx, self.fakesbc.nintervals + 1)
 
         self.fakesbc.check_and_set_states_data(xdata_ref.T)
         assert_array_equal(self.fakesbc.xdata, xdata_ref)
@@ -289,7 +322,7 @@ class CheckAndSetStatesData(unittest.TestCase):
 
         self.fakesbc.nx = 4
 
-        xdata_ref = np.zeros((self.fakesbc.nx, self.fakesbc.nsteps + 1))
+        xdata_ref = np.zeros((self.fakesbc.nx, self.fakesbc.nintervals + 1))
 
         self.fakesbc.check_and_set_states_data(None)
         assert_array_equal(self.fakesbc.xdata, xdata_ref)
@@ -299,7 +332,7 @@ class CheckAndSetStatesData(unittest.TestCase):
 
         self.fakesbc.nx = 0
 
-        xdata_ref = ca.DMatrix(0, 0)
+        xdata_ref = ci.dmatrix(0, 0)
 
         # In this case, the input value is not used by the function, and
         # therefor irrelevant at this point
@@ -311,7 +344,7 @@ class CheckAndSetStatesData(unittest.TestCase):
     def test_input_invalid(self):
 
         self.fakesbc.nx = 4
-        xdata_ref = np.random.rand(self.fakesbc.nx, self.fakesbc.nsteps)
+        xdata_ref = np.random.rand(self.fakesbc.nx, self.fakesbc.nintervals)
 
         self.assertRaises(ValueError, \
             self.fakesbc.check_and_set_states_data, xdata_ref)
@@ -439,7 +472,7 @@ class CheckAndSetEquationErrorWeightings(unittest.TestCase):
 
         self.fakesbc.neps_e = 0
 
-        weps_e_ref = ca.DMatrix(0, 0)
+        weps_e_ref = ci.dmatrix(0, 0)
 
         # In this case, the input value is not used by the function, and
         # therefor irrelevant at this point
@@ -503,7 +536,7 @@ class CheckAndSetInputErrorWeightings(unittest.TestCase):
 
         self.fakesbc.neps_u = 0
 
-        weps_u_ref = ca.DMatrix(0, 0)
+        weps_u_ref = ci.dmatrix(0, 0)
 
         # In this case, the input value is not used by the function, and
         # therefor irrelevant at this point
@@ -606,4 +639,30 @@ class CheckSetProblemDimensionsFromSystemInformation(unittest.TestCase):
         self.fakesbc.set_problem_dimensions_from_system_information()
 
         self.assertEqual(self.fakesbc.neps_u, 0)
-        
+
+
+class CheckAndSetTimepoints(unittest.TestCase):
+
+    def setUp(self):
+
+        self.fakesbc = FakeSetupsBaseClass()
+        self.fakesbc.check_and_set_control_time_points_input = \
+            mock.MagicMock()      
+        self.fakesbc.check_and_set_measurement_time_points_input = \
+            mock.MagicMock()
+        self.fakesbc.set_number_of_control_intervals = \
+            mock.MagicMock()
+
+    def test_functions_are_called_with_corresponding_arguments(self):
+
+        controls = {"tu": "controls"}
+        measurements = {"ty": "measurements"}
+
+        self.fakesbc.check_and_set_time_points(controls = controls, \
+            measurements = measurements)
+
+        self.fakesbc.check_and_set_control_time_points_input.\
+            assert_called_with("controls")
+        self.fakesbc.check_and_set_measurement_time_points_input.\
+            assert_called_with("measurements")
+        self.assertTrue(self.fakesbc.set_number_of_control_intervals.called)

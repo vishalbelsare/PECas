@@ -37,7 +37,7 @@ All systems also need to depend on unknown parameters that will be estimated.
 For more information on the several classes, see their descriptions below.
 '''
 
-import casadi as ca
+from interfaces import casadi_interface as ci
 
 import intro
 
@@ -68,7 +68,7 @@ class SystemBaseClass:
 
         for arg in self.__init__.__code__.co_varnames[1:]:
 
-                if not isinstance(getattr(self, arg), ca.casadi.MX):
+                if not isinstance(getattr(self, arg), type(ci.mx_sym("a"))):
 
                     raise TypeError('''
 Missing input argument for system definition or wrong variable type for an
@@ -109,11 +109,11 @@ class NonDyn(SystemBaseClass):
     '''
 
     def __init__(self, \
-                 t = ca.MX.sym("t", 1), \
-                 u = ca.MX.sym("u", 0), \
+                 t = ci.mx_sym("t", 1), \
+                 u = ci.mx_sym("u", 0), \
                  p = None, \
                  phi = None, \
-                 g = ca.MX.sym("g", 0)):
+                 g = ci.mx_sym("g", 0)):
 
         super(NonDyn, self).__init__()
 
@@ -209,12 +209,12 @@ class ExplODE(SystemBaseClass):
     '''
 
     def __init__(self, \
-                 t = ca.MX.sym("t", 1),
-                 u = ca.MX.sym("u", 0), \
+                 t = ci.mx_sym("t", 1),
+                 u = ci.mx_sym("u", 0), \
                  x = None, \
                  p = None, \
-                 eps_e = ca.MX.sym("eps_e", 0), \
-                 eps_u = ca.MX.sym("eps_u", 0), \
+                 eps_e = ci.mx_sym("eps_e", 0), \
+                 eps_u = ci.mx_sym("eps_u", 0), \
                  phi = None, \
                  f = None):
 
@@ -234,7 +234,7 @@ class ExplODE(SystemBaseClass):
 
         super(ExplODE, self).check_all_system_parts_are_casadi_symbolics()
 
-        if ca.dependsOn(f, t):
+        if ci.depends_on(f, t):
 
             raise NotImplementedError('''
 Explicit time dependecies of the ODE right hand side are not yet supported in
@@ -298,15 +298,15 @@ class ImplDAE(SystemBaseClass):
     '''
 
     def __init__(self, \
-             t = ca.MX.sym("t", 1),
-             u = ca.MX.sym("u", 0), \
+             t = ci.mx_sym("t", 1),
+             u = ci.mx_sym("u", 0), \
              x = None, \
              p = None, \
-             eps_e = ca.MX.sym("eps_e", 0), \
-             eps_u = ca.MX.sym("eps_u", 0), \
+             eps_e = ci.mx_sym("eps_e", 0), \
+             eps_u = ci.mx_sym("eps_u", 0), \
              phi = None, \
              f = None, \
-             g = ca.MX.sym("g", 0)):
+             g = ci.mx_sym("g", 0)):
 
         raise NotImplementedError( \
             "Support of implicit DAEs is not implemented yet.")

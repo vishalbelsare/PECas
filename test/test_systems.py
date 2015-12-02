@@ -20,7 +20,7 @@
 
 # Test the classes for system definitions
 
-import casadi as ca
+import pecas.interfaces.casadi_interface as ci
 import pecas.systems
 
 import unittest
@@ -29,11 +29,11 @@ class NonDyn(unittest.TestCase):
 
     def setUp(self):
 
-        self.t = ca.MX.sym("t", 1)
-        self.u = ca.MX.sym("u", 1)
-        self.p = ca.MX.sym("p", 1)
-        self.phi = ca.MX.sym("phi", 1)
-        self.g = ca.MX.sym("g", 1)
+        self.t = ci.mx_sym("t", 1)
+        self.u = ci.mx_sym("u", 1)
+        self.p = ci.mx_sym("p", 1)
+        self.phi = ci.mx_sym("phi", 1)
+        self.g = ci.mx_sym("g", 1)
 
 
     def test_init_p_phi(self):
@@ -82,14 +82,14 @@ class ExplODE(unittest.TestCase):
 
     def setUp(self):
 
-        self.t = ca.MX.sym("t", 1)
-        self.u = ca.MX.sym("u", 1)
-        self.x = ca.MX.sym("x", 1)
-        self.p = ca.MX.sym("p", 1)
-        self.eps_e = ca.MX.sym("eps_e", 1)
-        self.eps_u = ca.MX.sym("eps_u", 1)
-        self.phi = ca.MX.sym("phi", 1)
-        self.f = ca.MX.sym("f", 1)
+        self.t = ci.mx_sym("t", 1)
+        self.u = ci.mx_sym("u", 1)
+        self.x = ci.mx_sym("x", 1)
+        self.p = ci.mx_sym("p", 1)
+        self.eps_e = ci.mx_sym("eps_e", 1)
+        self.eps_u = ci.mx_sym("eps_u", 1)
+        self.phi = ci.mx_sym("phi", 1)
+        self.f = ci.mx_sym("f", 1)
 
 
     def test_init_x_p_epse_phi_f(self):
