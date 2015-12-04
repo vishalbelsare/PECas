@@ -345,12 +345,12 @@ class SetupsBaseClass(object):
         if self.neps_e != 0:
 
             self.optimvars["EPS_E"] = ci.mx_sym("EPS_E", \
-                self.neps_e, ntauroot * self.nintervals)
+                self.neps_e, max(1, ntauroot) * self.nintervals)
 
         if self.neps_u != 0:
                 
             self.optimvars["EPS_U"] = ci.mx_sym("EPS_U", \
-                self.neps_u, ntauroot * self.nintervals)
+                self.neps_u, max(1, ntauroot) * self.nintervals)
 
         if self.nu != 0:
 

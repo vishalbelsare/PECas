@@ -831,6 +831,15 @@ class SetOptimizationVariables(unittest.TestCase):
             (0, self.fakesbc.nintervals))
 
 
+    def test_dimension_optimvar_eps_e_ntauroot_zero(self):
+
+        self.fakesbc.discretization_settings.collocation_polynomial_degree.return_value = 0
+
+        self.fakesbc.set_optimization_variables()
+        self.assertEqual(self.fakesbc.optimvars["EPS_E"].shape, \
+            (self.fakesbc.neps_e, self.fakesbc.nintervals))
+
+
     def test_dimension_optimvar_eps_u_not_zero(self):
 
         self.fakesbc.set_optimization_variables()
@@ -847,6 +856,15 @@ class SetOptimizationVariables(unittest.TestCase):
         self.fakesbc.set_optimization_variables()
         self.assertEqual(self.fakesbc.optimvars["EPS_U"].shape, \
             (0, self.fakesbc.nintervals))
+
+
+    def test_dimension_optimvar_eps_u_ntauroot_zero(self):
+
+        self.fakesbc.discretization_settings.collocation_polynomial_degree.return_value = 0
+
+        self.fakesbc.set_optimization_variables()
+        self.assertEqual(self.fakesbc.optimvars["EPS_U"].shape, \
+            (self.fakesbc.neps_u, self.fakesbc.nintervals))
 
 
     def test_dimension_optimvar_u_not_zero(self):
