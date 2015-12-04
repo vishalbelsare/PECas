@@ -37,11 +37,11 @@ class SetupsBaseClass(object):
 
         def __init__(self, \
             discretization_method = None, \
-            collocation_polynomial_order = 3, \
+            number_of_collocation_points = 3, \
             collocation_scheme = "radau"):
 
             self.discretization_method = discretization_method
-            self.collocation_polynomial_order = collocation_polynomial_order
+            self.number_of_collocation_points = number_of_collocation_points
             self.collocation_scheme = collocation_scheme
 
 
@@ -49,11 +49,11 @@ class SetupsBaseClass(object):
 
             if self.discretization_method == "collocation":
 
-                if self.collocation_polynomial_order and \
+                if self.number_of_collocation_points and \
                     self.collocation_scheme:
 
                     return ci.collocation_points( \
-                        self.collocation_polynomial_order, \
+                        self.number_of_collocation_points, \
                         self.collocation_scheme)
 
             else:
@@ -61,7 +61,7 @@ class SetupsBaseClass(object):
                 return []
 
 
-        def ncollocation_points(self):
+        def collocation_polynomial_degree(self):
 
             return max(0, len(self.collocation_points()) - 1)
 
@@ -326,7 +326,7 @@ class SetupsBaseClass(object):
 
     def set_optimization_variables(self):
 
-        ntauroot = self.discretization_settings.ncollocation_points()
+        ntauroot = self.discretization_settings.collocation_polynomial_degree()
 
         self.optimvars = {key: ci.dmatrix(0, self.nintervals) \
             for key in ["P", "V", "X", "EPS_E", "EPS_U", "U"]}
@@ -360,7 +360,7 @@ class SetupsBaseClass(object):
 
     @abstractmethod
     def __init__(self, system, controls, measurements, discretization_method, \
-        collocation_polynomial_order, collocation_scheme):
+        number_of_collocation_points, collocation_scheme):
 
         intro.pecas_intro()
         print('\n' + 24 * '-' + \
@@ -377,7 +377,7 @@ class SetupsBaseClass(object):
         self.discretization_settings = \
             self.DiscretizationSettings( \
                 discretization_method = discretization_method, \
-                collocation_polynomial_order = collocation_polynomial_order, \
+                number_of_collocation_points = number_of_collocation_points, \
                 collocation_scheme = collocation_scheme)
 
         self.set_optimization_variables()
