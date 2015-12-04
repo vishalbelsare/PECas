@@ -23,8 +23,8 @@ from abc import ABCMeta, abstractmethod
 
 import time
 
-from ..interfaces import casadi_interface as ci
-from .. import intro
+from pecas.interfaces import casadi_interface as ci
+from pecas import intro
 import ipdb
 
 import time
@@ -33,7 +33,7 @@ class SetupsBaseClass(object):
 
     __metaclass__ = ABCMeta
 
-    class DiscretizationSettings(object):
+    class Discretization(object):
 
         def __init__(self, \
             discretization_method = None, \
@@ -45,7 +45,7 @@ class SetupsBaseClass(object):
             self.collocation_scheme = collocation_scheme
 
 
-        def collocation_points(self):
+        def get_collocation_points(self):
 
             if self.discretization_method == "collocation":
 
@@ -61,9 +61,12 @@ class SetupsBaseClass(object):
                 return []
 
 
-        def collocation_polynomial_degree(self):
+        def get_collocation_polynomial_degree(self):
 
-            return max(0, len(self.collocation_points()) - 1)
+            return max(0, len(self.get_collocation_points()) - 1)
+
+
+        # def compute_
 
 
     def set_system(self, system):
@@ -326,7 +329,7 @@ class SetupsBaseClass(object):
 
     def set_optimization_variables(self):
 
-        ntauroot = self.discretization_settings.collocation_polynomial_degree()
+        ntauroot = self.discretization.get_collocation_polynomial_degree()
 
         self.optimvars = {key: ci.dmatrix(0, self.nintervals) \
             for key in ["P", "V", "X", "EPS_E", "EPS_U", "U"]}
@@ -359,6 +362,21 @@ class SetupsBaseClass(object):
 
 
     @abstractmethod
+    def define_number_of_control_intervals(self):
+
+        pass
+
+    @abstractmethod
+    def discretize_problem(self):
+
+        pass
+
+    @abstractmethod
+    def set_initials(self):
+
+        pass
+
+    # @abstractmethod
     def __init__(self, system, controls, measurements, discretization_method, \
         number_of_collocation_points, collocation_scheme):
 
@@ -367,17 +385,22 @@ class SetupsBaseClass(object):
             ' PECas system initialization ' + 25 * '-')
         print('\nStart system initialization ...')
 
-        self.set_system
+        self.set_system(system)
 
         self.set_problem_dimensions_from_system_information()
 
         self.check_and_set_time_points(controls = controls, \
             measurements = measurements)
+
+        self.define_number_of_control_values()
         
-        self.discretization_settings = \
-            self.DiscretizationSettings( \
+        self.discretization = self.Discretization( \
                 discretization_method = discretization_method, \
                 number_of_collocation_points = number_of_collocation_points, \
                 collocation_scheme = collocation_scheme)
 
         self.set_optimization_variables()
+
+        self.discretize_problem()
+
+        self.set_initials()

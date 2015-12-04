@@ -38,7 +38,22 @@ class FakeSetupsBaseClass(SetupsBaseClass):
         pass
 
 
-class DiscretizationSettings(unittest.TestCase):
+    def define_number_of_control_intervals(self):
+
+        pass
+
+
+    def discretize_problem(self):
+
+        pass
+
+
+    def set_initials(self):
+
+        pass
+
+
+class Discretization(unittest.TestCase):
 
     def setUp(self):
 
@@ -50,25 +65,25 @@ class DiscretizationSettings(unittest.TestCase):
 
     def test_set_default_method(self):
 
-        self.ds = self.fakesbc.DiscretizationSettings()
+        self.ds = self.fakesbc.Discretization()
         self.assertEqual(self.ds.discretization_method, None)
 
     
     def test_set_default_number_of_collocation_points(self):
 
-        self.ds = self.fakesbc.DiscretizationSettings()
+        self.ds = self.fakesbc.Discretization()
         self.assertEqual(self.ds.number_of_collocation_points, 3)
 
 
     def test_set_default_collocation_scheme(self):
 
-        self.ds = self.fakesbc.DiscretizationSettings()
+        self.ds = self.fakesbc.Discretization()
         self.assertEqual(self.ds.collocation_scheme, "radau")
 
 
     def test_set_custom_method(self):
 
-        self.ds = self.fakesbc.DiscretizationSettings( \
+        self.ds = self.fakesbc.Discretization( \
             discretization_method = self.discretization_method)
         self.assertEqual(self.ds.discretization_method, \
             self.discretization_method)
@@ -76,7 +91,7 @@ class DiscretizationSettings(unittest.TestCase):
     
     def test_set_custom_number_of_collocation_points(self):
 
-        self.ds = self.fakesbc.DiscretizationSettings( \
+        self.ds = self.fakesbc.Discretization( \
             number_of_collocation_points= self.number_of_collocation_points)
         self.assertEqual(self.ds.number_of_collocation_points, \
             self.number_of_collocation_points)
@@ -84,7 +99,7 @@ class DiscretizationSettings(unittest.TestCase):
 
     def test_set_custom_collocation_scheme(self):
 
-        self.ds = self.fakesbc.DiscretizationSettings( \
+        self.ds = self.fakesbc.Discretization( \
             collocation_scheme= self.collocation_scheme)
         self.assertEqual(self.ds.collocation_scheme, \
             self.collocation_scheme)
@@ -95,9 +110,9 @@ class DiscretizationSettings(unittest.TestCase):
         collocation_points = \
             [0.0, 0.15505102572168222, 0.6449489742783179, 1.0]
 
-        self.ds = self.fakesbc.DiscretizationSettings( \
+        self.ds = self.fakesbc.Discretization( \
             discretization_method = self.discretization_method)
-        self.assertEqual(self.ds.collocation_points(), collocation_points)
+        self.assertEqual(self.ds.get_collocation_points(), collocation_points)
 
 
     def test_return_collocation_polynomial_degree_for_collocation(self):
@@ -105,9 +120,9 @@ class DiscretizationSettings(unittest.TestCase):
         # collocation_points = casadi.collocationPoints(3, "radau")
         collocation_polynomial_degree = 3
 
-        self.ds = self.fakesbc.DiscretizationSettings( \
+        self.ds = self.fakesbc.Discretization( \
             discretization_method = self.discretization_method)
-        self.assertEqual(self.ds.collocation_polynomial_degree(), \
+        self.assertEqual(self.ds.get_collocation_polynomial_degree(), \
             collocation_polynomial_degree)
 
 
@@ -115,18 +130,18 @@ class DiscretizationSettings(unittest.TestCase):
 
         collocation_points = []
 
-        self.ds = self.fakesbc.DiscretizationSettings( \
+        self.ds = self.fakesbc.Discretization( \
             discretization_method = None)
-        self.assertEqual(self.ds.collocation_points(), collocation_points)
+        self.assertEqual(self.ds.get_collocation_points(), collocation_points)
 
 
     def test_return_collocation_polynomial_degree_for_other_methods(self):
 
         collocation_polynomial_degree = 0
 
-        self.ds = self.fakesbc.DiscretizationSettings( \
+        self.ds = self.fakesbc.Discretization( \
             discretization_method = None)
-        self.assertEqual(self.ds.collocation_polynomial_degree(), \
+        self.assertEqual(self.ds.get_collocation_polynomial_degree(), \
             collocation_polynomial_degree)
 
 
@@ -776,10 +791,10 @@ class SetOptimizationVariables(unittest.TestCase):
         self.fakesbc.nu = 6
 
         self.fakesbc.nintervals = 12
-        self.fakesbc.discretization_settings = mock.MagicMock()
-        self.fakesbc.discretization_settings.collocation_polynomial_degree = \
+        self.fakesbc.discretization = mock.MagicMock()
+        self.fakesbc.discretization.get_collocation_polynomial_degree = \
             mock.MagicMock()
-        self.fakesbc.discretization_settings.collocation_polynomial_degree.return_value = 3
+        self.fakesbc.discretization.get_collocation_polynomial_degree.return_value = 3
 
     def test_dimension_optimvar_p(self):
 
@@ -800,7 +815,7 @@ class SetOptimizationVariables(unittest.TestCase):
         self.fakesbc.set_optimization_variables()
         self.assertEqual(self.fakesbc.optimvars["X"].shape, \
             (self.fakesbc.nx, \
-            (self.fakesbc.discretization_settings.collocation_polynomial_degree() + 1) * \
+            (self.fakesbc.discretization.get_collocation_polynomial_degree() + 1) * \
                 self.fakesbc.nintervals))
 
 
@@ -818,7 +833,7 @@ class SetOptimizationVariables(unittest.TestCase):
         self.fakesbc.set_optimization_variables()
         self.assertEqual(self.fakesbc.optimvars["EPS_E"].shape, \
             (self.fakesbc.neps_e, \
-            self.fakesbc.discretization_settings.collocation_polynomial_degree() * \
+            self.fakesbc.discretization.get_collocation_polynomial_degree() * \
                 self.fakesbc.nintervals))
 
 
@@ -833,7 +848,7 @@ class SetOptimizationVariables(unittest.TestCase):
 
     def test_dimension_optimvar_eps_e_ntauroot_zero(self):
 
-        self.fakesbc.discretization_settings.collocation_polynomial_degree.return_value = 0
+        self.fakesbc.discretization.get_collocation_polynomial_degree.return_value = 0
 
         self.fakesbc.set_optimization_variables()
         self.assertEqual(self.fakesbc.optimvars["EPS_E"].shape, \
@@ -845,7 +860,7 @@ class SetOptimizationVariables(unittest.TestCase):
         self.fakesbc.set_optimization_variables()
         self.assertEqual(self.fakesbc.optimvars["EPS_U"].shape, \
             (self.fakesbc.neps_u, \
-            self.fakesbc.discretization_settings.collocation_polynomial_degree() * \
+            self.fakesbc.discretization.get_collocation_polynomial_degree() * \
                 self.fakesbc.nintervals))
 
 
@@ -860,7 +875,7 @@ class SetOptimizationVariables(unittest.TestCase):
 
     def test_dimension_optimvar_eps_u_ntauroot_zero(self):
 
-        self.fakesbc.discretization_settings.collocation_polynomial_degree.return_value = 0
+        self.fakesbc.discretization.get_collocation_polynomial_degree.return_value = 0
 
         self.fakesbc.set_optimization_variables()
         self.assertEqual(self.fakesbc.optimvars["EPS_U"].shape, \
