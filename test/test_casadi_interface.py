@@ -126,3 +126,19 @@ class DependsOn(unittest.TestCase):
 
         b = ca.MX.sym("b")
         self.assertFalse(ci.depends_on(b, self.a))
+
+
+class CollocationPoints(unittest.TestCase):
+
+    def setUp(self):
+
+        self.order = 3
+        self.scheme = "radau"
+        # self.collocation_points = casadi.collocationPoints(3, "radau")
+        self.collocation_points = \
+            [0.0, 0.15505102572168222, 0.6449489742783179, 1.0]
+
+    def test_collocation_points(self):
+
+        self.assertEqual(ci.collocation_points(self.order, self.scheme), \
+            self.collocation_points)

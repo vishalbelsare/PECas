@@ -34,6 +34,13 @@ def dmatrix(dim1, dim2 = 1):
 
     return ca.DMatrix(dim1, dim2)
 
+
 def depends_on(b, a):
 
     return ca.dependsOn(b, a)
+
+
+def collocation_points(order, scheme):
+
+    return ca.collocationPoints(order, scheme)
+    

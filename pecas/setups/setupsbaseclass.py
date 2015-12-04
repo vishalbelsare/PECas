@@ -33,6 +33,39 @@ class SetupsBaseClass(object):
 
     __metaclass__ = ABCMeta
 
+    class DiscretizationSettings(object):
+
+        def __init__(self, \
+            discretization_method = None, \
+            collocation_polynomial_order = 3, \
+            collocation_scheme = "radau"):
+
+            self.discretization_method = discretization_method
+            self.collocation_polynomial_order = collocation_polynomial_order
+            self.collocation_scheme = collocation_scheme
+
+
+        def collocation_points(self):
+
+            if self.discretization_method == "collocation":
+
+                if self.collocation_polynomial_order and \
+                    self.collocation_scheme:
+
+                    return ci.collocation_points( \
+                        self.collocation_polynomial_order, \
+                        self.collocation_scheme)
+
+            else:
+
+                return []
+
+
+        def ncollocation_points(self):
+
+            return max(0, len(self.collocation_points()) - 1)
+
+
     def set_system(self, system):
 
         self.system = system
@@ -290,54 +323,44 @@ class SetupsBaseClass(object):
 
     #     self.set_error_initials_to_zero()
 
+
     def set_optimization_variables(self):
 
-        self.P = ci.mx_sym("P", self.np)
+        ntauroot = self.discretization_settings.ncollocation_points()
 
-        self.V = ci.mx_sym("V", self.nphi, self.nintervals+1)
+        self.optimvars = {key: ci.dmatrix(0, self.nintervals) \
+            for key in ["P", "V", "X", "EPS_E", "EPS_U", "U"]}
+
+        self.optimvars["P"] = ci.mx_sym("P", self.np)
+
+        self.optimvars["V"] = ci.mx_sym("V", self.nphi, self.nintervals+1)
 
         if self.nx != 0:
 
-            self.X = ci.mx_sym("X", \
-                (self.nx * (self.ntauroot+1)), self.nintervals)
-            self.XF = ci.mx_sym("XF", self.nx)
-
-        else:
-
-            self.X = ci.dmatrix(0, self.nintervals)
-            self.XF = ci.dmatrix(0, self.nintervals)
+            # Attention! Way of ordering has changed! Consider when
+            # reapplying collocation and multiple shooting!
+            self.optimvars["X"] = ci.mx_sym("X", \
+                self.nx, (ntauroot + 1) * self.nintervals)
         
         if self.neps_e != 0:
 
-            self.EPS_E = ci.mx_sym("EPS_E", \
-                (self.neps_e * self.ntauroot), self.nintervals)
-
-        else:
-
-            self.EPS_E = ci.dmatrix(0, self.nintervals)
+            self.optimvars["EPS_E"] = ci.mx_sym("EPS_E", \
+                self.neps_e, ntauroot * self.nintervals)
 
         if self.neps_u != 0:
                 
-            self.EPS_U = ci.mx_sym("EPS_U", \
-                (self.neps_u * self.ntauroot), self.nintervals)
-
-        else:
-
-            self.EPS_U = ci.dmatrix(0, self.nintervals)
-
+            self.optimvars["EPS_U"] = ci.mx_sym("EPS_U", \
+                self.neps_u, ntauroot * self.nintervals)
 
         if self.nu != 0:
 
-            self.U = ci.mx_sym("U", \
-                (self.nu * self.ntauroot), self.nintervals)
-
-        else:
-
-            self.U = ci.dmatrix(0, self.nintervals)
+            self.optimvars["U"] = ci.mx_sym("U", \
+                self.nu, ntauroot * self.nintervals)
 
 
     @abstractmethod
-    def __init__(self, system, controls, measurements):
+    def __init__(self, system, controls, measurements, discretization_method, \
+        collocation_polynomial_order, collocation_scheme):
 
         intro.pecas_intro()
         print('\n' + 24 * '-' + \
@@ -351,3 +374,10 @@ class SetupsBaseClass(object):
         self.check_and_set_time_points(controls = controls, \
             measurements = measurements)
         
+        self.discretization_settings = \
+            self.DiscretizationSettings( \
+                discretization_method = discretization_method, \
+                collocation_polynomial_order = collocation_polynomial_order, \
+                collocation_scheme = collocation_scheme)
+
+        self.set_optimization_variables()
