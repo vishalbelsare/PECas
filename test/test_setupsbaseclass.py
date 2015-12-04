@@ -851,9 +851,7 @@ class SetOptimizationVariables(unittest.TestCase):
 
         self.fakesbc.set_optimization_variables()
         self.assertEqual(self.fakesbc.optimvars["U"].shape, \
-            (self.fakesbc.nu, \
-            self.fakesbc.discretization_settings.ncollocation_points() * \
-                self.fakesbc.nintervals))
+            (self.fakesbc.nu, self.fakesbc.nintervals))
 
 
     def test_dimension_optimvar_u_zero(self):

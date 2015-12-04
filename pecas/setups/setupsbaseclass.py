@@ -355,7 +355,7 @@ class SetupsBaseClass(object):
         if self.nu != 0:
 
             self.optimvars["U"] = ci.mx_sym("U", \
-                self.nu, ntauroot * self.nintervals)
+                self.nu, self.nintervals)
 
 
     @abstractmethod
