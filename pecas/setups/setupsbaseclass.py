@@ -33,42 +33,6 @@ class SetupsBaseClass(object):
 
     __metaclass__ = ABCMeta
 
-    class Discretization(object):
-
-        def __init__(self, \
-            discretization_method = None, \
-            number_of_collocation_points = 3, \
-            collocation_scheme = "radau"):
-
-            self.discretization_method = discretization_method
-            self.number_of_collocation_points = number_of_collocation_points
-            self.collocation_scheme = collocation_scheme
-
-
-        def get_collocation_points(self):
-
-            if self.discretization_method == "collocation":
-
-                if self.number_of_collocation_points and \
-                    self.collocation_scheme:
-
-                    return ci.collocation_points( \
-                        self.number_of_collocation_points, \
-                        self.collocation_scheme)
-
-            else:
-
-                return []
-
-
-        def get_collocation_polynomial_degree(self):
-
-            return max(0, len(self.get_collocation_points()) - 1)
-
-
-        # def compute_
-
-
     def set_system(self, system):
 
         self.system = system
@@ -222,7 +186,7 @@ class SetupsBaseClass(object):
                     "State values provided by user have wrong dimension.")
 
             self.xdata = xdata
-            # self.Xinit = ca.repmat(xinit[:,:-1], self.ntauroot+1, 1)
+            # self.Xinit = ca.repmat(xinit[:,:-1], self.pol_degree+1, 1)
             # self.XFinit = xinit[:,-1]
     
         else:
@@ -326,10 +290,48 @@ class SetupsBaseClass(object):
 
     #     self.set_error_initials_to_zero()
 
+    class Discretization(object):
+
+        def __init__(self, \
+            discretization_method = None, \
+            number_of_collocation_points = 3, \
+            collocation_scheme = "radau"):
+
+            self.discretization_method = discretization_method
+            self.number_of_collocation_points = number_of_collocation_points
+            self.collocation_scheme = collocation_scheme
+
+
+        def get_collocation_points(self):
+
+            if self.discretization_method == "collocation":
+
+                if self.number_of_collocation_points and \
+                    self.collocation_scheme:
+
+                    return ci.collocation_points( \
+                        self.number_of_collocation_points, \
+                        self.collocation_scheme)
+
+            else:
+
+                return []
+
+
+        def get_collocation_polynomial_degree(self):
+
+            return max(0, len(self.get_collocation_points()) - 1)
+
+
+    @abstractmethod
+    def define_number_of_control_intervals(self):
+
+        pass
+
 
     def set_optimization_variables(self):
 
-        ntauroot = self.discretization.get_collocation_polynomial_degree()
+        pol_degree = self.discretization.get_collocation_polynomial_degree()
 
         self.optimvars = {key: ci.dmatrix(0, self.nintervals) \
             for key in ["P", "V", "X", "EPS_E", "EPS_U", "U"]}
@@ -343,17 +345,17 @@ class SetupsBaseClass(object):
             # Attention! Way of ordering has changed! Consider when
             # reapplying collocation and multiple shooting!
             self.optimvars["X"] = ci.mx_sym("X", \
-                self.nx, (ntauroot + 1) * self.nintervals)
+                self.nx, (pol_degree + 1) * self.nintervals)
         
         if self.neps_e != 0:
 
             self.optimvars["EPS_E"] = ci.mx_sym("EPS_E", \
-                self.neps_e, max(1, ntauroot) * self.nintervals)
+                self.neps_e, max(1, pol_degree) * self.nintervals)
 
         if self.neps_u != 0:
                 
             self.optimvars["EPS_U"] = ci.mx_sym("EPS_U", \
-                self.neps_u, max(1, ntauroot) * self.nintervals)
+                self.neps_u, max(1, pol_degree) * self.nintervals)
 
         if self.nu != 0:
 
@@ -361,10 +363,80 @@ class SetupsBaseClass(object):
                 self.nu, self.nintervals)
 
 
-    @abstractmethod
-    def define_number_of_control_intervals(self):
+    def compute_collocation_time_points(self):
+
+        pol_degree = self.discretization.get_collocation_polynomial_degree()
+
+        self.T = np.zeros(pol_degree, self.nintervals)
+
+        for k in range (self.nintervals):
+
+            for j in range(pol_degree + 1):
+
+                self.T[j,k] = self.tu[k] + \
+                    (self.tu[k+1] - self.tu[k]) * pol_degree[j]
+
+
+    def compute_collocation_coefficients(self):
+
+        pol_degree = self.discretization.get_collocation_polynomial_degree()
+    
+        # Coefficients of the collocation equation
+
+        self.C = np.zeros((pol_degree + 1, pol_degree + 1))
+
+        # Coefficients of the continuity equation
+
+        self.D = np.zeros(pol_degree + 1)
+
+        # Dimensionless time inside one control interval
+
+        tau = ca.SX.sym("tau")
+
+        # For all collocation points
+
+        for j in range(pol_degree + 1):
+
+            # Construct Lagrange polynomials to get the polynomial basis
+            # at the collocation point
+            
+            L = 1
+            
+            for r in range(pol_degree + 1):
+            
+                if r != j:
+            
+                    L *= (tau - pol_degree[r]) / \
+                        (pol_degree[j] - pol_degree[r])
+    
+
+            lfcn = ca.SXFunction("lfcn", [tau],[L])
+          
+            # Evaluate the polynomial at the final time to get the
+            # coefficients of the continuity equation
+            
+            [self.D[j]] = lfcn([1])
+
+            # Evaluate the time derivative of the polynomial at all 
+            # collocation points to get the coefficients of the
+            # collocation equation
+            
+            tfcn = lfcn.tangent()
+
+            for r in range(self.ntauroot + 1):
+
+                [self.C[j,r]] = tfcn([self.tauroot[r]])
+
+
+    def set_collocation_nodes(self):
 
         pass
+
+
+    def set_collocation_continuity_nodes(self):
+
+        pass
+        
 
     @abstractmethod
     def discretize_problem(self):

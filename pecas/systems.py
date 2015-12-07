@@ -18,51 +18,12 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with PECas. If not, see <http://www.gnu.org/licenses/>.
 
-'''
-PECas provides different classes for defining systems for parameter estimation
-problems that can be solved within PECas. According to a
-system\'s properties, a suitable class needs to be used:
-
-* :class:`NonDyn`: non-dynamic, contains an output function and possibly
-  equality constraints, possibly dependent on time and/or controls.
-
-* :class:`ExplODE`: dynamic system of explicit ODEs, contains an output
-  function but no algebraic equations, possibly dependent on time and/or
-  controls, equation errors, input errors.
-
-* :class:`ImplDAE` (not yet implemented!): dynamic system of implicit DAEs,
-  possibly dependent on time and/or controls.
-
-All systems also need to depend on unknown parameters that will be estimated.
-For more information on the several classes, see their descriptions below.
-'''
-
 from interfaces import casadi_interface as ci
 
-import intro
+from intro import pecas_intro
+import discretization
 
-from abc import ABCMeta, abstractmethod
-
-class SystemBaseClass:
-
-    __metaclass__ = ABCMeta
-
-    @abstractmethod
-    def __init__(self):
-
-        intro.pecas_intro()
-        
-        print('\n' + 26 * '-' + \
-            ' PECas system definition ' + 27 * '-')
-
-
-    def show_system_information(self, showEquations = False):
-        
-        intro.pecas_intro()
-
-        print('\n' + 26 * '-' + \
-            ' PECas system information ' + 26 * '-')
-
+class System:
 
     def check_all_system_parts_are_casadi_symbolics(self):
 
@@ -75,238 +36,236 @@ Missing input argument for system definition or wrong variable type for an
 input argument. Input arguments must be CasADi symbolic types.''')
 
 
-class NonDyn(SystemBaseClass):
+    def check_no_explicit_time_dependecy(self):
 
-    '''
-    :param t: time :math:`t \in \mathbb{R}` (optional)
-    :type t: casadi.casadi.MX
-
-    :param u: controls :math:`u \in \mathbb{R}^{n_{u}}` (optional)
-    :type u: casadi.casadi.MX
-
-    :param p: unknown parameters :math:`p \in \mathbb{R}^{n_{p}}`
-    :type p: casadi.casadi.MX
-
-    :param phi: output function :math:`\phi(t, u, p) = y \in \mathbb{R}^{n_{y}}`
-    :type phi: casadi.casadi.MX
-
-    :param g: equality constraints :math:`g(t, u, p) = 0 \in \mathbb{R}^{n_{g}}`
-              (optional)
-    :type g: casadi.casadi.MX
-
-    :raises: TypeError
-
-
-    The class :class:`NonDyn` is used to define non-dynamic
-    systems for parameter estimation of the following structure:
-
-    .. math::
-
-        y = \phi(t, u, p)
-
-        0 = g(t, u, p).
-        
-    '''
-
-    def __init__(self, \
-                 t = ci.mx_sym("t", 1), \
-                 u = ci.mx_sym("u", 0), \
-                 p = None, \
-                 phi = None, \
-                 g = ci.mx_sym("g", 0)):
-
-        super(NonDyn, self).__init__()
-
-        print('\nStarting definition of NonDyn system ...')
-
-        self.t = t
-        self.u = u
-        self.p = p
-
-        self.phi = phi
-        self.g = g
-
-        super(NonDyn, self).check_all_system_parts_are_casadi_symbolics()
-
-        print('\nDefinition of NonDyn system sucessful.')
-
-
-    def show_system_information(self, showEquations = False):
-
-        r'''
-        :param showEquations: show model equations and measurement functions
-        :type showEquations: bool
-
-        This function shows the system type and the dimension of the system
-        components. If `showEquations` is set to `True`, also the model
-        equations and measurement functions are shown.
-        '''
-
-        super(NonDyn, self).show_system_information( \
-            showEquations = showEquations)
-
-        print('''\The system is a non-dynamic systems with the general 
-input-output structure and contrain equations: ''')
-        
-        print("y = phi(t, u, p), g(t, u, p) = 0 ")
-        
-        print('''\nWith {0} inputs u, {1} parameters p and {2} outputs phi
-        '''.format(self.u.size(),self.p.size(), \
-            self.phi.size()))
-
-        if showEquations:
-            
-            print("\nAnd where phi is defined by: ")
-            for i, yi in enumerate(self.phi):         
-                print("y[{0}] = {1}".format(\
-                     i, yi))
-                     
-            print("\nAnd where g is defined by: ")
-            for i, gi in enumerate(self.g):              
-                print("g[{0}] = {1}".format(\
-                     i, gi))
-
-
-class ExplODE(SystemBaseClass):
-
-    r'''
-    :param t: time :math:`t \in \mathbb{R}` (optional)
-    :type t: casadi.casadi.MX
-
-    :param u: controls :math:`u \in \mathbb{R}^{n_{u}}` (optional)
-    :type u: casadi.casadi.MX
-
-    :param x: states :math:`x \in \mathbb{R}^{n_{x}}`
-    :type x: casadi.casadi.MX
-
-    :param p: unknown parameters :math:`p \in \mathbb{R}^{n_{p}}`
-    :type p: casadi.casadi.MX
-
-    :param eps_e: equation errors :math:`\epsilon_{e} \in \mathbb{R}^{n_{\epsilon_{e}}}` (optional)
-    :type eps_e: casadi.casadi.MX
-
-    :param eps_u: input errors :math:`\epsilon_{u} \in \mathbb{R}^{n_{\epsilon_{u}}}` (optional)
-    :type eps_u: casadi.casadi.MX
-
-    :param phi: output function :math:`\phi(t, u, x, p) = y \in \mathbb{R}^{n_{y}}`
-    :type phi: casadi.casadi.MX
-
-    :param f: explicit system of ODEs :math:`f(t, u, x, p, \epsilon_{e}, \epsilon_{u}) = \dot{x} \in \mathbb{R}^{n_{x}}`
-    :type f: casadi.casadi.MX
-
-    :raises: TypeError
-
-
-    The class :class:`ExplODE` is used to define dynamic systems of explicit
-    ODEs for parameter estimation of the following structure:
-
-    .. math::
-
-        y & = & \phi(t, u, x, p) \\
-
-        \dot{x}  & = & f(t, u, x, p, \epsilon_{e}, \epsilon_{u}).
-
-    '''
-
-    def __init__(self, \
-                 t = ci.mx_sym("t", 1),
-                 u = ci.mx_sym("u", 0), \
-                 x = None, \
-                 p = None, \
-                 eps_e = ci.mx_sym("eps_e", 0), \
-                 eps_u = ci.mx_sym("eps_u", 0), \
-                 phi = None, \
-                 f = None):
-
-        super(ExplODE, self).__init__()
-
-        print('\nStarting definition of ExplODE system ...')
-
-        self.t = t
-        self.u = u
-        self.x = x
-        self.eps_e = eps_e
-        self.eps_u = eps_u
-        self.p = p
-
-        self.phi = phi
-        self.f = f
-
-        super(ExplODE, self).check_all_system_parts_are_casadi_symbolics()
-
-        if ci.depends_on(f, t):
+        if ci.depends_on(self.f, self.t):
 
             raise NotImplementedError('''
 Explicit time dependecies of the ODE right hand side are not yet supported in
-PECas, but probably will be in future versions.''')
-
-        print('Definition of ExplODE system sucessful.')
+PECas, but will be in future versions.''')
 
 
-    def show_system_information(self, showEquations = False):
+    def system_validation(self):
 
-        r'''
-        :param showEquations: show model equations and measurement functions
-        :type showEquations: bool
+        self.check_all_system_parts_are_casadi_symbolics()
+        self.check_no_explicit_time_dependecy()
 
-        This function shows the system type and the dimension of the system
-        components. If `showEquations` is set to `True`, also the model
-        equations and measurement functions are shown.
-        '''
-        
-        super(ExplODE, self).show_system_information( \
-            showEquations = showEquations)
+        if self.nx == 0 and self.nz == 0:
 
-        print('''\nThe system is a dynamic system defined by a set of
-explicit ODEs xdot which establish the system state x:
-xdot = f(t, u, x, p, eps_e, eps_u)
-and by an output function phi which sets the system measurements:
-y = phi(t, x, p).
+            self.print_nondyn_system_information()
+            self.discretization = discretization.NoDiscretization()
+
+        elif self.nx != 0 and self.nz == 0:
+
+            self.print_ode_system_information()
+            self.discretization = discretization.ODEDiscretization()
+
+        elif self.nx != 0 and self.nz != 0:
+
+            raise NotImplementedError('''
+Support of implicit DAEs is not implemented yet,
+but will be in future versions.
 ''')
+
+        else:
+
+            raise NotImplementedError('''
+The system definition provided by the user is invalid.
+See the documentation for a list of valid definitions.
+''')
+
+
+    def print_nondyn_system_information(self):
+
+        print('''
+The system is a non-dynamic systems with the general input-output
+structure and equality constraints:
+
+y = phi(t, u, p),
+g(t, u, p) = 0.
+
+Particularly, the system has:
+{0} inputs u
+{1} parameters p
+{2} outputs phi'''.format(self.nu,self.nz, self.nphi))
         
-        
-        print('''Particularly, the system has:
+        print("\nwhere phi is defined by ")
+        for i, yi in enumerate(self.phi):         
+            print("y[{0}] = {1}".format(i, yi))
+                 
+        print("\nand where g is defined by ")
+        for i, gi in enumerate(self.g):              
+            print("g[{0}] = {1}".format(i, gi) + ".")
+
+
+    def print_ode_system_information(self):
+
+        print('''
+The system is a dynamic system defined by a set of explicit ODEs xdot
+which establish the system state x and by an output function phi which
+sets the system measurements:
+
+xdot = f(t, u, x, p, eps_e, eps_u),
+y = phi(t, x, p).
+
+Particularly, the system has:
 {0} inputs u
 {1} parameters p
 {2} states x
-{3} outputs phi'''.format(self.u.size(),self.p.size(),\
-                            self.x.size(), \
-                            self.phi.size()))
+{3} outputs phi'''.format(self.nu,self.np, self.nx, self.nphi))
 
-        if showEquations:
-            
-            print("\nWhere xdot is defined by: ")
-            for i, xi in enumerate(self.f):         
-                print("xdot[{0}] = {1}".format(\
-                     i, xi))
-                     
-            print("\nAnd where phi is defined by: ")
-            for i, yi in enumerate(self.phi):              
-                print("y[{0}] = {1}".format(\
-                     i, yi))
+        
+        print("\nwhere xdot is defined by ")
+        for i, xi in enumerate(self.f):         
+            print("xdot[{0}] = {1}".format(i, xi))
+                 
+        print("\nand where phi is defined by ")
+        for i, yi in enumerate(self.phi):              
+            print("y[{0}] = {1}".format(i, yi) + ".")
 
 
-class ImplDAE(SystemBaseClass):
+    @property
+    def nu(self):
 
-    '''
-    :raises: NotImplementedError
+        return self.u.size()
 
 
-    The class :class:`ImplDAE` will be used to define dynamic systems of 
-    implicit DAEs for parameter estimation, but is not supported yet.
+    @property
+    def np(self):
 
-    '''
+        return self.p.size()
+
+
+    @property
+    def nx(self):
+
+        return self.x.size()
+
+
+    @property
+    def nz(self):
+
+        return self.z.size()
+
+    @property
+    def neps_e(self):
+
+        return self.eps_e.size()
+
+
+    @property
+    def neps_u(self):
+
+        return self.eps_u.size()
+
+    @property
+    def nphi(self):
+
+        return self.phi.size()
+
 
     def __init__(self, \
              t = ci.mx_sym("t", 1),
              u = ci.mx_sym("u", 0), \
-             x = None, \
              p = None, \
+             x = ci.mx_sym("u", 0), \
+             z = ci.mx_sym("u", 0),
              eps_e = ci.mx_sym("eps_e", 0), \
              eps_u = ci.mx_sym("eps_u", 0), \
              phi = None, \
-             f = None, \
+             f = ci.mx_sym("u", 0), \
              g = ci.mx_sym("g", 0)):
 
-        raise NotImplementedError( \
-            "Support of implicit DAEs is not implemented yet.")
+
+        r'''
+        :param t: time :math:`t \in \mathbb{R}` (not yet supported!)
+        :type t: casadi.casadi.MX
+
+        :param u: controls :math:`u \in \mathbb{R}^{n_{u}}` (optional)
+        :type u: casadi.casadi.MX
+
+        :param p: unknown parameters :math:`p \in \mathbb{R}^{n_{p}}`
+        :type p: casadi.casadi.MX
+
+        :param x: differential states :math:`x \in \mathbb{R}^{n_{x}}` (optional)
+        :type x: casadi.casadi.MX
+
+        :param z: algebraic states :math:`x \in \mathbb{R}^{n_{z}}` (optional)
+        :type z: casadi.casadi.MX
+
+        :param eps_e: equation errors :math:`\epsilon_{e} \in \mathbb{R}^{n_{\epsilon_{e}}}` (optional)
+        :type eps_e: casadi.casadi.MX
+
+        :param eps_u: input errors :math:`\epsilon_{u} \in \mathbb{R}^{n_{\epsilon_{u}}}` (optional)
+        :type eps_u: casadi.casadi.MX
+
+        :param phi: output function :math:`\phi(t, u, x, p) = y \in \mathbb{R}^{n_{y}}`
+        :type phi: casadi.casadi.MX
+
+        :param f: explicit system of ODEs :math:`f(t, u, x, z, p, \epsilon_{e}, \epsilon_{u}) = \dot{x} \in \mathbb{R}^{n_{x}}` (optional)
+        :type f: casadi.casadi.MX
+
+        :param g: equality constraints :math:`g(t, u, x, z, p) = 0 \in \mathbb{R}^{n_{g}}` (optional)
+                  (optional)
+        :type g: casadi.casadi.MX
+
+        :raises: TypeError
+
+
+        The class :class:`System` is used to define non-dynamic, explicit ODE-
+        or fully implicit DAE-systems systems within PECas. Depending on the
+        inputs the user provides, :class:`System` is interpreted as follows:
+
+
+        **Non-dynamic system** (x = None, z = None):
+
+        .. math::
+
+            y = \phi(t, u, p)
+
+            0 = g(t, u, p).
+
+
+        **ODE system** (x != None, z = None):
+
+        .. math::
+
+            y & = & \phi(t, u, x, p) \\
+
+            \dot{x}  & = & f(t, u, x, p, \epsilon_{e}, \epsilon_{u}).
+
+
+        **DAE system** (x != None, z != None) (not yet supported!):
+
+        .. math::
+
+            y & = & \phi(t, u, x, p) \\
+
+            \dot{x}  & = & f(t, u, x, z, p, \epsilon_{e}, \epsilon_{u}).
+
+            0 = g(t, u, x, z, p)
+
+        '''
+
+
+        pecas_intro()
+        
+        print('\n' + 26 * '-' + \
+            ' PECas system definition ' + 27 * '-')
+        print('\nStarting system definition ...')
+
+        self.t = t
+        self.u = u
+        self.p = p
+
+        self.x = x
+        self.z = z
+
+        self.eps_e = eps_e
+        self.eps_u = eps_u
+
+        self.phi = phi
+        self.f = f
+        self.g = g
+
+        self.system_validation()
