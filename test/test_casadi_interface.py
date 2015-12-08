@@ -61,30 +61,67 @@ class MXSymbolic(unittest.TestCase):
         self.assertEqual(mx_sym.shape, (self.dim1, self.dim2))
 
 
-class MXFunction(unittest.TestCase):
+class SXSymbolic(unittest.TestCase):
+
+    def setUp(self):
+
+        self.name = "varname"
+        self.dim1 = 3
+        self.dim2 = 2
+
+
+    def test_sx_sym_is_sx_sym_instance(self):
+
+        sx_sym = ci.sx_sym(self.name, self.dim1)
+        
+        self.assertTrue(isinstance(sx_sym, ca.casadi.SX))
+
+
+    def test_sx_sym_nodim(self):
+
+        sx_sym = ci.sx_sym(self.name)
+        
+        self.assertEqual(sx_sym.shape, (1, 1))
+
+
+    def test_sx_sym_1dim(self):
+
+        sx_sym = ci.sx_sym(self.name, self.dim1)
+        
+        self.assertEqual(sx_sym.shape, (self.dim1, 1))
+
+
+    def test_sx_sym_2dim(self):
+
+        sx_sym = ci.sx_sym(self.name, self.dim1, self.dim2)
+        
+        self.assertEqual(sx_sym.shape, (self.dim1, self.dim2))
+
+
+class SXFunction(unittest.TestCase):
 
     def setUp(self):
 
         self.name = "funcname"
-        a = ca.MX.sym("a", 1)
+        a = ca.SX.sym("a", 1)
         self.input = [a]
         self.output = [a**2]
 
 
-    def test_mx_function_is_mx_function_instance(self):
+    def test_sx_function_is_sx_function_instance(self):
 
-        mx_function = ci.mx_function(self.name, self.input, self.output)
+        sx_function = ci.sx_function(self.name, self.input, self.output)
         
-        self.assertTrue(isinstance(mx_function, ca.casadi.MXFunction))
+        self.assertTrue(isinstance(sx_function, ca.casadi.SXFunction))
 
 
-    def test_mx_function_call(self):
+    def test_sx_function_call(self):
 
-        mx_function = ci.mx_function(self.name, self.input, self.output)
+        sx_function = ci.sx_function(self.name, self.input, self.output)
         b = 2
         c = 4
 
-        self.assertTrue(mx_function([b]), c)
+        self.assertTrue(sx_function([b]), c)
 
 
 class DMatrix(unittest.TestCase):
@@ -142,3 +179,17 @@ class CollocationPoints(unittest.TestCase):
 
         self.assertEqual(ci.collocation_points(self.order, self.scheme), \
             self.collocation_points)
+
+class Vertcat(unittest.TestCase):
+
+    def setUp(self):
+
+        self.lenlist = 3
+        self.inputlist = [k for k in range(self.lenlist)]
+
+
+    def test_assure_vertcat_returns_column_vector(self):
+
+        v = ci.vertcat(self.inputlist)
+
+        self.assertEqual(v.shape[0], self.lenlist)

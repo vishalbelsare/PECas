@@ -131,91 +131,91 @@ class ODESetup(SetupsBaseClass):
         SetupsBaseClass.__init__(self, system = system, \
             controls = controls, measurements = measurements)
 
-        # self.assure_correct_system_type_for_setup_method( \
-        #     system, systems.ExplODE)
-        # self.set_problem_dimensions_from_system_information()
+        # # self.assure_correct_system_type_for_setup_method( \
+        # #     system, systems.ExplODE)
+        # # self.set_problem_dimensions_from_system_information()
 
-        # self.check_and_set_control_time_points_input(tu)
-        # self.check_and_set_measurement_time_points_input(ty)
+        # # self.check_and_set_control_time_points_input(tu)
+        # # self.check_and_set_measurement_time_points_input(ty)
 
-        # self.nsteps = controls["tu"].shape[0] - 1
-        self.ncontrols = self.nintervals
+        # # self.nsteps = controls["tu"].shape[0] - 1
+        # self.ncontrols = self.nintervals
 
-        # self.collocation_settings = collocation_settings
-        # self.tauroot = ca.collocationPoints( \
-        #     self.collocation_settings["order"], \
-        #     self.collocation_settings["scheme"])
+        # # self.collocation_settings = collocation_settings
+        # # self.tauroot = ca.collocationPoints( \
+        # #     self.collocation_settings["order"], \
+        # #     self.collocation_settings["scheme"])
 
-        # # Degree of interpolating polynomial
+        # # # Degree of interpolating polynomial
 
-        # self.ntauroot = len(self.tauroot) - 1
+        # # self.ntauroot = len(self.tauroot) - 1
 
-        self.check_and_set_all_inputs_and_initials( \
-            controls = controls, initials = initials)
+        # self.check_and_set_all_inputs_and_initials( \
+        #     controls = controls, initials = initials)
 
-        # Set tp the collocation coefficients
+        # # Set tp the collocation coefficients
 
-        # Coefficients of the collocation equation
+        # # Coefficients of the collocation equation
 
-        self.C = np.zeros((self.ntauroot + 1, self.ntauroot + 1))
+        # self.C = np.zeros((self.ntauroot + 1, self.ntauroot + 1))
 
-        # Coefficients of the continuity equation
+        # # Coefficients of the continuity equation
 
-        self.D = np.zeros(self.ntauroot + 1)
+        # self.D = np.zeros(self.ntauroot + 1)
 
-        # Dimensionless time inside one control interval
+        # # Dimensionless time inside one control interval
 
-        tau = ca.SX.sym("tau")
+        # tau = ca.SX.sym("tau")
 
-        # Construct the matrix T that contains all collocation time points
+        # # Construct the matrix T that contains all collocation time points
 
-        self.T = np.zeros((self.nsteps, self.ntauroot + 1))
+        # self.T = np.zeros((self.nsteps, self.ntauroot + 1))
 
-        for k in range(self.nsteps):
+        # for k in range(self.nsteps):
 
-            for j in range(self.ntauroot + 1):
+        #     for j in range(self.ntauroot + 1):
 
-                self.T[k,j] = self.tu[k] + \
-                    (self.tu[k+1] - self.tu[k]) * self.tauroot[j]
+        #         self.T[k,j] = self.tu[k] + \
+        #             (self.tu[k+1] - self.tu[k]) * self.tauroot[j]
 
-        self.T = self.T.T
+        # self.T = self.T.T
 
-        # For all collocation points
+        # # For all collocation points
 
-        self.lfcns = []
+        # self.lfcns = []
 
-        for j in range(self.ntauroot + 1):
+        # for j in range(self.ntauroot + 1):
 
-            # Construct Lagrange polynomials to get the polynomial basis
-            # at the collocation point
+        #     # Construct Lagrange polynomials to get the polynomial basis
+        #     # at the collocation point
             
-            L = 1
+        #     L = 1
             
-            for r in range(self.ntauroot + 1):
+        #     for r in range(self.ntauroot + 1):
             
-                if r != j:
+        #         if r != j:
             
-                    L *= (tau - self.tauroot[r]) / \
-                        (self.tauroot[j] - self.tauroot[r])
+        #             L *= (tau - self.tauroot[r]) / \
+        #                 (self.tauroot[j] - self.tauroot[r])
             
-            lfcn = ca.SXFunction("lfcn", [tau],[L])
+        #     lfcn = ca.SXFunction("lfcn", [tau],[L])
           
-            # Evaluate the polynomial at the final time to get the
-            # coefficients of the continuity equation
+        #     # Evaluate the polynomial at the final time to get the
+        #     # coefficients of the continuity equation
             
-            [self.D[j]] = lfcn([1])
+        #     [self.D[j]] = lfcn([1])
 
-            # Evaluate the time derivative of the polynomial at all 
-            # collocation points to get the coefficients of the
-            # collocation equation
+        #     # Evaluate the time derivative of the polynomial at all 
+        #     # collocation points to get the coefficients of the
+        #     # collocation equation
             
-            tfcn = lfcn.tangent()
+        #     tfcn = lfcn.tangent()
 
-            for r in range(self.ntauroot + 1):
+        #     for r in range(self.ntauroot + 1):
 
-                self.C[j,r] = tfcn([self.tauroot[r]])[0]
+        #         self.C[j,r] = tfcn([self.tauroot[r]])[0]
 
-            self.lfcns.append(lfcn)
+        #     self.lfcns.append(lfcn)
 
 
         # Initialize phiN
@@ -230,93 +230,93 @@ class ODESetup(SetupsBaseClass):
 
         # Initialzie setup of g
 
-        self.g = []
+        # self.g = []
 
         # Initialize ODE right-hand-side
 
-        ffcn = ca.MXFunction("ffcn", \
-            [self.system.t, self.system.u, self.system.x, self.system.eps_e, self.system.eps_u, \
-            self.system.p], [self.system.f])
+        # ffcn = ca.MXFunction("ffcn", \
+        #     [self.system.t, self.system.u, self.system.x, self.system.eps_e, self.system.eps_u, \
+        #     self.system.p], [self.system.f])
 
-        # Collect information for measurement function
+        # # Collect information for measurement function
 
-        # Structs to hold variables for later mapped evaluation
+        # # Structs to hold variables for later mapped evaluation
 
-        Tphi = []
-        Uphi = []
-        Xphi = []
-        EPS_Uphi = []
+        # Tphi = []
+        # Uphi = []
+        # Xphi = []
+        # EPS_Uphi = []
 
-        for k in range(self.nsteps):
+        # for k in range(self.nsteps):
 
-            hk = self.tu[k + 1] - self.tu[k]
-            t_meas = self.ty[np.where(np.logical_and( \
-                self.ty >= self.tu[k], self.ty < self.tu[k + 1]))]
+        #     hk = self.tu[k + 1] - self.tu[k]
+        #     t_meas = self.ty[np.where(np.logical_and( \
+        #         self.ty >= self.tu[k], self.ty < self.tu[k + 1]))]
 
-            for t_meas_j in t_meas:
+        #     for t_meas_j in t_meas:
 
-                Uphi.append(self.uN[:, k])
-                EPS_Uphi.append(self.EPS_U[:self.neps_u, k])
+        #         Uphi.append(self.uN[:, k])
+        #         EPS_Uphi.append(self.EPS_U[:self.neps_u, k])
 
-                if t_meas_j == self.tu[k]:
+        #         if t_meas_j == self.tu[k]:
 
-                    Tphi.append(self.tu[k])
-                    Xphi.append(self.X[:self.nx, k])
+        #             Tphi.append(self.tu[k])
+        #             Xphi.append(self.X[:self.nx, k])
 
-                else:
+        #         else:
 
-                    tau = (t_meas_j - self.tu[k]) / hk
+        #             tau = (t_meas_j - self.tu[k]) / hk
 
-                    x_temp = 0
+        #             x_temp = 0
 
-                    for r in range(self.ntauroot + 1):
+        #             for r in range(self.ntauroot + 1):
 
-                        x_temp += self.lfcns[r]([tau])[0] * \
-                        self.X[r*self.nx : (r+1) * self.nx, k]
+        #                 x_temp += self.lfcns[r]([tau])[0] * \
+        #                 self.X[r*self.nx : (r+1) * self.nx, k]
 
-                    Tphi.append(t_meas_j)
-                    Xphi.append(x_temp)
+        #             Tphi.append(t_meas_j)
+        #             Xphi.append(x_temp)
 
-        if self.tu[-1] in self.ty:
+        # if self.tu[-1] in self.ty:
 
-            Tphi.append(self.tu[-1])
-            Uphi.append(self.uN[:,-1])
-            Xphi.append(self.XF)
-            EPS_Uphi.append(self.EPS_U[:self.neps_u,-1])
+        #     Tphi.append(self.tu[-1])
+        #     Uphi.append(self.uN[:,-1])
+        #     Xphi.append(self.XF)
+        #     EPS_Uphi.append(self.EPS_U[:self.neps_u,-1])
 
 
         # Mapped calculation of the collocation equations
 
         # Collocation nodes
 
-        hc = ca.MX.sym("hc", 1)
-        tc = ca.MX.sym("tc", self.ntauroot)
-        xc = ca.MX.sym("xc", self.nx * (self.ntauroot+1))
-        eps_ec = ca.MX.sym("eps_ec", self.neps_e * self.ntauroot)
-        eps_uc = ca.MX.sym("eps_uc", self.neps_u * self.ntauroot)
+        # hc = ca.MX.sym("hc", 1)
+        # tc = ca.MX.sym("tc", self.ntauroot)
+        # xc = ca.MX.sym("xc", self.nx * (self.ntauroot+1))
+        # eps_ec = ca.MX.sym("eps_ec", self.neps_e * self.ntauroot)
+        # eps_uc = ca.MX.sym("eps_uc", self.neps_u * self.ntauroot)
 
-        coleqn = ca.vertcat([ \
+        # coleqn = ca.vertcat([ \
 
-            hc * ffcn([tc[j-1], \
-                self.system.u, \
-                xc[j*self.nx : (j+1)*self.nx], \
-                eps_ec[(j-1)*self.neps_e : j*self.neps_e], \
-                eps_uc[(j-1)*self.neps_u : j*self.neps_u], \
-                self.system.p])[0] - \
+        #     hc * ffcn([tc[j-1], \
+        #         self.system.u, \
+        #         xc[j*self.nx : (j+1)*self.nx], \
+        #         eps_ec[(j-1)*self.neps_e : j*self.neps_e], \
+        #         eps_uc[(j-1)*self.neps_u : j*self.neps_u], \
+        #         self.system.p])[0] - \
 
-            sum([self.C[r,j] * xc[r*self.nx : (r+1)*self.nx] \
+        #     sum([self.C[r,j] * xc[r*self.nx : (r+1)*self.nx] \
 
-                for r in range(self.ntauroot + 1)]) \
+        #         for r in range(self.ntauroot + 1)]) \
                     
-                    for j in range(1, self.ntauroot + 1)])
+        #             for j in range(1, self.ntauroot + 1)])
 
-        coleqnfcn = ca.MXFunction("coleqnfcn", \
-            [hc, tc, self.system.u, xc, eps_ec, eps_uc, self.system.p], [coleqn])
-        coleqnfcn = coleqnfcn.expand()
+        # coleqnfcn = ca.MXFunction("coleqnfcn", \
+        #     [hc, tc, self.system.u, xc, eps_ec, eps_uc, self.system.p], [coleqn])
+        # coleqnfcn = coleqnfcn.expand()
 
-        [gcol] = coleqnfcn.map([ \
-            np.atleast_2d((self.tu[1:] - self.tu[:-1])), self.T[1:,:], \
-            self.uN, self.X, self.EPS_E, self.EPS_U, self.P])
+        # [gcol] = coleqnfcn.map([ \
+        #     np.atleast_2d((self.tu[1:] - self.tu[:-1])), self.T[1:,:], \
+        #     self.uN, self.X, self.EPS_E, self.EPS_U, self.P])
 
 
         # Continuity nodes

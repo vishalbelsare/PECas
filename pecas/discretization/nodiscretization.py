@@ -18,44 +18,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with PECas. If not, see <http://www.gnu.org/licenses/>.
 
-import casadi as ca
+class NoDiscretization(Discretization):
 
-def sx_sym(name, dim1 = 1, dim2 = 1):
+    def __init__(self):
 
-    return ca.SX.sym(name, dim1, dim2)
-
-
-def sx_function(name, inputs, outputs):
-
-    return ca.SXFunction(name, inputs, outputs)
-
-
-def mx_sym(name, dim1 = 1, dim2 = 1):
-
-    return ca.MX.sym(name, dim1, dim2)
-
-
-def mx_function(name, inputs, outputs):
-
-    return ca.MXFunction(name, inputs, outputs)
-
-
-def dmatrix(dim1, dim2 = 1):
-
-    return ca.DMatrix(dim1, dim2)
-
-
-def depends_on(b, a):
-
-    return ca.dependsOn(b, a)
-
-
-def collocation_points(order, scheme):
-
-    return ca.collocationPoints(order, scheme)
-
-
-def vertcat(inputlist):
-
-    return ca.vertcat(inputlist)
-    
+        super(NoDiscretization, self).__init__()

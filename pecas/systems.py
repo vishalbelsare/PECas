@@ -21,7 +21,7 @@
 from interfaces import casadi_interface as ci
 
 from intro import pecas_intro
-import discretization
+from discretization.odecollocation import ODECollocation
 
 class System:
 
@@ -53,12 +53,12 @@ PECas, but will be in future versions.''')
         if self.nx == 0 and self.nz == 0:
 
             self.print_nondyn_system_information()
-            self.discretization = discretization.NoDiscretization()
+            self.discretization = NoDiscretization()
 
         elif self.nx != 0 and self.nz == 0:
 
             self.print_ode_system_information()
-            self.discretization = discretization.ODEDiscretization()
+            self.discretization = ODECollocation(self)
 
         elif self.nx != 0 and self.nz != 0:
 
@@ -95,7 +95,7 @@ Particularly, the system has:
                  
         print("\nand where g is defined by ")
         for i, gi in enumerate(self.g):              
-            print("g[{0}] = {1}".format(i, gi) + ".")
+            print("g[{0}] = {1}".format(i, gi))
 
 
     def print_ode_system_information(self):
@@ -121,7 +121,7 @@ Particularly, the system has:
                  
         print("\nand where phi is defined by ")
         for i, yi in enumerate(self.phi):              
-            print("y[{0}] = {1}".format(i, yi) + ".")
+            print("y[{0}] = {1}".format(i, yi))
 
 
     @property
