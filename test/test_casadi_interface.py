@@ -193,3 +193,17 @@ class Vertcat(unittest.TestCase):
         v = ci.vertcat(self.inputlist)
 
         self.assertEqual(v.shape[0], self.lenlist)
+
+
+class Veccat(unittest.TestCase):
+
+    def setUp(self):
+
+        self.inputlist = [ca.MX.sym("a", 4, 3), ca.MX.sym("b", 2, 4)]
+
+
+    def test_assure_veccat_returns_column_vector(self):
+
+        v = ci.veccat(self.inputlist)
+
+        self.assertEqual(v.shape[0], 20)

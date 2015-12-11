@@ -58,4 +58,14 @@ def collocation_points(order, scheme):
 def vertcat(inputlist):
 
     return ca.vertcat(inputlist)
+
+
+def veccat(inputlist):
+
+    return ca.veccat(inputlist)
+
+
+def horzcat(inputlist):
+
+    return ca.horzcat(inputlist)
     

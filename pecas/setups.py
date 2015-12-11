@@ -220,13 +220,13 @@ class ODESetup(SetupsBaseClass):
 
         # Initialize phiN
 
-        self.phiN = []
+        # self.phiN = []
 
         # Initialize measurement function
 
-        phifcn = ca.MXFunction("phifcn", \
-            [self.system.t, self.system.u, self.system.x, self.system.eps_u, self.system.p], \
-            [self.system.phi])
+        # phifcn = ca.MXFunction("phifcn", \
+        #     [self.system.t, self.system.u, self.system.x, self.system.eps_u, self.system.p], \
+        #     [self.system.phi])
 
         # Initialzie setup of g
 
@@ -321,16 +321,16 @@ class ODESetup(SetupsBaseClass):
 
         # Continuity nodes
 
-        xnext = ca.MX.sym("xnext", self.nx)
+        # xnext = ca.MX.sym("xnext", self.nx)
 
-        conteqn = xnext - sum([self.D[r] * xc[r*self.nx : (r+1)*self.nx] \
-            for r in range(self.ntauroot + 1)])
+        # conteqn = xnext - sum([self.D[r] * xc[r*self.nx : (r+1)*self.nx] \
+        #     for r in range(self.ntauroot + 1)])
 
-        conteqnfcn = ca.MXFunction("conteqnfcn", [xnext, xc], [conteqn])
-        conteqnfcn = conteqnfcn.expand()
+        # conteqnfcn = ca.MXFunction("conteqnfcn", [xnext, xc], [conteqn])
+        # conteqnfcn = conteqnfcn.expand()
 
-        [gcont] = conteqnfcn.map([ \
-            ca.horzcat([self.X[:self.nx, 1:], self.XF]), self.X])
+        # [gcont] = conteqnfcn.map([ \
+        #     ca.horzcat([self.X[:self.nx, 1:], self.XF]), self.X])
 
 
         # Stack equality constraints together

@@ -30,73 +30,77 @@ from .. import inputchecks
 
 class ODECollocation(Discretization):
 
-    def set_collocation_settings(self, number_of_points, scheme):
+    def __set_collocation_settings(self, number_of_collocation_points, \
+        collocation_scheme):
 
-        self.number_of_points = number_of_points
-        self.scheme = scheme
+        self.number_of_collocation_points = number_of_collocation_points
+        self.collocation_scheme = collocation_scheme
 
         self.collocation_points = ci.collocation_points( \
-            self.number_of_points, self.scheme)
+            self.number_of_collocation_points, self.collocation_scheme)
         self.collocation_polynomial_degree = len(self.collocation_points) - 1
 
 
-    def set_optimization_variables(self):
+    def __set_optimization_variables(self):
 
-        self.optimvars = {key: ci.dmatrix(0, self.nintervals) \
+        self.optimization_variables = {key: ci.dmatrix(0, self.number_of_intervals) \
             for key in ["P", "V", "X", "EPS_E", "EPS_U", "U"]}
 
-        self.optimvars["P"] = ci.mx_sym("P", self.system.np)
+        self.optimization_variables["P"] = ci.mx_sym("P", self.system.np)
 
-        self.optimvars["V"] = ci.mx_sym("V", self.system.nphi, \
-            self.nintervals + 1)
+        self.optimization_variables["V"] = ci.mx_sym("V", self.system.nphi, \
+            self.number_of_intervals + 1)
 
         if self.system.nu != 0:
 
-            self.optimvars["U"] = ci.mx_sym("U", self.system.nu, \
-                self.nintervals)
+            self.optimization_variables["U"] = ci.mx_sym("U", self.system.nu, \
+                self.number_of_intervals)
 
         if self.system.nx != 0:
 
             # Attention! Way of ordering has changed! Consider when
             # reapplying collocation and multiple shooting!
-            self.optimvars["X"] = ci.mx_sym("X", self.system.nx, \
-                (self.collocation_polynomial_degree + 1) * self.nintervals + 1)
+            self.optimization_variables["X"] = ci.mx_sym("X", self.system.nx, \
+                (self.collocation_polynomial_degree + 1) * \
+                self.number_of_intervals + 1)
         
         if self.system.neps_e != 0:
 
-            self.optimvars["EPS_E"] = ci.mx_sym("EPS_E", self.system.neps_e, \
-                self.collocation_polynomial_degree * self.nintervals)
+            self.optimization_variables["EPS_E"] = \
+                ci.mx_sym("EPS_E", self.system.neps_e, \
+                self.collocation_polynomial_degree * self.number_of_intervals)
 
         if self.system.neps_u != 0:
                 
-            self.optimvars["EPS_U"] = ci.mx_sym("EPS_U", self.system.neps_u, \
-                self.collocation_polynomial_degree * self.nintervals)
+            self.optimization_variables["EPS_U"] = \
+                ci.mx_sym("EPS_U", self.system.neps_u, \
+                self.collocation_polynomial_degree * self.number_of_intervals)
 
 
-    def compute_collocation_time_points(self):
+    def __compute_collocation_time_points(self):
 
-        self.T = np.zeros((self.collocation_polynomial_degree + 1, \
-            self.nintervals))
+        self.__T = np.zeros((self.collocation_polynomial_degree + 1, \
+            self.number_of_intervals))
 
-        for k in range(self.nintervals):
+        for k in range(self.number_of_intervals):
 
             for j in range(self.collocation_polynomial_degree + 1):
 
-                self.T[j,k] = self.tu[k] + \
-                    (self.tu[k+1] - self.tu[k]) * \
+                self.__T[j,k] = self.time_points[k] + \
+                    (self.time_points[k+1] - self.time_points[k]) * \
                     self.collocation_points[j]
 
 
-    def compute_collocation_coefficients(self):
+    def __compute_collocation_coefficients(self):
     
         # Coefficients of the collocation equation
 
-        self.C = np.zeros((self.collocation_polynomial_degree + 1, \
+        self.__C = np.zeros((self.collocation_polynomial_degree + 1, \
             self.collocation_polynomial_degree + 1))
 
         # Coefficients of the continuity equation
 
-        self.D = np.zeros(self.collocation_polynomial_degree + 1)
+        self.__D = np.zeros(self.collocation_polynomial_degree + 1)
 
         # Dimensionless time inside one control interval
 
@@ -125,7 +129,7 @@ class ODECollocation(Discretization):
             # Evaluate the polynomial at the final time to get the
             # coefficients of the continuity equation
             
-            [self.D[j]] = lfcn([1])
+            [self.__D[j]] = lfcn([1])
 
             # Evaluate the time derivative of the polynomial at all 
             # collocation points to get the coefficients of the
@@ -135,17 +139,17 @@ class ODECollocation(Discretization):
 
             for r in range(self.collocation_polynomial_degree + 1):
 
-                self.C[j,r] = tfcn([self.collocation_points[r]])[0]
+                self.__C[j,r] = tfcn([self.collocation_points[r]])[0]
 
 
-    def initialize_ode_right_hand_side(self):
+    def __initialize_ode_right_hand_side(self):
 
-        self.ffcn = ci.mx_function("ffcn", \
+        self.__ffcn = ci.mx_function("ffcn", \
             [self.system.t, self.system.u, self.system.p, self.system.x, \
             self.system.eps_e, self.system.eps_u], [self.system.f])
 
 
-    def compute_collocation_nodes(self):
+    def __compute_collocation_nodes(self):
 
         h = ci.mx_sym("h", 1)
 
@@ -162,7 +166,7 @@ class ODECollocation(Discretization):
 
         collocation_node = ci.vertcat([ \
 
-            h * self.ffcn([ \
+            h * self.__ffcn([ \
 
                 t[j-1], u, p, \
 
@@ -170,7 +174,7 @@ class ODECollocation(Discretization):
                 eps_e[(j-1)*self.system.neps_e : j*self.system.neps_e], \
                 eps_u[(j-1)*self.system.neps_u : j*self.system.neps_u]])[0] - \
 
-                sum([self.C[r,j] * x[r*self.system.nx : (r+1)*self.system.nx] \
+                sum([self.__C[r,j] * x[r*self.system.nx : (r+1)*self.system.nx] \
 
                     for r in range(self.collocation_polynomial_degree + 1)]) \
                     
@@ -181,30 +185,32 @@ class ODECollocation(Discretization):
             [h, t, u, x, eps_e, eps_u, p], [collocation_node])
         collocation_node_fcn = collocation_node_fcn.expand()
 
-        X = self.optimvars["X"][:, :-1][:].reshape( \
+        X = self.optimization_variables["X"][:, :-1][:].reshape( \
             (self.system.nx * (self.collocation_polynomial_degree + 1), \
-            self.nintervals))
+            self.number_of_intervals))
 
-        EPS_E = self.optimvars["EPS_E"][:].reshape( \
+        EPS_E = self.optimization_variables["EPS_E"][:].reshape( \
             (self.system.neps_e * self.collocation_polynomial_degree, \
-            self.nintervals))
+            self.number_of_intervals))
 
-        EPS_U = self.optimvars["EPS_U"][:].reshape( \
+        EPS_U = self.optimization_variables["EPS_U"][:].reshape( \
             (self.system.neps_u * self.collocation_polynomial_degree, \
-            self.nintervals))
+            self.number_of_intervals))
 
-        [self.collocation_nodes] = collocation_node_fcn.map([ \
-            np.atleast_2d((self.tu[1:] - self.tu[:-1])), self.T[1:,:], \
-            self.optimvars["U"], X, EPS_E, EPS_U, self.optimvars["P"]])
+        [self.__collocation_nodes] = collocation_node_fcn.map([ \
+            np.atleast_2d((self.time_points[1:] - self.time_points[:-1])), \
+            self.__T[1:,:], \
+            self.optimization_variables["U"], X, EPS_E, EPS_U, \
+            self.optimization_variables["P"]])
 
 
-    def compute_continuity_nodes(self):
+    def __compute_continuity_nodes(self):
 
         x = ci.mx_sym("x", self.system.nx * \
             (self.collocation_polynomial_degree + 1))
         x_next = ci.mx_sym("x_next", self.system.nx)
 
-        continuity_node = x_next - sum([self.D[r] * \
+        continuity_node = x_next - sum([self.__D[r] * \
             x[r*self.system.nx : (r+1)*self.system.nx] \
             for r in range(self.collocation_polynomial_degree + 1)])
 
@@ -212,40 +218,68 @@ class ODECollocation(Discretization):
             [x_next, x], [continuity_node])
         continuity_node_fcn = continuity_node_fcn.expand()
 
-        # --> TODO!
-
-        import ipdb
-        ipdb.set_trace()
-
-        X_NEXT = self.optimvars["X"][:, \
+        X_NEXT = self.optimization_variables["X"][:, \
             (self.collocation_polynomial_degree + 1) :: \
             (self.collocation_polynomial_degree + 1)]
 
-        X = self.optimvars["X"][:, :-1][:].reshape( \
+        X = self.optimization_variables["X"][:, :-1][:].reshape( \
             (self.system.nx * (self.collocation_polynomial_degree + 1), \
-            self.nintervals))
+            self.number_of_intervals))
 
-        [self.continuity_nodes] = continuity_node_fcn.map([X_NEXT, X])
-
-
-        # <-- TODO!
-
-    def __init__(self, system, number_of_points = 3, scheme = "radau"):
-
-        super(ODECollocation, self).__init__(system)
-
-        self.set_collocation_settings(number_of_points, scheme)
+        [self.__continuity_nodes] = continuity_node_fcn.map([X_NEXT, X])
 
 
-    def discretize(self, tu):
+    def __set_nlp_equality_constraints(self):
 
-        self.tu = inputchecks.check_and_set_time_points_input(tu)
+        self.equality_constraints = \
+            ci.veccat([self.__collocation_nodes, self.__continuity_nodes])
 
-        self.set_optimization_variables()
 
-        self.compute_collocation_time_points()
-        self.compute_collocation_coefficients()
+    def __apply_discretization_method(self):
 
-        self.initialize_ode_right_hand_side()
-        self.compute_collocation_nodes()
-        self.compute_continuity_nodes()
+        self.__set_optimization_variables()
+
+        self.__compute_collocation_time_points()
+        self.__compute_collocation_coefficients()
+
+        self.__initialize_ode_right_hand_side()
+        self.__compute_collocation_nodes()
+        self.__compute_continuity_nodes()
+        self.__set_nlp_equality_constraints()
+
+
+    def __evaluate_measurement_function(self):
+
+        phifcn = ci.mx_function("phifcn", \
+            [self.system.t, self.system.u, self.system.x, \
+                self.system.eps_u, self.system.p], \
+            [self.system.phi])    
+
+        measurement_function_input = [ \
+            ci.horzcat(self.time_points.tolist()),
+            self.optimization_variables["U"],
+            self.optimization_variables["X"][:, \
+                :: (self.collocation_polynomial_degree + 1)],
+            self.optimization_variables["EPS_U"][:, \
+                ::(self.collocation_polynomial_degree + 1)],
+            self.optimization_variables["P"]
+        ]
+
+        [self.measurements] = phifcn.map(measurement_function_input)
+
+
+    def __discretize(self, number_of_collocation_points, collocation_scheme):
+
+        self.__set_collocation_settings(number_of_collocation_points, \
+            collocation_scheme)
+        self.__apply_discretization_method()
+
+        self.__evaluate_measurement_function()
+
+
+    def __init__(self, system, time_points, number_of_collocation_points = 3, \
+        collocation_scheme = "radau"):
+
+        super(ODECollocation, self).__init__(system, time_points)
+
+        self.__discretize(number_of_collocation_points, collocation_scheme)

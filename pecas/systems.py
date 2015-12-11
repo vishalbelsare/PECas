@@ -53,12 +53,10 @@ PECas, but will be in future versions.''')
         if self.nx == 0 and self.nz == 0:
 
             self.print_nondyn_system_information()
-            self.discretization = NoDiscretization()
 
         elif self.nx != 0 and self.nz == 0:
 
             self.print_ode_system_information()
-            self.discretization = ODECollocation(self)
 
         elif self.nx != 0 and self.nz != 0:
 
@@ -269,3 +267,8 @@ Particularly, the system has:
         self.g = g
 
         self.system_validation()
+
+        # Once the system got discretized, the information about the
+        # discretization will be stored in the attribute self.discretization
+
+        self.discretization = None

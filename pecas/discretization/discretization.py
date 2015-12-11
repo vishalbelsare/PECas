@@ -28,11 +28,12 @@ class Discretization(object):
     __metaclass__ = ABCMeta
 
     @property
-    def nintervals(self):
+    def number_of_intervals(self):
 
-        return self.tu.size - 1
+        return self.time_points.size - 1
 
     @abstractmethod
-    def __init__(self, system):
+    def __init__(self, system, tu):
 
         self.system = inputchecks.set_system(system)
+        self.time_points = inputchecks.check_and_set_time_points_input(tu)
