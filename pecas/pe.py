@@ -220,7 +220,7 @@ but will be in future versions.
             ])
 
 
-    def __set_R(self):
+    def __setup_R(self):
 
         self.R = ci.sqrt(self.weightings_vectorized) * \
             ci.veccat([ \
@@ -232,7 +232,7 @@ but will be in future versions.
             ])
 
 
-    def __set_g(self):
+    def __setup_g(self):
 
         self.g = ci.vertcat([ \
 
@@ -240,6 +240,21 @@ but will be in future versions.
                 self.equality_constraints_controls_applied,
 
             ])
+
+
+    def __setup_solver(self):
+
+        nlp = ci.mx_function("nlp", ci.nlpIn(x = self.optimization_variables), \
+            ci.nlpOut(f = 0.5 * ci.mul([self.R.T, self.R]), g = self.g))
+
+        self.solver = ci.NlpSolver("solver", "ipopt", nlp, options = {})
+
+
+    def run_parameter_estimation(self):
+
+        self.solution = \
+            self.solver(x0 = self.optimization_variables_initials, \
+                lbg = 0, ubg = 0)
 
 
     def __init__(self, system, time_points, \
@@ -263,13 +278,8 @@ but will be in future versions.
 
         self.__set_measurement_deviations()
 
-        self.__set_R()
+        self.__setup_R()
 
-        self.__set_g()
+        self.__setup_g()
 
-        nlp = ci.mx_function("nlp", ci.nlpIn(x = self.optimization_variables), \
-            ci.nlpOut(f = 0.5 * ci.mul([self.R.T, self.R]), g = self.g))
-
-        solver = ci.NlpSolver("solver", "ipopt", nlp, options = {})
-
-        self.sol = solver(x0 = self.optimization_variables_initials, lbg = 0, ubg = 0)
+        self.__setup_solver()
