@@ -30,6 +30,12 @@ from .. import inputchecks
 
 class ODECollocation(Discretization):
 
+    @property
+    def number_of_controls(self):
+
+        return self.number_of_intervals
+        
+
     def __set_collocation_settings(self, number_of_collocation_points, \
         collocation_scheme):
 
@@ -74,7 +80,7 @@ class ODECollocation(Discretization):
                 
             self.optimization_variables["EPS_U"] = \
                 ci.mx_sym("EPS_U", self.system.neps_u, \
-                self.collocation_polynomial_degree * self.number_of_intervals)
+                self.number_of_intervals)
 
 
     def __compute_collocation_time_points(self):
@@ -185,7 +191,11 @@ class ODECollocation(Discretization):
             [h, t, u, x, eps_e, eps_u, p], [collocation_node])
         collocation_node_fcn = collocation_node_fcn.expand()
 
-        X = self.optimization_variables["X"][:, :-1][:].reshape( \
+        # import ipdb
+        # ipdb.set_trace()
+
+        # X = self.optimization_variables["X"][:, :-1][:].reshape( \
+        X = self.optimization_variables["X"][:, :-1].reshape( \
             (self.system.nx * (self.collocation_polynomial_degree + 1), \
             self.number_of_intervals))
 
@@ -222,7 +232,7 @@ class ODECollocation(Discretization):
             (self.collocation_polynomial_degree + 1) :: \
             (self.collocation_polynomial_degree + 1)]
 
-        X = self.optimization_variables["X"][:, :-1][:].reshape( \
+        X = self.optimization_variables["X"][:, :-1].reshape( \
             (self.system.nx * (self.collocation_polynomial_degree + 1), \
             self.number_of_intervals))
 

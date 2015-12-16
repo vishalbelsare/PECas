@@ -68,4 +68,38 @@ def veccat(inputlist):
 def horzcat(inputlist):
 
     return ca.horzcat(inputlist)
+
+
+def repmat(inputobj, dim1, dim2):
+
+    return ca.repmat(inputobj, dim1, dim2)
     
+
+def vec(inputobj):
+
+    return ca.vec(inputobj)
+
+
+def sqrt(inputobj):
+
+    return ca.sqrt(inputobj)
+
+
+def nlpIn(x = None):
+
+    return ca.nlpIn(x = x)
+
+
+def nlpOut(f = None, g = None):
+
+    return ca.nlpOut(f = f, g = g)
+
+
+def mul(inputobj):
+
+    return ca.mul(inputobj)
+
+
+def NlpSolver(name, solver, nlp, options):
+
+    return ca.NlpSolver(name, solver, nlp, options)

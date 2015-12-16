@@ -323,10 +323,10 @@ class SetupsBaseClass(object):
     #         return max(0, len(self.get_collocation_points()) - 1)
 
 
-    @abstractmethod
-    def define_number_of_control_intervals(self):
+    # @abstractmethod
+    # def define_number_of_control_intervals(self):
 
-        pass
+    #     pass
 
 
     # def set_optimization_variables(self):
@@ -428,14 +428,14 @@ class SetupsBaseClass(object):
     #             [self.C[j,r]] = tfcn([self.tauroot[r]])
 
 
-    def set_collocation_nodes(self):
+    # def set_collocation_nodes(self):
 
-        pass
+    #     pass
 
 
-    def set_collocation_continuity_nodes(self):
+    # def set_collocation_continuity_nodes(self):
 
-        pass
+    #     pass
         
 
     # @abstractmethod
@@ -446,33 +446,33 @@ class SetupsBaseClass(object):
     # @abstractmethod
     # def set_initials(self):
 
-        pass
+        # pass
 
     # @abstractmethod
-    def __init__(self, system, controls, measurements, discretization_method, \
-        number_of_collocation_points, collocation_scheme):
+    # def __init__(self, system, controls, measurements, discretization_method, \
+    #     number_of_collocation_points, collocation_scheme):
 
-        intro.pecas_intro()
-        print('\n' + 24 * '-' + \
-            ' PECas system initialization ' + 25 * '-')
-        print('\nStart system initialization ...')
+        # intro.pecas_intro()
+        # print('\n' + 24 * '-' + \
+        #     ' PECas system initialization ' + 25 * '-')
+        # print('\nStart system initialization ...')
 
-        self.set_system(system)
+        # self.set_system(system)
 
-        self.set_problem_dimensions_from_system_information()
+        # self.set_problem_dimensions_from_system_information()
 
-        self.check_and_set_time_points(controls = controls, \
-            measurements = measurements)
+        # self.check_and_set_time_points(controls = controls, \
+        #     measurements = measurements)
 
-        self.define_number_of_control_values()
+        # self.define_number_of_control_values()
         
-        self.discretization = self.Discretization( \
-                discretization_method = discretization_method, \
-                number_of_collocation_points = number_of_collocation_points, \
-                collocation_scheme = collocation_scheme)
+        # self.discretization = self.Discretization( \
+        #         discretization_method = discretization_method, \
+        #         number_of_collocation_points = number_of_collocation_points, \
+        #         collocation_scheme = collocation_scheme)
 
-        self.set_optimization_variables()
+        # self.set_optimization_variables()
 
-        self.discretize_problem()
+        # self.discretize_problem()
 
-        self.set_initials()
+        # self.set_initials()

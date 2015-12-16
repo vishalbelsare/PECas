@@ -128,16 +128,18 @@ but you supported wv of dimension:
         # Get the measurement values and standard deviations into the
         # necessary order of apperance and dimensions
 
-        self.yN = np.zeros(np.size(yN))
-        self.wv = np.zeros(np.size(yN))
+        # self.yN = np.zeros(np.size(yN))
+        # self.wv = np.zeros(np.size(yN))
 
-        for k in range(yN.shape[0]):
+        # for k in range(yN.shape[0]):
 
-            self.yN[k:yN.shape[0]*yN.shape[1]+1:yN.shape[0]] = \
-                yN[k, :]
-            self.wv[k:yN.shape[0]*yN.shape[1]+1:yN.shape[0]] = \
-                wv[k, :]
+        #     self.yN[k:yN.shape[0]*yN.shape[1]+1:yN.shape[0]] = \
+        #         yN[k, :]
+        #     self.wv[k:yN.shape[0]*yN.shape[1]+1:yN.shape[0]] = \
+        #         wv[k, :]
 
+        self.yN = yN.T.reshape(1, -1)
+        self.wv = wv.T.reshape(1, -1)
 
         self.weps_e = []
 

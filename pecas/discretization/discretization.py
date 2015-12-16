@@ -36,4 +36,4 @@ class Discretization(object):
     def __init__(self, system, tu):
 
         self.system = inputchecks.set_system(system)
-        self.time_points = inputchecks.check_and_set_time_points_input(tu)
+        self.time_points = inputchecks.check_time_points_input(tu)
