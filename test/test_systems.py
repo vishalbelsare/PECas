@@ -21,150 +21,91 @@
 # Test the classes for system definitions
 
 import pecas.interfaces.casadi_interface as ci
-import pecas.systems
+import pecas.system
 
 import unittest
 
-class NonDyn(unittest.TestCase):
+class System(unittest.TestCase):
 
     def setUp(self):
 
         self.t = ci.mx_sym("t", 1)
-        self.u = ci.mx_sym("u", 1)
-        self.p = ci.mx_sym("p", 1)
-        self.phi = ci.mx_sym("phi", 1)
-        self.g = ci.mx_sym("g", 1)
+        self.u = ci.mx_sym("u", 2)
+        self.p = ci.mx_sym("p", 3)
+        self.x = ci.mx_sym("x", 4)
+        self.z = ci.mx_sym("z", 5)
+        self.eps_e = ci.mx_sym("eps_e", 6)
+        self.eps_u = ci.mx_sym("eps_u", 7)
+        self.phi = ci.mx_sym("phi", 8)
+        self.f = ci.mx_sym("f", 9)
+        self.g = ci.mx_sym("g", 10)
 
 
     def test_init_p_phi(self):
 
-        sys = pecas.systems.NonDyn(p = self.p, phi = self.phi)
-        sys.show_system_information(showEquations = True)
+        sys = pecas.system.System(p = self.p, phi = self.phi)
+        sys.print_system_information()
 
 
-    def test_init_t_p_phi(self):
-        
-        sys = pecas.systems.NonDyn(t = self.t, p = self.p, phi = self.phi)
-        sys.show_system_information(showEquations = True)
-        
+    def test_all_nondynamic_inputs(self):
 
-    def test_init_t_u_p_phi(self):
-
-        sys = pecas.systems.NonDyn(t = self.t, u = self.u, p = self.p, \
-            phi = self.phi)
-        sys.show_system_information(showEquations = True)
-
-    def test_init_t_u_p_phi_g(self):
-
-        sys = pecas.systems.NonDyn(t = self.t, u = self.u, p = self.p, \
+        sys = pecas.system.System(t = self.t, u = self.u, p = self.p, \
             phi = self.phi, g = self.g)
-        sys.show_system_information(showEquations = True)
 
+    def test_all_ode_inputs(self):
 
-    def test_init_no_args(self):
-
-        self.assertRaises(TypeError, pecas.systems.NonDyn)
-
-
-    def test_init_no_phi(self):
-
-        self.assertRaises(TypeError, pecas.systems.NonDyn, p = None, \
-            phi = self.phi)
-
-
-    def test_init_no_p(self):
-
-        self.assertRaises(TypeError, pecas.systems.NonDyn, p = self.p, \
-            phi = None)
-
-
-class ExplODE(unittest.TestCase):
-
-    def setUp(self):
-
-        self.t = ci.mx_sym("t", 1)
-        self.u = ci.mx_sym("u", 1)
-        self.x = ci.mx_sym("x", 1)
-        self.p = ci.mx_sym("p", 1)
-        self.eps_e = ci.mx_sym("eps_e", 1)
-        self.eps_u = ci.mx_sym("eps_u", 1)
-        self.phi = ci.mx_sym("phi", 1)
-        self.f = ci.mx_sym("f", 1)
-
-
-    def test_init_x_p_epse_phi_f(self):
-
-        sys = pecas.systems.ExplODE(x = self.x, p = self.p, \
-            eps_e = self.eps_e, phi = self.phi, f = self.f)
-        sys.show_system_information(showEquations = True)
-
-
-    def test_init_t_x_p_epse_phi_f(self):
-
-        sys = pecas.systems.ExplODE(t = self.t, x = self.x, p = self.p, \
-            eps_e = self.eps_e, phi = self.phi, f = self.f)
-        sys.show_system_information(showEquations = True)
-
-
-    def test_init_t_u_x_p_epse_phi_f(self):
-
-        sys = pecas.systems.ExplODE(t = self.t, u = self.u, x = self.x, \
-            p = self.p, eps_e = self.eps_e, phi = self.phi, f = self.f)
-        sys.show_system_information(showEquations = True)
-
-
-    def test_init_t_u_x_p_epse_epsu_phi_f(self):
-
-        sys = pecas.systems.ExplODE(t = self.t, u = self.u, x = self.x,\
-            p = self.p, eps_e = self.eps_e, eps_u = self.eps_u, \
+        sys = pecas.system.System(t = self.t, u = self.u, p = self.p, \
+            x = self.x, eps_e = self.eps_e, eps_u = self.eps_u, \
             phi = self.phi, f = self.f)
-        sys.show_system_information(showEquations = True)
+        sys.print_system_information()
 
 
-    def test_init_no_args(self):
+    def test_init_not_args(self):
 
-        self.assertRaises(TypeError, pecas.systems.ExplODE)
-
-
-    def test_init_no_x(self):
-
-        self.assertRaises(TypeError, pecas.systems.ExplODE, x = None, \
-            p = self.p, phi = self.phi, f = self.f)
+        self.assertRaises(TypeError,  pecas.system.System)
 
 
-    def test_init_no_p(self):
+    def test_init_not_p(self):
 
-        self.assertRaises(TypeError, pecas.systems.ExplODE, x = self.x, \
-            p = None, phi = self.phi, f = self.f)
-
-
-    def test_init_no_phi(self):
-
-        self.assertRaises(TypeError, pecas.systems.ExplODE, x = self.x, \
-            p = self.p, phi = None, f = self.f)
+        self.assertRaises(TypeError,  pecas.system.System, phi = self.phi)
 
 
-    def test_init_no_f(self):
+    def test_init_not_phi(self):
 
-        self.assertRaises(TypeError, pecas.systems.ExplODE, x = self.x, \
-            p = self.p, phi = self.phi, f = None)
+        self.assertRaises(TypeError,  pecas.system.System, p = self.p)
 
 
     def test_assure_no_explicit_time_dependecy(self):
 
         # Assure as long as explicit time dependecy is not allowed
 
-        self.assertRaises(NotImplementedError, pecas.systems.ExplODE, \
+        self.assertRaises(NotImplementedError, pecas.system.System, \
             t = self.t, u = self.u, x = self.x, \
             p = self.p, eps_e = self.eps_e, phi = self.phi, f = self.t)
 
 
-class ImplDAE(unittest.TestCase):
+    def test_assure_not_dae(self):
+
+        self.assertRaises(NotImplementedError, pecas.system.System, \
+            p = self.p, phi = self.phi, x = self.x, z = self.z)
 
 
-    def test_assure_init_raises_error(self):
+    def test_assure_not_algebraic_states_without_dynamic_states(self):
 
-        # Assure as long as not implemented
-
-        self.assertRaises(NotImplementedError, pecas.systems.ImplDAE)
+        self.assertRaises(NotImplementedError, pecas.system.System, \
+            p = self.p, phi = self.phi, z = self.z)
     
+
+    def test_sizes_attributes(self):
+
+        sys = pecas.system.System(t = self.t, u = self.u, p = self.p, \
+            x = self.x, eps_e = self.eps_e, eps_u = self.eps_u, \
+            phi = self.phi, f = self.f, g = self.g)
+        
+        self.assertEqual(sys.nu, self.u.size())
+        self.assertEqual(sys.np, self.p.size())
+        self.assertEqual(sys.nx, self.x.size())
+        self.assertEqual(sys.nz, 0)
+        self.assertEqual(sys.neps_e, self.eps_e.size())
+        self.assertEqual(sys.neps_u, self.eps_u.size())
+        self.assertEqual(sys.nphi, self.phi.size())

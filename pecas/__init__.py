@@ -19,5 +19,3 @@
 # along with PECas. If not, see <http://www.gnu.org/licenses/>.
 
 __version__ = "0.5.1"
-
-from pecas import *
