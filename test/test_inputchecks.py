@@ -19,14 +19,14 @@
 # along with PECas. If not, see <http://www.gnu.org/licenses/>.
 # Test the function for setting bounds and initials
 
-# import numpy as np
-# from numpy.testing import assert_array_equal
+import numpy as np
+from numpy.testing import assert_array_equal
 
-# import pecas.interfaces.casadi_interface as ci
-# from pecas.setups.setupsbaseclass import SetupsBaseClass
+from pecas.interfaces import casadi_interface as ci
+from pecas import inputchecks
 
-# import unittest
-# import mock
+import unittest
+import mock
 
 # class FakeSetupsBaseClass(SetupsBaseClass):
 
@@ -145,210 +145,186 @@
 #             collocation_polynomial_degree)
 
 
-# class SetSystem(unittest.TestCase):
+class SetSystem(unittest.TestCase):
 
-#     def setUp(self):
+    def setUp(self):
 
-#         self.fakesbc = FakeSetupsBaseClass()
+        self.system = "system"
 
 
-#     def test_set_system(self):
+    def test_set_system(self):
 
-#         system = "system"
+        system = "system"
 
-#         # A better test would be needed here also to make sure that system is
-#         # subclass of systems.SystemBaseClass, but this is yet problematic
+        # A better test would be needed here also to make sure that system is
+        # subclass of systems.SystemBaseClass, but this is yet problematic
 
-#         self.fakesbc.set_system(system)
-#         self.assertEqual(self.fakesbc.system, system)
+        system = inputchecks.set_system(system)
+        self.assertEqual(self.system, system)
 
 
-# class CheckAndSetTimepointsInput(unittest.TestCase):
+class CheckTimepointsInput(unittest.TestCase):
 
-#     def setUp(self):
+    def setUp(self):
 
-#         self.fakesbc = FakeSetupsBaseClass()
-#         self.tp_ref = np.linspace(0, 49, 50)
+        self.tp_ref = np.linspace(0, 49, 50)
 
 
-#     def test_input_list(self):
+    def test_input_list(self):
 
-#         tp = [k for k in range(50)]
+        tp = [k for k in range(50)]
 
-#         tp = self.fakesbc.check_and_set_time_points_input(tp)
-#         assert_array_equal(tp, self.tp_ref)
+        tp = inputchecks.check_time_points_input(tp)
+        assert_array_equal(tp, self.tp_ref)
 
 
-#     def test_input_onedim_time_vector(self):
+    def test_input_onedim_time_vector(self):
 
-#         tp = np.linspace(0, 49, 50)
+        tp = np.linspace(0, 49, 50)
 
-#         tp = self.fakesbc.check_and_set_time_points_input(tp)
-#         assert_array_equal(tp, self.tp_ref)
+        tp = inputchecks.check_time_points_input(tp)
+        assert_array_equal(tp, self.tp_ref)
 
 
-#     def test_input_row_time_vector(self):
+    def test_input_row_time_vector(self):
 
-#         tp = np.atleast_2d(np.linspace(0, 49, 50))
+        tp = np.atleast_2d(np.linspace(0, 49, 50))
 
-#         tp = self.fakesbc.check_and_set_time_points_input(tp)
-#         assert_array_equal(tp, self.tp_ref)
+        tp = inputchecks.check_time_points_input(tp)
+        assert_array_equal(tp, self.tp_ref)
 
 
-#     def test_input_column_time_vector(self):
+    def test_input_column_time_vector(self):
 
-#         tp = np.atleast_2d(np.linspace(0, 49, 50)).T
+        tp = np.atleast_2d(np.linspace(0, 49, 50)).T
 
-#         tp = self.fakesbc.check_and_set_time_points_input(tp)
-#         assert_array_equal(tp, self.tp_ref)
+        tp = inputchecks.check_time_points_input(tp)
+        assert_array_equal(tp, self.tp_ref)
 
 
-#     def test_input_invalid_time_vector(self):
+    def test_input_invalid_time_vector(self):
 
-#         tp = np.random.randn(2,2)
+        tp = np.random.randn(2,2)
 
-#         self.assertRaises(ValueError, \
-#             self.fakesbc.check_and_set_time_points_input, tp)
+        self.assertRaises(ValueError, \
+            inputchecks.check_time_points_input, tp)
 
 
-# class CheckAndSetControlTimepoints(unittest.TestCase):
+class CheckControlsData(unittest.TestCase):
 
-#     def setUp(self):
+    def setUp(self):
 
-#         self.fakesbc = FakeSetupsBaseClass()
-#         # Cf. https://docs.python.org/3/library/unittest.mock.html#quick-guide        
-#         self.fakesbc.check_and_set_time_points_input = mock.MagicMock()
+        self.number_of_controls = 20
 
-#         self.tu_ref = np.linspace(0, 49, 50)
+    def test_input_rows(self):
 
+        nu = 3
+        udata_ref = np.random.rand(nu, self.number_of_controls)
 
-#     def test_input_valid(self):
+        udata = inputchecks.check_controls_data(udata_ref, \
+            nu, self.number_of_controls)
+        assert_array_equal(udata, udata_ref)
 
-#         # check_and_set_control_time_points_input passes it's input values to
-#         # check_and_set_time_points_input for checking, whose return value
-#         # is mocked here, which makes the input values for
-#         # check_and_set_control_time_points_input irrelevant for testing
 
-#         self.fakesbc.check_and_set_time_points_input.return_value = self.tu_ref
-#         self.fakesbc.check_and_set_control_time_points_input(None)
-#         assert_array_equal(self.fakesbc.tu, self.tu_ref)
+    def test_input_columns(self):
 
+        nu = 3
+        udata_ref = np.random.rand(nu, self.number_of_controls)
 
-#     def test_input_invalid(self):
+        udata = inputchecks.check_controls_data(udata_ref.T, \
+            nu, self.number_of_controls)
+        assert_array_equal(udata, udata_ref)
 
-#         self.fakesbc.check_and_set_time_points_input.side_effect = \
-#             ValueError
-#         self.assertRaises(ValueError, \
-#             self.fakesbc.check_and_set_control_time_points_input, None)
 
+    def test_input_none(self):
 
-# class CheckAndSetMeasurementsTimepoints(unittest.TestCase):
+        nu = 3
+        udata_ref = np.zeros((nu, self.number_of_controls))
 
-#     def setUp(self):
+        udata = inputchecks.check_controls_data(None, \
+            nu, self.number_of_controls)
+        assert_array_equal(udata, udata_ref)
 
-#         self.fakesbc = FakeSetupsBaseClass()
-#         self.fakesbc.check_and_set_time_points_input = mock.MagicMock()
+    def test_zero_controls(self):
 
-#         self.tu_ref = np.linspace(0, 49, 50)
-#         self.ty_ref = np.linspace(50, 99, 50)
+        # In this case, the input value is not used by the function, and
+        # therefor irrelevant at this point
 
+        nu = 0
+        udata_ref = ci.dmatrix(0, self.number_of_controls)
 
-#     def test_input_none(self):
+        udata = inputchecks.check_controls_data(None, \
+            nu, self.number_of_controls)
+        assert_array_equal(udata, udata_ref)
 
-#         self.fakesbc.tu = self.tu_ref
-#         self.fakesbc.check_and_set_measurement_time_points_input(None)
-#         assert_array_equal(self.fakesbc.ty, self.tu_ref)
+    def test_input_invalid(self):
 
+        nu = 3
+        udata_ref = np.zeros((nu + 1, self.number_of_controls))
 
-#     def test_input_valid(self):
+        self.assertRaises(ValueError, \
+            inputchecks.check_controls_data, udata_ref, \
+            nu, self.number_of_controls)
 
-#         self.fakesbc.check_and_set_time_points_input.return_value = self.ty_ref
-#         self.fakesbc.check_and_set_measurement_time_points_input(self.ty_ref)
-#         assert_array_equal(self.fakesbc.ty, self.ty_ref)
 
+class CheckAndSetStatesData(unittest.TestCase):
 
-#     def test_input_invalid(self):
+    def setUp(self):
 
-#         self.fakesbc.check_and_set_time_points_input.side_effect = \
-#             ValueError
-#         self.assertRaises(ValueError, \
-#             self.fakesbc.check_and_set_measurement_time_points_input, \
-#             self.ty_ref)
+        self.number_of_intervals = 20
 
 
-# class SetNumberOfControlIntervals(unittest.TestCase):
+    def test_input_rows(self):
 
-#     def setUp(self):
+        nx = 4
+        xdata_ref = np.random.rand(nx, self.number_of_intervals + 1)
 
-#         self.fakesbc = FakeSetupsBaseClass()
+        xdata = inputchecks.check_states_data(xdata_ref, nx, \
+            self.number_of_intervals)
+        assert_array_equal(xdata, xdata_ref)
 
-#         self.fakesbc.nu = 3
 
-#     def test_set_number_of_control_intervals(self):
+    def test_input_columns(self):
 
-#         self.fakesbc.set_number_of_control_intervals()
-#         self.assertEqual(self.fakesbc.nintervals, self.fakesbc.nu - 1)
+        nx = 4
+        xdata_ref = np.random.rand(nx, self.number_of_intervals + 1)
 
+        xdata = inputchecks.check_states_data(xdata_ref.T, nx, \
+            self.number_of_intervals)
+        assert_array_equal(xdata, xdata_ref)
 
-# class CheckAndSetControlsData(unittest.TestCase):
 
-#     def setUp(self):
+    def test_input_none(self):
 
-#         self.fakesbc = FakeSetupsBaseClass()
+        nx = 4
+        xdata_ref = np.zeros((nx, self.number_of_intervals + 1))
 
-#         self.fakesbc.nintervals = 20
-#         # self.fakesbc.ncontrols = self.fakesbc.nintervals + 1 for NonDyn,
-#         # but makes no difference for testing the function itself
-#         self.fakesbc.ncontrols = self.fakesbc.nintervals
+        xdata = inputchecks.check_states_data(None, nx, \
+            self.number_of_intervals)
+        assert_array_equal(xdata, xdata_ref)
 
-#     def test_input_rows(self):
 
-#         self.fakesbc.nu = 3
-#         udata_ref = np.random.rand(self.fakesbc.nu, self.fakesbc.nintervals)
+    def test_zero_states(self):
 
-#         self.fakesbc.check_and_set_controls_data(udata_ref)
-#         assert_array_equal(self.fakesbc.udata, udata_ref)
+        nx = 0
+        xdata_ref = ci.dmatrix(0, 0)
 
+        # In this case, the input value is not used by the function, and
+        # therefor irrelevant at this point
 
-#     def test_input_columns(self):
+        xdata = inputchecks.check_states_data(None, nx, \
+            self.number_of_intervals)
+        assert_array_equal(xdata, xdata_ref)
 
-#         self.fakesbc.nu = 3
-#         udata_ref = np.random.rand(self.fakesbc.nu, self.fakesbc.nintervals)
 
-#         self.fakesbc.check_and_set_controls_data(udata_ref.T)
-#         assert_array_equal(self.fakesbc.udata, udata_ref)
+    def test_input_invalid(self):
 
+        nx = 4
+        xdata_ref = np.random.rand(nx, self.number_of_intervals)
 
-#     def test_input_none(self):
-
-#         self.fakesbc.nu = 3
-
-#         udata_ref = np.zeros((self.fakesbc.nu, self.fakesbc.nintervals))
-
-#         self.fakesbc.check_and_set_controls_data(None)
-#         assert_array_equal(self.fakesbc.udata, udata_ref)
-
-
-#     def test_zero_controls(self):
-
-#         self.fakesbc.nu = 0
-
-#         udata_ref = ci.dmatrix(0, self.fakesbc.nintervals)
-
-#         # In this case, the input value is not used by the function, and
-#         # therefor irrelevant at this point
-
-#         self.fakesbc.check_and_set_controls_data(None)
-#         assert_array_equal(self.fakesbc.udata, udata_ref)
-
-
-#     def test_input_invalid(self):
-
-#         self.fakesbc.nu = 3
-#         udata_ref = np.random.rand(self.fakesbc.nu + 1, self.fakesbc.nintervals)
-
-#         self.assertRaises(ValueError, \
-#             self.fakesbc.check_and_set_controls_data, udata_ref)
+        self.assertRaises(ValueError, \
+            inputchecks.check_states_data, xdata_ref, nx, \
+            self.number_of_intervals + 1)
 
 
 # class CheckAndSetParameterData(unittest.TestCase):
@@ -399,63 +375,6 @@
 #             self.fakesbc.check_and_set_parameter_data, pdata_ref)   
 
 
-# class CheckAndSetStatesData(unittest.TestCase):
-
-#     def setUp(self):
-
-#         self.fakesbc = FakeSetupsBaseClass()
-
-#         self.fakesbc.nintervals = 20
-
-
-#     def test_input_rows(self):
-
-#         self.fakesbc.nx = 4
-#         xdata_ref = np.random.rand(self.fakesbc.nx, self.fakesbc.nintervals + 1)
-
-#         self.fakesbc.check_and_set_states_data(xdata_ref)
-#         assert_array_equal(self.fakesbc.xdata, xdata_ref)
-
-
-#     def test_input_columns(self):
-
-#         self.fakesbc.nx = 4
-#         xdata_ref = np.random.rand(self.fakesbc.nx, self.fakesbc.nintervals + 1)
-
-#         self.fakesbc.check_and_set_states_data(xdata_ref.T)
-#         assert_array_equal(self.fakesbc.xdata, xdata_ref)
-
-
-#     def test_input_none(self):
-
-#         self.fakesbc.nx = 4
-
-#         xdata_ref = np.zeros((self.fakesbc.nx, self.fakesbc.nintervals + 1))
-
-#         self.fakesbc.check_and_set_states_data(None)
-#         assert_array_equal(self.fakesbc.xdata, xdata_ref)
-
-
-#     def test_zero_states(self):
-
-#         self.fakesbc.nx = 0
-
-#         xdata_ref = ci.dmatrix(0, 0)
-
-#         # In this case, the input value is not used by the function, and
-#         # therefor irrelevant at this point
-
-#         self.fakesbc.check_and_set_states_data(None)
-#         assert_array_equal(self.fakesbc.xdata, xdata_ref)
-
-
-#     def test_input_invalid(self):
-
-#         self.fakesbc.nx = 4
-#         xdata_ref = np.random.rand(self.fakesbc.nx, self.fakesbc.nintervals)
-
-#         self.assertRaises(ValueError, \
-#             self.fakesbc.check_and_set_states_data, xdata_ref)
 
 
 # class CheckAndSetMeasurementData(unittest.TestCase):
