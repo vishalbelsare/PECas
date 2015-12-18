@@ -24,10 +24,7 @@ def check_time_points_input(tp):
     return tp   
     
 
-def check_controls_data(self, udata):
-
-    nu = self.discretization.system.nu
-    number_of_controls = self.discretization.number_of_controls
+def check_controls_data(udata, nu, number_of_controls):
 
     if not nu == 0:
 
@@ -51,10 +48,7 @@ def check_controls_data(self, udata):
         return ci.dmatrix(0, number_of_controls)
 
 
-def check_states_data(self, xdata):
-
-    nx = self.discretization.system.nx
-    number_of_intervals = self.discretization.number_of_intervals
+def check_states_data(xdata, nx, number_of_intervals):
 
     if not nx == 0:
 
@@ -78,11 +72,11 @@ def check_states_data(self, xdata):
         return ci.dmatrix(0,0)
 
 
-def check_parameter_data(self, pdata):
+def check_parameter_data(self, pdata, n_p):
 
     # Using "np" will overwrite the import of numpy!
 
-    n_p = self.discretization.system.np
+    # n_p = self.__discretization.system.np
 
     if pdata is None:
         pdata = np.zeros(n_p)
@@ -97,10 +91,10 @@ def check_parameter_data(self, pdata):
     return pdata
 
 
-def check_measurement_data(self, ydata):
+def check_measurement_data(self, ydata, nphi, number_of_measurements):
 
-    nphi = self.discretization.system.nphi
-    number_of_measurements = self.discretization.number_of_intervals + 1
+    # nphi = self.__discretization.system.nphi
+    # number_of_measurements = self.__discretization.number_of_intervals + 1
 
     if ydata is None:
         ydata = np.zeros((nphi, number_of_measurements))
@@ -118,10 +112,10 @@ def check_measurement_data(self, ydata):
     return ydata
 
 
-def check_measurement_weightings(self, wv):
+def check_measurement_weightings(self, wv, nphi, number_of_measurements):
 
-    nphi = self.discretization.system.nphi
-    number_of_measurements = self.discretization.number_of_intervals + 1
+    # nphi = self.__discretization.system.nphi
+    # number_of_measurements = self.__discretization.number_of_intervals + 1
 
     if wv is None:
         wv = np.ones((nphi, number_of_measurements))
@@ -139,9 +133,9 @@ def check_measurement_weightings(self, wv):
     return wv
 
 
-def check_equation_error_weightings(self, weps_e):
+def check_equation_error_weightings(self, weps_e, neps_e):
 
-    neps_e = self.discretization.system.neps_e
+    # neps_e = self.__discretization.system.neps_e
 
     if not neps_e == 0:
 
@@ -162,9 +156,9 @@ def check_equation_error_weightings(self, weps_e):
         return ci.dmatrix(0, 0)
 
 
-def check_input_error_weightings(self, weps_u):
+def check_input_error_weightings(self, weps_u, neps_u):
 
-    neps_u = self.discretization.system.neps_u
+    # neps_u = self.__discretization.system.neps_u
 
     if not neps_u == 0:
 

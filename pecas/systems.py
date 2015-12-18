@@ -19,13 +19,53 @@
 # along with PECas. If not, see <http://www.gnu.org/licenses/>.
 
 from interfaces import casadi_interface as ci
-
 from intro import pecas_intro
-from discretization.odecollocation import ODECollocation
 
 class System:
 
-    def check_all_system_parts_are_casadi_symbolics(self):
+    @property
+    def nu(self):
+
+        return self.u.size()
+
+
+    @property
+    def np(self):
+
+        return self.p.size()
+
+
+    @property
+    def nx(self):
+
+        return self.x.size()
+
+
+    @property
+    def nz(self):
+
+        return self.z.size()
+
+
+    @property
+    def neps_e(self):
+
+        return self.eps_e.size()
+
+
+    @property
+    def neps_u(self):
+
+        return self.eps_u.size()
+
+
+    @property
+    def nphi(self):
+
+        return self.phi.size()
+
+
+    def __check_all_system_parts_are_casadi_symbolics(self):
 
         for arg in self.__init__.__code__.co_varnames[1:]:
 
@@ -36,7 +76,7 @@ Missing input argument for system definition or wrong variable type for an
 input argument. Input arguments must be CasADi symbolic types.''')
 
 
-    def check_no_explicit_time_dependecy(self):
+    def __check_no_explicit_time_dependecy(self):
 
         if ci.depends_on(self.f, self.t):
 
@@ -45,35 +85,7 @@ Explicit time dependecies of the ODE right hand side are not yet supported in
 PECas, but will be in future versions.''')
 
 
-    def system_validation(self):
-
-        self.check_all_system_parts_are_casadi_symbolics()
-        self.check_no_explicit_time_dependecy()
-
-        if self.nx == 0 and self.nz == 0:
-
-            self.print_nondyn_system_information()
-
-        elif self.nx != 0 and self.nz == 0:
-
-            self.print_ode_system_information()
-
-        elif self.nx != 0 and self.nz != 0:
-
-            raise NotImplementedError('''
-Support of implicit DAEs is not implemented yet,
-but will be in future versions.
-''')
-
-        else:
-
-            raise NotImplementedError('''
-The system definition provided by the user is invalid.
-See the documentation for a list of valid definitions.
-''')
-
-
-    def print_nondyn_system_information(self):
+    def __print_nondyn_system_information(self):
 
         print('''
 The system is a non-dynamic systems with the general input-output
@@ -96,7 +108,7 @@ Particularly, the system has:
             print("g[{0}] = {1}".format(i, gi))
 
 
-    def print_ode_system_information(self):
+    def __print_ode_system_information(self):
 
         print('''
 The system is a dynamic system defined by a set of explicit ODEs xdot
@@ -122,44 +134,37 @@ Particularly, the system has:
             print("y[{0}] = {1}".format(i, yi))
 
 
-    @property
-    def nu(self):
+    def print_system_information(self):
 
-        return self.u.size()
+        if self.nx == 0 and self.nz == 0:
 
+            self.__print_nondyn_system_information()
 
-    @property
-    def np(self):
+        elif self.nx != 0 and self.nz == 0:
 
-        return self.p.size()
-
-
-    @property
-    def nx(self):
-
-        return self.x.size()
+            self.__print_ode_system_information()
 
 
-    @property
-    def nz(self):
+    def __system_validation(self):
 
-        return self.z.size()
+        self.__check_all_system_parts_are_casadi_symbolics()
+        self.__check_no_explicit_time_dependecy()
 
-    @property
-    def neps_e(self):
+        if self.nx != 0 and self.nz != 0:
 
-        return self.eps_e.size()
+            raise NotImplementedError('''
+Support of implicit DAEs is not implemented yet,
+but will be in future versions.
+''')
 
+        if self.nx == 0 and self.nz != 0:
 
-    @property
-    def neps_u(self):
+            raise NotImplementedError('''
+The system definition provided by the user is invalid.
+See the documentation for a list of valid definitions.
+''')
 
-        return self.eps_u.size()
-
-    @property
-    def nphi(self):
-
-        return self.phi.size()
+        self.print_system_information()
 
 
     def __init__(self, \
@@ -266,9 +271,4 @@ Particularly, the system has:
         self.f = f
         self.g = g
 
-        self.system_validation()
-
-        # Once the system got discretized, the information about the
-        # discretization will be stored in the attribute self.discretization
-
-        self.discretization = None
+        self.__system_validation()

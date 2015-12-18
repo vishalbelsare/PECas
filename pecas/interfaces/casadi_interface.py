@@ -103,3 +103,35 @@ def mul(inputobj):
 def NlpSolver(name, solver, nlp, options):
 
     return ca.NlpSolver(name, solver, nlp, options)
+
+
+def daeIn(t = None, x = None, p = None):
+
+    if t is None:
+
+        return ca.daeIn(x = x, p = p)
+
+    else:
+
+        return ca.daeIn(t = t, x = x, p = p)
+
+
+def daeOut(ode = None, alg = None):
+
+    if alg is None:
+
+        return ca.daeOut(ode = ode)
+
+    else:
+
+        return ca.daeOut(ode = ode, alg = alg)
+
+
+def Integrator(name, method, dae, options = {}):
+
+    return ca.Integrator(name, method, dae, options)
+
+
+def diag(inputobj):
+
+    return ca.diag(inputobj)
