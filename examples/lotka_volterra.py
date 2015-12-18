@@ -26,6 +26,10 @@ import casadi as ca
 
 import pecas
 
+import pecas.system
+import pecas.pe
+import pecas.sim
+
 T = pl.linspace(0, 10, 11)
 
 yN = pl.array([[1.0, 0.9978287, 2.366363, 6.448709, 5.225859, 2.617129, \
@@ -50,8 +54,7 @@ f = ca.vertcat( \
 
 phi = x
 
-odesys = pecas.systems.ExplODE(x = x, p = p, f = f, phi = phi)
-odesys.show_system_information(showEquations = True)
+odesys = pecas.system.System(x = x, p = p, f = f, phi = phi)
 
 # The weightings for the measurements errors given to PECas are calculated
 # from the standard deviations of the measurements, so that the least squares
@@ -61,31 +64,23 @@ wv = pl.zeros((2, yN.shape[1]))
 wv[0,:] = (1.0 / sigma_x1**2)
 wv[1,:] = (1.0 / sigma_x2**2)
 
-lsqpe = pecas.LSq(system = odesys, \
-    tu = T, \
-    pinit = [0.5, 1.0], \
-    xinit = yN, \
-    yN = yN, \
-    # linear_solver = "ma97", \
-    wv = wv)
+pe = pecas.pe.LSq(system = odesys, time_points = T, xinit = yN, ydata = yN, wv = wv)
 
-lsqpe.run_parameter_estimation(hessian = "gauss-newton")
-# lsqpe.run_parameter_estimation(hessian = "exact-hessian")
-lsqpe.show_results()
+pe.run_parameter_estimation(solver_options = {"linear_solver": "ma97"})
 
-lsqpe.compute_covariance_matrix()
-lsqpe.show_results()
+T_sim = pl.linspace(0, 10, 101)
+x0 = yN[:,0]
 
-t = pl.linspace(0,10,1000)
-lsqpe.run_simulation(x0 = yN[:,0], tsim = t)
+sim = pecas.sim.Simulation(odesys, pe.estimated_parameters)
+sim.run_system_simulation(time_points = T_sim, x0 = x0)
 
 pl.figure()
 
 pl.scatter(T, yN[0,:], color = "b", label = "$x_{1,meas}$")
 pl.scatter(T, yN[1,:], color = "r", label = "$x_{2,meas}$")
 
-pl.plot(t, pl.squeeze(lsqpe.Xsim[0,:]), color="b", label = "$x_{1,sim}$")
-pl.plot(t, pl.squeeze(lsqpe.Xsim[1,:]), color="r", label = "$x_{2,sim}$")
+pl.plot(T_sim, pl.squeeze(sim.simulation_results[0,:]), color="b", label = "$x_{1,sim}$")
+pl.plot(T_sim, pl.squeeze(sim.simulation_results[1,:]), color="r", label = "$x_{2,sim}$")
 
 pl.xlabel("$t$")
 pl.ylabel("$x_1, x_2$", rotation = 0)
