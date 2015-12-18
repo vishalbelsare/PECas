@@ -335,7 +335,7 @@ but will be in future versions.
             ])
 
 
-    def __setup_solver(self):
+    def __setup_nlp(self):
 
         self.__nlp = ci.mx_function("nlp", \
             ci.nlpIn(x = self.__optimization_variables), \
@@ -350,7 +350,7 @@ but will be in future versions.
 
         r'''
         :raises: AttributeError, NotImplementedError
-        
+
         :param system: system considered for parameter estimation, specified
                        using the PECas :class:`pecas.system.System` class
         :type system: pecas.system.System
@@ -500,7 +500,7 @@ but will be in future versions.
 
         self.__setup_constraints()
 
-        self.__setup_solver()
+        self.__setup_nlp()
 
 
     def run_parameter_estimation(self, solver_options = {}):
@@ -555,7 +555,7 @@ Parameter estimation finished. Check IPOPT output for status information.
 ''')
 
 
-    def show_results(self):
+    def print_estimation_results(self):
 
         r'''
         :raises: AttributeError

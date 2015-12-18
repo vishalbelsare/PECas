@@ -265,9 +265,15 @@ class ODECollocation(Discretization):
                 self.system.eps_u, self.system.p], \
             [self.system.phi])    
 
+        # The last control value is silently reused. This should be changed
+        # or at least the user should be noticed about that!
+
         measurement_function_input = [ \
             ci.horzcat(self.time_points.tolist()),
-            self.optimization_variables["U"],
+
+            ci.horzcat([self.optimization_variables["U"], \
+                self.optimization_variables["U"][:, -1]]), 
+            
             self.optimization_variables["X"][:, \
                 :: (self.collocation_polynomial_degree + 1)],
             self.optimization_variables["EPS_U"][:, \

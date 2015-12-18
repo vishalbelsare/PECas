@@ -35,9 +35,9 @@ def mx_sym(name, dim1 = 1, dim2 = 1):
     return ca.MX.sym(name, dim1, dim2)
 
 
-def mx_function(name, inputs, outputs):
+def mx_function(name, inputs, outputs, options = {}):
 
-    return ca.MXFunction(name, inputs, outputs)
+    return ca.MXFunction(name, inputs, outputs, options)
 
 
 def dmatrix(dim1, dim2 = 1):

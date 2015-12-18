@@ -103,6 +103,9 @@ can be accessed, please run run_system_simulation() first.
     def run_system_simulation(self, x0, time_points, udata = None, \
         integrator_options = {}):
 
+        print('\n' + 27 * '-' + \
+            ' PECas system simulation ' + 26 * '-')
+        print('\nPerforming system simulation, this might take some time ...') 
 
         self.__initialize_simulation(x0 = x0, time_points = time_points, \
             udata = udata, integrator_options_user = integrator_options)
@@ -113,3 +116,5 @@ can be accessed, please run run_system_simulation() first.
             self.__simulation(x0 = self.__x0, p = self.__simulation_input)["xf"]
 
             ])
+
+        print("System simulation finished.")

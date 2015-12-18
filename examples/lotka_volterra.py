@@ -67,6 +67,7 @@ wv[1,:] = (1.0 / sigma_x2**2)
 pe = pecas.pe.LSq(system = odesys, time_points = T, xinit = yN, ydata = yN, wv = wv)
 
 pe.run_parameter_estimation(solver_options = {"linear_solver": "ma97"})
+pe.print_estimation_results()
 
 T_sim = pl.linspace(0, 10, 101)
 x0 = yN[:,0]

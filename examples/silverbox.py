@@ -25,7 +25,9 @@
 import pylab as pl
 
 import casadi as ca
-import pecas
+import pecas.system
+import pecas.sim
+import pecas.pe
 
 N = 10000
 fs = 610.1
@@ -46,51 +48,42 @@ f = ca.vertcat([
 
 phi = x
 
-odesys = pecas.systems.ExplODE( \
+odesys = pecas.system.System( \
     x = x, u = u, p = p, f = f, phi = phi)
 
 dt = 1.0 / fs
-ty = pl.linspace(0, N, N+1) * dt
+tN = pl.linspace(0, N, N+1) * dt
 
-u_data = ca.DMatrix(0.1*pl.random(N))
+udata = ca.DMatrix(0.1*pl.random(N))
 
-y_data_dummy = pl.zeros((x.shape[0], N+1))
-wv_dummy = y_data_dummy
+simulation_true_parameters = pecas.sim.Simulation( \
+    system = odesys, p = p_true / scale)
+simulation_true_parameters.run_system_simulation( \
+    x0 = [0.0, 0.0], time_points = tN, udata = udata)
 
-lsqpe_dummy = pecas.LSq( \
-    system = odesys, \
-    tu = ty, \
-    uN = u_data, \
-    yN = y_data_dummy, \
-    wv = wv_dummy)
+ydata = simulation_true_parameters.simulation_results
+ydata += 1e-3 * pl.random((x.shape[0], N+1))
 
-lsqpe_dummy.run_simulation(x0 = [0.0, 0.0], psim = p_true/scale)
+wv = pl.ones(ydata.shape)
 
-y_data = lsqpe_dummy.Xsim
-y_data += 1e-3 * pl.random((x.shape[0], N+1))
+pe = pecas.pe.LSq(system = odesys, \
+    time_points = tN, xinit = ydata, \
+    ydata = ydata, wv = wv, udata = udata, pinit = p_guess)
+    
+pe.run_parameter_estimation()
 
-wv = pl.ones(y_data.shape)
-
-lsqpe = pecas.LSq( \
-    system = odesys, \
-    tu = ty, \
-    uN = u_data, \
-    yN = y_data, \
-    pinit = p_guess, \
-    xinit = y_data, \
-    # linear_solver = "ma97", \
-    wv = wv)
-
-lsqpe.run_parameter_estimation()
-lsqpe.run_simulation(x0 = [0.0, 0.0])
+simulation_estimated_parameters = pecas.sim.Simulation( \
+    system = odesys, p = pe.estimated_parameters)
+simulation_estimated_parameters.run_system_simulation( \
+    x0 = [0.0, 0.0], time_points = tN, udata = udata)
 
 pl.close("all")
 pl.figure()
 
-pl.scatter(ty, pl.squeeze(y_data[0,:]))
-pl.plot(ty, lsqpe.Xsim[0,:].T)
+pl.scatter(tN, pl.squeeze(ydata[0,:]))
+pl.plot(tN, simulation_estimated_parameters.simulation_results[0,:].T)
 
-pl.scatter(ty, pl.squeeze(y_data[1,:]))
-pl.plot(ty, lsqpe.Xsim[1,:].T)
+pl.scatter(tN, pl.squeeze(ydata[1,:]))
+pl.plot(tN, simulation_estimated_parameters.simulation_results[1,:].T)
 
 pl.show()
