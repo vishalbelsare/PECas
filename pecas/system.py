@@ -23,6 +23,9 @@ from intro import pecas_intro
 
 class System:
 
+    '''The class :class:`System` is used to define non-dynamic, explicit ODE-
+    or fully implicit DAE-systems systems within PECas.'''
+
     @property
     def nu(self):
 
@@ -181,6 +184,8 @@ See the documentation for a list of valid definitions.
 
 
         r'''
+        :raises: TypeError, NotImplementedError
+
         :param t: time :math:`t \in \mathbb{R}` (not yet supported!)
         :type t: casadi.casadi.MX
 
@@ -212,12 +217,9 @@ See the documentation for a list of valid definitions.
                   (optional)
         :type g: casadi.casadi.MX
 
-        :raises: TypeError
 
-
-        The class :class:`System` is used to define non-dynamic, explicit ODE-
-        or fully implicit DAE-systems systems within PECas. Depending on the
-        inputs the user provides, :class:`System` is interpreted as follows:
+        Depending on the inputs the user provides, the :class:`System`
+        is interpreted as follows:
 
 
         **Non-dynamic system** (x = None, z = None):

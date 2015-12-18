@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with PECas. If not, see <http://www.gnu.org/licenses/>.
 
-'''The module :file:`pe` can used for parameter estimation applications.
+'''The module :file:`pecas.pe` can used for parameter estimation applications.
 For now, only least squares parameter estimation problems are covered.'''
 
 import numpy as np
@@ -35,8 +35,9 @@ import inputchecks
 
 class LSq(object):
 
-    '''The class :class:`LSq` is used to set up least squares parameter
-    estimation problems for systems defined with the PECas :class:`System`
+    '''The class :class:`pecas.pe.LSq` is used to set up least squares parameter
+    estimation problems for systems defined with the PECas
+    :class:`pecas.system.System`
     class, using a given set of user provided control 
     data, measurement data and different kinds of weightings.'''
 
@@ -91,7 +92,7 @@ Run compute_covariance_matrix() to do so.
 
         try:
 
-            return ca.sqrt(np.abs(ci.diag(self.__covariance_matrix[ \
+            return ci.sqrt(np.abs(ci.diag(self.__covariance_matrix[ \
                 :self.__discretization.system.np, \
                 :self.__discretization.system.np])))
 
@@ -348,9 +349,11 @@ but will be in future versions.
         discretization_method = "collocation", **kwargs):
 
         r'''
+        :raises: AttributeError, NotImplementedError
+        
         :param system: system considered for parameter estimation, specified
-                       using the PECas :class:`System` class
-        :type system: pecas.System
+                       using the PECas :class:`pecas.system.System` class
+        :type system: pecas.system.System
 
         :param time_points: time points :math:`t_N \in \mathbb{R}^{N}`
                    used to discretize the continuous time problem. Controls
@@ -417,12 +420,12 @@ but will be in future versions.
                                    collocation polynomials,
                                    possible values are `radau` (default)
                                    and `legendre`
-        :type scheme: str
+        :type collocation_scheme: str
 
         :param number_of_collocation_points: order of collocation polynominals
                                              :math:`d \in \mathbb{Z}` (default
                                              values is 3)
-        :type poly_order: int
+        :type number_of_collocation_points: int
 
 
         :param integrator: integrator to be used with multiple shooting.
@@ -509,19 +512,21 @@ but will be in future versions.
         :type solver_options: dict
 
         This functions will run a least squares parameter estimation for the
-        given problem and data set.
-
-        The printed status of IPOPT provides information whether the
+        given problem and data set. The status of IPOPT printed to the 
+        console provides information whether the
         computations finished sucessfully. The estimated parameters
         :math:`\hat{p}` can afterwards be accessed via the class attribute
         ``LSq.estimated_parameters``.
 
-        **Please be aware:** IPOPT finishing sucessfully does not necessarly
-        mean that the estimation results for the unknown parameters are useful
-        for your purposes, it just means that IPOPT was able to solve the given
-        optimization problem.
-        You have in any case to verify your results, e. g. by simulation using
-        the PECas class :class:`Simulation`.
+        .. note::
+
+            IPOPT finishing sucessfully does not necessarly
+            mean that the estimation results for the unknown parameters are useful
+            for your purposes, it just means that IPOPT was able to solve the given
+            optimization problem.
+            You have in any case to verify your results, e. g. by simulation using
+            the PECas class :class:`pecas.sim.Simulation`!
+
         '''  
 
         print('\n' + 18 * '-' + \
@@ -532,7 +537,7 @@ Starting least squares parameter estimation using IPOPT,
 this might take some time ...
 ''')
 
-        self.__t_start_estimation = time.time()
+        self.__tstart_estimation = time.time()
 
         nlpsolver = ci.NlpSolver("solver", "ipopt", self.__nlp, \
             options = solver_options)
@@ -578,7 +583,7 @@ Parameter estimation finished. Check IPOPT output for status information.
         try:
 
             print('\n' + 21 * '-' + \
-                ' PECas Parameter estimation results ' + 21 * '-')
+                ' PECas parameter estimation results ' + 21 * '-')
              
             print("\nEstimated parameters p_i:")
 
@@ -586,12 +591,12 @@ Parameter estimation finished. Check IPOPT output for status information.
             
                 try:
 
-                    print("    p_{0:<3} = {1: 10.8e} +/- {2: 10.8e}".format( \
-                         k, sigmak[0], self.standard_deviations[k]))
+                    print("    p_{0:<3} = {1} +/- {2}".format( \
+                         k, pk[0], self.standard_deviations[k]))
 
                 except AttributeError:
 
-                    print("    p_{0:<3} = {1: 10.8e}".format(\
+                    print("    p_{0:<3} = {1}".format(\
                         k, pk[0]))
 
             print("\nCovariance matrix for the estimated parameters:")
@@ -607,7 +612,7 @@ Parameter estimation finished. Check IPOPT output for status information.
     Run compute_covariance_matrix() to do so.''')
 
             
-            print("Duration of the estimation" + 23 * "." + \
+            print("\nDuration of the estimation" + 23 * "." + \
                 ": {0:10.8e} s".format(self.__duration_estimation))
 
             try:
