@@ -101,3 +101,14 @@ def setup_beta(residuals, measurements, equality_constraints, \
         equality_constraints.size1() - optimization_variables.size())
 
     return beta
+
+
+def setup_a_criterion(covariance_matrix):
+
+    return (1.0 / covariance_matrix.shape[0]) * ci.trace(covariance_matrix)
+
+
+def setup_d_criterion(covariance_matrix):
+
+    return pow(ci.det(covariance_matrix), (1.0 / covariance_matrix.shape[0]))
+    
