@@ -26,10 +26,6 @@ import casadi as ca
 
 import pecas
 
-import pecas.system
-import pecas.pe
-import pecas.sim
-
 T = pl.linspace(0, 10, 11)
 
 yN = pl.array([[1.0, 0.9978287, 2.366363, 6.448709, 5.225859, 2.617129, \
@@ -70,26 +66,27 @@ pe.run_parameter_estimation(solver_options = {"linear_solver": "ma97"})
 pe.print_estimation_results()
 
 pe.compute_covariance_matrix()
+pe.print_estimation_results()
 
-# T_sim = pl.linspace(0, 10, 101)
-# x0 = yN[:,0]
+T_sim = pl.linspace(0, 10, 101)
+x0 = yN[:,0]
 
-# sim = pecas.sim.Simulation(system, pe.estimated_parameters)
-# sim.run_system_simulation(time_points = T_sim, x0 = x0)
+sim = pecas.sim.Simulation(system, pe.estimated_parameters)
+sim.run_system_simulation(time_points = T_sim, x0 = x0)
 
-# pl.figure()
+pl.figure()
 
-# pl.scatter(T, yN[0,:], color = "b", label = "$x_{1,meas}$")
-# pl.scatter(T, yN[1,:], color = "r", label = "$x_{2,meas}$")
+pl.scatter(T, yN[0,:], color = "b", label = "$x_{1,meas}$")
+pl.scatter(T, yN[1,:], color = "r", label = "$x_{2,meas}$")
 
-# pl.plot(T_sim, pl.squeeze(sim.simulation_results[0,:]), color="b", label = "$x_{1,sim}$")
-# pl.plot(T_sim, pl.squeeze(sim.simulation_results[1,:]), color="r", label = "$x_{2,sim}$")
+pl.plot(T_sim, pl.squeeze(sim.simulation_results[0,:]), color="b", label = "$x_{1,sim}$")
+pl.plot(T_sim, pl.squeeze(sim.simulation_results[1,:]), color="r", label = "$x_{2,sim}$")
 
-# pl.xlabel("$t$")
-# pl.ylabel("$x_1, x_2$", rotation = 0)
-# pl.xlim(0.0, 10.0)
+pl.xlabel("$t$")
+pl.ylabel("$x_1, x_2$", rotation = 0)
+pl.xlim(0.0, 10.0)
 
-# pl.legend(loc = "upper left")
-# pl.grid()
+pl.legend(loc = "upper left")
+pl.grid()
 
-# pl.show()
+pl.show()

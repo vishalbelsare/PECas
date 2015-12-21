@@ -23,9 +23,7 @@
 
 import casadi as ca
 import pylab as pl
-import pecas.system
-import pecas.pe
-import pecas.sim
+import pecas
 
 # Defining constant problem parameters: 
 #
@@ -92,11 +90,13 @@ pe = pecas.pe.LSq( \
 pe.run_parameter_estimation()
 pe.print_estimation_results()
 
+pe.compute_covariance_matrix()
+pe.print_estimation_results()
+
 sim = pecas.sim.Simulation(system, pe.estimated_parameters)
 sim.run_system_simulation(time_points = time_points, \
     x0 = ydata[:,0], udata = udata)
 
-# lsqpe.run_simulation([numeas[0], wmeas[0]])
 nusim = sim.simulation_results[0,:].T
 wsim = sim.simulation_results[1,:].T
 

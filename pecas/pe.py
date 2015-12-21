@@ -618,7 +618,8 @@ Parameter estimation finished. Check IPOPT output for status information.
             try:
 
                 print("Duration of the covariance matrix computation...." + \
-                    ": {0:10.8e} s".format(self.__duration_cov_computation))
+                    ": {0:10.8e} s".format( \
+                        self.__duration_covariance_computation))
 
             except AttributeError:
 

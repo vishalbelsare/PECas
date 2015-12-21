@@ -191,10 +191,6 @@ class ODECollocation(Discretization):
             [h, t, u, x, eps_e, eps_u, p], [collocation_node])
         collocation_node_fcn = collocation_node_fcn.expand()
 
-        # import ipdb
-        # ipdb.set_trace()
-
-        # X = self.optimization_variables["X"][:, :-1][:].reshape( \
         X = self.optimization_variables["X"][:, :-1].reshape( \
             (self.system.nx * (self.collocation_polynomial_degree + 1), \
             self.number_of_intervals))

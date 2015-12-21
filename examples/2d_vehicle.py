@@ -71,6 +71,9 @@ pe = pecas.pe.LSq(system = system, \
 pe.run_parameter_estimation()
 pe.print_estimation_results()
 
+pe.compute_covariance_matrix()
+pe.print_estimation_results()
+
 sim = pecas.sim.Simulation(system, pe.estimated_parameters)
 sim.run_system_simulation(time_points = time_points, \
     x0 = ydata[0,:], udata = udata)

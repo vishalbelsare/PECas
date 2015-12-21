@@ -111,4 +111,3 @@ def setup_a_criterion(covariance_matrix):
 def setup_d_criterion(covariance_matrix):
 
     return pow(ci.det(covariance_matrix), (1.0 / covariance_matrix.shape[0]))
-    
