@@ -53,34 +53,34 @@ class PECasBaseClass:
     def __init__(self, system, controls, measurements, \
         weightings, initials, solver_settings, collocation_settings):
 
-        intro.pecas_intro()
-        print('\n' + 22 * '-' + \
-            ' PECas parameter estimation setup ' + 22 * '-')
-        print('\nStarting parameter estimation problem setup ...') 
+        # intro.pecas_intro()
+        # print('\n' + 22 * '-' + \
+        #     ' PECas parameter estimation setup ' + 22 * '-')
+        # print('\nStarting parameter estimation problem setup ...') 
 
 
-        self.solver_settings = solver_settings
+        # self.solver_settings = solver_settings
 
 
-        if type(system) is systems.NonDyn:
+        # if type(system) is systems.NonDyn:
 
-            self.pesetup = setups.NDSetup( \
-                system = system, controls = controls, \
-                measurements = measurements, \
-                weightings = weightings, initials = initials)
+        #     self.pesetup = setups.NDSetup( \
+        #         system = system, controls = controls, \
+        #         measurements = measurements, \
+        #         weightings = weightings, initials = initials)
 
-        elif type(system) is systems.ExplODE:
+        # elif type(system) is systems.ExplODE:
 
-            self.pesetup = setups.ODESetup( \
-                system = system, controls = controls, \
-                measurements = measurements, \
-                weightings = weightings, initials = initials, \
-                collocation_settings = collocation_settings)
+        #     self.pesetup = setups.ODESetup( \
+        #         system = system, controls = controls, \
+        #         measurements = measurements, \
+        #         weightings = weightings, initials = initials, \
+        #         collocation_settings = collocation_settings)
 
-        else:
+        # else:
 
-            raise NotImplementedError( \
-                "The system type provided by the user is not supported.")
+        #     raise NotImplementedError( \
+        #         "The system type provided by the user is not supported.")
 
         # Store the parameter estimation problem setup
 
@@ -89,41 +89,41 @@ class PECasBaseClass:
         # Check if the supported measurement data fits to the dimensions of
         # the output function
 
-        yN = np.atleast_2d(yN)
+#         yN = np.atleast_2d(yN)
 
-        if yN.shape == (self.pesetup.tu.size, self.pesetup.nphi):
+#         if yN.shape == (self.pesetup.tu.size, self.pesetup.nphi):
 
-            yN = yN.T
+#             yN = yN.T
 
-        if not yN.shape == (self.pesetup.nphi, self.pesetup.tu.size):
+#         if not yN.shape == (self.pesetup.nphi, self.pesetup.tu.size):
 
-            raise ValueError('''
-The dimension of the measurement data given in yN does not match the
-dimension of output function and/or tu.
-Valid dimensions for yN for the given data are:
-    {0} or {1},
-but you supported yN of dimension:
-    {2}.'''.format(str((self.pesetup.tu.size, self.pesetup.nphi)), \
-    str((self.pesetup.nphi, self.pesetup.tu.size)), str(yN.shape)))
+#             raise ValueError('''
+# The dimension of the measurement data given in yN does not match the
+# dimension of output function and/or tu.
+# Valid dimensions for yN for the given data are:
+#     {0} or {1},
+# but you supported yN of dimension:
+#     {2}.'''.format(str((self.pesetup.tu.size, self.pesetup.nphi)), \
+#     str((self.pesetup.nphi, self.pesetup.tu.size)), str(yN.shape)))
 
-        # Check if the supported standard deviations fit to the dimensions of
-        # the measurement data
+#         # Check if the supported standard deviations fit to the dimensions of
+#         # the measurement data
 
-        wv = np.atleast_2d(wv)
+#         wv = np.atleast_2d(wv)
 
-        if wv.shape == yN.T.shape:
+#         if wv.shape == yN.T.shape:
 
-            wv = wv.T
+#             wv = wv.T
 
-        if not wv.shape == yN.shape:
+#         if not wv.shape == yN.shape:
 
-            raise ValueError('''
-The dimension of weights of the measurement errors given in wv does not
-match the dimensions of the measurement data.
-Valid dimensions for wv for the given data are:
-    {0} or {1},
-but you supported wv of dimension:
-    {2}.'''.format(str(yN.shape), str(yN.T.shape), str(wv.shape)))
+#             raise ValueError('''
+# The dimension of weights of the measurement errors given in wv does not
+# match the dimensions of the measurement data.
+# Valid dimensions for wv for the given data are:
+#     {0} or {1},
+# but you supported wv of dimension:
+#     {2}.'''.format(str(yN.shape), str(yN.T.shape), str(wv.shape)))
 
         # Get the measurement values and standard deviations into the
         # necessary order of apperance and dimensions

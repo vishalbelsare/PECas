@@ -244,7 +244,7 @@ but will be in future versions.
 
             ])
 
-        pinit = inputchecks.check_parameter_data(self, pinit, \
+        pinit = inputchecks.check_parameter_data(pinit, \
             self.__discretization.system.np)
         Pinit = pinit
 
@@ -267,7 +267,7 @@ but will be in future versions.
 
     def __set_measurement_data(self, ydata):
 
-        measurement_data = inputchecks.check_measurement_data(self, ydata, \
+        measurement_data = inputchecks.check_measurement_data(ydata, \
             self.__discretization.system.nphi, \
             self.__discretization.number_of_intervals + 1)
         self.__measurement_data_vectorized = ci.vec(measurement_data)
@@ -276,16 +276,16 @@ but will be in future versions.
     def __set_weightings(self, wv, weps_e, weps_u):
 
         measurement_weightings = \
-            inputchecks.check_measurement_weightings(self, wv, \
+            inputchecks.check_measurement_weightings(wv, \
             self.__discretization.system.nphi, \
             self.__discretization.number_of_intervals + 1)
 
         equation_error_weightings = \
-            inputchecks.check_equation_error_weightings(self, weps_e, \
+            inputchecks.check_equation_error_weightings(weps_e, \
             self.__discretization.system.neps_e)
 
         input_error_weightings = \
-            inputchecks.check_input_error_weightings(self, weps_u, \
+            inputchecks.check_input_error_weightings(weps_u, \
             self.__discretization.system.neps_u)
 
         self.__weightings_vectorized = ci.veccat([ \
