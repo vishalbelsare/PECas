@@ -69,7 +69,7 @@ pe = pecas.pe.LSq(system = system, \
     xinit = ydata)
 
 pe.run_parameter_estimation()
-lsqpe.print_estimation_results()
+pe.print_estimation_results()
 
 sim = pecas.sim.Simulation(system, pe.estimated_parameters)
 sim.run_system_simulation(time_points = time_points, \

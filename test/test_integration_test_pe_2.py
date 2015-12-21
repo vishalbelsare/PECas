@@ -27,7 +27,7 @@ from numpy.testing import assert_array_almost_equal
 
 import unittest
 
-class IntegrationTestPE2(unittest.TestCase):
+class IntegrationTestODE2(unittest.TestCase):
 
 #     # Model and data taken and adapted from Verschueren, Robin: Design and
 #     # implementation of a time-optimal controller for model race cars, 
@@ -71,7 +71,7 @@ class IntegrationTestPE2(unittest.TestCase):
             [0.200652, 11.6528, -26.2501, -74.1967, 16.8705, -1.80125]).T
 
 
-    def test_integration_test_pe_2(self):
+    def test_integration_test_pe(self):
 
         odesys = pecas.system.System(x = self.x, p = self.p, \
             f = self.f, phi = self.phi, u = self.u)
@@ -85,4 +85,18 @@ class IntegrationTestPE2(unittest.TestCase):
         pe.print_estimation_results()
 
         assert_array_almost_equal(pe.estimated_parameters, self.phat, \
+            decimal = 4)
+
+
+    def test_integration_test_sim(self):
+
+        odesys = pecas.system.System(x = self.x, p = self.p, \
+            f = self.f, phi = self.phi, u = self.u)
+
+        sim = pecas.sim.Simulation(odesys, self.phat)
+        sim.run_system_simulation(time_points = self.time_points, \
+            x0 = self.ydata[0,:], udata = self.udata)
+
+        simdata = np.array(np.loadtxt("test/data_2d_vehicle_sim.txt")).T
+        assert_array_almost_equal(sim.simulation_results, simdata, \
             decimal = 4)

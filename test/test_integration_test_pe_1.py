@@ -22,15 +22,18 @@ import casadi as ca
 import numpy as np
 import pecas.system
 import pecas.pe
+import pecas.sim
 
 from numpy.testing import assert_array_almost_equal
 
 import unittest
 
-class IntegrationTestPE1(unittest.TestCase):
+class IntegrationTestODE1(unittest.TestCase):
 
     # Model and data taken from Bock, Sager et al.: Uebungen Numerische
     # Mathematik II, Blatt 9, IWR, Universitaet Heidelberg, 2006
+
+    # ODE, no controls
 
     def setUp(self):
 
@@ -47,11 +50,6 @@ class IntegrationTestPE1(unittest.TestCase):
 
         self.time_points = data[:, 0]
 
-        # -- TODO! --
-        # None of the checks will detect an invalidxpvbarg of
-        # [[2, 1], [3]], since shape and size both fit.
-        # --> How to check for this?
-
         self.ydata = data[:, 1::2]
         self.wv = 1.0 / data[:, 2::2]**2
 
@@ -60,7 +58,7 @@ class IntegrationTestPE1(unittest.TestCase):
         self.phat = np.atleast_2d([0.693379029, 0.341128482]).T
 
 
-    def test_integration_test_pe_1(self):
+    def test_integration_test_pe(self):
 
         odesys = pecas.system.System(x = self.x, p = self.p, \
             f = self.f, phi = self.phi)
@@ -74,3 +72,16 @@ class IntegrationTestPE1(unittest.TestCase):
 
         assert_array_almost_equal(pe.estimated_parameters, self.phat, \
             decimal = 8)
+
+    def test_integration_test_sim(self):
+
+        odesys = pecas.system.System(x = self.x, p = self.p, \
+            f = self.f, phi = self.phi)
+        time_points_sim = np.linspace(0, 10, 101)
+
+        sim = pecas.sim.Simulation(odesys, self.phat)
+        sim.run_system_simulation(time_points = time_points_sim, \
+            x0 = self.ydata[0,:])
+
+        simdata = np.array(np.loadtxt("test/data_lotka_volterra_sim.txt")).T
+        assert_array_almost_equal(sim.simulation_results, simdata)
