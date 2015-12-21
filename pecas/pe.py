@@ -29,6 +29,7 @@ from discretization.odecollocation import ODECollocation
 from discretization.odemultipleshooting import ODEMultipleShooting
 
 from interfaces import casadi_interface as ci
+from covariance_matrix import setup_covariance_matrix, setup_beta
 from intro import pecas_intro
 
 import inputchecks
@@ -92,9 +93,8 @@ Run compute_covariance_matrix() to do so.
 
         try:
 
-            return ci.sqrt(np.abs(ci.diag(self.__covariance_matrix[ \
-                :self.__discretization.system.np, \
-                :self.__discretization.system.np])))
+            return ci.sqrt([abs(var) for var \
+                in ci.diag(self.covariance_matrix)])
 
         except AttributeError:
 
@@ -634,3 +634,34 @@ and compute_covariance_matrix() before all results can be displayed.
         finally:
 
             np.set_printoptions()
+
+
+    def compute_covariance_matrix(self):
+
+        self.__tstart_covariance_computation = time.time()
+
+        self.__covariance_matrix_symbolic = setup_covariance_matrix( \
+                self.__optimization_variables, self.__weightings_vectorized, \
+                self.__constraints, self.__discretization.system.np)
+
+        self.__beta_symbolic = setup_beta(self.__residuals, \
+            self.__measurement_data_vectorized, \
+            self.__constraints, self.__optimization_variables)
+
+        covariance_matrix_fcn = ci.mx_function("covariance_matrix_fcn", \
+            [self.__optimization_variables], \
+            [self.__covariance_matrix_symbolic])
+
+        beta_fcn = ci.mx_function("beta_fcn", \
+            [self.__optimization_variables], \
+            [self.__beta_symbolic])
+
+        self.__beta = beta_fcn([self.estimation_results["x"]])[0]
+
+        self.__covariance_matrix = self.__beta * \
+            covariance_matrix_fcn([self.estimation_results["x"]])[0]
+
+        self.__tend_covariance_computation = time.time()
+        self.__duration_covariance_computation = \
+            self.__tend_covariance_computation - \
+            self.__tstart_covariance_computation

@@ -135,3 +135,28 @@ def Integrator(name, method, dae, options = {}):
 def diag(inputobj):
 
     return ca.diag(inputobj)
+
+
+def mx(dim1, dim2):
+
+    return ca.MX(dim1, dim2)
+
+
+def blockcat(a, b, c, d):
+
+    return ca.blockcat(a, b, c, d)
+
+
+def jacobian(a, b):
+
+    return ca.jacobian(a, b)
+
+
+def solve(a, b, solver):
+
+    return ca.solve(a, b, solver)
+
+def mx_eye(dim1):
+
+    return ca.MX.eye(dim1)
+    
