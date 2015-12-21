@@ -5,3 +5,5 @@ dist/
 pecas.egg-info/
 files.txt
 *.pdf
+*.lprof
+*.coverage
