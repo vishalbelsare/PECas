@@ -54,7 +54,7 @@ f = ca.vertcat( \
 
 phi = x
 
-odesys = pecas.system.System(x = x, p = p, f = f, phi = phi)
+system = pecas.system.System(x = x, p = p, f = f, phi = phi)
 
 # The weightings for the measurements errors given to PECas are calculated
 # from the standard deviations of the measurements, so that the least squares
@@ -64,7 +64,7 @@ wv = pl.zeros((2, yN.shape[1]))
 wv[0,:] = (1.0 / sigma_x1**2)
 wv[1,:] = (1.0 / sigma_x2**2)
 
-pe = pecas.pe.LSq(system = odesys, time_points = T, xinit = yN, ydata = yN, wv = wv)
+pe = pecas.pe.LSq(system = system, time_points = T, xinit = yN, ydata = yN, wv = wv)
 
 pe.run_parameter_estimation(solver_options = {"linear_solver": "ma97"})
 pe.print_estimation_results()
@@ -72,7 +72,7 @@ pe.print_estimation_results()
 T_sim = pl.linspace(0, 10, 101)
 x0 = yN[:,0]
 
-sim = pecas.sim.Simulation(odesys, pe.estimated_parameters)
+sim = pecas.sim.Simulation(system, pe.estimated_parameters)
 sim.run_system_simulation(time_points = T_sim, x0 = x0)
 
 pl.figure()

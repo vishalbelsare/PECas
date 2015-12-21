@@ -23,14 +23,16 @@
 
 import casadi as ca
 import pylab as pl
-import pecas
+import pecas.system
+import pecas.pe
+import pecas.sim
 
 # Defining constant problem parameters: 
 #
 #     - m: representing the ball of the mass in kg
 #     - L: the length of the pendulum bar in meters
 #     - g: the gravity constant in m/s^2
-#     - psi: the actuation angle of the manuver in radians, which stays
+#     - psi: the actime_pointsation angle of the manuver in radians, which stays
 #            constant for this problem
 
 m = 1.0
@@ -48,18 +50,17 @@ f = ca.vertcat([x[1], p[0]/(m*(L**2))*(u-x[0]) - g/L * pl.sin(x[0])])
 
 phi = x
 
-odesys = pecas.systems.ExplODE(x = x, u = u, p = p, f = f, phi = phi)
-odesys.show_system_information(showEquations = True)
+system = pecas.system.System(x = x, u = u, p = p, f = f, phi = phi)
 
 # Loading data
 
 data = pl.loadtxt('data_pendulum.txt')
-tu = data[:500, 0]
+time_points = data[:500, 0]
 numeas = data[:500, 1]
 wmeas = data[:500, 2]
-N = tu.size
-yN = pl.array([numeas,wmeas])
-uN = [psi] * (N-1)
+N = time_points.size
+ydata = pl.array([numeas,wmeas])
+udata = [psi] * (N-1)
 
 # Definition of the weightings for each of the measurements.
 
@@ -74,39 +75,38 @@ sigmaw = pl.std(wmeas, ddof=1)
 # from the standard deviations of the measurements, so that the least squares
 # estimator ist the maximum likelihood estimator for the estimation problem.
 
-wnu = 1.0 / (pl.ones(tu.size)*sigmanu**2)
-ww = 1.0 / (pl.ones(tu.size)*sigmaw**2)
+wnu = 1.0 / (pl.ones(time_points.size)*sigmanu**2)
+ww = 1.0 / (pl.ones(time_points.size)*sigmaw**2)
 
 wv = pl.array([wnu, ww])
 
 # Run parameter estimation and assure that the results is correct
 
-lsqpe = pecas.LSq( \
-    system = odesys, tu = tu, \
-    uN = uN, \
+pe = pecas.pe.LSq( \
+    system = system, time_points = time_points, \
+    udata = udata, \
     pinit = 1, \
-    xinit = yN, 
-    # linear_solver = "ma97", \
-    yN = yN, wv = wv)
+    xinit = ydata, 
+    ydata = ydata, wv = wv)
 
-# lsqpe.run_parameter_estimation(hessian = "gauss-newton")
-lsqpe.run_parameter_estimation(hessian = "exact-hessian")
-lsqpe.show_results()
+pe.run_parameter_estimation()
+pe.print_estimation_results()
 
-lsqpe.compute_covariance_matrix()
-lsqpe.show_results()
+sim = pecas.sim.Simulation(system, pe.estimated_parameters)
+sim.run_system_simulation(time_points = time_points, \
+    x0 = ydata[:,0], udata = udata)
 
-lsqpe.run_simulation([numeas[0], wmeas[0]])
-nusim = lsqpe.Xsim[0,:].T
-wsim = lsqpe.Xsim[1,:].T
+# lsqpe.run_simulation([numeas[0], wmeas[0]])
+nusim = sim.simulation_results[0,:].T
+wsim = sim.simulation_results[1,:].T
 
 pl.close("all")
 
 pl.figure()
 pl.subplot2grid((2, 2), (0, 0))
-pl.scatter(tu[::2], numeas[::2], \
+pl.scatter(time_points[::2], numeas[::2], \
     s = 10.0, color = 'k', marker = "x", label = r"$\nu_{meas}$")
-pl.plot(tu, nusim, label = r"$\nu_{sim}$")
+pl.plot(time_points, nusim, label = r"$\nu_{sim}$")
 
 pl.xlabel("$t$")
 pl.ylabel(r"$\nu$", rotation = 0)
@@ -115,9 +115,9 @@ pl.xlim(0.0, 4.2)
 pl.legend(loc = "lower left")
 
 pl.subplot2grid((2, 2), (1, 0))
-pl.scatter(tu[::2], wmeas[::2], \
+pl.scatter(time_points[::2], wmeas[::2], \
     s = 10.0, color = 'k', marker = "x", label = "$\omega_{meas}$")
-pl.plot(tu, wsim, label = "$\omega_{sim}$")
+pl.plot(time_points, wsim, label = "$\omega_{sim}$")
 
 pl.xlabel("$t$")
 pl.ylabel("$\omega$", rotation = 0)
