@@ -41,7 +41,9 @@ can be accessed, please run run_system_simulation() first.
 ''')
 
 
-    def __generate_simulation_ode(self, p):
+    def __generate_simulation_ode(self, pdata):
+
+        p = inputchecks.check_parameter_data(pdata, self.__system.np)
 
         ode_fcn = ci.mx_function("ode_fcn", \
             [self.__system.t, self.__system.u, self.__system.x, \
@@ -69,11 +71,11 @@ can be accessed, please run run_system_simulation() first.
         self.__dae_scaled = dae_scaled.expand()
 
 
-    def __init__(self, system, p, method = "rk"):
+    def __init__(self, system, pdata):
 
         self.__system = inputchecks.set_system(system)
 
-        self.__generate_simulation_ode(p)
+        self.__generate_simulation_ode(pdata)
         self.__generate_scaled_dae()
 
 

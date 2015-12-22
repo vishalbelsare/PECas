@@ -57,7 +57,7 @@ tN = pl.linspace(0, N, N+1) * dt
 udata = ca.DMatrix(0.1*pl.random(N))
 
 simulation_true_parameters = pecas.sim.Simulation( \
-    system = odesys, p = p_true / scale)
+    system = odesys, pdata = p_true / scale)
 simulation_true_parameters.run_system_simulation( \
     x0 = [0.0, 0.0], time_points = tN, udata = udata)
 
@@ -73,7 +73,7 @@ pe = pecas.pe.LSq(system = odesys, \
 pe.run_parameter_estimation()
 
 simulation_estimated_parameters = pecas.sim.Simulation( \
-    system = odesys, p = pe.estimated_parameters)
+    system = odesys, pdata = pe.estimated_parameters)
 simulation_estimated_parameters.run_system_simulation( \
     x0 = [0.0, 0.0], time_points = tN, udata = udata)
 

@@ -54,11 +54,11 @@ system = pecas.system.System(x = x, u = u, p = p, f = f, phi = phi)
 data = pl.array(pl.loadtxt("data_2d_vehicle.dat", \
     delimiter = ", ", skiprows = 1))
 
-time_points = data[100:250, 1]
+time_points = data[200:750:5, 1]
 
-ydata = data[100:250, [2, 4, 6, 8]]
+ydata = data[200:750:5, [2, 4, 6, 8]]
 
-udata = data[100:249, [9, 10]]
+udata = data[200:750:5, [9, 10]][:-1, :]
 
 pinit = [0.5, 17.06, 12.0, 2.17, 0.1, 0.6]
 
@@ -66,9 +66,9 @@ pe = pecas.pe.LSq(system = system, \
     time_points = time_points, udata = udata, \
     pinit = pinit, \
     ydata = ydata, \
-    xinit = ydata)
+    xinit = ydata, discretization_method = "multiple_shooting")
 
-pe.run_parameter_estimation()
+pe.run_parameter_estimation({"linear_solver": "ma57"})
 pe.print_estimation_results()
 
 pe.compute_covariance_matrix()

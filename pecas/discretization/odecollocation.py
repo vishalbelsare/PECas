@@ -20,13 +20,10 @@
 
 import numpy as np
 
-from abc import ABCMeta, abstractmethod
-
 from ..interfaces import casadi_interface as ci
 from discretization import Discretization
 
 from .. import inputchecks
-
 
 class ODECollocation(Discretization):
 
@@ -259,7 +256,8 @@ class ODECollocation(Discretization):
         phifcn = ci.mx_function("phifcn", \
             [self.system.t, self.system.u, self.system.x, \
                 self.system.eps_u, self.system.p], \
-            [self.system.phi])    
+            [self.system.phi])
+        phifcn = phifcn.expand()
 
         # The last control value is silently reused. This should be changed
         # or at least the user should be noticed about that!

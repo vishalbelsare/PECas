@@ -156,7 +156,17 @@ def solve(a, b, solver):
 
     return ca.solve(a, b, solver)
 
+
 def mx_eye(dim1):
 
     return ca.MX.eye(dim1)
-    
+
+
+def trace(inputobj):
+
+    return ca.trace(inputobj)
+
+
+def det(inputobj):
+
+    return ca.det(inputobj)

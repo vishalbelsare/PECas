@@ -23,3 +23,4 @@ __version__ = "0.5.1"
 import system
 import sim
 import pe
+import doe
