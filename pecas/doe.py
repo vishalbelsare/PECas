@@ -434,7 +434,7 @@ but will be in future versions.
         pdata = None, x0 = None, \
         xmin = None, xmax = None, \
         wv = None, weps_e = None, weps_u = None, \
-        discretization_method = "multiple_shooting", **kwargs):
+        discretization_method = "collocation", **kwargs):
 
         pecas_intro()
 
@@ -473,7 +473,7 @@ but will be in future versions.
         nlpsolver = ci.NlpSolver("solver", "ipopt", self.__nlp, \
             options = solver_options)
 
-        self.__design_results = \
+        self.design_results = \
             nlpsolver(x0 = self.__optimization_variables_initials, \
                 lbg = 0, ubg = 0, \
                 lbx = self.__optimization_variables_lower_bounds, \

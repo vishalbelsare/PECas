@@ -65,7 +65,15 @@ pdata = [0.273408, 11.5602, 2.45652, 7.90959, -0.44353, -0.249098]
 doe = pecas.doe.DoE(system = system, time_points = time_points, \
     uinit = uinit, pdata = pdata, x0 = ydata[0,:], \
     umin = [-0.436332, -0.3216], umax = [0.436332, 1.0])
-# doe.run_experimental_design()
+doe.run_experimental_design()
+
+try:
+
+    pl.save("2d_vehicle_doe_coll.txt", doe.design_results["x"])
+
+except:
+
+    pass
 
 # pe = pecas.pe.LSq(system = system, \
 #     time_points = time_points, udata = udata, \
