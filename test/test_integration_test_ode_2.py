@@ -67,11 +67,13 @@ class IntegrationTestODE2(unittest.TestCase):
 
         self.xinit = self.ydata
  
-        self.phat = np.atleast_2d( \
+        self.phat_collocation = np.atleast_2d( \
             [0.200652, 11.6528, -26.2501, -74.1967, 16.8705, -1.80125]).T
+        self.phat_multiple_shooting = np.atleast_2d( \
+            [0.200652, 11.6528, -26.2502, -74.1968, 16.8705, -1.80125]).T
 
 
-    def test_integration_test_pe(self):
+    def test_integration_test_pe_collocation(self):
 
         odesys = pecas.system.System(x = self.x, p = self.p, \
             f = self.f, phi = self.phi, u = self.u)
@@ -84,8 +86,25 @@ class IntegrationTestODE2(unittest.TestCase):
         pe.run_parameter_estimation()
         pe.print_estimation_results()
 
-        assert_array_almost_equal(pe.estimated_parameters, self.phat, \
-            decimal = 4)
+        assert_array_almost_equal(pe.estimated_parameters, \
+            self.phat_collocation, decimal = 4)
+
+
+    def test_integration_test_pe_multiple_shooting(self):
+
+        odesys = pecas.system.System(x = self.x, p = self.p, \
+            f = self.f, phi = self.phi, u = self.u)
+
+        pe = pecas.pe.LSq(system = odesys, time_points = self.time_points, \
+            xinit = self.xinit, ydata = self.ydata, pinit = self.pinit, \
+            udata = self.udata, discretization_method = "multiple_shooting")
+
+        self.assertRaises(AttributeError, pe.print_estimation_results)
+        pe.run_parameter_estimation()
+        pe.print_estimation_results()
+
+        assert_array_almost_equal(pe.estimated_parameters, \
+            self.phat_multiple_shooting, decimal = 4)
 
 
     def test_integration_test_sim(self):
@@ -93,7 +112,7 @@ class IntegrationTestODE2(unittest.TestCase):
         odesys = pecas.system.System(x = self.x, p = self.p, \
             f = self.f, phi = self.phi, u = self.u)
 
-        sim = pecas.sim.Simulation(odesys, self.phat)
+        sim = pecas.sim.Simulation(odesys, self.phat_collocation)
         sim.run_system_simulation(time_points = self.time_points, \
             x0 = self.ydata[0,:], udata = self.udata)
 

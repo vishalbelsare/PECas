@@ -55,10 +55,11 @@ class IntegrationTestODE1(unittest.TestCase):
 
         self.xinit = self.ydata
 
-        self.phat = np.atleast_2d([0.693379029, 0.341128482]).T
+        self.phat_collocation = np.atleast_2d([0.693379029, 0.341128482]).T
+        self.phat_multiple_shooting = np.atleast_2d([0.693971, 0.340921]).T
 
 
-    def test_integration_test_pe(self):
+    def test_integration_test_pe_collocation(self):
 
         odesys = pecas.system.System(x = self.x, p = self.p, \
             f = self.f, phi = self.phi)
@@ -70,8 +71,26 @@ class IntegrationTestODE1(unittest.TestCase):
         pe.run_parameter_estimation()
         pe.print_estimation_results()
 
-        assert_array_almost_equal(pe.estimated_parameters, self.phat, \
-            decimal = 8)
+        assert_array_almost_equal(pe.estimated_parameters, \
+            self.phat_collocation, decimal = 8)
+
+
+    def test_integration_test_pe_multiple_shooting(self):
+
+        odesys = pecas.system.System(x = self.x, p = self.p, \
+            f = self.f, phi = self.phi)
+
+        pe = pecas.pe.LSq(system = odesys, time_points = self.time_points, \
+            xinit = self.xinit, ydata = self.ydata, wv = self.wv, \
+            discretization_method = "multiple_shooting")
+
+        self.assertRaises(AttributeError, pe.print_estimation_results)
+        pe.run_parameter_estimation()
+        pe.print_estimation_results()
+
+        assert_array_almost_equal(pe.estimated_parameters, \
+            self.phat_multiple_shooting, decimal = 5)
+
 
     def test_integration_test_sim(self):
 
@@ -79,7 +98,7 @@ class IntegrationTestODE1(unittest.TestCase):
             f = self.f, phi = self.phi)
         time_points_sim = np.linspace(0, 10, 101)
 
-        sim = pecas.sim.Simulation(odesys, self.phat)
+        sim = pecas.sim.Simulation(odesys, self.phat_collocation)
         sim.run_system_simulation(time_points = time_points_sim, \
             x0 = self.ydata[0,:])
 

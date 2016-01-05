@@ -44,64 +44,34 @@ class DoE(object):
     data, measurement data and different kinds of weightings.'''
 
     @property
-    def estimation_results(self):
+    def design_results(self):
 
         try:
 
-            return self.__estimation_results
+            return self.__design_results
 
         except AttributeError:
 
             raise AttributeError('''
-A parameter estimation has to be executed before the estimation results
-can be accessed, please run run_parameter_estimation() first.
+An experimental design has to be executed before the design results
+can be accessed, please run run_experimental_design() first.
 ''')
 
 
     @property
-    def estimated_parameters(self):
+    def optimized_controls(self):
 
         try:
 
-            return self.__estimation_results["x"][ \
-                :self.__discretization.system.np]
+            return self.__design_results["x"][ \
+                :(self.__discretization.number_of_intervals * \
+                    self.__discretization.system.nu)]
 
         except AttributeError:
 
             raise AttributeError('''
-A parameter estimation has to be executed before the estimated parameters
-can be accessed, please run run_parameter_estimation() first.
-''')
-
-
-    @property
-    def covariance_matrix(self):
-
-        try:
-
-            return self.__covariance_matrix
-
-        except AttributeError:
-
-            raise AttributeError('''
-Covariance matrix for the estimated parameters not yet computed.
-Run compute_covariance_matrix() to do so.
-''')
-
-
-    @property
-    def standard_deviations(self):
-
-        try:
-
-            return ci.sqrt([abs(var) for var \
-                in ci.diag(self.covariance_matrix)])
-
-        except AttributeError:
-
-            raise AttributeError('''
-Standard deviations for the estimated parameters not yet computed.
-Run compute_covariance_matrix() to do so.
+An experimental design has to be executed before the optimized controls
+can be accessed, please run run_experimental_design() first.
 ''')
 
 
@@ -371,18 +341,6 @@ but will be in future versions.
             ])
 
 
-    # def __setup_residuals(self):
-
-    #     self.__residuals = ci.sqrt(self.__weightings_vectorized) * \
-    #         ci.veccat([ \
-
-    #             self.__discretization.optimization_variables["V"],
-    #             self.__discretization.optimization_variables["EPS_E"],
-    #             self.__discretization.optimization_variables["EPS_U"],
-
-    #         ])
-
-
     def __setup_constraints(self):
 
         self.__constraints = ci.vertcat([ \
@@ -457,8 +415,6 @@ but will be in future versions.
 
         self.__set_measurement_deviations()
 
-        # self.__setup_residuals()
-
         self.__set_cov_matrix_derivative_directions()
 
         self.__setup_constraints()
@@ -468,7 +424,7 @@ but will be in future versions.
         self.__setup_nlp()
 
 
-    def run_experimental_design(self, solver_options = {"linear_solver": "ma57"}):
+    def run_experimental_design(self, solver_options = {}):
 
         nlpsolver = ci.NlpSolver("solver", "ipopt", self.__nlp, \
             options = solver_options)

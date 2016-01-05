@@ -60,7 +60,7 @@ wv = pl.zeros((2, yN.shape[1]))
 wv[0,:] = (1.0 / sigma_x1**2)
 wv[1,:] = (1.0 / sigma_x2**2)
 
-pe = pecas.pe.LSq(system = system, time_points = T, xinit = yN, ydata = yN, wv = wv)
+pe = pecas.pe.LSq(system = system, time_points = T, xinit = yN, ydata = yN, wv = wv, discretization_method = "multiple_shooting")
 
 pe.run_parameter_estimation(solver_options = {"linear_solver": "ma97"})
 pe.print_estimation_results()

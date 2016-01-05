@@ -60,20 +60,23 @@ ydata = data[200:750:5, [2, 4, 6, 8]]
 
 uinit = data[200:750:5, [9, 10]][:-1, :]
 
+#uinit = 0.1 * pl.ones((109,2))
+
 pdata = [0.273408, 11.5602, 2.45652, 7.90959, -0.44353, -0.249098]
 
 doe = pecas.doe.DoE(system = system, time_points = time_points, \
     uinit = uinit, pdata = pdata, x0 = ydata[0,:], \
-    umin = [-0.436332, -0.3216], umax = [0.436332, 1.0])
-doe.run_experimental_design()
+    umin = [-0.436332, -0.3216], umax = [0.436332, 1.0], \
+    discretization_method = "multiple_shooting")
+# doe.run_experimental_design()
 
-try:
+# try:
 
-    pl.save("2d_vehicle_doe_coll.txt", doe.design_results["x"])
+#     pl.save("2d_vehicle_doe_ms_20151229.txt", doe.design_results["x"])
 
-except:
+# except:
 
-    pass
+#     pass
 
 # pe = pecas.pe.LSq(system = system, \
 #     time_points = time_points, udata = udata, \
